@@ -1,10 +1,7 @@
-
+import Home from './components/auth/Home.jsx'
 
 function App() {
-  return (
-    <>
-    </>
-  )
+  return <Home />
 }
 
 export default App
