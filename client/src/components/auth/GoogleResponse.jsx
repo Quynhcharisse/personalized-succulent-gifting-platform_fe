@@ -1,8 +1,8 @@
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
-import {useEffect, useState} from "react";
-import {login} from "../../services/AuthService.jsx";
-import {enqueueSnackbar} from "notistack";
+import { useEffect, useState } from "react";
+import { login } from "../../services/AuthService.jsx";
+import useNotify from '../../hooks/useNotify.js'
 
 async function Login(email, avatar, name) {
     const response = await login(email, avatar, name)
@@ -12,6 +12,7 @@ async function Login(email, avatar, name) {
 }
 
 function HandleResponse() {
+    const { error, success } = useNotify()
     const [googleResponse, setGoogleResponse] = useState(null)
     const location = useLocation()
     const accessToken = new URLSearchParams(location.hash.substring(1)).get('access_token')
@@ -33,26 +34,27 @@ function HandleResponse() {
                 localStorage.setItem("user", JSON.stringify(res.data.data))
                 localStorage.setItem("message", res.data.message)
                 localStorage.setItem("variant", "success")
-                switch (res.data.data.role) {
-                    case "admin":
-                        window.location.href = '/admin/dashboard'
-                        break;
-                    case "school":
-                        window.location.href = '/home'
-                        break;
-                    case "designer":
-                        window.location.href = '/designer/dashboard'
-                        break;
-                    case "garment":
-                        window.location.href = '/garment/dashboard'
-                        break;
-                    default:
-                        window.location.href = '/sign-in'
-                        break;
-                }
+
+                const role = res.data.data.role
+                const name = res.data.data.name || 'bạn'
+                const target = (() => {
+                    switch (role) {
+                        case 'admin':
+                            return '/admin/dashboard'
+                        case 'buyer':
+                            return '/home'
+                        case 'seller':
+                            return '/seller/dashboard'
+                        default:
+                            return '/sign-in'
+                    }
+                })()
+                // Welcome toast before redirect
+                success(`Đăng nhập thành công, chào mừng ${name}!`)
+                setTimeout(() => { window.location.href = target }, 1200)
             }
         }).catch(err => {
-            enqueueSnackbar(err.response.data.message, {variant: "error"})
+            error(err?.response?.data?.message || 'Đăng nhập thất bại')
             setTimeout(() => {
                 window.location.href = '/sign-in'
             }, 1500)

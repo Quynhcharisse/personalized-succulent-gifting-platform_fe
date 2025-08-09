@@ -160,50 +160,30 @@ export default function Home() {
 
     document.title = 'Lá Nhỏ Bên Thềm | Sen đá & quà tặng xanh'
 
+    // Highlight only sections on Home (exclude /cham-soc which is a separate page)
+    useEffect(() => {
+        const sectionIds = ['san-pham', 'danh-gia', 'ly-do']
+        const linkById = new Map(sectionIds.map(id => [id, document.querySelector(`.main-nav a[href="#${id}"]`)]))
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                const link = linkById.get(entry.target.id)
+                if (!link) return
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'))
+                    link.classList.add('active')
+                }
+            })
+        }, { root: null, rootMargin: '0px 0px -40% 0px', threshold: [0.5, 0.75, 1] })
+        sectionIds.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el) })
+        return () => observer.disconnect()
+    }, [])
+
     return (
         <div className="home">
-            <div className="site-header" id="siteHeader">
-                <div className="container header__row">
-                    <a className="brand" href="/">
-                        <span className="brand__logo" aria-hidden>
-                            <img src="/senda.png" alt="Lá Nhỏ Bên Thềm"/>
-                        </span>
-                        <span className="brand__name">Lá Nhỏ Bên Thềm</span>
-                    </a>
-                    <nav className="main-nav">
-                        <a href="#san-pham">Sản phẩm</a>
-                        <a href="#danh-gia">Đánh giá</a>
-                        <a href="#ly-do">Lý do chọn</a>
-                    </nav>
-                    <div className="header__actions">
-                        <div className="searchbar">
-                            <input
-                                className="searchbar__input"
-                                placeholder="Tìm sen đá, phụ kiện..."
-                                aria-label="Tìm kiếm sen đá, phụ kiện"
-                            />
-                        </div>
-                        <div className="header__icons">
-                            <a className="header__icon" title="Yêu thích" href="#">
-                                <img src="/TraiTym.png" alt="Yêu thích"/>
-                            </a>
-                            <a className="header__icon" title="Tài khoản" href="/signin">
-                                <img src="/nguoidung.png" alt="Tài khoản"/>
-                            </a>
-                            <a className="header__icon" title="Giỏ hàng" href="#">
-                                <img src="/MuaHang.png" alt="Giỏ hàng"/>
-                            </a>
-                            <a className="header__icon" title="Thông báo" href="#">
-                                <img src="/Chuong.png" alt="Thông báo"/>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <header className="hero">
                 <div className="container hero__content">
-                    <div className="hero__panel">
+                <div className="hero__panel">
                         <p className="hero__poem">
                             Chăm một lá nhỏ, gieo ngàn cung bậc<br/>
                             Bên thềm xanh mát, dệt mộng bình yên<br/>
@@ -293,7 +273,7 @@ export default function Home() {
                             alt="Bộ sưu tập sen đá"
                             loading="lazy"
                             decoding="async"
-                            fetchpriority="low"
+                            fetchPriority="low"
                         />
                     )}
                 </div>
@@ -393,7 +373,9 @@ export default function Home() {
 
             <section id="ly-do" className="reasons">
                 <div className="container">
-                    <h2 className="section-title">Điều gì giúp chúng tôi trở thành lựa chọn hàng đầu giúp bạn sở hữu sen đá ưng ý</h2>
+                    <div className="section-title-card">
+                        <h2 className="section-title">Điều gì giúp chúng tôi trở thành lựa chọn hàng đầu giúp bạn sở hữu sen đá ưng ý</h2>
+                    </div>
                     <div className="reasons__grid">
                         <article className="reason-card">
                             <div className="reason-card__icon">
@@ -455,10 +437,13 @@ export default function Home() {
                 </div>
             </section>
 
-            <section className="newsletter">
+            <section className="newsletter newsletter--bleed">
                 <div className="container newsletter__inner">
                     <div>
-                        <h2>Giảm giá 20% cho đơn đặt hàng đầu tiên của bạn</h2>
+                        <span className="eyebrow">Ưu đãi đặc biệt</span>
+                        <h2 className="newsletter__title">
+                        🎁 Giảm giá 20% cho đơn đặt hàng đầu tiên của bạn
+                        </h2>
                         <p className="muted">Nhận tin cây hằng tuần và ưu đãi hấp dẫn của chúng tôi.</p>
                     </div>
                     <form className="newsletter__form" onSubmit={(e) => e.preventDefault()}>
@@ -467,64 +452,6 @@ export default function Home() {
                     </form>
                 </div>
             </section>
-
-            <footer className="footer">
-                <div className="container footer__grid">
-                    <div>
-                        <span className="footer__logo" aria-hidden>
-                            <img src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm"/>
-                        </span>
-                        <p className="footer__desc">
-                            Cửa hàng sen đá tại TP. HCM chuyên phân phối cả lẻ và sỉ với đa dạng giống sen đá thường,
-                            combo mix sẵn và dịch vụ điện cây theo yêu cầu. Chúng tôi cam kết mang đến những chậu sen đá
-                            chất lượng, phù hợp khí hậu Sài Gòn, kèm chậu sứ, đất trồng và phụ kiện décor. Tại Lá Nhỏ
-                            Bên Thềm,
-                            mỗi sản phẩm đều được chăm chút tỉ mỉ để tạo nên không gian xanh thanh thiện, trong lành và
-                            cá nhân
-                            hóa
-                            cho từng góc nhỏ trong ngôi nhà bạn.
-                        </p>
-                    </div>
-                    <div>
-                        <h4 className="footer__title">QUICK LINK</h4>
-                        <ul className="footer__list">
-                            <li><a href="#">Giỏ hàng</a></li>
-                            <li><a href="#san-pham">Sản phẩm</a></li>
-                            <li><a href="#">Cộng đồng yêu cây</a></li>
-                            <li><a href="#">Về chúng tôi</a></li>
-                            <li><a href="#">Điện cây</a></li>
-                            <li><a href="#">Yêu thích</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="footer__title">Chính sách</h4>
-                        <ul className="footer__list">
-                            <li><a href="#">Khách hàng thân thiết</a></li>
-                            <li><a href="#">Chính sách bảo mật</a></li>
-                            <li><a href="#">Chính sách bảo hành</a></li>
-                            <li><a href="#">Chính sách vận chuyển</a></li>
-                        </ul>
-                        <p className="footer__hours small">Làm việc : Từ 9:00 đến 20:00 hằng ngày. Trừ chủ nhật</p>
-                        <div className="payments">
-                            <img className="payment-img" src="/mastercard_visa.png" alt="Visa & MasterCard"/>
-                            <img className="payment-img" src="/mastercard.png" alt="MasterCard"/>
-                            <img className="payment-img" src="/momo_card.jpg" alt="MoMo"/>
-                            <img className="payment-img" src="/zalopaylogo-3.jpg" alt="ZaloPay"/>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="footer__title">Liên hệ</h4>
-                        <ul className="footer__list">
-                            <li>Email: support@lanhobenthem.local</li>
-                            <li>Phone: 0703346041</li>
-                            <li>FB: fb.com/lanhobenthem</li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="container footer__bottom center">
-                    <p className="muted small">© {new Date().getFullYear()} Lá Nhỏ Bên Thềm. All rights reserved.</p>
-                </div>
-            </footer>
         </div>
     )
 }
