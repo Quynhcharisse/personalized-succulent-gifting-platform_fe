@@ -1,4 +1,4 @@
-import '../styles/layout/SiteFooter.css'
+import '../styles/ui/SiteFooter.css'
 
 export default function SiteFooter() {
   return (
@@ -43,9 +43,9 @@ export default function SiteFooter() {
         <div>
           <h4 className="footer__title">Liên hệ</h4>
           <ul className="footer__list">
-            <li>Email: support@lanhobenthem.local</li>
-            <li>Phone: 0703346041</li>
-            <li>FB: fb.com/lanhobenthem</li>
+            <li>Email: lanhobenthem@gmail.com</li>
+            <li>Phone: 0886122578</li>
+            <li>FB: https://bit.ly/lanhobenthem</li>
           </ul>
         </div>
       </div>

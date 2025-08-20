@@ -1,26 +1,96 @@
 import '../../styles/auth/SignIn.css'
-import { Button, Typography, Link } from "@mui/material";
+import {Button, Typography, Link, Box, Alert} from "@mui/material";
 import { KeyboardBackspace } from '@mui/icons-material';
-import { getGoogleUrl } from "../../services/AuthService.jsx";
 import useNotify from '../../hooks/useNotify.js'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
+import axios from "axios";
+import {signIn} from "../../services/AuthService.jsx";
+import {getCookie} from "../../utils/CookieUtil.jsx";
+import {jwtDecode} from "jwt-decode";
+import {useGoogleLogin} from "@react-oauth/google";
+import GoogleIcon from '@mui/icons-material/Google';
+import {enqueueSnackbar} from "notistack";
+import {useState} from "react";
 
 function RenderLoginArea() {
-    const { error } = useNotify()
+    const [isLoading, setIsLoading] = useState(false);
+    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const isGoogleConfigured = clientID && clientID !== "your_actual_google_client_id_here" && clientID !== "fallback_client_id";
+    const navigate = useNavigate();
+    const { search } = useLocation();
+    const redirectTo = new URLSearchParams(search).get('redirectTo');
+    const redirectUri = `${window.location.origin}/sign-in`;
 
-    const signIn = async () => {
+    async function HandleLogin(userInfo) {
         try {
-            const response = await getGoogleUrl()
-            if (response?.status === 200 && response.data?.data?.url) {
-                window.location.href = response.data.data.url
-            } else {
-                error('Không lấy được đường dẫn đăng nhập Google')
+            setIsLoading(true);
+            const loginResponse = await signIn(userInfo.data.email, userInfo.data.name, userInfo.data.picture);
+            if (loginResponse && loginResponse.status === 200) {
+                localStorage.setItem('user', JSON.stringify(loginResponse.data.body));
+                const access = getCookie('access');
+                const role = jwtDecode(access)?.role
+                enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
+                setTimeout(() => {
+                    switch (role) {
+                        case 'admin':
+                            navigate('/admin/dashboard', { replace: true });
+                            break;
+                        case 'buyer':
+                            navigate(redirectTo || '/', { replace: true });
+                            break;
+                        case 'seller':
+                            navigate('/seller/dashboard', { replace: true });
+                            break;
+                        default:
+                            navigate('/', { replace: true });
+                            break;
+                    }
+                }, 1000)
             }
-        } catch (e) {
-            error('Không thể kết nối máy chủ. Vui lòng thử lại')
+        } catch (error) {
+            console.error("Login error:", error);
+            enqueueSnackbar("Đăng nhập thất bại", {variant: "error"});
+        } finally {
+            setIsLoading(false);
         }
     }
+
+    async function HandleSuccess(token) {
+        try {
+            const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token.access_token}`,
+                    }
+                }
+            );
+
+            if (userInfo) {
+                HandleLogin(userInfo)
+            }
+        } catch (error) {
+            console.error("Failed to get user info:", error);
+            enqueueSnackbar("Không thể lấy thông tin người dùng", {variant: "error"});
+            setIsLoading(false);
+        }
+    }
+
+    function HandleError(error) {
+        console.log("Login Error:", error);
+        enqueueSnackbar("Đăng nhập thất bại", {variant: "error"});
+        setIsLoading(false);
+    }
+
+    const login = useGoogleLogin({
+        flow: 'implicit',
+        scope: 'openid email profile',
+        ux_mode: 'redirect',
+        redirect_uri: redirectUri,
+        onSuccess: HandleSuccess,
+        onError: HandleError,
+    });
+
     return (
         <div className={'sign-in-login-area-container'}>
             <span className="signin-eyebrow">Ưu đãi 20% cho đơn đầu tiên</span>
@@ -30,22 +100,56 @@ function RenderLoginArea() {
             <Typography variant="body1" sx={{ color: 'var(--muted)', textAlign: 'center' }}>
                 Để nhận ưu đãi, lưu giỏ hàng và theo dõi đơn.
             </Typography>
-            <Button
-                fullWidth
-                size="large"
-                startIcon={<img src={'/google_logo.webp'} alt={'Google'} height={20} width={20} />}
-                variant="outlined"  
-                color="inherit"
-                onClick={signIn}
-                className="google-btn"
-                sx={{
-                    borderColor: 'var(--divider)',
-                    bgcolor: '#fff',
-                    '&:hover': { bgcolor: 'var(--neutral-50)' }
-                }}
-            >
-                Đăng nhập với Google
-            </Button>
+
+            {!isGoogleConfigured && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    Google OAuth chưa được cấu hình. Vui lòng liên hệ quản trị viên.
+                </Alert>
+            )}
+
+            {/* Google Login Button */}
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+                <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<GoogleIcon/>}
+                    onClick={() => {
+                        if (isGoogleConfigured) {
+                            setIsLoading(true);
+                            login();
+                        } else {
+                            enqueueSnackbar("Google OAuth chưa được cấu hình", {variant: "warning"});
+                        }
+                    }}
+                    disabled={!isGoogleConfigured || isLoading}
+                    sx={{
+                        background: isGoogleConfigured
+                            ? 'linear-gradient(90deg, #d32f2f 0%, #ef5350 100%)'
+                            : 'linear-gradient(90deg, #9e9e9e 0%, #bdbdbd 100%)',
+                        color: 'white',
+                        fontWeight: 700,
+                        px: 4,
+                        py: 1.5,
+                        fontSize: "1rem",
+                        borderRadius: 3,
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                        textTransform: "none",
+                        width: "80%",
+                        textAlign: "center",
+                        "&:hover": {
+                            background: isGoogleConfigured
+                                ? 'linear-gradient(90deg, #c62828 0%, #d32f2f 100%)'
+                                : 'linear-gradient(90deg, #9e9e9e 0%, #bdbdbd 100%)',
+                            boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+                        },
+                        "&:disabled": {
+                            background: 'linear-gradient(90deg, #9e9e9e 0%, #bdbdbd 100%)',
+                        }
+                    }}
+                >
+                    {isLoading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
+                </Button>
+            </Box>
             <ul className="signin-perks">
                 <li><CheckCircleRounded fontSize="small" /> Không lưu mật khẩu</li>
                 <li><CheckCircleRounded fontSize="small" /> Bảo mật Google</li>
@@ -64,12 +168,14 @@ function RenderLoginArea() {
                     to="/"
                     className="secondary-cta"
                     sx={{
-                        bgcolor: 'var(--secondary-500)',
+                        backgroundColor: 'var(--secondary-500)',
                         color: '#fff',
                         borderRadius: '10px',
                         height: '42px',
                         px: 1.5,
-                        '&:hover': { bgcolor: 'var(--secondary-400)' }
+                        '&:hover': {
+                            backgroundColor: 'var(--secondary-400)'
+                        }
                     }}
                 >
                     Tiếp tục xem sản phẩm
