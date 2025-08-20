@@ -542,6 +542,240 @@ body, #root {
 
 /* Payments styles moved to src/styles/layout/SiteFooter.css */
 
+/* Contact Widget */
+.contact-widget {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Contact Dropdown */
+.contact-dropdown {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.75rem;
+  min-width: 380px;
+  overflow: hidden;
+  animation: slideUpFade 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.contact-dropdown__header {
+  background: #0D3B2E;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  position: relative;
+}
+
+.contact-dropdown__header-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 6px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
+  flex-shrink: 0;
+}
+
+.contact-dropdown__header-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.contact-dropdown__header-text h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.contact-dropdown__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #ffffff;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.contact-dropdown__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contact-dropdown__options {
+  padding: 0.5rem 0;
+}
+
+.contact-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.contact-dropdown__option:last-child {
+  border-bottom: none;
+}
+
+.contact-dropdown__option:hover {
+  background: #f8fafc;
+  transform: translateX(2px);
+}
+
+.contact-dropdown__option-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-dropdown__option-icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.contact-dropdown__option-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.contact-dropdown__option-subtitle {
+  font-size: 0.825rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.contact-dropdown__footer {
+  background: #0D3B2E;
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+.contact-dropdown__footer p {
+  margin: 0;
+  font-size: 0.825rem;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Contact Float Button */
+.contact-widget__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contact-widget__button:hover {
+  transform: scale(1.1);
+}
+
+.contact-widget__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-widget__icon img {
+  width: 12vw;
+  height: 11vh;
+  object-fit: contain;
+}
+
+.contact-widget__text {
+  white-space: nowrap;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .contact-widget {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .contact-dropdown {
+    min-width: 320px;
+    margin-right: -1rem;
+  }
+  
+  .contact-widget__button {
+    padding: 0;
+  }
+  
+  .contact-dropdown__header {
+    padding: 1rem 1.25rem;
+  }
+  
+  .contact-dropdown__header-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .contact-dropdown__option {
+    padding: 0.875rem 1.25rem;
+  }
+  
+  .contact-dropdown__option-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .contact-dropdown__option-icon img {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .contact-dropdown__footer {
+    padding: 0.875rem 1.25rem;
+  }
+}
+
 @media (max-width: 860px) {
   .about {
     grid-template-columns: 1fr;

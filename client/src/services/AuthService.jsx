@@ -1,15 +1,16 @@
 import axiosClient from "../config/APIConfig.jsx";
 
-export const getGoogleUrl = async () => {
-    const response = await axiosClient.get("/auth/google/url")
-    return response ? response : null
+export const refreshToken = async () => {
+    const response = await axiosClient.post("/auth/refresh");
+    return response || null
 }
 
-export const login = async (email, avatar, name) => {
+export const signIn = async (email, name, avatar) => {
     const response = await axiosClient.post("/auth/login", {
-        email: email,
-        avatar: avatar,
-        name: name
-    })
-    return response ? response : null
+            email: email,
+            name: name,
+            avatar: avatar
+        }
+    );
+    return response || null
 }

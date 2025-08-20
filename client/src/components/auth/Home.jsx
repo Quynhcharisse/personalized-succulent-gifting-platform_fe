@@ -4,6 +4,7 @@ import {useEffect, useRef, useState} from 'react'
 export default function Home() {
     const [bannerVideoReady, setBannerVideoReady] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
+    const [showContactDropdown, setShowContactDropdown] = useState(false)
     const videoRef = useRef(null)
     // Prefer higher bitrate file if you have one, fallback to current mp4
     const bannerVideoSrc = '/videoBanner.mp4'
@@ -177,6 +178,17 @@ export default function Home() {
         sectionIds.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el) })
         return () => observer.disconnect()
     }, [])
+
+    // Close contact dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showContactDropdown && !event.target.closest('.contact-widget')) {
+                setShowContactDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [showContactDropdown])
 
     return (
         <div className="home">
@@ -452,6 +464,88 @@ export default function Home() {
                     </form>
                 </div>
             </section>
+
+            {/* Contact Float Widget */}
+            <div className="contact-widget">
+                {/* Contact Dropdown */}
+                {showContactDropdown && (
+                    <div className="contact-dropdown">
+                        <div className="contact-dropdown__header">
+                            <div className="contact-dropdown__header-icon">
+                                <img src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm" />
+                            </div>
+                            <div className="contact-dropdown__header-text">
+                                <h3>Lá Nhỏ Bên Thềm có thể hỗ trợ gì cho anh chị?</h3>
+                            </div>
+                            <button 
+                                className="contact-dropdown__close"
+                                onClick={() => setShowContactDropdown(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="contact-dropdown__options">
+                            <a 
+                                href="https://m.me/lanhobenthem" 
+                                className="contact-dropdown__option"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--messenger">
+                                    <img src="/messengerIcon.png" alt="Messenger" />
+                                </div>
+                                <div>
+                                    <div className="contact-dropdown__option-title">Messenger</div>
+                                    <div className="contact-dropdown__option-subtitle">https://m.me/lanhobenthem</div>
+                                </div>
+                            </a>
+
+                            <a 
+                                href="mailto:support@lanhobenthem.com" 
+                                className="contact-dropdown__option"
+                            >
+                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--email">
+                                    <img src="/mailIcon.png" alt="Email" />
+                                </div>
+                                <div>
+                                    <div className="contact-dropdown__option-title">Email</div>
+                                    <div className="contact-dropdown__option-subtitle">support@lanhobenthem.com</div>
+                                </div>
+                            </a>
+
+                            <a 
+                                href="tel:0908304247" 
+                                className="contact-dropdown__option"
+                            >
+                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--phone">
+                                    <img src="/phoneIcon.png" alt="Phone" />
+                                </div>
+                                <div>
+                                    <div className="contact-dropdown__option-title">Hotline</div>
+                                    <div className="contact-dropdown__option-subtitle">0908304247</div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div className="contact-dropdown__footer">
+                            <p>Cung cấp bởi <strong>Lá Nhỏ Bên Thềm</strong></p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Contact Float Button */}
+                <button 
+                    className="contact-widget__button"
+                    onClick={() => setShowContactDropdown(!showContactDropdown)}
+                    title="Liên hệ Lá Nhỏ Bên Thềm"
+                >
+                    <span className="contact-widget__icon">
+                        <img src="/communications.png" alt="Contact" />
+                    </span>
+                    {/* <span className="contact-widget__text">Liên hệ</span> */}
+                </button>
+            </div>
         </div>
     )
 }

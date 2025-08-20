@@ -3,10 +3,13 @@ import Home from './components/auth/Home.jsx'
 import Blogs from './components/auth/Blogs.jsx'
 import OrderGuide from './components/auth/OrderGuide.jsx'
 import SignIn from './components/auth/SignIn.jsx'
-import GoogleResponse from './components/auth/GoogleResponse.jsx'
-import {Grow} from '@mui/material'
+import AdminDashboard from './components/admin/AdminDashboard.jsx'
+import SellerDashboard from './components/seller/SellerDashboard.jsx'
+import {Slide} from '@mui/material';
 import {SnackbarProvider} from "notistack";
 import WebApplicationLayout from "./layouts/WebApplicationLayout.jsx";
+import {GoogleOAuthProvider} from "@react-oauth/google";
+import ProtectedRoute from './config/ProtectedRoute.jsx'
 
 const router = createBrowserRouter([
     {
@@ -28,12 +31,52 @@ const router = createBrowserRouter([
             {
                 path: 'sign-in',
                 element: <SignIn/>
-            },
-            {
-                path: 'google/result',
-                element: <GoogleResponse/>
-            },
+            }
         ],
+    },
+    {
+        path: 'admin',
+        element: (
+            <ProtectedRoute allowRoles={["admin"]}>
+                <AdminDashboard />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: <Navigate to={'/admin/dashboard'} />
+            }
+        ]
+    },
+    {
+        path: 'admin/dashboard',
+        element: (
+            <ProtectedRoute allowRoles={["admin"]}>
+                <AdminDashboard />
+            </ProtectedRoute>
+        )
+    },
+    {
+        path: 'seller',
+        element: (
+            <ProtectedRoute allowRoles={["seller"]}>
+                <SellerDashboard />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: <Navigate to={'/seller/dashboard'} />
+            }
+        ]
+    },
+    {
+        path: 'seller/dashboard',
+        element: (
+            <ProtectedRoute allowRoles={["seller"]}>
+                <SellerDashboard />
+            </ProtectedRoute>
+        )
     },
     {
         path: '*',
@@ -42,14 +85,23 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
+    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "fallback_client_id"
+
+    if (!clientID || clientID === "your_actual_google_client_id_here" || clientID === "fallback_client_id") {
+        console.warn("Google Client ID not configured. Please set VITE_GOOGLE_CLIENT_ID in your .env file")
+    }
+
     return (
         <SnackbarProvider
-            maxSnack={4}
-            anchorOrigin={{vertical: 'top', horizontal: 'right'}}
-            autoHideDuration={1500}
-            TransitionComponent={Grow}
+            maxSnack={3}
+            autoHideDuration={3000}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            TransitionComponent={Slide}
+            preventDuplicate={true}
         >
-            <RouterProvider router={router}/>
+            <GoogleOAuthProvider clientId={clientID}>
+                <RouterProvider router={router} />
+            </GoogleOAuthProvider>
         </SnackbarProvider>
     )
 }
