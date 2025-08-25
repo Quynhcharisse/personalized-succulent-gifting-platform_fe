@@ -41,21 +41,21 @@ export default function Home() {
             name: 'Bộ dụng cụ chăm cây 5 món',
             priceVnd: 129000,
             image:
-                'https://images.unsplash.com/photo-1614594859139-806d3f9ec4bb?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
         },
         {
             id: 'pot-01',
             name: 'Chậu gốm men mờ 10cm',
             priceVnd: 99000,
             image:
-                'https://images.unsplash.com/photo-1594737625785-c6683fc0b331?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
         },
         {
             id: 'mix-01',
             name: 'Combo 3 chậu phối cảnh',
             priceVnd: 219000,
             image:
-                'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
         },
     ]
 
@@ -67,7 +67,7 @@ export default function Home() {
             salePriceVnd: null,
             badge: 'Mới',
             image:
-                'https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-02',
@@ -76,7 +76,7 @@ export default function Home() {
             salePriceVnd: 59000,
             badge: 'Giảm 25%',
             image:
-                'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-03',
@@ -85,7 +85,7 @@ export default function Home() {
             salePriceVnd: 82000,
             badge: 'Bán chạy',
             image:
-                'https://images.unsplash.com/photo-1524592094177-28f4b65fa182?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-04',
@@ -94,7 +94,7 @@ export default function Home() {
             salePriceVnd: null,
             badge: null,
             image:
-                'https://images.unsplash.com/photo-1545249390-6bdfa286032f?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-05',
@@ -103,7 +103,7 @@ export default function Home() {
             salePriceVnd: null,
             badge: 'Mới',
             image:
-                'https://images.unsplash.com/photo-1495326965828-8ebaf0a2044a?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-06',
@@ -112,7 +112,7 @@ export default function Home() {
             salePriceVnd: 65000,
             badge: 'Giảm 15%',
             image:
-                'https://images.unsplash.com/photo-1520662414057-4937828eea6d?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-07',
@@ -121,7 +121,7 @@ export default function Home() {
             salePriceVnd: null,
             badge: null,
             image:
-                'https://images.unsplash.com/photo-1614630986672-0f908db8b27d?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
         {
             id: 'succ-08',
@@ -130,7 +130,7 @@ export default function Home() {
             salePriceVnd: 83000,
             badge: 'Bán chạy',
             image:
-                'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
+                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
         },
     ]
 
@@ -264,7 +264,7 @@ export default function Home() {
                         muted={isMuted}
                         playsInline
                         preload="metadata"
-                        poster="/nimbus.png"
+                        poster="/nen.jpg"
                         onCanPlay={() => setBannerVideoReady(true)}
                         ref={videoRef}
                     >
@@ -281,7 +281,7 @@ export default function Home() {
                     {!bannerVideoReady && (
                         <img
                             className="banner__img"
-                            src="/nimbus.png"
+                            src="/nen.jpg"
                             alt="Bộ sưu tập sen đá"
                             loading="lazy"
                             decoding="async"
