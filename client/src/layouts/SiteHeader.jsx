@@ -104,7 +104,7 @@ export default function SiteHeader() {
 
                         {!currentUser ? (
                             <Link 
-                                to="/sign-in"
+                                to="/login"
                                 className="header__icon" 
                                 title="Đăng nhập"
                                 style={{
@@ -172,19 +172,19 @@ export default function SiteHeader() {
                                         <ListItemIcon><PersonIcon fontSize="small"/></ListItemIcon>
                                         Hồ sơ của tôi
                                     </MenuItem>
-                                    {role === 'buyer' && (
+                                    {role === 'BUYER' && (
                                         <MenuItem onClick={() => navigate('/')}>
                                             <ListItemIcon><HomeIcon fontSize="small"/></ListItemIcon>
                                             Trang sản phẩm
                                         </MenuItem>
                                     )}
-                                    {role === 'admin' && (
+                                    {role === 'ADMIN' && (
                                         <MenuItem onClick={() => navigate('/admin/dashboard')}>
                                             <ListItemIcon><DashboardIcon fontSize="small"/></ListItemIcon>
                                             Admin Dashboard
                                         </MenuItem>
                                     )}
-                                    {role === 'seller' && (
+                                    {role === 'SELLER' && (
                                         <MenuItem onClick={() => navigate('/seller/dashboard')}>
                                             <ListItemIcon><StorefrontIcon fontSize="small"/></ListItemIcon>
                                             Kênh người bán

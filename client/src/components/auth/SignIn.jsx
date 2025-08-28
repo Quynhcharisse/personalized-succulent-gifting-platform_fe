@@ -6,13 +6,13 @@ import {getCookie} from "../../utils/CookieUtil.jsx";
 import {jwtDecode} from "jwt-decode";
 import {enqueueSnackbar} from "notistack";
 import axios from "axios";
-import {useState, useEffect} from "react";
-import {useNavigate, useLocation} from "react-router-dom";
+import {useEffect, useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
 
 export default function SignIn() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { search } = useLocation();
+    const {search} = useLocation();
     const redirectTo = new URLSearchParams(search).get('redirectTo');
 
     async function HandleLogin(userInfo) {
@@ -24,38 +24,40 @@ export default function SignIn() {
                 name: userInfo.data.name,
                 picture: userInfo.data.picture
             });
+
             const loginResponse = await signIn(userInfo.data.email, userInfo.data.name, userInfo.data.picture);
-            console.log('Login response:', loginResponse);
 
             if (loginResponse && loginResponse.status === 200) {
-                console.log('Login successful, saving user data');
+                // console.log('Login successful, saving user data');
+                console.log('Login response:', loginResponse);
                 localStorage.setItem('user', JSON.stringify(loginResponse.data.body));
-                
+
                 const access = getCookie('access');
                 console.log('Access token from cookie:', access);
-                
+
                 const role = jwtDecode(access)?.role;
                 console.log('Decoded role:', role);
-                
+
                 enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
-                
+
                 setTimeout(() => {
                     console.log('Redirecting based on role:', role);
                     switch (role) {
                         case 'ADMIN':
-                            navigate('/admin/dashboard', { replace: true });
+                            navigate('/admin/dashboard', {replace: true});
                             break;
                         case 'SELLER':
-                            navigate('/seller/dashboard', { replace: true });
+                            navigate('/seller/dashboard', {replace: true});
                             break;
-                        case 'BUYER':
+                        case 'BUYER': {
                             const target = redirectTo || '/';
                             console.log('Redirecting buyer to:', target);
-                            navigate(target, { replace: true });
+                            navigate(target, {replace: true});
                             break;
+                        }
                         default:
                             console.log('Unknown role, redirecting to home');
-                            navigate('/', { replace: true });
+                            navigate('/', {replace: true});
                             break;
                     }
                 }, 1000)
@@ -88,12 +90,13 @@ export default function SignIn() {
                 }
             );
 
-            if (userInfo?.data) {
+            if (userInfo) {
                 await HandleLogin(userInfo);
             } else {
                 throw new Error('No user info in response');
             }
-        } catch (error) {
+        } catch (e) {
+            console.log(e)
             enqueueSnackbar("Không thể lấy thông tin người dùng", {variant: "error"});
             setIsLoading(false);
         }
@@ -107,11 +110,7 @@ export default function SignIn() {
     const login = useGoogleLogin({
         onSuccess: HandleSuccess,
         onError: HandleError,
-        flow: 'implicit',
-        scope: 'openid email profile',
-        onNonOAuthError: (error) => {
-            console.error('Non-OAuth error:', error);
-        },
+        scope: 'openid email profile'
     });
 
     // Check if already logged in
@@ -122,16 +121,16 @@ export default function SignIn() {
                 const role = jwtDecode(access)?.role
                 switch (role) {
                     case 'ADMIN':
-                        navigate('/admin/dashboard', { replace: true })
+                        navigate('/admin/dashboard', {replace: true})
                         break
                     case 'SELLER':
-                        navigate('/seller/dashboard', { replace: true })
+                        navigate('/seller/dashboard', {replace: true})
                         break
                     case 'BUYER':
-                        navigate('/', { replace: true })
+                        navigate('/login', {replace: true})
                         break
                     default:
-                        navigate('/', { replace: true })
+                        navigate('/', {replace: true})
                 }
             }
         } catch (error) {
@@ -175,8 +174,8 @@ export default function SignIn() {
                     borderRadius: "50%",
                     animation: "float 6s ease-in-out infinite",
                     "@keyframes float": {
-                        "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
-                        "50%": { transform: "translateY(-20px) rotate(180deg)" }
+                        "0%, 100%": {transform: "translateY(0px) rotate(0deg)"},
+                        "50%": {transform: "translateY(-20px) rotate(180deg)"}
                     }
                 }}
             />
@@ -254,8 +253,8 @@ export default function SignIn() {
                             }}
                         />
                     </Box>
-                    <Typography 
-                        variant="h4" 
+                    <Typography
+                        variant="h4"
                         sx={{
                             fontWeight: 800,
                             background: "linear-gradient(135deg, #2D6A4F 0%, #1B4332 100%)",
@@ -268,8 +267,8 @@ export default function SignIn() {
                     >
                         Lá Nhỏ Bên Thềm
                     </Typography>
-                    <Typography 
-                        variant="caption" 
+                    <Typography
+                        variant="caption"
                         sx={{
                             color: "#666",
                             fontWeight: 500,
@@ -284,8 +283,8 @@ export default function SignIn() {
 
                 {/* Welcome Text */}
                 <Box sx={{mb: 4}}>
-                    <Typography 
-                        variant="h5" 
+                    <Typography
+                        variant="h5"
                         sx={{
                             mb: 1.5,
                             fontWeight: 700,
@@ -295,8 +294,8 @@ export default function SignIn() {
                     >
                         Chào mừng trở lại
                     </Typography>
-                    <Typography 
-                        variant="body2" 
+                    <Typography
+                        variant="body2"
                         sx={{
                             color: "#7f8c8d",
                             fontSize: "0.95rem",
@@ -314,11 +313,11 @@ export default function SignIn() {
                     <Button
                         variant="contained"
                         size="large"
-                        startIcon={isLoading ? null : <GoogleIcon sx={{ fontSize: 20 }} />}
+                        startIcon={isLoading ? null : <GoogleIcon sx={{fontSize: 20}}/>}
                         onClick={() => !isLoading && login()}
                         disabled={isLoading}
                         sx={{
-                            background: isLoading 
+                            background: isLoading
                                 ? "linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)"
                                 : "linear-gradient(135deg, #2D6A4F 0%, #1B4332 100%)",
                             color: 'white',
@@ -327,7 +326,7 @@ export default function SignIn() {
                             py: 1.5,
                             fontSize: "1rem",
                             borderRadius: 3,
-                            boxShadow: isLoading 
+                            boxShadow: isLoading
                                 ? "0 4px 15px rgba(149, 165, 166, 0.4)"
                                 : "0 8px 25px rgba(45, 106, 79, 0.4)",
                             textTransform: "none",
@@ -346,10 +345,10 @@ export default function SignIn() {
                                 transition: "left 0.5s"
                             },
                             "&:hover": {
-                                background: isLoading 
+                                background: isLoading
                                     ? "linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)"
                                     : "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                                boxShadow: isLoading 
+                                boxShadow: isLoading
                                     ? "0 4px 15px rgba(149, 165, 166, 0.4)"
                                     : "0 12px 35px rgba(45, 106, 79, 0.6)",
                                 transform: isLoading ? "none" : "translateY(-2px)",
@@ -369,8 +368,8 @@ export default function SignIn() {
 
                 {/* Footer Links */}
                 <Box sx={{borderTop: "1px solid rgba(0,0,0,0.1)", pt: 2.5}}>
-                    <Typography 
-                        variant="caption" 
+                    <Typography
+                        variant="caption"
                         sx={{
                             color: "#95a5a6",
                             lineHeight: 1.5,
@@ -378,8 +377,8 @@ export default function SignIn() {
                         }}
                     >
                         Bằng việc đăng nhập, bạn đồng ý với{" "}
-                        <Link 
-                            href="#" 
+                        <Link
+                            href="#"
                             sx={{
                                 color: "#2D6A4F",
                                 textDecoration: "none",
@@ -392,8 +391,8 @@ export default function SignIn() {
                             Điều khoản dịch vụ
                         </Link>
                         {" "}và{" "}
-                        <Link 
-                            href="#" 
+                        <Link
+                            href="#"
                             sx={{
                                 color: "#2D6A4F",
                                 textDecoration: "none",
