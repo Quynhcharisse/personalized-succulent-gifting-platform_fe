@@ -30,7 +30,19 @@ export default function SignIn() {
             if (loginResponse && loginResponse.status === 200) {
                 // console.log('Login successful, saving user data');
                 console.log('Login response:', loginResponse);
-                localStorage.setItem('user', JSON.stringify(loginResponse.data.body));
+                console.log('🔍 SignIn - Full loginResponse:', loginResponse);
+                console.log('🔍 SignIn - loginResponse.data:', loginResponse.data);
+                console.log('🔍 SignIn - loginResponse.data.data:', loginResponse.data.data);
+                
+                const userDataToStore = loginResponse.data.data;
+                console.log('🔍 SignIn - Storing to localStorage:', userDataToStore);
+                
+                localStorage.setItem('user', JSON.stringify(userDataToStore));
+                
+                // Verify data was stored
+                const storedData = localStorage.getItem('user');
+                console.log('🔍 SignIn - Verified stored data:', storedData);
+                console.log('🔍 SignIn - Parsed stored data:', JSON.parse(storedData));
 
                 const access = getCookie('access');
                 console.log('Access token from cookie:', access);

@@ -77,34 +77,10 @@ const NAVIGATION = [
         title: 'Quản lý người dùng',
         icon: <PeopleIcon />,
         path: '/admin/users'
-    },
-    {
-        segment: 'products',
-        title: 'Quản lý sản phẩm',
-        icon: <InventoryIcon />,
-        path: '/admin/products'
-    },
-    {
-        segment: 'orders',
-        title: 'Đơn hàng',
-        icon: <ShoppingCartIcon />,
-        path: '/admin/orders'
-    },
-    {
-        segment: 'analytics',
-        title: 'Báo cáo & Thống kê',
-        icon: <AssessmentIcon />,
-        path: '/admin/analytics'
-    },
-    {
-        segment: 'settings',
-        title: 'Cài đặt',
-        icon: <SettingsIcon />,
-        path: '/admin/settings'
     }
 ];
 
-function AdminDashboardContent() {
+function AdminDashboardContent({ session }) {
     const [stats, setStats] = useState({
         todayOrders: 24,
         revenueVnd: 15750000,
@@ -216,7 +192,7 @@ function AdminDashboardContent() {
                     WebkitTextFillColor: 'transparent',
                     mb: 1
                 }}>
-                    Admin Dashboard
+                    {session.user.role || 'User'} Dashboard
                 </Typography>
                 <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem' }}>
                     Chào mừng trở lại! Đây là tổng quan về hoạt động của hệ thống
@@ -325,15 +301,46 @@ export default function AdminDashboard() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [session, setSession] = useState({
         user: {
-            name: 'Admin User',
-            email: 'admin@lanhobenthem.com',
+            name: '',
+            email: '',
             image: null,
-            role: 'ADMIN'
+            role: ''
         }
     });
 
     useEffect(() => {
         document.title = 'Admin Dashboard | Lá Nhỏ Bên Thềm';
+        
+        // Lấy thông tin user từ localStorage
+        try {
+            const userData = localStorage.getItem('user');
+            console.log('🔍 AdminDashboard - Raw localStorage data:', userData);
+            
+            if (userData) {
+                const parsedUser = JSON.parse(userData);
+                console.log('🔍 AdminDashboard - Parsed user data:', parsedUser);
+                console.log('🔍 AdminDashboard - parsedUser.user:', parsedUser.user);
+                console.log('🔍 AdminDashboard - parsedUser.email:', parsedUser.email);
+                console.log('🔍 AdminDashboard - parsedUser.role:', parsedUser.role);
+                
+                const sessionData = {
+                    user: {
+                        name: parsedUser.user?.name || parsedUser.name || 'Admin User',
+                        email: parsedUser.email || '',
+                        image: parsedUser.user?.avatarUrl || parsedUser.avatarUrl || parsedUser.avatar || null,
+                        role: parsedUser.role || 'ADMIN'
+                    }
+                };
+                
+                console.log('🔍 AdminDashboard - Setting session:', sessionData);
+                setSession(sessionData);
+            } else {
+                console.warn('⚠️ No user data found in localStorage');
+                console.log('🔍 All localStorage keys:', Object.keys(localStorage));
+            }
+        } catch (error) {
+            console.error('❌ Error parsing user data:', error);
+        }
     }, []);
 
     const handleDrawerToggle = () => {
@@ -437,7 +444,7 @@ export default function AdminDashboard() {
                     letterSpacing: 1,
                     textTransform: 'uppercase'
                 }}>
-                    Điều hướng
+                    {session.user.role || 'User'} Navigation
                 </Typography>
                 <List sx={{ mt: 1 }}>
                     {NAVIGATION.map((item, index) => (
@@ -555,7 +562,7 @@ export default function AdminDashboard() {
                         color: colors.primary
                     }}>
                         {location.pathname === '/admin/dashboard' ? 'Dashboard' : 
-                         NAVIGATION.find(nav => nav.path === location.pathname)?.title || 'Admin Panel'}
+                         NAVIGATION.find(nav => nav.path === location.pathname)?.title || `${session.user.role || 'User'} Panel`}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -675,7 +682,7 @@ export default function AdminDashboard() {
                     </Box>
                     <Chip 
                         size="small" 
-                        label="Admin" 
+                        label={session.user.role || 'User'} 
                         sx={{ 
                             backgroundColor: alpha(colors.primary, 0.1),
                             color: colors.primary,
@@ -685,26 +692,6 @@ export default function AdminDashboard() {
                     />
                 </Box>
                 <Box sx={{ py: 1 }}>
-                    <MenuItem 
-                        onClick={handleProfileClick}
-                        sx={{
-                            mx: 1,
-                            borderRadius: 2,
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                backgroundColor: alpha(colors.primary, 0.1),
-                                transform: 'translateX(4px)',
-                            }
-                        }}
-                    >
-                        <ListItemIcon>
-                            <AccountCircleIcon fontSize="small" sx={{ color: colors.primary }} />
-                        </ListItemIcon>
-                        <ListItemText 
-                            primary="Hồ sơ cá nhân"
-                            primaryTypographyProps={{ fontWeight: 500 }}
-                        />
-                    </MenuItem>
                     <MenuItem 
                         onClick={handleLogout}
                         sx={{
@@ -787,10 +774,10 @@ export default function AdminDashboard() {
                     }
                 }}
             >
-                {/* Dashboard content or nested routes */}
-                {location.pathname === '/admin/dashboard' ? (
-                    <AdminDashboardContent />
-                ) : (
+                                 {/* Dashboard content or nested routes */}
+                 {location.pathname === '/admin/dashboard' ? (
+                     <AdminDashboardContent session={session} />
+                 ) : (
                     <Box sx={{ p: 4 }}>
                         <Outlet />
                     </Box>
