@@ -1,6 +1,6 @@
 import './styles/App.css'
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import {lazy, Suspense} from 'react'
 import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
@@ -16,46 +16,46 @@ const OrderGuide = lazy(() => import('./components/auth/OrderGuide.jsx'))
 const SignIn = lazy(() => import('./components/auth/SignIn.jsx'))
 
 // Lazy imports for admin components
-const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard.jsx'))
+const AdminDashboard = lazy(() => import('./layouts/AdminDashboard.jsx'))
 
 // Lazy imports for seller components
-const SellerDashboard = lazy(() => import('./components/seller/SellerDashboard.jsx'))
+const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column',
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    fontFamily: '"Open Sans", sans-serif',
-    padding: '20px',
-    boxSizing: 'border-box'
-  }}>
     <div style={{
-      width: 'clamp(40px, 8vw, 60px)',
-      height: 'clamp(40px, 8vw, 60px)',
-      border: 'clamp(3px, 0.8vw, 5px) solid #e3e3e3',
-      borderTop: 'clamp(3px, 0.8vw, 5px) solid #1976d2',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-      marginBottom: 'clamp(15px, 4vw, 25px)'
-    }}></div>
-    <div style={{
-      fontSize: 'clamp(14px, 4vw, 18px)',
-      color: '#666',
-      fontWeight: '500',
-      textAlign: 'center',
-      lineHeight: '1.5'
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        fontFamily: '"Open Sans", sans-serif',
+        padding: '20px',
+        boxSizing: 'border-box'
     }}>
-      Đang tải...
-    </div>
-    <style>{`
+        <div style={{
+            width: 'clamp(40px, 8vw, 60px)',
+            height: 'clamp(40px, 8vw, 60px)',
+            border: 'clamp(3px, 0.8vw, 5px) solid #e3e3e3',
+            borderTop: 'clamp(3px, 0.8vw, 5px) solid #1976d2',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginBottom: 'clamp(15px, 4vw, 25px)'
+        }}></div>
+        <div style={{
+            fontSize: 'clamp(14px, 4vw, 18px)',
+            color: '#666',
+            fontWeight: '500',
+            textAlign: 'center',
+            lineHeight: '1.5'
+        }}>
+            Đang tải...
+        </div>
+        <style>{`
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -79,153 +79,153 @@ const LoadingFallback = () => (
         }
       }
     `}</style>
-  </div>
+    </div>
 )
 
 // Custom theme configuration with responsive design
 const theme = createTheme({
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536,
-    },
-  },
-  typography: {
-    fontFamily: '"Open Sans", sans-serif',
-    h1: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
-      lineHeight: 1.2,
-    },
-    h2: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-      lineHeight: 1.3,
-    },
-    h3: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(1.25rem, 3.5vw, 1.75rem)',
-      lineHeight: 1.4,
-    },
-    h4: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-      lineHeight: 1.4,
-    },
-    h5: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-      lineHeight: 1.5,
-    },
-    h6: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.875rem, 2vw, 1.125rem)',
-      lineHeight: 1.5,
-    },
-    body1: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-      lineHeight: 1.6,
-    },
-    body2: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
-      lineHeight: 1.6,
-    },
-    button: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-      fontWeight: 600,
-    },
-    caption: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
-      lineHeight: 1.4,
-    },
-    overline: {
-      fontFamily: '"Open Sans", sans-serif',
-      fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
-      letterSpacing: '0.08em',
-    },
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          fontFamily: '"Open Sans", sans-serif',
-          margin: 0,
-          padding: 0,
-          boxSizing: 'border-box',
-          fontSize: 'clamp(14px, 2vw, 16px)',
-          overflowX: 'hidden',
+    breakpoints: {
+        values: {
+            xs: 0,
+            sm: 600,
+            md: 900,
+            lg: 1200,
+            xl: 1536,
         },
-        html: {
-          fontSize: 'clamp(14px, 2vw, 16px)',
-        },
-        '*': {
-          boxSizing: 'border-box',
-        },
-        '@media (max-width: 600px)': {
-          body: {
-            fontSize: '14px',
-          },
-        },
-        '@media (min-width: 600px) and (max-width: 900px)': {
-          body: {
-            fontSize: '15px',
-          },
-        },
-        '@media (min-width: 900px)': {
-          body: {
-            fontSize: '16px',
-          },
-        },
-      },
     },
-    // Add responsive container styling
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          paddingLeft: 'clamp(16px, 4vw, 24px)',
-          paddingRight: 'clamp(16px, 4vw, 24px)',
-          '@media (max-width: 600px)': {
-            paddingLeft: '16px',
-            paddingRight: '16px',
-          },
+    typography: {
+        fontFamily: '"Open Sans", sans-serif',
+        h1: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
+            lineHeight: 1.2,
         },
-      },
+        h2: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+            lineHeight: 1.3,
+        },
+        h3: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(1.25rem, 3.5vw, 1.75rem)',
+            lineHeight: 1.4,
+        },
+        h4: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
+            lineHeight: 1.4,
+        },
+        h5: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+            lineHeight: 1.5,
+        },
+        h6: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.875rem, 2vw, 1.125rem)',
+            lineHeight: 1.5,
+        },
+        body1: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            lineHeight: 1.6,
+        },
+        body2: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
+            lineHeight: 1.6,
+        },
+        button: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+            fontWeight: 600,
+        },
+        caption: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
+            lineHeight: 1.4,
+        },
+        overline: {
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
+            letterSpacing: '0.08em',
+        },
     },
-    // Responsive button styling
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-          padding: 'clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px)',
-          borderRadius: '8px',
-          textTransform: 'none',
-          fontWeight: 600,
+    components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    fontFamily: '"Open Sans", sans-serif',
+                    margin: 0,
+                    padding: 0,
+                    boxSizing: 'border-box',
+                    fontSize: 'clamp(14px, 2vw, 16px)',
+                    overflowX: 'hidden',
+                },
+                html: {
+                    fontSize: 'clamp(14px, 2vw, 16px)',
+                },
+                '*': {
+                    boxSizing: 'border-box',
+                },
+                '@media (max-width: 600px)': {
+                    body: {
+                        fontSize: '14px',
+                    },
+                },
+                '@media (min-width: 600px) and (max-width: 900px)': {
+                    body: {
+                        fontSize: '15px',
+                    },
+                },
+                '@media (min-width: 900px)': {
+                    body: {
+                        fontSize: '16px',
+                    },
+                },
+            },
         },
-        small: {
-          fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
-          padding: 'clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)',
+        // Add responsive container styling
+        MuiContainer: {
+            styleOverrides: {
+                root: {
+                    paddingLeft: 'clamp(16px, 4vw, 24px)',
+                    paddingRight: 'clamp(16px, 4vw, 24px)',
+                    '@media (max-width: 600px)': {
+                        paddingLeft: '16px',
+                        paddingRight: '16px',
+                    },
+                },
+            },
         },
-        large: {
-          fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
-          padding: 'clamp(12px, 3vw, 16px) clamp(20px, 5vw, 32px)',
+        // Responsive button styling
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                    padding: 'clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px)',
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                },
+                small: {
+                    fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
+                    padding: 'clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)',
+                },
+                large: {
+                    fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+                    padding: 'clamp(12px, 3vw, 16px) clamp(20px, 5vw, 32px)',
+                },
+            },
         },
-      },
     },
-  },
 })
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: (
-            <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<LoadingFallback/>}>
                 <WebApplicationLayout/>
             </Suspense>
         ),
@@ -233,7 +233,7 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <Home/>
                     </Suspense>
                 )
@@ -241,7 +241,7 @@ const router = createBrowserRouter([
             {
                 path: 'cham-soc',
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <Blogs/>
                     </Suspense>
                 )
@@ -249,15 +249,15 @@ const router = createBrowserRouter([
             {
                 path: 'huong-dan-mua-hang',
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <OrderGuide/>
                     </Suspense>
                 )
             },
             {
-                path: 'sign-in',
+                path: 'login',
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <SignIn/>
                     </Suspense>
                 )
@@ -267,9 +267,9 @@ const router = createBrowserRouter([
     {
         path: 'admin',
         element: (
-            <Suspense fallback={<LoadingFallback />}>
-                <ProtectedRoute allowRoles={["admin"]}>
-                    <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<LoadingFallback/>}>
+                <ProtectedRoute allowRoles={["ADMIN"]}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <AdminDashboard/>
                     </Suspense>
                 </ProtectedRoute>
@@ -279,15 +279,39 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <Navigate to={'/admin/dashboard'}/>
+            },
+            {
+                path: 'dashboard',
+                element: <h1>Dashboard Pannel</h1>
+            },
+            {
+                path: 'users',
+                element: <h1>Quản lý người dùng</h1>
+            },
+            {
+                path: 'products',
+                element: <h1>Quản lý sản phẩm</h1>
+            },
+            {
+                path: 'orders',
+                element: <h1>Đơn hàng</h1>
+            },
+            {
+                path: 'analytics',
+                element: <h1>Báo cáo & Thống kê</h1>
+            },
+            {
+                path: 'settings',
+                element: <h1>Cài đặt</h1>
             }
         ]
     },
     {
         path: 'seller',
         element: (
-            <Suspense fallback={<LoadingFallback />}>
-                <ProtectedRoute allowRoles={["seller"]}>
-                    <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<LoadingFallback/>}>
+                <ProtectedRoute allowRoles={["SELLER"]}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <SellerDashboard/>
                     </Suspense>
                 </ProtectedRoute>
@@ -299,9 +323,13 @@ const router = createBrowserRouter([
                 element: <Navigate to={'/seller/dashboard'}/>
             },
             {
+                path: 'dashboard',
+                element: <h1>Dashboard Pannel</h1>
+            },
+            {
                 path: 'profile',
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
+                    <Suspense fallback={<LoadingFallback/>}>
                         <UserProfile/>
                     </Suspense>
                 )
@@ -330,7 +358,7 @@ export default function App() {
             preventDuplicate={true}
         >
             <ThemeProvider theme={theme}>
-                <CssBaseline />
+                <CssBaseline/>
                 <GoogleOAuthProvider clientId={clientID}>
                     <RouterProvider router={router}/>
                 </GoogleOAuthProvider>

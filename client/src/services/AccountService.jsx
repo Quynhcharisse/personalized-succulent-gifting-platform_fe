@@ -5,13 +5,13 @@ export const signOut = async () => {
     return response || null
 }
 
-export const getAccess = async () => {
-    const response = await axiosClient.post("/account/access")
-    return response || null;
-}
+// export const getAccess = async () => {
+//     const response = await axiosClient.post("/account/access")
+//     return response || null;
+// }
 
 export const viewProfile = async () => {
-    const response = await axiosClient.get("/account/profile");
+    const response = await axiosClient.post("/account/profile");
     return response || null
 }
 
@@ -19,3 +19,4 @@ export const updateProfile = async (userProfile) => {
     const response = await axiosClient.put("/account/profile", userProfile);
     return response || null
 }
+
