@@ -427,14 +427,9 @@ export default function SellerDashboard() {
         // Lấy thông tin user từ localStorage
         try {
             const userData = localStorage.getItem('user');
-            console.log('🔍 SellerDashboard - Raw localStorage data:', userData);
             
             if (userData) {
                 const parsedUser = JSON.parse(userData);
-                console.log('🔍 SellerDashboard - Parsed user data:', parsedUser);
-                console.log('🔍 SellerDashboard - parsedUser.user:', parsedUser.user);
-                console.log('🔍 SellerDashboard - parsedUser.email:', parsedUser.email);
-                console.log('🔍 SellerDashboard - parsedUser.role:', parsedUser.role);
                 
                 const sessionData = {
                     user: {
@@ -445,11 +440,9 @@ export default function SellerDashboard() {
                     }
                 };
                 
-                console.log('🔍 SellerDashboard - Setting session:', sessionData);
                 setSession(sessionData);
             } else {
                 console.warn('⚠️ No user data found in localStorage');
-                console.log('🔍 All localStorage keys:', Object.keys(localStorage));
             }
         } catch (error) {
             console.error('❌ Error parsing user data:', error);

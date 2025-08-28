@@ -314,14 +314,9 @@ export default function AdminDashboard() {
         // Lấy thông tin user từ localStorage
         try {
             const userData = localStorage.getItem('user');
-            console.log('🔍 AdminDashboard - Raw localStorage data:', userData);
             
             if (userData) {
                 const parsedUser = JSON.parse(userData);
-                console.log('🔍 AdminDashboard - Parsed user data:', parsedUser);
-                console.log('🔍 AdminDashboard - parsedUser.user:', parsedUser.user);
-                console.log('🔍 AdminDashboard - parsedUser.email:', parsedUser.email);
-                console.log('🔍 AdminDashboard - parsedUser.role:', parsedUser.role);
                 
                 const sessionData = {
                     user: {
@@ -332,11 +327,9 @@ export default function AdminDashboard() {
                     }
                 };
                 
-                console.log('🔍 AdminDashboard - Setting session:', sessionData);
                 setSession(sessionData);
             } else {
                 console.warn('⚠️ No user data found in localStorage');
-                console.log('🔍 All localStorage keys:', Object.keys(localStorage));
             }
         } catch (error) {
             console.error('❌ Error parsing user data:', error);

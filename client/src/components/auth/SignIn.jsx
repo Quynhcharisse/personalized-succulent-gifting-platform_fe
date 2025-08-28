@@ -16,44 +16,22 @@ export default function SignIn() {
     const redirectTo = new URLSearchParams(search).get('redirectTo');
 
     async function HandleLogin(userInfo) {
-        console.log('Starting HandleLogin with userInfo:', userInfo);
         try {
             setIsLoading(true);
-            console.log('Calling signIn with:', {
-                email: userInfo.data.email,
-                name: userInfo.data.name,
-                picture: userInfo.data.picture
-            });
 
             const loginResponse = await signIn(userInfo.data.email, userInfo.data.name, userInfo.data.picture);
 
             if (loginResponse && loginResponse.status === 200) {
-                // console.log('Login successful, saving user data');
-                console.log('Login response:', loginResponse);
-                console.log('🔍 SignIn - Full loginResponse:', loginResponse);
-                console.log('🔍 SignIn - loginResponse.data:', loginResponse.data);
-                console.log('🔍 SignIn - loginResponse.data.data:', loginResponse.data.data);
-                
                 const userDataToStore = loginResponse.data.data;
-                console.log('🔍 SignIn - Storing to localStorage:', userDataToStore);
                 
                 localStorage.setItem('user', JSON.stringify(userDataToStore));
                 
-                // Verify data was stored
-                const storedData = localStorage.getItem('user');
-                console.log('🔍 SignIn - Verified stored data:', storedData);
-                console.log('🔍 SignIn - Parsed stored data:', JSON.parse(storedData));
-
                 const access = getCookie('access');
-                console.log('Access token from cookie:', access);
-
                 const role = jwtDecode(access)?.role;
-                console.log('Decoded role:', role);
 
                 enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
 
                 setTimeout(() => {
-                    console.log('Redirecting based on role:', role);
                     switch (role) {
                         case 'ADMIN':
                             navigate('/admin/dashboard', {replace: true});
@@ -63,12 +41,10 @@ export default function SignIn() {
                             break;
                         case 'BUYER': {
                             const target = redirectTo || '/';
-                            console.log('Redirecting buyer to:', target);
                             navigate(target, {replace: true});
                             break;
                         }
                         default:
-                            console.log('Unknown role, redirecting to home');
                             navigate('/', {replace: true});
                             break;
                     }
@@ -108,7 +84,6 @@ export default function SignIn() {
                 throw new Error('No user info in response');
             }
         } catch (e) {
-            console.log(e)
             enqueueSnackbar("Không thể lấy thông tin người dùng", {variant: "error"});
             setIsLoading(false);
         }
