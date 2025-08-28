@@ -106,7 +106,7 @@ export default function UserProfile() {
         email: '',
         role: '',
         active: '',
-        registeredDate : '',
+        registerDate: '',
         phone: '',
         gender: '',
         address: '',
@@ -126,6 +126,26 @@ export default function UserProfile() {
 
     async function uploadToCloudinary(file) {
         try {
+            // Validate file
+            if (!file) {
+                enqueueSnackbar("Không có file để upload", {variant: "error"})
+                return null
+            }
+
+            // Check file size (max 10MB)
+            const maxSize = 10 * 1024 * 1024 // 10MB
+            if (file.size > maxSize) {
+                enqueueSnackbar("File quá lớn. Kích thước tối đa: 10MB", {variant: "error"})
+                return null
+            }
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+            if (!allowedTypes.includes(file.type)) {
+                enqueueSnackbar("Loại file không được hỗ trợ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP", {variant: "error"})
+                return null
+            }
+
             if (abortController.current) {
                 abortController.current.abort()
             }
@@ -133,8 +153,18 @@ export default function UserProfile() {
 
             const formData = new FormData()
             formData.append("file", file)
-            formData.append("upload_preset", "psgp")
+            formData.append("upload_preset", "psgp_web")
             formData.append("cloud_name", "dfx4miova")
+            formData.append("folder", "psgp")
+            formData.append("public_id", `user_${Date.now()}`)
+
+            console.log("Uploading to Cloudinary:", {
+                file: file.name,
+                size: file.size,
+                type: file.type,
+                upload_preset: "psgp_web",
+                cloud_name: "dfx4miova"
+            })
 
             const response = await axios.post(
                 "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
@@ -144,17 +174,34 @@ export default function UserProfile() {
                         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
                         setUploadProgress(percentCompleted)
                     },
-                    signal: abortController.current.signal
+                    signal: abortController.current.signal,
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
             )
 
+            console.log("Cloudinary response:", response.data)
             return response.data.secure_url
         } catch (error) {
             if (axios.isCancel(error)) {
                 enqueueSnackbar("Upload cancelled", {variant: "info"})
                 return null
             }
-            enqueueSnackbar("Failed to upload file", {variant: "error"})
+            
+            console.error("Cloudinary upload error:", error.response?.data || error.message)
+            
+            if (error.response?.status === 400) {
+                const errorData = error.response.data
+                if (errorData.error?.message) {
+                    enqueueSnackbar(`Upload failed: ${errorData.error.message}`, {variant: "error"})
+                } else {
+                    enqueueSnackbar("Upload failed: Bad request. Vui lòng kiểm tra file và thử lại", {variant: "error"})
+                }
+            } else {
+                enqueueSnackbar("Upload failed: " + (error.response?.data?.message || error.message), {variant: "error"})
+            }
+            
             return null
         } finally {
             setUploadProgress(0)
@@ -167,32 +214,94 @@ export default function UserProfile() {
         async function load() {
             try {
                 setLoading(true)
-                const res = await viewProfile()
-                const accountData = res?.data?.body || {}
-                const userData = accountData.user || {}
                 
-                if (mounted) {
-                    setUserRole(accountData.role || '')
-                    const formData = {
-                        name: userData.name || '',
-                        email: userData.email || '',
-                        role: accountData.role || '',
-                        active: accountData.active !== undefined ? accountData.active : true,
-                        registeredDate: accountData.registeredDate || '',
-                        phone: userData.phone || '',
-                        gender: userData.gender || '',
-                        address: userData.address || '',
-                        avatarUrl: userData.avatarUrl || '',
-                        fengShui: userData.fengShui || '',
-                        zodiac: userData.zodiac || ''
+                // Ưu tiên lấy dữ liệu từ localStorage trước (dữ liệu Google login)
+                let formData = {}
+                let accountData = {}
+                let userData = {}
+                
+                try {
+                    const userFromStorage = localStorage.getItem('user')
+                    if (userFromStorage) {
+                        const parsedUser = JSON.parse(userFromStorage)
+                        console.log('🔍 UserProfile - User data from localStorage:', parsedUser)
+                        console.log('🔍 UserProfile - parsedUser.user:', parsedUser.user)
+                        console.log('🔍 UserProfile - parsedUser.email:', parsedUser.email)
+                        console.log('🔍 UserProfile - parsedUser.role:', parsedUser.role)
+                        
+                        // Lấy dữ liệu cơ bản từ localStorage
+                        formData = {
+                            name: parsedUser.user?.name || parsedUser.name || '',
+                            email: parsedUser.email || '',
+                            role: parsedUser.role || '',
+                            active: parsedUser.active !== undefined ? parsedUser.active : true,
+                            registerDate: parsedUser.registerDate || parsedUser.createdAt || '',
+                            phone: parsedUser.user?.phone || parsedUser.phone || '',
+                            gender: parsedUser.user?.gender || parsedUser.gender || '',
+                            address: parsedUser.user?.address || parsedUser.address || '',
+                            avatarUrl: parsedUser.user?.avatarUrl || parsedUser.avatarUrl || parsedUser.avatar || '',
+                            fengShui: parsedUser.user?.fengShui || parsedUser.fengShui || '',
+                            zodiac: parsedUser.user?.zodiac || parsedUser.zodiac || ''
+                        }
+                        
+                        console.log('🔍 UserProfile - Final formData from localStorage:', formData)
+                        
+                        setUserRole(parsedUser.role || '')
+                        setForm(formData)
+                        setOriginalForm(formData)
                     }
-                    setForm(formData)
-                    setOriginalForm(formData)
+                } catch (storageError) {
+                    console.error('Error parsing localStorage:', storageError)
                 }
+                
+                // Sau đó gọi API để cập nhật thông tin chi tiết
+                try {
+                    const res = await viewProfile()
+                    console.log('API Response:', res)
+                    console.log('res.data:', res?.data)
+                    
+                    if (res?.data?.data) {
+                        accountData = res.data.data
+                        userData = accountData.user || {}
+                        console.log('accountData from API:', accountData)
+                        console.log('userData from API:', userData)
+                        
+                        if (mounted) {
+                            // Cập nhật form với dữ liệu từ API, ưu tiên dữ liệu mới
+                            const updatedFormData = {
+                                name: userData.name || formData.name || '',
+                                email: accountData.email || formData.email || '',
+                                role: accountData.role || formData.role || '',
+                                active: accountData.active !== undefined ? accountData.active : formData.active,
+                                registerDate: accountData.registerDate || formData.registerDate || '',
+                                phone: userData.phone || formData.phone || '',
+                                gender: userData.gender || formData.gender || '',
+                                address: userData.address || formData.address || '',
+                                avatarUrl: userData.avatarUrl || formData.avatarUrl || '',
+                                fengShui: userData.fengShui || formData.fengShui || '',
+                                zodiac: userData.zodiac || formData.zodiac || ''
+                            }
+                            
+                            setUserRole(accountData.role || formData.role || '')
+                            setForm(updatedFormData)
+                            setOriginalForm(updatedFormData)
+                        }
+                    }
+                } catch (apiError) {
+                    console.error('API Error:', apiError)
+                    // Nếu API lỗi, vẫn giữ dữ liệu từ localStorage
+                    if (mounted && Object.keys(formData).length > 0) {
+                        enqueueSnackbar('Không thể cập nhật thông tin từ server, sử dụng dữ liệu local', { variant: 'warning' })
+                    }
+                }
+                
             } catch (e) {
+                console.error('Load error:', e)
                 enqueueSnackbar('Không tải được hồ sơ', { variant: 'error' })
             } finally {
-                setLoading(false)
+                if (mounted) {
+                    setLoading(false)
+                }
             }
         }
         load()
@@ -217,7 +326,7 @@ export default function UserProfile() {
         // Name validation
         if (!form.name || form.name.trim().length === 0) {
             newErrors.name = 'Tên là bắt buộc'
-        } else if (form.name.length < 3) {
+        } else if (form.name.trim().length < 3) {
             newErrors.name = 'Tên phải có ít nhất 3 ký tự'
         } else if (form.name.length > 100) {
             newErrors.name = 'Tên không được vượt quá 100 ký tự'
@@ -360,19 +469,19 @@ export default function UserProfile() {
             <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
                 {/* Modern Hero Header */}
                 <Fade in timeout={800}>
-                    <Card sx={{
+            <Card sx={{
                         mb: 6,
                         borderRadius: 6,
                         background: colors.gradient.primary,
-                        color: 'white',
-                        overflow: 'hidden',
+                color: 'white',
+                overflow: 'hidden',
                         position: 'relative',
                         boxShadow: `0 20px 40px ${alpha(colors.primary, 0.3)}`,
                         border: 'none'
-                    }}>
+            }}>
                         {/* Decorative elements */}
-                        <Box sx={{
-                            position: 'absolute',
+                <Box sx={{
+                    position: 'absolute',
                             top: -50,
                             right: -50,
                             width: 200,
@@ -397,7 +506,7 @@ export default function UserProfile() {
                                 justifyContent="space-between"
                                 spacing={3}
                             >
-                                <Box>
+                        <Box>
                                     <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                                         <AutoAwesomeIcon sx={{ fontSize: 32, color: colors.accent }} />
                                         <Typography variant={isMobile ? "h4" : "h3"} sx={{ 
@@ -407,8 +516,8 @@ export default function UserProfile() {
                                             WebkitBackgroundClip: 'text',
                                             WebkitTextFillColor: 'transparent'
                                         }}>
-                                            Hồ sơ cá nhân
-                                        </Typography>
+                                Hồ sơ cá nhân
+                            </Typography>
                                     </Stack>
                                     <Typography variant="h6" sx={{ 
                                         opacity: 0.9, 
@@ -416,13 +525,13 @@ export default function UserProfile() {
                                         maxWidth: 500
                                     }}>
                                         Quản lý thông tin cá nhân
-                                    </Typography>
-                                </Box>
+                            </Typography>
+                        </Box>
                                 
 
-                            </Stack>
-                        </CardContent>
-                    </Card>
+                    </Stack>
+                </CardContent>
+            </Card>
                 </Fade>
 
                 {/* Account Status Card */}
@@ -440,7 +549,7 @@ export default function UserProfile() {
                                 <Box sx={{
                                     width: 48,
                                     height: 48,
-                                    borderRadius: 3,
+                    borderRadius: 3,
                                     background: colors.gradient.secondary,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -451,9 +560,9 @@ export default function UserProfile() {
                                 <Box sx={{ flex: 1 }}>
                                     <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary, mb: 0.5 }}>
                                         Tài khoản đã xác thực
-                                    </Typography>
+                </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Hồ sơ của bạn đã được xác minh và bảo mật • Role: {userRole}
+                                        Hồ sơ của bạn đã được xác minh và bảo mật với vai trò : <strong>{userRole}</strong>
                                     </Typography>
                                 </Box>
                                 <Chip 
@@ -510,18 +619,18 @@ export default function UserProfile() {
                                         
                                         {/* Avatar with camera overlay */}
                                         <Box sx={{ position: 'relative', mb: 3 }}>
-                                            <Avatar
+                            <Avatar
                                                 src={previewImage || form.avatarUrl}
-                                                sx={{
-                                                    width: 120,
-                                                    height: 120,
+                                sx={{
+                                    width: 120,
+                                    height: 120,
                                                     border: `3px solid ${colors.surface}`,
                                                     boxShadow: `0 8px 32px ${alpha(colors.primary, 0.3)}`,
                                                 }}
                                             >
                                                 <PersonIcon sx={{ fontSize: 60, color: colors.primary }} />
-                                            </Avatar>
-                                            
+                            </Avatar>
+                            
                                             {/* Hidden file input */}
                                             <input
                                                 type="file"
@@ -531,18 +640,27 @@ export default function UserProfile() {
                                                 onChange={async (e) => {
                                                     const file = e.target.files[0];
                                                     if (file) {
-                                                        // Preview image
-                                                        const reader = new FileReader();
-                                                        reader.onloadend = () => {
-                                                            setPreviewImage(reader.result);
-                                                        };
-                                                        reader.readAsDataURL(file);
-                                                        
-                                                        // Upload to Cloudinary
-                                                        const imageUrl = await uploadToCloudinary(file);
-                                                        if (imageUrl) {
-                                                            setForm(prev => ({ ...prev, avatarUrl: imageUrl }));
-                                                            enqueueSnackbar("Upload successful", {variant: "success"});
+                                                        try {
+                                                            // Preview image
+                                                            const reader = new FileReader();
+                                                            reader.onloadend = () => {
+                                                                setPreviewImage(reader.result);
+                                                            };
+                                                            reader.readAsDataURL(file);
+                                                            
+                                                            // Upload to Cloudinary
+                                                            const imageUrl = await uploadToCloudinary(file);
+                                                            if (imageUrl) {
+                                                                setForm(prev => ({ ...prev, avatarUrl: imageUrl }));
+                                                                enqueueSnackbar("Upload ảnh thành công!", {variant: "success"});
+                                                            } else {
+                                                                // Nếu upload thất bại, xóa preview
+                                                                setPreviewImage(null);
+                                                            }
+                                                        } catch (error) {
+                                                            console.error("File upload error:", error);
+                                                            setPreviewImage(null);
+                                                            enqueueSnackbar("Lỗi khi xử lý file", {variant: "error"});
                                                         }
                                                     }
                                                 }}
@@ -587,11 +705,11 @@ export default function UserProfile() {
                                         </Box>
 
                                         {/* Role Badge */}
-                                        <Chip 
+                                        <Chip
                                             icon={<BadgeIcon sx={{ fontSize: 14 }} />}
                                             label={userRole}
                                             size="small"
-                                            sx={{ 
+                                            sx={{
                                                 background: colors.gradient.secondary,
                                                 color: 'white',
                                                 fontWeight: 600,
@@ -606,14 +724,36 @@ export default function UserProfile() {
                                     <Box sx={{ p: 4 }}>
                                         {/* Header with Edit Button */}
                                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 4 }}>
-                                            <Box>
-                                                <Typography variant="h4" sx={{ 
-                                                    fontWeight: 800,
-                                                    color: colors.primary,
-                                                    mb: 1
-                                                }}>
-                                                    {form.name || 'User name'}
-                                                </Typography>
+                                    <Box>
+                                                {isEditing ? (
+                                                    <TextField
+                                                        fullWidth
+                                                        value={form.name}
+                                                        onChange={handleChange('name')}
+                                                        error={!!errors.name}
+                                                        helperText={errors.name || 'Tên phải có ít nhất 3 ký tự'}
+                                                        placeholder="Nhập tên của bạn"
+                                            sx={{
+                                                            '& .MuiOutlinedInput-root': {
+                                                                borderRadius: 2,
+                                                                backgroundColor: colors.surface,
+                                                                fontSize: '1.5rem',
+                                                                fontWeight: 800,
+                                                                '&.Mui-focused': {
+                                                                    boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Typography variant="h4" sx={{ 
+                                                        fontWeight: 800,
+                                                        color: colors.primary,
+                                                        mb: 1
+                                                    }}>
+                                                        {form.name || 'Chưa có tên'}
+                                                    </Typography>
+                                                )}
                                             </Box>
                                             
                                             {!isEditing ? (
@@ -707,33 +847,33 @@ export default function UserProfile() {
                                                             fontSize: '0.75rem'
                                                         }}>
                                                             Trạng thái
-                                                        </Typography>
-                                                        <Chip
+                                        </Typography>
+                                        <Chip
                                                             label={form.active ? 'Đang hoạt động' : 'Không hoạt động'}
-                                                            size="small"
+                                            size="small"
                                                             color={form.active ? 'success' : 'default'}
-                                                            sx={{
+                                            sx={{
                                                                 fontWeight: 500,
                                                                 borderRadius: 2,
                                                                 height: 28,
                                                                 backgroundColor: form.active ? colors.success : alpha(colors.primary, 0.1),
                                                                 color: form.active ? 'white' : colors.primary
-                                                            }}
-                                                        />
-                                                    </Box>
+                                            }}
+                                        />
+                                    </Box>
 
                                                     {/* Registered Date Field - Read Only */}
                                                     <Box sx={{ mb: 4 }}>
                                                         <Typography variant="subtitle2" sx={{ 
-                                                            fontWeight: 700, 
-                                                            color: colors.primary,
+                                fontWeight: 700, 
+                                color: colors.primary,
                                                             mb: 1,
                                                             textTransform: 'uppercase',
                                                             letterSpacing: '0.5px',
                                                             fontSize: '0.75rem'
                                                         }}>
                                                             Ngày đăng ký
-                                                        </Typography>
+                            </Typography>
                                                         <Typography variant="body1" sx={{
                                                             color: 'text.primary',
                                                             fontSize: '1rem',
@@ -743,8 +883,55 @@ export default function UserProfile() {
                                                             borderRadius: 1,
                                                             border: `1px solid ${alpha(colors.primary, 0.1)}`
                                                         }}>
-                                                            {form.registeredDate ? new Date(form.registeredDate).toLocaleDateString('vi-VN') : 'Chưa có ngày đăng ký'}
+                                                            {form.registerDate ? new Date(form.registerDate).toLocaleDateString('vi-VN') : 'Chưa có ngày đăng ký'}
                                                         </Typography>
+                                                    </Box>
+                                                </Grid>
+
+                                                {/* Right Column */}
+                                    <Grid item xs={12} md={6}>
+                                                    {/* Address Field */}
+                                                    <Box sx={{ mb: 4 }}>
+                                                        <Typography variant="subtitle2" sx={{ 
+                                                            fontWeight: 700, 
+                                                            color: colors.primary,
+                                                            mb: 1,
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '0.5px',
+                                                            fontSize: '0.75rem'
+                                                        }}>
+                                                            Địa chỉ
+                                                        </Typography>
+                                                        {isEditing ? (
+                                        <TextField
+                                            fullWidth
+                                                                multiline
+                                                                rows={2}
+                                                                value={form.address}
+                                                                onChange={handleChange('address')}
+                                                                error={!!errors.address}
+                                                                helperText={errors.address || 'Tối đa 255 ký tự'}
+                                                                placeholder="Nhập địa chỉ của bạn"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
+                                                                        backgroundColor: colors.surface,
+                                                                        '&.Mui-focused': {
+                                                                            boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                                        ) : (
+                                                            <Typography variant="body1" sx={{
+                                                                color: 'text.primary',
+                                                                fontSize: '1rem',
+                                                                fontWeight: 500,
+                                                                lineHeight: 1.6
+                                                            }}>
+                                                                {form.address || 'Chưa có địa chỉ'}
+                                                            </Typography>
+                                                        )}
                                                     </Box>
 
                                                     {/* Phone Field */}
@@ -757,33 +944,33 @@ export default function UserProfile() {
                                                             letterSpacing: '0.5px',
                                                             fontSize: '0.75rem'
                                                         }}>
-                                                            Phone Number
+                                                            Số điện thoại
                                                         </Typography>
                                                         {isEditing ? (
-                                                            <TextField
-                                                                fullWidth
-                                                                value={form.phone}
-                                                                onChange={handleChange('phone')}
+                                        <TextField
+                                            fullWidth
+                                            value={form.phone}
+                                            onChange={handleChange('phone')}
                                                                 error={!!errors.phone}
                                                                 helperText={errors.phone || 'Định dạng: 0xxxxxxxxx hoặc +84xxxxxxxxx'}
-                                                                placeholder="+20-01274318900"
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        borderRadius: 2,
+                                                                placeholder="Nhập số điện thoại"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
                                                                         backgroundColor: colors.surface,
                                                                         '&.Mui-focused': {
                                                                             boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
-                                                                        }
-                                                                    }
-                                                                }}
-                                                            />
+                                                    }
+                                                }
+                                            }}
+                                        />
                                                         ) : (
                                                             <Typography variant="body1" sx={{
                                                                 color: 'text.primary',
                                                                 fontSize: '1rem',
                                                                 fontWeight: 500
                                                             }}>
-                                                                {form.phone || '+20-01274318900'}
+                                                                {form.phone || 'Chưa có số điện thoại'}
                                                             </Typography>
                                                         )}
                                                     </Box>
@@ -801,91 +988,44 @@ export default function UserProfile() {
                                                             Giới tính
                                                         </Typography>
                                                         {isEditing ? (
-                                                            <TextField
-                                                                select
-                                                                fullWidth
-                                                                value={form.gender}
-                                                                onChange={handleChange('gender')}
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            value={form.gender}
+                                            onChange={handleChange('gender')}
                                                                 error={!!errors.gender}
                                                                 helperText={errors.gender}
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        borderRadius: 2,
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
                                                                         backgroundColor: colors.surface,
                                                                         '&.Mui-focused': {
                                                                             boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
-                                                                        }
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {GENDERS.map(g => (
-                                                                    <MenuItem key={g.value} value={g.value}>
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {GENDERS.map(g => (
+                                                <MenuItem key={g.value} value={g.value}>
                                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                             <span style={{ fontSize: '18px' }}>{g.icon}</span>
-                                                                            {g.label}
+                                                    {g.label}
                                                                         </Box>
-                                                                    </MenuItem>
-                                                                ))}
-                                                            </TextField>
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                                         ) : (
                                                             <Chip
                                                                 label={getGenderLabel(form.gender)}
                                                                 size="small"
-                                                                sx={{
+                                            sx={{
                                                                     backgroundColor: alpha(colors.primary, 0.1),
                                                                     color: colors.primary,
                                                                     fontWeight: 500,
-                                                                    borderRadius: 2,
+                                                    borderRadius: 2,
                                                                     height: 28
                                                                 }}
                                                             />
-                                                        )}
-                                                    </Box>
-                                                </Grid>
-
-                                                {/* Right Column */}
-                                                <Grid item xs={12} md={6}>
-                                                    {/* Address Field */}
-                                                    <Box sx={{ mb: 4 }}>
-                                                        <Typography variant="subtitle2" sx={{ 
-                                                            fontWeight: 700, 
-                                                            color: colors.primary,
-                                                            mb: 1,
-                                                            textTransform: 'uppercase',
-                                                            letterSpacing: '0.5px',
-                                                            fontSize: '0.75rem'
-                                                        }}>
-                                                            Address
-                                                        </Typography>
-                                                        {isEditing ? (
-                                                            <TextField
-                                                                fullWidth
-                                                                multiline
-                                                                rows={2}
-                                                                value={form.address}
-                                                                onChange={handleChange('address')}
-                                                                error={!!errors.address}
-                                                                helperText={errors.address || 'Tối đa 255 ký tự'}
-                                                                placeholder="285 N Broad St, Elizabeth, NJ 07208, USA"
-                                                                sx={{
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        borderRadius: 2,
-                                                                        backgroundColor: colors.surface,
-                                                                        '&.Mui-focused': {
-                                                                            boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
-                                                                        }
-                                                                    }
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Typography variant="body1" sx={{
-                                                                color: 'text.primary',
-                                                                fontSize: '1rem',
-                                                                fontWeight: 500,
-                                                                lineHeight: 1.6
-                                                            }}>
-                                                                {form.address || '285 N Broad St, Elizabeth, NJ 07208, USA'}
-                                                            </Typography>
                                                         )}
                                                     </Box>
 
@@ -905,36 +1045,36 @@ export default function UserProfile() {
                                                                     Ngũ hành
                                                                 </Typography>
                                                                 {isEditing ? (
-                                                                    <TextField
-                                                                        select
-                                                                        fullWidth
-                                                                        value={form.fengShui}
-                                                                        onChange={handleChange('fengShui')}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                borderRadius: 2,
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            value={form.fengShui}
+                                            onChange={handleChange('fengShui')}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
                                                                                 backgroundColor: colors.surface,
                                                                                 '&.Mui-focused': {
                                                                                     boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
-                                                                                }
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        {FENGSHUI.map(f => (
-                                                                            <MenuItem key={f.value} value={f.value}>
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {FENGSHUI.map(f => (
+                                                <MenuItem key={f.value} value={f.value}>
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                                                    <Box sx={{
+                                                        <Box sx={{
                                                                                         width: 16,
                                                                                         height: 16,
-                                                                                        borderRadius: '50%',
+                                                            borderRadius: '50%',
                                                                                         backgroundColor: f.color,
                                                                                         boxShadow: `0 2px 8px ${alpha(f.color, 0.4)}`
-                                                                                    }} />
+                                                        }} />
                                                                                     <Typography sx={{ fontWeight: 500 }}>{f.label}</Typography>
-                                                                                </Box>
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </TextField>
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                                                 ) : (
                                                                     <Chip
                                                                         label={getFengShuiInfo(form.fengShui).label}
@@ -963,30 +1103,30 @@ export default function UserProfile() {
                                                                     Cung hoàng đạo
                                                                 </Typography>
                                                                 {isEditing ? (
-                                                                    <TextField
-                                                                        select
-                                                                        fullWidth
-                                                                        value={form.zodiac}
-                                                                        onChange={handleChange('zodiac')}
-                                                                        sx={{
-                                                                            '& .MuiOutlinedInput-root': {
-                                                                                borderRadius: 2,
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            value={form.zodiac}
+                                            onChange={handleChange('zodiac')}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
                                                                                 backgroundColor: colors.surface,
                                                                                 '&.Mui-focused': {
                                                                                     boxShadow: `0 0 0 2px ${alpha(colors.primary, 0.2)}`
-                                                                                }
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        {ZODIACS.map(z => (
-                                                                            <MenuItem key={z.value} value={z.value}>
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {ZODIACS.map(z => (
+                                                <MenuItem key={z.value} value={z.value}>
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                                                                     <Typography sx={{ fontSize: '18px' }}>{z.icon}</Typography>
                                                                                     <Typography sx={{ fontWeight: 500 }}>{z.label}</Typography>
-                                                                                </Box>
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </TextField>
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                                                 ) : (
                                                                     <Chip
                                                                         icon={<span style={{ fontSize: '14px' }}>{getZodiacInfo(form.zodiac).icon}</span>}
@@ -1006,52 +1146,52 @@ export default function UserProfile() {
                                                     )}
 
                                                     {/* Save & Cancel Buttons - Only show when editing */}
-                                                    {isEditing && (
+                                    {isEditing && (
                                                         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 2 }}>
-                                                            <Button
-                                                                variant="outlined"
-                                                                onClick={handleCancel}
-                                                                disabled={loading}
-                                                                sx={{
-                                                                    borderRadius: 2,
+                                                <Button
+                                                    variant="outlined"
+                                                    onClick={handleCancel}
+                                                    disabled={loading}
+                                                    sx={{
+                                                        borderRadius: 2,
                                                                     borderColor: alpha(colors.primary, 0.5),
-                                                                    color: colors.primary,
-                                                                    '&:hover': {
+                                                        color: colors.primary,
+                                                        '&:hover': {
                                                                         borderColor: colors.primary,
                                                                         backgroundColor: alpha(colors.primary, 0.05)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                Hủy
-                                                            </Button>
-                                                            <Button
-                                                                type="submit"
-                                                                variant="contained"
-                                                                disabled={loading}
-                                                                sx={{
-                                                                    borderRadius: 2,
-                                                                    backgroundColor: colors.primary,
+                                                        }
+                                                    }}
+                                                >
+                                                    Hủy
+                                                </Button>
+                                                <Button
+                                                    type="submit"
+                                                    variant="contained"
+                                                    disabled={loading}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        backgroundColor: colors.primary,
                                                                     color: 'white',
-                                                                    '&:hover': {
+                                                        '&:hover': {
                                                                         backgroundColor: colors.primaryDark
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                                                            </Button>
-                                                        </Stack>
-                                                    )}
+                                                        }
+                                                    }}
+                                                >
+                                                    {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                                </Button>
+                                            </Stack>
+                                    )}
                                                 </Grid>
-                                            </Grid>
-                                        </form>
-                                    </Box>
                                 </Grid>
-                            </Grid>
+                            </form>
+                                    </Box>
+                </Grid>
+            </Grid>
                         </CardContent>
                     </Card>
                 </Fade>
 
                 </Container>
-            </Box>
-        )
-    }
+        </Box>
+    )
+}

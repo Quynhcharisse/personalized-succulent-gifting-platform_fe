@@ -101,7 +101,7 @@ const NAVIGATION = [
     }
 ];
 
-function SellerDashboardContent() {
+function SellerDashboardContent({ session }) {
     const [stats, setStats] = useState({
         todayOrders: 18,
         revenueVnd: 8750000,
@@ -218,7 +218,7 @@ function SellerDashboardContent() {
                     WebkitTextFillColor: 'transparent',
                     mb: 1
                 }}>
-                        Seller Dashboard
+                        {session.user.role || 'User'} Dashboard
                     </Typography>
                 <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem' }}>
                     Tổng quan hiệu suất cửa hàng của bạn hôm nay
@@ -416,7 +416,7 @@ export default function SellerDashboard() {
         user: {
             name: '',
             email: '',
-            image: null,
+            avatar: '',
             role: ''
         }
     });
@@ -427,19 +427,32 @@ export default function SellerDashboard() {
         // Lấy thông tin user từ localStorage
         try {
             const userData = localStorage.getItem('user');
+            console.log('🔍 SellerDashboard - Raw localStorage data:', userData);
+            
             if (userData) {
                 const parsedUser = JSON.parse(userData);
-                setSession({
+                console.log('🔍 SellerDashboard - Parsed user data:', parsedUser);
+                console.log('🔍 SellerDashboard - parsedUser.user:', parsedUser.user);
+                console.log('🔍 SellerDashboard - parsedUser.email:', parsedUser.email);
+                console.log('🔍 SellerDashboard - parsedUser.role:', parsedUser.role);
+                
+                const sessionData = {
                     user: {
-                        name: parsedUser.name || 'User',
+                        name: parsedUser.user?.name || parsedUser.name || 'User',
                         email: parsedUser.email || '',
-                        image: parsedUser.avatarUrl || null,
-                        role: parsedUser.role || 'SELLER'
+                        image: parsedUser.user?.avatarUrl || parsedUser.avatarUrl || parsedUser.avatar || null,
+                        role: parsedUser.role || ''
                     }
-                });
+                };
+                
+                console.log('🔍 SellerDashboard - Setting session:', sessionData);
+                setSession(sessionData);
+            } else {
+                console.warn('⚠️ No user data found in localStorage');
+                console.log('🔍 All localStorage keys:', Object.keys(localStorage));
             }
         } catch (error) {
-            console.error('Error parsing user data:', error);
+            console.error('❌ Error parsing user data:', error);
         }
     }, []);
 
@@ -543,7 +556,7 @@ export default function SellerDashboard() {
                     letterSpacing: 1,
                     textTransform: 'uppercase'
                 }}>
-                    Kênh bán hàng
+                    Kênh {session.user.role?.toLowerCase() || 'người dùng'}
                 </Typography>
                 <List sx={{ mt: 1 }}>
                     {NAVIGATION.map((item) => (
@@ -661,7 +674,7 @@ export default function SellerDashboard() {
                         color: colors.primary
                     }}>
                         {location.pathname === '/seller/dashboard' ? 'Dashboard' : 
-                         NAVIGATION.find(nav => nav.path === location.pathname)?.title || 'Kênh người bán'}
+                         NAVIGATION.find(nav => nav.path === location.pathname)?.title || `Kênh ${session.user.role?.toLowerCase() || 'người dùng'}`}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -781,7 +794,7 @@ export default function SellerDashboard() {
                     </Box>
                     <Chip 
                         size="small" 
-                        label="Seller" 
+                        label={session.user.role || 'User'} 
                         sx={{ 
                             backgroundColor: alpha(colors.primary, 0.1),
                             color: colors.primary,
@@ -891,10 +904,10 @@ export default function SellerDashboard() {
                     }
                 }}
             >
-                {/* Dashboard content or nested routes */}
-                {location.pathname === '/seller/dashboard' ? (
-                    <SellerDashboardContent />
-                ) : (
+                                 {/* Dashboard content or nested routes */}
+                 {location.pathname === '/seller/dashboard' ? (
+                     <SellerDashboardContent session={session} />
+                 ) : (
                     <Box sx={{ p: 4 }}>
                         <Outlet />
                     </Box>
