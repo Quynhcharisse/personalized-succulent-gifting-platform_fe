@@ -32,17 +32,9 @@ import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
     People as PeopleIcon,
-    Inventory as InventoryIcon,
-    ShoppingCart as ShoppingCartIcon,
-    Assessment as AssessmentIcon,
-    Settings as SettingsIcon,
     AccountCircle as AccountCircleIcon,
     Logout as LogoutIcon,
-    Notifications as NotificationsIcon,
-    TrendingUp as TrendingUpIcon,
-    Add as AddIcon,
-    Visibility as VisibilityIcon,
-    ManageAccounts as ManageAccountsIcon
+    Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
@@ -81,105 +73,6 @@ const NAVIGATION = [
 ];
 
 function AdminDashboardContent({ session }) {
-    const [stats, setStats] = useState({
-        todayOrders: 24,
-        revenueVnd: 15750000,
-        newUsers: 12,
-        totalProducts: 156
-    });
-
-    function formatCurrencyVnd(value) {
-        try {
-            return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value || 0);
-        } catch (_) {
-            return `${value ?? 0} ₫`;
-        }
-    }
-
-    const StatCard = ({ title, value, icon, color, trend }) => (
-        <Card sx={{
-            background: `linear-gradient(135deg, ${color} 0%, ${alpha(color, 0.8)} 100%)`,
-            color: 'white',
-            borderRadius: 3,
-            overflow: 'hidden',
-            position: 'relative',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: `0 12px 24px ${alpha(color, 0.3)}`,
-            },
-            '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: '100px',
-                height: '100px',
-                background: `radial-gradient(circle, ${alpha('#ffffff', 0.1)} 0%, transparent 70%)`,
-                transform: 'translate(30px, -30px)',
-            }
-        }}>
-            <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                    <Box sx={{
-                        backgroundColor: alpha('#ffffff', 0.2),
-                        borderRadius: 2,
-                        p: 1.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        {icon}
-                    </Box>
-                    {trend && (
-                        <Chip 
-                            size="small" 
-                            label={trend} 
-                            sx={{ 
-                                backgroundColor: alpha('#ffffff', 0.2),
-                                color: 'white',
-                                fontWeight: 600
-                            }} 
-                        />
-                    )}
-                </Stack>
-                <Typography variant="body2" sx={{ opacity: 0.9, mb: 1, fontSize: '0.875rem' }}>
-                    {title}
-                </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                    {value}
-                </Typography>
-            </CardContent>
-        </Card>
-    );
-
-    const QuickActionButton = ({ icon, label, variant = 'contained', onClick }) => (
-        <Button
-            variant={variant}
-            startIcon={icon}
-            onClick={onClick}
-            sx={{
-                borderRadius: 3,
-                px: 3,
-                py: 1.5,
-                textTransform: 'none',
-                fontWeight: 600,
-                boxShadow: variant === 'contained' ? `0 4px 12px ${alpha(colors.primary, 0.3)}` : 'none',
-                border: variant === 'outlined' ? `2px solid ${colors.primary}` : 'none',
-                color: variant === 'outlined' ? colors.primary : 'white',
-                backgroundColor: variant === 'contained' ? colors.primary : 'transparent',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: variant === 'contained' ? `0 8px 20px ${alpha(colors.primary, 0.4)}` : `0 4px 12px ${alpha(colors.primary, 0.2)}`,
-                    backgroundColor: variant === 'contained' ? colors.primaryDark : alpha(colors.primary, 0.1),
-                }
-            }}
-        >
-            {label}
-        </Button>
-    );
-
     return (
         <Box sx={{ px: 4, py: 5 }}>
             {/* Header */}
@@ -199,94 +92,281 @@ function AdminDashboardContent({ session }) {
                 </Typography>
             </Box>
 
-            {/* Stats Cards */}
+            {/* Quick Stats Overview */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={6} lg={3}>
-                    <StatCard
-                        title="Đơn hàng hôm nay"
-                        value={stats.todayOrders}
-                        icon={<ShoppingCartIcon sx={{ fontSize: 28 }} />}
-                        color={colors.primary}
-                        trend="+12%"
-                    />
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{
+                        background: `linear-gradient(135deg, ${colors.primary} 0%, ${alpha(colors.primary, 0.8)} 100%)`,
+                        color: 'white',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 8px 25px ${alpha(colors.primary, 0.3)}`,
+                        }
+                    }}>
+                        <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                                backgroundColor: alpha('#ffffff', 0.2),
+                                borderRadius: 2,
+                                p: 1.5,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <PeopleIcon sx={{ fontSize: 28, color: 'white' }} />
+                            </Box>
+                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                                Quản lý
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Tài khoản người dùng
+                            </Typography>
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                    <StatCard
-                        title="Doanh thu (VNĐ)"
-                        value={formatCurrencyVnd(stats.revenueVnd)}
-                        icon={<TrendingUpIcon sx={{ fontSize: 28 }} />}
-                        color={colors.success}
-                        trend="+8.5%"
-                    />
+                
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{
+                        background: `linear-gradient(135deg, ${colors.success} 0%, ${alpha(colors.success, 0.8)} 100%)`,
+                        color: 'white',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 8px 25px ${alpha(colors.success, 0.3)}`,
+                        }
+                    }}>
+                        <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                                backgroundColor: alpha('#ffffff', 0.2),
+                                borderRadius: 2,
+                                p: 1.5,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <DashboardIcon sx={{ fontSize: 28, color: 'white' }} />
+                            </Box>
+                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                                Hệ thống
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Quản trị tổng thể
+                            </Typography>
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                    <StatCard
-                        title="Người dùng mới"
-                        value={stats.newUsers}
-                        icon={<PeopleIcon sx={{ fontSize: 28 }} />}
-                        color={colors.info}
-                        trend="+15%"
-                    />
+                
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{
+                        background: `linear-gradient(135deg, ${colors.info} 0%, ${alpha(colors.info, 0.8)} 100%)`,
+                        color: 'white',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 8px 25px ${alpha(colors.info, 0.3)}`,
+                        }
+                    }}>
+                        <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                                backgroundColor: alpha('#ffffff', 0.2),
+                                borderRadius: 2,
+                                p: 1.5,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <NotificationsIcon sx={{ fontSize: 28, color: 'white' }} />
+                            </Box>
+                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                                Thông báo
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Cập nhật hệ thống
+                            </Typography>
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                    <StatCard
-                        title="Tổng sản phẩm"
-                        value={stats.totalProducts}
-                        icon={<InventoryIcon sx={{ fontSize: 28 }} />}
-                        color={colors.warning}
-                        trend="+5%"
-                    />
+                
+                <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{
+                        background: `linear-gradient(135deg, ${colors.warning} 0%, ${alpha(colors.warning, 0.8)} 100%)`,
+                        color: 'white',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 8px 25px ${alpha(colors.warning, 0.3)}`,
+                        }
+                    }}>
+                        <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                                backgroundColor: alpha('#ffffff', 0.2),
+                                borderRadius: 2,
+                                p: 1.5,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <AccountCircleIcon sx={{ fontSize: 28, color: 'white' }} />
+                            </Box>
+                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                                Tài khoản
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                Thông tin cá nhân
+                            </Typography>
+                        </CardContent>
+                    </Card>
                 </Grid>
             </Grid>
 
-            {/* Quick Actions */}
+            {/* Welcome Message */}
             <Card sx={{
                 borderRadius: 4,
                 border: `1px solid ${alpha(colors.primary, 0.1)}`,
                 background: `linear-gradient(135deg, ${colors.surface} 0%, ${alpha(colors.surfaceVariant, 0.5)} 100%)`,
                 boxShadow: `0 4px 20px ${alpha(colors.primary, 0.1)}`,
+                mb: 4
             }}>
-                <CardContent sx={{ p: 4 }}>
+                <CardContent sx={{ p: 4, textAlign: 'center' }}>
                     <Typography variant="h5" sx={{ 
                         fontWeight: 700, 
-                        mb: 3,
-                        color: colors.primary,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
+                        mb: 2,
+                        color: colors.primary
                     }}>
-                        <Box sx={{
-                            width: 6,
-                            height: 24,
-                            backgroundColor: colors.primary,
-                            borderRadius: 1
-                        }} />
-                        Tác vụ nhanh
+                        Chào mừng đến với Admin Dashboard
                     </Typography>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-                        <QuickActionButton
-                            icon={<AddIcon />}
-                            label="Tạo sản phẩm"
+                    <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+                        Sử dụng menu bên trái để điều hướng đến các chức năng quản lý
+                    </Typography>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        gap: 2, 
+                        flexWrap: 'wrap' 
+                    }}>
+                        <Button
                             variant="contained"
-                        />
-                        <QuickActionButton
-                            icon={<VisibilityIcon />}
-                            label="Xem đơn hàng"
-                            variant="outlined"
-                        />
-                        <QuickActionButton
-                            icon={<ManageAccountsIcon />}
-                            label="Quản lý người dùng"
-                            variant="outlined"
-                        />
-                        <QuickActionButton
-                            icon={<AssessmentIcon />}
-                            label="Báo cáo"
-                            variant="outlined"
-                        />
-                    </Stack>
+                            startIcon={<PeopleIcon />}
+                            onClick={() => window.location.href = '/admin/users'}
+                            sx={{
+                                borderRadius: 3,
+                                px: 3,
+                                py: 1.5,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                backgroundColor: colors.primary,
+                                '&:hover': {
+                                    backgroundColor: colors.primaryDark,
+                                }
+                            }}
+                        >
+                            Quản lý người dùng
+                        </Button>
+                    </Box>
                 </CardContent>
             </Card>
+
+            {/* System Info */}
+            <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                    <Card sx={{
+                        borderRadius: 3,
+                        border: `1px solid ${alpha(colors.primary, 0.1)}`,
+                        background: `linear-gradient(135deg, ${colors.surface} 0%, ${alpha(colors.surfaceVariant, 0.3)} 100%)`,
+                        boxShadow: `0 2px 12px ${alpha(colors.primary, 0.08)}`,
+                    }}>
+                        <CardContent sx={{ p: 3 }}>
+                            <Typography variant="h6" sx={{ 
+                                fontWeight: 600, 
+                                mb: 2,
+                                color: colors.primary,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1
+                            }}>
+                                <Box sx={{
+                                    width: 4,
+                                    height: 20,
+                                    backgroundColor: colors.primary,
+                                    borderRadius: 1
+                                }} />
+                                Thông tin hệ thống
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary">Phiên bản:</Typography>
+                                    <Chip label="v1.0.0" size="small" color="primary" variant="outlined" />
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
+                                    <Chip label="Hoạt động" size="small" color="success" />
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary">Cập nhật cuối:</Typography>
+                                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                                        {new Date().toLocaleDateString('vi-VN')}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                    <Card sx={{
+                        borderRadius: 3,
+                        border: `1px solid ${alpha(colors.primary, 0.1)}`,
+                        background: `linear-gradient(135deg, ${colors.surface} 0%, ${alpha(colors.surfaceVariant, 0.3)} 100%)`,
+                        boxShadow: `0 2px 12px ${alpha(colors.primary, 0.08)}`,
+                    }}>
+                        <CardContent sx={{ p: 3 }}>
+                            <Typography variant="h6" sx={{ 
+                                fontWeight: 600, 
+                                mb: 2,
+                                color: colors.primary,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1
+                            }}>
+                                <Box sx={{
+                                    width: 4,
+                                    height: 20,
+                                    backgroundColor: colors.primary,
+                                    borderRadius: 1
+                                }} />
+                                Hướng dẫn nhanh
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                    • Sử dụng menu bên trái để điều hướng
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                    • Click vào "Quản lý người dùng" để xem danh sách
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                    • Sử dụng avatar để đăng xuất hoặc xem thông tin
+                                </Typography>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
         </Box>
     );
 }

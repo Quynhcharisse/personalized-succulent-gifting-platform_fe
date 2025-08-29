@@ -17,6 +17,7 @@ const SignIn = lazy(() => import('./components/auth/SignIn.jsx'))
 
 // Lazy imports for admin components
 const AdminDashboard = lazy(() => import('./layouts/AdminDashboard.jsx'))
+const AccountBuyerInfo = lazy(() => import('./components/admin/AccountBuyerInfo.jsx'))
 
 // Lazy imports for seller components
 const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
@@ -286,23 +287,11 @@ const router = createBrowserRouter([
             },
             {
                 path: 'users',
-                element: <h1>Quản lý người dùng</h1>
-            },
-            {
-                path: 'products',
-                element: <h1>Quản lý sản phẩm</h1>
-            },
-            {
-                path: 'orders',
-                element: <h1>Đơn hàng</h1>
-            },
-            {
-                path: 'analytics',
-                element: <h1>Báo cáo & Thống kê</h1>
-            },
-            {
-                path: 'settings',
-                element: <h1>Cài đặt</h1>
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <AccountBuyerInfo/>
+                    </Suspense>
+                )
             }
         ]
     },

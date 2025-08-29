@@ -20,3 +20,18 @@ export const updateProfile = async (userProfile) => {
     return response || null
 }
 
+export const viewAccountBuyerList = async () => {
+    const response = await axiosClient.post("/account/buyer/list");
+    return response || null
+}
+
+export const activateAccount = async (accountId) => {
+    const response = await axiosClient.put("/account/unban", { accountId });
+    return response || null;
+}
+
+export const banAccount = async (accountId) => {
+    const response = await axiosClient.put("/account/ban", { accountId });
+    return response || null;
+}
+
