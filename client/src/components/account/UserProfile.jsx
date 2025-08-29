@@ -158,13 +158,7 @@ export default function UserProfile() {
             formData.append("folder", "psgp")
             formData.append("public_id", `user_${Date.now()}`)
 
-            console.log("Uploading to Cloudinary:", {
-                file: file.name,
-                size: file.size,
-                type: file.type,
-                upload_preset: "psgp_web",
-                cloud_name: "dfx4miova"
-            })
+
 
             const response = await axios.post(
                 "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
@@ -181,7 +175,7 @@ export default function UserProfile() {
                 }
             )
 
-            console.log("Cloudinary response:", response.data)
+
             return response.data.secure_url
         } catch (error) {
             if (axios.isCancel(error)) {
@@ -224,10 +218,7 @@ export default function UserProfile() {
                     const userFromStorage = localStorage.getItem('user')
                     if (userFromStorage) {
                         const parsedUser = JSON.parse(userFromStorage)
-                        console.log('🔍 UserProfile - User data from localStorage:', parsedUser)
-                        console.log('🔍 UserProfile - parsedUser.user:', parsedUser.user)
-                        console.log('🔍 UserProfile - parsedUser.email:', parsedUser.email)
-                        console.log('🔍 UserProfile - parsedUser.role:', parsedUser.role)
+
                         
                         // Lấy dữ liệu cơ bản từ localStorage
                         formData = {
@@ -244,7 +235,7 @@ export default function UserProfile() {
                             zodiac: parsedUser.user?.zodiac || parsedUser.zodiac || ''
                         }
                         
-                        console.log('🔍 UserProfile - Final formData from localStorage:', formData)
+
                         
                         setUserRole(parsedUser.role || '')
                         setForm(formData)
@@ -257,14 +248,10 @@ export default function UserProfile() {
                 // Sau đó gọi API để cập nhật thông tin chi tiết
                 try {
                     const res = await viewProfile()
-                    console.log('API Response:', res)
-                    console.log('res.data:', res?.data)
                     
                     if (res?.data?.data) {
                         accountData = res.data.data
                         userData = accountData.user || {}
-                        console.log('accountData from API:', accountData)
-                        console.log('userData from API:', userData)
                         
                         if (mounted) {
                             // Cập nhật form với dữ liệu từ API, ưu tiên dữ liệu mới
