@@ -24,6 +24,12 @@ export default function SignIn() {
             if (loginResponse && loginResponse.status === 200) {
                 const userDataToStore = loginResponse.data.data;
                 
+                // Đảm bảo avatar từ Google được lưu
+                if (userInfo.data.picture && !userDataToStore.avatar && !userDataToStore.avatarUrl) {
+                    userDataToStore.avatar = userInfo.data.picture;
+                    userDataToStore.avatarUrl = userInfo.data.picture;
+                }
+                
                 localStorage.setItem('user', JSON.stringify(userDataToStore));
                 
                 const access = getCookie('access');

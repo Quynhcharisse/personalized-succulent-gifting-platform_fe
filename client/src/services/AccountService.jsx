@@ -34,4 +34,3 @@ export const banAccount = async (accountId) => {
     const response = await axiosClient.put("/account/ban", { accountId });
     return response || null;
 }
-

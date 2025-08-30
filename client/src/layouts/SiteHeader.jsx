@@ -7,7 +7,11 @@ import {
     Home as HomeIcon,
     Logout as LogoutIcon,
     Person as PersonIcon,
-    Storefront as StorefrontIcon
+    Storefront as StorefrontIcon,
+    AccountCircle as AccountCircleIcon,
+    FavoriteBorder as FavoriteBorderIcon,
+    LocalGroceryStore as LocalGroceryStoreIcon,
+    NotificationsActive as NotificationsActiveIcon
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
 import {getCookie} from '../utils/CookieUtil.jsx'
@@ -49,9 +53,9 @@ export default function SiteHeader() {
         }
     }, [currentUser])
 
-    const displayName = currentUser?.name || currentUser?.fullName || 'Tài khoản'
-    const avatarUrl = currentUser?.avatar || currentUser?.photoURL || ''
-
+    const displayName = currentUser?.name || currentUser?.fullName || currentUser?.displayName || 'Tài khoản'
+    const avatarUrl = currentUser?.avatar || currentUser?.avatarUrl || currentUser?.photoURL || currentUser?.picture || ''
+    
     const handleOpenMenu = (event) => setAnchorEl(event.currentTarget)
     const handleCloseMenu = () => setAnchorEl(null)
 
@@ -93,13 +97,31 @@ export default function SiteHeader() {
                     </div>
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
                         <Link className="header__icon" title="Yêu thích" to="#">
-                            <img src="/TraiTym.png" alt="Yêu thích"/>
+                            <FavoriteBorderIcon 
+                                sx={{
+                                    width: 22,
+                                    height: 22,
+                                    color: '#0D3B2E'
+                                }}
+                            />
                         </Link>
                         <Link className="header__icon" title="Giỏ hàng" to="#">
-                            <img src="/MuaHang.png" alt="Giỏ hàng"/>
+                            <LocalGroceryStoreIcon 
+                                sx={{
+                                    width: 22,
+                                    height: 22,
+                                    color: '#0D3B2E'
+                                }}
+                            />
                         </Link>
                         <Link className="header__icon" title="Thông báo" to="#">
-                            <img src="/Chuong.png" alt="Thông báo"/>
+                            <NotificationsActiveIcon 
+                                sx={{
+                                    width: 22,
+                                    height: 22,
+                                    color: '#0D3B2E'
+                                }}
+                            />
                         </Link>
 
                         {!currentUser ? (
@@ -111,8 +133,8 @@ export default function SiteHeader() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    width: 40,
-                                    height: 40,
+                                    width: 44,
+                                    height: 44,
                                     borderRadius: '50%',
                                     transition: 'all 0.2s ease',
                                     '&:hover': {
@@ -120,13 +142,11 @@ export default function SiteHeader() {
                                     }
                                 }}
                             >
-                                <img 
-                                    src="/nguoidung.png" 
-                                    alt="Đăng nhập" 
-                                    style={{ 
-                                        width: 24, 
-                                        height: 24,
-                                        objectFit: 'contain'
+                                <PersonIcon 
+                                    sx={{
+                                        width: 22,
+                                        height: 22,
+                                        color: '#0D3B2E'
                                     }}
                                 />
                             </Link>
@@ -140,14 +160,30 @@ export default function SiteHeader() {
                                     sx={{p: 0}}
                                 >
                                     {avatarUrl ? (
-                                        <Avatar src={avatarUrl} sx={{width: 36, height: 36}}/>
+                                        <Avatar 
+                                            src={avatarUrl} 
+                                            sx={{
+                                                width: 44, 
+                                                height: 44, 
+                                                borderRadius: '50%',
+                                                border: '1px solid #e0e0e0',
+                                                backgroundColor: '#fff'
+                                            }}
+                                        />
                                     ) : (
-                                        <img src="/nguoidung.png" alt={displayName}/>
+                                        <AccountCircleIcon 
+                                            sx={{
+                                                width: 44,
+                                                height: 44,
+                                                color: '#666',
+                                                backgroundColor: '#f5f5f5',
+                                                borderRadius: '50%',
+                                                border: '1px solid rgba(0, 0, 0, 0.12)'
+                                            }}
+                                        />
                                     )}
                                 </IconButton>
-                                <Typography variant="body2" sx={{fontWeight: 600, display: {xs: 'none', md: 'block'}}}>
-                                    {displayName}
-                                </Typography>
+
                                 <Menu
                                     anchorEl={anchorEl}
                                     id="account-menu"
@@ -162,13 +198,21 @@ export default function SiteHeader() {
                                         <Typography variant="subtitle2"
                                                     sx={{fontWeight: 700}}>{displayName}</Typography>
                                         <Typography variant="caption" className="muted">
-                                            {role === 'ADMIN' ? 'Quản trị viên' :
-                                                role === 'SELLER' ? 'Người bán' :
-                                                    role === 'BUYER' ? 'Khách hàng' : 'Đã đăng nhập'}
+                                            {currentUser?.email || 'Đã đăng nhập'}
                                         </Typography>
                                     </Box>
                                     <Divider/>
-                                    <MenuItem onClick={() => navigate('/account/profile')}>
+                                    <MenuItem onClick={() => {
+                                        if (role === 'BUYER') {
+                                            navigate('/buyer/profile')
+                                        } else if (role === 'SELLER') {
+                                            navigate('/seller/profile')
+                                        } else if (role === 'ADMIN') {
+                                            navigate('/admin/profile')
+                                        } else {
+                                            navigate('/profile')
+                                        }
+                                    }}>
                                         <ListItemIcon><PersonIcon fontSize="small"/></ListItemIcon>
                                         Hồ sơ của tôi
                                     </MenuItem>
