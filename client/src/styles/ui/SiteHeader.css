@@ -1,3 +1,8 @@
+:root {
+    --secondary-500: #0D3B2E;
+    --divider: #e0e0e0;
+}
+
 .site-header { position: sticky;
     top: 0;
     background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.86));
@@ -87,19 +92,201 @@
 }
 .searchbar { display: flex; align-items: center; background: #fff; border: 1px solid var(--divider); border-radius: 999px; padding: 0 0.85rem; height: 40px; min-width: 280px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
 .searchbar__input { border: none; outline: none; width: 100%; }
-.header__icons { display: inline-flex; gap: .5rem; }
-.header__icon { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--divider); border-radius: 12px; background: #fff; transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease; }
-.header__icon:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(2,6,23,.08); border-color: color-mix(in srgb, var(--secondary-500) 25%, var(--divider)); }
-.header__icon img { width: 20px; height: 20px; object-fit: contain; }
+.header__icons { 
+    display: inline-flex; 
+    gap: .75rem; 
+}
 
-.icon-btn {
-    height: 36px;
-    width: 36px;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--divider);
-    border-radius: 10px;
-    background: #fff;
+.header__icon { 
+    width: 44px; 
+    height: 44px; 
+    display: grid; 
+    place-items: center; 
+    border: 1px solid rgba(0, 0, 0, 0.12); 
+    border-radius: 50%; 
+    background: #fff; 
+    transition: all 0.2s ease; 
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+}
+
+.header__icon:hover { 
+    transform: translateY(-1px); 
+    box-shadow: 0 6px 18px rgba(2,6,23,.08); 
+    border-color: rgba(13, 59, 46, 0.3); 
+}
+/* MUI Icons styling */
+.header__icon .MuiSvgIcon-root {
+    width: 22px !important;
+    height: 22px !important;
+    color: #0D3B2E !important;
+    transition: all 0.2s ease !important;
+}
+
+.header__icon:hover .MuiSvgIcon-root {
+    color: #1a5f4a !important;
+    transform: scale(1.1) !important;
+}
+
+/* ===== DROPDOWN MENU STYLING ===== */
+/* Custom styling cho MUI Menu */
+.MuiMenu-root {
+    margin-top: 8px !important;
+    margin-left: -20px !important;
+}
+
+.MuiMenu-paper {
+    background: #ffffff !important;
+    border: 1px solid rgba(13, 59, 46, 0.1) !important;
+    border-radius: 20px !important;
+    box-shadow: 
+        0 25px 50px -12px rgba(13, 59, 46, 0.25),
+        0 12px 24px -6px rgba(13, 59, 46, 0.15),
+        0 4px 8px -2px rgba(13, 59, 46, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    min-width: 300px !important;
+    max-width: 350px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.MuiMenu-paper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+    border-radius: 24px;
+    pointer-events: none;
+}
+
+/* Header section của dropdown */
+.MuiMenu-paper .MuiBox-root:first-child {
+    background: white !important;
+    color: #0D3B2E !important;
+    padding: 14px 18px 12px !important;
+    margin: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiMenu-paper .MuiBox-root:first-child::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    pointer-events: none;
+}
+
+/* Tên người dùng trong header */
+.MuiMenu-paper .MuiTypography-subtitle2 {
+    color: #0D3B2E !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    margin-bottom: 4px !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+/* Role/status trong header */
+.MuiMenu-paper .MuiTypography-caption {
+    color: #0D3B2E !important;
+    font-weight: 500 !important;
+    font-size: 0.8rem !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
+    text-transform: uppercase !important;
+}
+
+/* Divider */
+.MuiMenu-paper .MuiDivider-root {
+    margin: 0 !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    height: 1px !important;
+}
+
+/* Menu items */
+.MuiMenu-paper .MuiMenuItem-root {
+    padding: 16px 24px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-left: 4px solid transparent !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:hover {
+    background: linear-gradient(90deg, rgba(13, 59, 46, 0.12) 0%, rgba(26, 95, 74, 0.08) 100%) !important;
+    transform: translateX(8px) !important;
+    border-left-color: #0D3B2E !important;
+    box-shadow: inset 4px 0 0 rgba(13, 59, 46, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Icons trong menu items */
+.MuiMenu-paper .MuiListItemIcon-root {
+    min-width: 38px !important;
+    color: #0D3B2E !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:hover .MuiListItemIcon-root {
+    color: #1a5f4a !important;
+    transform: scale(1.1) !important;
+}
+
+/* Text trong menu items */
+.MuiMenu-paper .MuiMenuItem-root .MuiTypography-root {
+    font-weight: 500 !important;
+    color: #374151 !important;
+    transition: color 0.2s ease !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:hover .MuiTypography-root {
+    color: #1f2937 !important;
+}
+
+/* Logout item đặc biệt */
+.MuiMenu-paper .MuiMenuItem-root:last-child {
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    margin-top: 6px !important;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.03) 100%) !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:last-child:hover {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.06) 100%) !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:last-child .MuiListItemIcon-root {
+    color: #ef4444 !important;
+}
+
+.MuiMenu-paper .MuiMenuItem-root:last-child:hover .MuiListItemIcon-root {
+    color: #dc2626 !important;
+}
+
+/* Animation cho dropdown */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.MuiMenu-paper {
+    animation: slideIn 0.2s ease-out !important;
 }
 
 

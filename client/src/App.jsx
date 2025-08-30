@@ -326,6 +326,40 @@ const router = createBrowserRouter([
         ]
     },
     {
+        path: 'buyer',
+        element: (
+            <Suspense fallback={<LoadingFallback/>}>
+                <ProtectedRoute allowRoles={["BUYER"]}>
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <WebApplicationLayout/>
+                    </Suspense>
+                </ProtectedRoute>
+            </Suspense>
+        ),
+        children: [
+            {
+                index: true,
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Home/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'profile',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <UserProfile/>
+                    </Suspense>
+                )
+            }
+        ]
+    },
+    {
+        path: 'profile',
+        element: <Navigate to="/buyer/profile"/>
+    },
+    {
         path: '*',
         element: <Navigate to="/"/>
     },
