@@ -70,6 +70,12 @@ const NAVIGATION = [
         path: '/seller/dashboard'
     },
     {
+        segment: 'succulent',
+        title: 'Quản lý Sen Đá',
+        icon: <InventoryIcon />,
+        path: '/seller/succulent'
+    },
+    {
         segment: 'products',
         title: 'Quản lý sản phẩm',
         icon: <InventoryIcon />,
@@ -102,6 +108,7 @@ const NAVIGATION = [
 ];
 
 function SellerDashboardContent({ session }) {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         todayOrders: 18,
         revenueVnd: 8750000,
@@ -297,6 +304,7 @@ function SellerDashboardContent({ session }) {
                                 <Button
                                     variant="contained"
                                     startIcon={<AddIcon />}
+                                    onClick={() => navigate('/seller/succulent')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
@@ -305,11 +313,12 @@ function SellerDashboardContent({ session }) {
                                         '&:hover': { backgroundColor: colors.primaryDark }
                                     }}
                                 >
-                                    Tạo sản phẩm
+                                    Tạo sản phẩm sen đá
                                 </Button>
                                 <Button
                                     variant="outlined"
                                     startIcon={<VisibilityIcon />}
+                                    onClick={() => navigate('/seller/orders')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
@@ -324,6 +333,7 @@ function SellerDashboardContent({ session }) {
                                 <Button
                                     variant="outlined"
                                     startIcon={<InventoryIcon />}
+                                    onClick={() => navigate('/seller/succulent')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
@@ -333,7 +343,7 @@ function SellerDashboardContent({ session }) {
                                         '&:hover': { borderColor: colors.primaryDark }
                                     }}
                                 >
-                                    Quản lý sản phẩm
+                                    Quản lý sen đá
                                 </Button>
                             </Stack>
                         </CardContent>
@@ -354,7 +364,11 @@ function SellerDashboardContent({ session }) {
                                 <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary }}>
                                     Đơn gần đây
                                 </Typography>
-                                <Button size="small" sx={{ color: colors.primary }}>
+                                <Button 
+                                    size="small" 
+                                    sx={{ color: colors.primary }}
+                                    onClick={() => navigate('/seller/orders')}
+                                >
                                     Xem tất cả
                                 </Button>
                         </Box>

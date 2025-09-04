@@ -21,6 +21,7 @@ const AccountBuyerInfo = lazy(() => import('./components/admin/AccountBuyerInfo.
 
 // Lazy imports for seller components
 const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
+const SucculentForm = lazy(() => import('./components/seller/Succulent.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
@@ -322,6 +323,34 @@ const router = createBrowserRouter([
                         <UserProfile/>
                     </Suspense>
                 )
+            },
+            {
+                path: 'succulent',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <SucculentForm/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'products',
+                element: <h1>Quản lý sản phẩm</h1>
+            },
+            {
+                path: 'orders',
+                element: <h1>Quản lý đơn hàng</h1>
+            },
+            {
+                path: 'analytics',
+                element: <h1>Báo cáo & Thống kê</h1>
+            },
+            {
+                path: 'store',
+                element: <h1>Cửa hàng của tôi</h1>
+            },
+            {
+                path: 'settings',
+                element: <h1>Cài đặt</h1>
             }
         ]
     },
