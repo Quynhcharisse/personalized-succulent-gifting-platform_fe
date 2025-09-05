@@ -37,6 +37,7 @@ import {
     Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NotificationDisplay } from '../services/NotificationService.jsx';
 
 const DRAWER_WIDTH = 280;
 
@@ -187,7 +188,7 @@ function AdminDashboardContent({ session }) {
                                 justifyContent: 'center',
                                 mb: 2
                             }}>
-                                <NotificationsIcon sx={{ fontSize: 28, color: 'white' }} />
+                                <NotificationDisplay/>
                             </Box>
                             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                                 Thông báo

@@ -43,6 +43,7 @@ import {
     LocalShipping as LocalShippingIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NotificationDisplay } from '../services/NotificationService.jsx';
 
 const DRAWER_WIDTH = 280;
 
@@ -698,7 +699,7 @@ export default function SellerDashboard() {
                             }}
                         >
                             <Badge badgeContent={5} color="error">
-                                <NotificationsIcon />
+                                <NotificationDisplay/>
                             </Badge>
                         </IconButton>
                         
