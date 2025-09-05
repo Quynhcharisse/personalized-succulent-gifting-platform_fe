@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import useNotify from '../hooks/useNotify';
@@ -16,9 +16,25 @@ export function NotificationDisplay() {
     const [notifications, setNotifications] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
 
+    useEffect(() => {
+        const socket = new SockJS('/ws-endpoint');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/notifications', (message) => {
+                const notification = JSON.parse(message.body);
+                setNotifications((prev) => [notification, ...prev]);
+            });
+        });
+
+        return () => {
+            stompClient.disconnect();
+        };
+    }, []);
+
     const fetchNotifications = async () => {
         try {
-            const response = await fetch('/api/notifications');
+            const response = await fetch('/api/v1/notifications');
             const data = await response.json();
             setNotifications(data);
         } catch (error) {
