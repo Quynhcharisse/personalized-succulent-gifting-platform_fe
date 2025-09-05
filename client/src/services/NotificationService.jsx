@@ -45,7 +45,7 @@ export function NotificationDisplay() {
 
     const handleIconClick = (event) => {
         setAnchorEl(event.currentTarget);
-        fetchNotifications();
+        fetchNotifications().then(() => {});
     };
 
     const handleClose = () => {
@@ -54,11 +54,9 @@ export function NotificationDisplay() {
 
     return (
         <>
-            <IconButton color="inherit" onClick={handleIconClick}>
-                <Badge badgeContent={notifications.length} color="error">
-                    <NotificationsIcon />
-                </Badge>
-            </IconButton>
+            <Badge badgeContent={notifications.length} color="error" onClick={handleIconClick}>
+                <NotificationsIcon />
+            </Badge>
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
