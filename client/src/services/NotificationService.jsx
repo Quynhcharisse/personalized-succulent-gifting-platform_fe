@@ -10,6 +10,7 @@ import {
     Typography,
 } from '@mui/material';
 import { Notifications as NotificationsIcon } from '@mui/icons-material';
+import axiosClient from "../config/APIConfig.jsx";
 
 export function NotificationDisplay() {
     const { info } = useNotify();
@@ -34,9 +35,8 @@ export function NotificationDisplay() {
 
     const fetchNotifications = async () => {
         try {
-            const response = await fetch('/api/v1/notifications');
-            const data = await response.json();
-            setNotifications(data);
+            const response = await axiosClient.get('/notifications');
+            setNotifications(response.data.data.notifications);
         } catch (error) {
             info('Failed to fetch notifications');
             console.error(error);
