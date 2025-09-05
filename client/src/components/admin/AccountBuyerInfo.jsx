@@ -667,7 +667,7 @@ export default function AccountBuyerInfo() {
                             Không có tài khoản người mua nào
                         </Typography>
                         <Typography variant="body2">
-                            Hãy đợi người dùng đăng ký hoặc kiểm tra lại kết nối API
+                            Hãy đợi người dùng đăng ký
                         </Typography>
                     </Box>
                 )}
