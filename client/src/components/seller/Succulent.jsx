@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
     Box,
     Container,
@@ -55,6 +55,14 @@ const ZODIAC_OPTIONS = [
     { value: "SONG_NGU", label: "Song Ngư (Pisces)" }
 ];
 
+const SIZE_OPTIONS = [
+    { value: "TINY", label: "3cm" },
+    { value: "SMALL", label: "7cm" },
+    { value: "MEDIUM", label: "10cm" },
+    { value: "LARGE", label: "13cm" },
+    { value: "EXTRA_LARGE", label: "16-18cm" }
+];
+
 // Subcomponent for Size Detail Card
 const SizeDetailCard = ({ size, index, errors, onChange, onRemove, canRemove }) => (
     <Card
@@ -77,17 +85,17 @@ const SizeDetailCard = ({ size, index, errors, onChange, onRemove, canRemove }) 
                     fullWidth
                     label="Kích thước"
                     value={size.name}
-                    onChange={(e) => onChange(index, 'name', e.target.value)}
-                    error={!!errors[`size_${index}_name`]}
-                    helperText={errors[`size_${index}_name`] || 'Ví dụ: 3cm, 7cm, 10cm'}
+                    InputProps={{
+                        readOnly: true,
+                        startAdornment: <InputAdornment position="start">📏</InputAdornment>
+                    }}
                     sx={{
                         '& .MuiInputBase-root': {
-                            background: '#fff',
+                            background: 'rgba(249, 251, 231, 0.6)',
                             borderRadius: 2,
                             overflow: 'hidden'
                         }
                     }}
-                    required
                 />
 
                 <TextField
@@ -137,7 +145,7 @@ const SizeDetailCard = ({ size, index, errors, onChange, onRemove, canRemove }) 
                             <Button
                                 variant="outlined"
                                 color="error"
-                                onClick={() => onRemove(index)}
+                                onClick={() => onRemove()}
                                 startIcon={<DeleteIcon />}
                                 aria-label="Xóa kích thước"
                                 sx={{
@@ -165,9 +173,8 @@ const SucculentForm = () => {
         description: '',
         fengShuiList: [],
         zodiacList: [],
-        sizeDetailRequests: [
-            { name: '', priceBuy: '' }
-        ]
+        selectedSizes: [],
+        sizeDetailRequests: []
     });
 
     const [errors, setErrors] = useState({});
@@ -175,6 +182,31 @@ const SucculentForm = () => {
     const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
     const [tabIndex, setTabIndex] = useState(0);
     const [maxStep, setMaxStep] = useState(0);
+
+    // Load draft data on component mount
+    useEffect(() => {
+        const savedDraft = localStorage.getItem('succulent_draft');
+        if (savedDraft) {
+            try {
+                const draftData = JSON.parse(savedDraft);
+                setFormData(prev => ({
+                    ...prev,
+                    species_name: draftData.species_name || '',
+                    description: draftData.description || '',
+                    fengShuiList: draftData.fengShuiList || [],
+                    zodiacList: draftData.zodiacList || [],
+                    selectedSizes: draftData.selectedSizes || [],
+                    sizeDetailRequests: draftData.sizeDetailRequests || []
+                }));
+                setSubmitMessage({ 
+                    type: 'info', 
+                    text: `Đã khôi phục dữ liệu nháp từ ${new Date(draftData.savedAt).toLocaleString('vi-VN')}` 
+                });
+            } catch (error) {
+                console.error('Error loading draft data:', error);
+            }
+        }
+    }, []);
 
     // Handle input changes
     const handleInputChange = (field, value) => {
@@ -196,6 +228,29 @@ const SucculentForm = () => {
         setFormData(prev => ({
             ...prev,
             [field]: prev[field].filter(v => v !== value)
+        }));
+    };
+
+    // Handle size selection
+    const handleSizeSelection = (selectedSizes) => {
+        setFormData(prev => ({
+            ...prev,
+            selectedSizes,
+            sizeDetailRequests: selectedSizes.map(size => ({
+                name: SIZE_OPTIONS.find(opt => opt.value === size)?.label || size,
+                priceBuy: ''
+            }))
+        }));
+    };
+
+    // Remove size from selection
+    const removeSize = (sizeValue) => {
+        setFormData(prev => ({
+            ...prev,
+            selectedSizes: prev.selectedSizes.filter(s => s !== sizeValue),
+            sizeDetailRequests: prev.sizeDetailRequests.filter((_, index) => 
+                prev.selectedSizes[index] !== sizeValue
+            )
         }));
     };
 
@@ -222,27 +277,6 @@ const SucculentForm = () => {
         }
     };
 
-    // Add new size detail
-    const addSizeDetail = () => {
-        setFormData(prev => ({
-            ...prev,
-            sizeDetailRequests: [
-                ...prev.sizeDetailRequests,
-                { name: '', priceBuy: '' }
-            ]
-        }));
-    };
-
-    // Remove size detail
-    const removeSizeDetail = (index) => {
-        if (formData.sizeDetailRequests.length > 1) {
-            const updatedSizes = formData.sizeDetailRequests.filter((_, i) => i !== index);
-            setFormData(prev => ({
-                ...prev,
-                sizeDetailRequests: updatedSizes
-            }));
-        }
-    };
 
     // Validate form
     const validateForm = () => {
@@ -304,10 +338,10 @@ const SucculentForm = () => {
     // Validate only step 1 (sizes)
     const validateSizesOnly = () => {
         const newErrors = {};
+        if (formData.selectedSizes.length === 0) {
+            newErrors.selectedSizes = 'Vui lòng chọn ít nhất một kích thước';
+        }
         formData.sizeDetailRequests.forEach((size, index) => {
-            if (!size.name.trim()) {
-                newErrors[`size_${index}_name`] = 'Tên kích thước là bắt buộc';
-            }
             if (!size.priceBuy || size.priceBuy <= 0) {
                 newErrors[`size_${index}_priceBuy`] = 'Giá mua phải lớn hơn 0';
             }
@@ -371,17 +405,19 @@ const SucculentForm = () => {
             if (response) {
                 setSubmitMessage({ 
                     type: 'success', 
-                    text: response.message || 'Tạo sản phẩm sen đá thành công!' 
+                    text: response?.data?.message || 'Tạo sản phẩm sen đá thành công!'
                 });
                 
-                // Reset form
+                // Reset form and clear draft
                 setFormData({
                     species_name: '',
                     description: '',
                     fengShuiList: [],
                     zodiacList: [],
-                    sizeDetailRequests: [{ name: '', priceBuy: '' }]
+                    selectedSizes: [],
+                    sizeDetailRequests: []
                 });
+                localStorage.removeItem('succulent_draft');
                 setTabIndex(0);
             }
         } catch (error) {
@@ -663,7 +699,7 @@ const SucculentForm = () => {
                                     value={formData.species_name}
                                     onChange={(e) => handleInputChange('species_name', e.target.value)}
                                     error={!!errors.species_name}
-                                    helperText={errors.species_name || 'Ví dụ: Sen đá Echeveria'}
+                                    helperText={errors.species_name}
                                     placeholder="Sen đá Echeveria"
                                     autoFocus
                                     sx={fieldSx}
@@ -776,97 +812,81 @@ const SucculentForm = () => {
                         <>
                             <Box sx={{
                                 display: 'flex',
-                                flexDirection: {xs: 'column', sm: 'row'},
-                                alignItems: {xs: 'flex-start', sm: 'center'},
-                                justifyContent: 'space-between',
-                                mb: 2,
-                                gap: 2
+                                alignItems: 'center',
+                                mb: 3,
+                                '&::before': {
+                                    content: '""',
+                                    display: 'block',
+                                    width: 4,
+                                    height: 24,
+                                    borderRadius: 2,
+                                    bgcolor: 'success.main',
+                                    mr: 2
+                                }
                             }}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    '&::before': {
-                                        content: '""',
-                                        display: 'block',
-                                        width: 4,
-                                        height: 24,
-                                        borderRadius: 2,
-                                        bgcolor: 'success.main',
-                                        mr: 2
-                                    }
-                                }}>
-                                    <Typography variant="h6" sx={{ color: 'success.dark', fontWeight: 700 }}>
-                                        Chi Tiết Kích Thước
-                                    </Typography>
-                                </Box>
-                                <Tooltip title="Thêm một kích thước mới cho sản phẩm">
-                                    <Button
-                                        startIcon={<AddIcon />}
-                                        onClick={addSizeDetail}
-                                        variant="contained"
-                                        size="medium"
-                                        sx={{
-                                            background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                                            color: '#fff',
-                                            fontWeight: 700,
-                                            borderRadius: 2,
-                                            px: 3,
-                                            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                                            '&:hover': {
-                                                boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                                            }
-                                        }}
-                                    >
-                                        Thêm Kích Thước
-                                    </Button>
-                                </Tooltip>
+                                <Typography variant="h6" sx={{ color: 'success.dark', fontWeight: 700 }}>
+                                    Chọn Kích Thước & Giá
+                                </Typography>
                             </Box>
-                            <Divider sx={{ mb: 3 }} />
+                            <Divider sx={{ mb: 4 }} />
 
                             <Stack spacing={3}>
-                                {formData.sizeDetailRequests.length > 0 ? (
-                                    formData.sizeDetailRequests.map((size, index) => (
-                                        <SizeDetailCard
-                                            key={index}
-                                            size={size}
-                                            index={index}
-                                            errors={errors}
-                                            onChange={handleSizeDetailChange}
-                                            onRemove={removeSizeDetail}
-                                            canRemove={formData.sizeDetailRequests.length > 1}
-                                        />
-                                    ))
-                                ) : (
-                                    <Box sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        flexDirection: 'column',
-                                        p: 6,
-                                        bgcolor: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: 4,
-                                        border: '1px dashed',
-                                        borderColor: 'success.light'
-                                    }}>
-                                        <Typography variant="body1" color="text.secondary" gutterBottom>
-                                            Chưa có kích thước nào được thêm vào
+                                <FormControl fullWidth error={!!errors.selectedSizes} required sx={fieldSx}>
+                                    <InputLabel>Kích thước sản phẩm</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={formData.selectedSizes}
+                                        onChange={(e) => handleSizeSelection(e.target.value)}
+                                        label="Kích thước sản phẩm"
+                                        renderValue={(selected) => (
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                {selected.map((val) => {
+                                                    const label = SIZE_OPTIONS.find(opt => opt.value === val)?.label || val;
+                                                    return (
+                                                        <Chip
+                                                            key={val}
+                                                            label={label}
+                                                            onDelete={() => removeSize(val)}
+                                                            onMouseDown={(e) => e.stopPropagation()}
+                                                            size="small"
+                                                        />
+                                                    );
+                                                })}
+                                            </Box>
+                                        )}
+                                    >
+                                        {SIZE_OPTIONS.map((option) => (
+                                            <MenuItem
+                                                key={option.value}
+                                                value={option.value}
+                                                disabled={formData.selectedSizes.includes(option.value)}
+                                                sx={{ opacity: formData.selectedSizes.includes(option.value) ? 0.5 : 1 }}
+                                            >
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {errors.selectedSizes && (
+                                        <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 2 }}>
+                                            {errors.selectedSizes}
                                         </Typography>
-                                        <Button
-                                            startIcon={<AddIcon />}
-                                            onClick={addSizeDetail}
-                                            variant="contained"
-                                            size="medium"
-                                            sx={{
-                                                mt: 2,
-                                                background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                                                color: '#fff',
-                                                fontWeight: 700,
-                                                borderRadius: 2,
-                                            }}
-                                        >
-                                            Thêm Kích Thước Đầu Tiên
-                                        </Button>
-                                    </Box>
+                                    )}
+                                </FormControl>
+
+                                {formData.sizeDetailRequests.length > 0 && (
+                                    <Stack spacing={3}>
+                                        {formData.sizeDetailRequests.map((size, index) => (
+                                            <SizeDetailCard
+                                                key={index}
+                                                size={size}
+                                                index={index}
+                                                errors={errors}
+                                                onChange={handleSizeDetailChange}
+                                                onRemove={() => removeSize(formData.selectedSizes[index])}
+                                                canRemove={formData.sizeDetailRequests.length > 1}
+                                            />
+                                        ))}
+                                    </Stack>
                                 )}
                             </Stack>
                         </>
@@ -1070,7 +1090,23 @@ const SucculentForm = () => {
                                         variant="outlined"
                                         size="large"
                                         disabled={isSubmitting}
-                                        onClick={() => setSubmitMessage({ type: 'success', text: 'Đã lưu nháp cục bộ (chưa gọi API).' })}
+                                        onClick={() => {
+                                            // Lưu dữ liệu vào localStorage
+                                            const draftData = {
+                                                species_name: formData.species_name,
+                                                description: formData.description,
+                                                fengShuiList: formData.fengShuiList,
+                                                zodiacList: formData.zodiacList,
+                                                selectedSizes: formData.selectedSizes,
+                                                sizeDetailRequests: formData.sizeDetailRequests,
+                                                savedAt: new Date().toISOString()
+                                            };
+                                            localStorage.setItem('succulent_draft', JSON.stringify(draftData));
+                                            setSubmitMessage({ 
+                                                type: 'success', 
+                                                text: 'Đã lưu nháp thành công! Dữ liệu sẽ được khôi phục khi tải lại trang.' 
+                                            });
+                                        }}
                                         sx={{
                                             borderRadius: 2,
                                             py: 1.2,

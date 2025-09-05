@@ -65,6 +65,12 @@ const NAVIGATION = [
         path: '/admin/dashboard'
     },
     {
+        segment: 'suppliers',
+        title: 'Nhà cung cấp',
+        icon: <PeopleIcon />,
+        path: '/admin/suppliers'
+    },
+    {
         segment: 'users',
         title: 'Quản lý người dùng',
         icon: <PeopleIcon />,

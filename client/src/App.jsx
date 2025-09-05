@@ -22,9 +22,12 @@ const AccountBuyerInfo = lazy(() => import('./components/admin/AccountBuyerInfo.
 // Lazy imports for seller components
 const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
 const SucculentForm = lazy(() => import('./components/seller/Succulent.jsx'))
+const ReceiveGoodsForm = lazy(() => import('./components/seller/ReceiveGoods.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
+// Lazy import for admin supplier management
+const Supplier = lazy(() => import('./components/admin/Supplier.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -294,6 +297,15 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             }
+            ,
+            {
+                path: 'suppliers',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Supplier/>
+                    </Suspense>
+                )
+            }
         ]
     },
     {
@@ -329,6 +341,14 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <SucculentForm/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'receive-goods',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <ReceiveGoodsForm/>
                     </Suspense>
                 )
             },
