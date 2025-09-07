@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Drawer,
@@ -11,32 +11,27 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
-    Divider,
     List,
     ListItem,
     ListItemButton,
     useTheme,
     useMediaQuery,
-    Paper,
     Grid,
     Button,
     Chip,
     Card,
     CardContent,
-    Badge,
     alpha,
-    Stack,
-    LinearProgress
 } from '@mui/material';
 import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
     People as PeopleIcon,
     Logout as LogoutIcon,
-    Notifications as NotificationsIcon,
     Business as BusinessIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import {NotificationDisplay} from '../services/NotificationService.jsx';
 import BuyerStatsChart from '../components/admin/BuyerStatsChart';
 import SupplierStatsCard from '../components/admin/SupplierStatsCard';
 
@@ -553,9 +548,7 @@ export default function AdminDashboard() {
                                 transition: 'all 0.2s ease'
                             }}
                         >
-                            <Badge badgeContent={3} color="error">
-                                <NotificationsIcon />
-                            </Badge>
+                            <NotificationDisplay/>
                         </IconButton>
                         
                         <IconButton
