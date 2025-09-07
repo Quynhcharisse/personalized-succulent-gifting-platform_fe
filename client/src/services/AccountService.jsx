@@ -25,6 +25,11 @@ export const viewAccountBuyerList = async () => {
     return response || null
 }
 
+export const getTotalBuyerCount = async () => {
+    const response = await axiosClient.get("/account/stats/buyer");
+    return response || null
+}
+
 export const activateAccount = async (accountId) => {
     const response = await axiosClient.put("/account/unban", { accountId });
     return response || null;
