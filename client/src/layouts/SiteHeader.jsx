@@ -17,6 +17,7 @@ import {enqueueSnackbar} from 'notistack'
 import {getCookie} from '../utils/CookieUtil.jsx'
 import {jwtDecode} from 'jwt-decode'
 import {signOut} from '../services/AccountService.jsx'
+import { NotificationDisplay } from '../services/NotificationService.jsx';
 
 export default function SiteHeader() {
     const navigate = useNavigate()
@@ -115,13 +116,7 @@ export default function SiteHeader() {
                             />
                         </Link>
                         <Link className="header__icon" title="Thông báo" to="#">
-                            <NotificationsActiveIcon 
-                                sx={{
-                                    width: 22,
-                                    height: 22,
-                                    color: '#0D3B2E'
-                                }}
-                            />
+                            <NotificationDisplay/>
                         </Link>
 
                         {!currentUser ? (
