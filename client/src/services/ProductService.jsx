@@ -1,5 +1,7 @@
 import axiosClient from "../config/APIConfig.jsx";
 
+//------------------- Supplier ------------------//
+
 export const createSupplier = async (supplierData) => {
     const response = await axiosClient.post("/product/supplier", supplierData);
     return response || null
@@ -19,6 +21,18 @@ export const getSupplierList = async () => {
     const response = await axiosClient.get("/product/supplier/list");
     return response || null
 }
+
+export const getTotalSupplierCount = async () => {
+    try {
+        const response = await axiosClient.get("/product/stats/supplier");
+        return response?.data || null;
+    } catch (error) {
+        console.error('Error fetching supplier count:', error);
+        return null;
+    }
+};
+
+//------------------- Accessories and Succulents ------------------//
 
 export const createSucculent = async (succulentData) => {
     const response = await axiosClient.post("/product/succulent", succulentData);
