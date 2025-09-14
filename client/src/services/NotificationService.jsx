@@ -20,16 +20,22 @@ export function NotificationDisplay() {
     useEffect(() => {
         const socket = new SockJS('/ws-endpoint');
         const stompClient = Stomp.over(socket);
+        let isConnected = false;
 
         stompClient.connect({}, () => {
+            isConnected = true;
             stompClient.subscribe('/topic/notifications', (message) => {
                 const notification = JSON.parse(message.body);
                 setNotifications((prev) => [notification, ...prev]);
             });
+        }, (error) => {
+            console.error('WebSocket connection error:', error);
         });
 
         return () => {
-            stompClient.disconnect();
+            if (isConnected && stompClient.connected) {
+                stompClient.disconnect();
+            }
         };
     }, []);
 
