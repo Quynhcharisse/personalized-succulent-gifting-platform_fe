@@ -38,12 +38,6 @@ export const createSucculent = async (succulentData) => {
     const response = await axiosClient.post("/product/succulent", succulentData);
     return response || null
 }
-
-export const receiveGoods = async (receiveData) => {
-    const response = await axiosClient.post("/product/receive-goods", receiveData);
-    return response || null
-}
-
 export const getSucculents = async () => {
     const response = await axiosClient.get("/product/succulents");
     return response || null

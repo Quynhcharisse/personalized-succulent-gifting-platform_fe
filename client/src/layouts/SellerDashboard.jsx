@@ -77,12 +77,6 @@ const NAVIGATION = [
         path: '/seller/succulent'
     },
     {
-        segment: 'receive-goods',
-        title: 'Nhập Hàng',
-        icon: <LocalShippingIcon />,
-        path: '/seller/receive-goods'
-    },
-    {
         segment: 'products',
         title: 'Quản lý sản phẩm',
         icon: <InventoryIcon />,
