@@ -61,12 +61,12 @@ const NAVIGATION = [
         icon: <DashboardIcon />,
         path: '/admin/dashboard'
     },
-    {
-        segment: 'suppliers',
-        title: 'Nhà cung cấp',
-        icon: <PeopleIcon />,
-        path: '/admin/suppliers'
-    },
+    // {
+    //     segment: 'suppliers',
+    //     title: 'Nhà cung cấp',
+    //     icon: <PeopleIcon />,
+    //     path: '/admin/suppliers'
+    // },
     {
         segment: 'users',
         title: 'Quản lý người dùng',
@@ -100,9 +100,9 @@ function AdminDashboardContent({ session, navigate }) {
                 <Grid item xs={12} md={6}>
                     <BuyerStatsChart />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                    <SupplierStatsCard />
-                </Grid>
+                {/*<Grid item xs={12} md={6}>*/}
+                {/*    <SupplierStatsCard />*/}
+                {/*</Grid>*/}
             </Grid>
 
             {/* Welcome Message */}
@@ -130,27 +130,27 @@ function AdminDashboardContent({ session, navigate }) {
                         gap: 2, 
                         flexWrap: 'wrap' 
                     }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<BusinessIcon />}
-                            onClick={() => navigate('/admin/suppliers')}
-                            sx={{
-                                borderRadius: 3,
-                                width: 250,
-                                height: 48,
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                backgroundColor: 'rgb(11, 63, 49)',
-                                '&:hover': {
-                                    backgroundColor: alpha('rgb(11, 63, 49)', 0.8),
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: `0 6px 20px ${alpha('rgb(11, 63, 49)', 0.3)}`,
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            Nhà cung cấp
-                        </Button>
+                        {/*<Button*/}
+                        {/*    variant="contained"*/}
+                        {/*    startIcon={<BusinessIcon />}*/}
+                        {/*    onClick={() => navigate('/admin/suppliers')}*/}
+                        {/*    sx={{*/}
+                        {/*        borderRadius: 3,*/}
+                        {/*        width: 250,*/}
+                        {/*        height: 48,*/}
+                        {/*        textTransform: 'none',*/}
+                        {/*        fontWeight: 600,*/}
+                        {/*        backgroundColor: 'rgb(11, 63, 49)',*/}
+                        {/*        '&:hover': {*/}
+                        {/*            backgroundColor: alpha('rgb(11, 63, 49)', 0.8),*/}
+                        {/*            transform: 'translateY(-2px)',*/}
+                        {/*            boxShadow: `0 6px 20px ${alpha('rgb(11, 63, 49)', 0.3)}`,*/}
+                        {/*        },*/}
+                        {/*        transition: 'all 0.3s ease'*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    Nhà cung cấp*/}
+                        {/*</Button>*/}
                         <Button
                             variant="contained"
                             startIcon={<PeopleIcon />}
