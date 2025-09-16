@@ -1,641 +1,482 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
-    Container,
-    Paper,
     Typography,
-    TextField,
+    Paper,
     Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Chip,
+    IconButton,
+    Tooltip,
+    Stack,
+    Alert,
+    CircularProgress,
     Card,
     CardContent,
-    IconButton,
+    Grid,
+    TextField,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     FormControl,
     InputLabel,
     Select,
-    MenuItem,
-    Chip,
-    Alert,
-    Divider,
-    Stack,
-    Tooltip,
-    InputAdornment,
-    Grid
+    MenuItem
 } from '@mui/material';
 import {
+    Visibility as VisibilityIcon,
+    Edit as EditIcon,
     Add as AddIcon,
-    Delete as DeleteIcon,
-    Save as SaveIcon,
-    Inventory as InventoryIcon,
-    LocalShipping as LocalShippingIcon
+    Refresh as RefreshIcon
 } from '@mui/icons-material';
-import { receiveGoods, getSucculents, getAccessories } from '../../services/ProductService.jsx';
 
-const ITEM_TYPE_OPTIONS = [
-    { value: "SUCCULENT", label: "Sen đá" },
-    { value: "ACCESSORY", label: "Phụ kiện" }
-];
-
-const ReceiveGoodsForm = () => {
-    // Form state
-    const [formData, setFormData] = useState({
-        supplierName: '',
-        supplierPhone: '',
-        note: '',
-        items: [
-            { itemType: 'SUCCULENT', succulentId: '', accessoryId: '', quantity: '', priceBuy: '' }
-        ]
-    });
-
-    const [errors, setErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+const ReceiveGoods = () => {
+    const [receiveGoodsList, setReceiveGoodsList] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showDetailDialog, setShowDetailDialog] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
-    const [succulents, setSucculents] = useState([]);
-    const [accessories, setAccessories] = useState([]);
-    const [loading, setLoading] = useState(true);
 
-    // Load succulents and accessories on component mount
+    // Mock data for demonstration
+    const mockData = [
+        {
+            id: 1,
+            productName: 'Sen đá Echeveria',
+            supplier: 'Nhà cung cấp A',
+            quantity: 50,
+            receivedDate: '2024-01-15',
+            status: 'Đã nhận',
+            notes: 'Hàng chất lượng tốt'
+        },
+        {
+            id: 2,
+            productName: 'Sen đá Bạch điểu',
+            supplier: 'Nhà cung cấp B',
+            quantity: 30,
+            receivedDate: '2024-01-14',
+            status: 'Chờ xác nhận',
+            notes: 'Cần kiểm tra lại'
+        }
+    ];
+
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const [succulentsData, accessoriesData] = await Promise.all([
-                    getSucculents(),
-                    getAccessories()
-                ]);
-                setSucculents(succulentsData);
-                setAccessories(accessoriesData);
-            } catch (error) {
-                console.error('Error loading data:', error);
-                setSubmitMessage({ 
-                    type: 'error', 
-                    text: 'Không thể tải danh sách sản phẩm. Vui lòng thử lại.' 
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
+        loadReceiveGoodsList();
     }, []);
 
-    // Handle input changes
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-
-        // Clear error when user starts typing
-        if (errors[field]) {
-            setErrors(prev => ({
-                ...prev,
-                [field]: ''
-            }));
-        }
-    };
-
-    // Handle item changes
-    const handleItemChange = (index, field, value) => {
-        const updatedItems = [...formData.items];
-        updatedItems[index] = {
-            ...updatedItems[index],
-            [field]: value
-        };
-        
-        setFormData(prev => ({
-            ...prev,
-            items: updatedItems
-        }));
-
-        // Clear item errors
-        const errorKey = `item_${index}_${field}`;
-        if (errors[errorKey]) {
-            setErrors(prev => ({
-                ...prev,
-                [errorKey]: ''
-            }));
-        }
-    };
-
-    // Add new item
-    const addItem = () => {
-        setFormData(prev => ({
-            ...prev,
-            items: [
-                ...prev.items,
-                { itemType: 'SUCCULENT', succulentId: '', accessoryId: '', quantity: '', priceBuy: '' }
-            ]
-        }));
-    };
-
-    // Remove item
-    const removeItem = (index) => {
-        if (formData.items.length > 1) {
-            const updatedItems = formData.items.filter((_, i) => i !== index);
-            setFormData(prev => ({
-                ...prev,
-                items: updatedItems
-            }));
-        }
-    };
-
-    // Validate form
-    const validateForm = () => {
-        const newErrors = {};
-
-        // Validate supplier info
-        if (!formData.supplierName.trim()) {
-            newErrors.supplierName = 'Tên nhà cung cấp là bắt buộc';
-        }
-        if (!formData.supplierPhone.trim()) {
-            newErrors.supplierPhone = 'Số điện thoại là bắt buộc';
-        }
-
-        // Validate items
-        formData.items.forEach((item, index) => {
-            if (!item.itemType) {
-                newErrors[`item_${index}_itemType`] = 'Loại sản phẩm là bắt buộc';
-            }
-            if (item.itemType === 'SUCCULENT' && !item.succulentId) {
-                newErrors[`item_${index}_succulentId`] = 'ID sen đá là bắt buộc';
-            }
-            if (item.itemType === 'ACCESSORY' && !item.accessoryId) {
-                newErrors[`item_${index}_accessoryId`] = 'ID phụ kiện là bắt buộc';
-            }
-            if (!item.quantity || item.quantity <= 0) {
-                newErrors[`item_${index}_quantity`] = 'Số lượng phải lớn hơn 0';
-            }
-            if (!item.priceBuy || item.priceBuy <= 0) {
-                newErrors[`item_${index}_priceBuy`] = 'Giá mua phải lớn hơn 0';
-            }
-        });
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) {
-            setSubmitMessage({ type: 'error', text: 'Vui lòng kiểm tra lại thông tin' });
-            return;
-        }
-
-        setIsSubmitting(true);
-        setSubmitMessage({ type: '', text: '' });
-
+    const loadReceiveGoodsList = async () => {
+        setIsLoading(true);
         try {
-            // Prepare data for API
-            const apiData = {
-                supplierName: formData.supplierName.trim(),
-                supplierPhone: formData.supplierPhone.trim(),
-                note: formData.note.trim(),
-                items: formData.items.map(item => ({
-                    itemType: item.itemType,
-                    ...(item.itemType === 'SUCCULENT' 
-                        ? { succulentId: parseInt(item.succulentId) }
-                        : { accessoryId: parseInt(item.accessoryId) }
-                    ),
-                    quantity: parseInt(item.quantity),
-                    priceBuy: parseInt(item.priceBuy)
-                }))
-            };
-
-            const response = await receiveGoods(apiData);
-            
-            if (response) {
-                setSubmitMessage({ 
-                    type: 'success', 
-                    text: response?.data?.message || 'Nhập hàng từ nhà cung cấp thành công!'
-                });
-            }
-            
-            // Reset form
-            setFormData({
-                supplierName: '',
-                supplierPhone: '',
-                note: '',
-                items: [
-                    { itemType: 'SUCCULENT', succulentId: '', accessoryId: '', quantity: '', priceBuy: '' }
-                ]
-            });
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setReceiveGoodsList(mockData);
         } catch (error) {
-            console.error('Error receiving goods:', error);
-            setSubmitMessage({ 
-                type: 'error', 
-                text: 'Có lỗi xảy ra khi nhập hàng. Vui lòng thử lại.' 
-            });
+            console.error('Error loading receive goods list:', error);
+            setSubmitMessage({ type: 'error', text: 'Có lỗi xảy ra khi tải danh sách' });
         } finally {
-            setIsSubmitting(false);
+            setIsLoading(false);
         }
     };
 
-    const fieldSx = {
-        '& .MuiInputBase-root': {
-            background: '#fff',
-            borderRadius: 2,
-            overflow: 'hidden',
-            transition: 'box-shadow 0.2s',
-            '&:hover': {
-                boxShadow: '0 0 0 2px rgba(46, 125, 50, 0.1)'
-            },
-            '&.Mui-focused': {
-                boxShadow: '0 0 0 2px rgba(46, 125, 50, 0.2)'
-            }
-        },
-        mb: 2
+    const handleViewDetail = (item) => {
+        setSelectedItem(item);
+        setShowDetailDialog(true);
+    };
+
+    const handleCloseDetailDialog = () => {
+        setShowDetailDialog(false);
+        setSelectedItem(null);
+    };
+
+    const handleCloseCreateDialog = () => {
+        setShowCreateDialog(false);
+        setSubmitMessage({ type: '', text: '' });
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Đã nhận':
+                return 'success';
+            case 'Chờ xác nhận':
+                return 'warning';
+            case 'Đã hủy':
+                return 'error';
+            default:
+                return 'default';
+        }
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 5 } }}>
-            <Paper elevation={0} sx={{
-                p: { xs: 2.5, sm: 4, md: 5 },
-                borderRadius: 4,
-                background: 'linear-gradient(120deg, #e0f7fa 0%, #f8f9e9 100%)',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.7)'
-            }}>
-                {/* Header */}
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    mb: 4
-                }}>
-                    <LocalShippingIcon sx={{
-                        fontSize: {xs: 38, sm: 44},
-                        color: 'success.main',
-                        mr: 2,
-                        filter: 'drop-shadow(0 4px 6px rgba(46, 125, 50, 0.2))'
-                    }} />
-                    <Box>
-                        <Typography
-                            variant="h4"
-                            component="h1"
-                            sx={{
-                                fontWeight: 900,
-                                color: 'success.dark',
-                                letterSpacing: 1,
-                                fontSize: {xs: '1.7rem', sm: '2.2rem'}
-                            }}
-                        >
-                            Nhập Hàng Từ Nhà Cung Cấp
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Cập nhật tồn kho và giá mua cho các sản phẩm
-                        </Typography>
+        <Box sx={{ p: 3 }}>
+            {/* Header */}
+            <Box sx={{ mb: 3 }}>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.dark', mb: 1 }}>
+                    Quản Lý Nhận Hàng
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    Theo dõi và quản lý việc nhận hàng từ nhà cung cấp
+                </Typography>
+            </Box>
+
+            {/* Action Buttons */}
+            <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => setShowCreateDialog(true)}
+                    sx={{
+                        background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        px: 3
+                    }}
+                >
+                    Thêm Phiếu Nhận Hàng
+                </Button>
+                <Button
+                    variant="outlined"
+                    startIcon={<RefreshIcon />}
+                    onClick={loadReceiveGoodsList}
+                    disabled={isLoading}
+                    sx={{ borderRadius: 2, fontWeight: 600 }}
+                >
+                    Làm Mới
+                </Button>
+            </Box>
+
+            {/* Submit Message */}
+            {submitMessage.text && (
+                <Alert
+                    severity={submitMessage.type === 'success' ? 'success' : 'error'}
+                    variant="filled"
+                    sx={{ mb: 3, fontWeight: 600, borderRadius: 2 }}
+                >
+                    {submitMessage.text}
+                </Alert>
+            )}
+
+            {/* Table */}
+            <Paper
+                elevation={3}
+                sx={{
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                    border: '1px solid rgba(76, 175, 80, 0.1)'
+                }}
+            >
+                {isLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                        <CircularProgress color="success" />
                     </Box>
-                </Box>
-
-                {/* Submit Message */}
-                {submitMessage.text && (
-                    <Alert
-                        severity={submitMessage.type === 'success' ? 'success' : 'error'}
-                        variant="filled"
-                        sx={{
-                            mb: 4,
-                            fontWeight: 600,
-                            fontSize: '1.05rem',
-                            borderRadius: 2,
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                        }}
-                    >
-                        {submitMessage.text}
-                    </Alert>
-                )}
-
-                <form onSubmit={handleSubmit} autoComplete="off">
-                    <Stack spacing={4}>
-                        {/* Supplier Information */}
-                        <Box>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                mb: 3,
-                                '&::before': {
-                                    content: '""',
-                                    display: 'block',
-                                    width: 4,
-                                    height: 24,
-                                    borderRadius: 2,
-                                    bgcolor: 'success.main',
-                                    mr: 2
-                                }
-                            }}>
-                                <Typography variant="h6" sx={{ color: 'success.dark', fontWeight: 700 }}>
-                                    Thông Tin Nhà Cung Cấp
-                                </Typography>
-                            </Box>
-                            <Divider sx={{ mb: 3 }} />
-
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Tên nhà cung cấp"
-                                        value={formData.supplierName}
-                                        onChange={(e) => handleInputChange('supplierName', e.target.value)}
-                                        error={!!errors.supplierName}
-                                        helperText={errors.supplierName}
-                                        placeholder="NCC ABC"
-                                        sx={fieldSx}
-                                        required
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Số điện thoại"
-                                        value={formData.supplierPhone}
-                                        onChange={(e) => handleInputChange('supplierPhone', e.target.value)}
-                                        error={!!errors.supplierPhone}
-                                        helperText={errors.supplierPhone}
-                                        placeholder="0900000000"
-                                        sx={fieldSx}
-                                        required
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        multiline
-                                        rows={3}
-                                        label="Ghi chú"
-                                        value={formData.note}
-                                        onChange={(e) => handleInputChange('note', e.target.value)}
-                                        placeholder="Ghi chú về lô hàng..."
-                                        sx={fieldSx}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </Box>
-
-                        {/* Items */}
-                        <Box>
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: {xs: 'column', sm: 'row'},
-                                alignItems: {xs: 'flex-start', sm: 'center'},
-                                justifyContent: 'space-between',
-                                mb: 3,
-                                gap: 2
-                            }}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    '&::before': {
-                                        content: '""',
-                                        display: 'block',
-                                        width: 4,
-                                        height: 24,
-                                        borderRadius: 2,
-                                        bgcolor: 'success.main',
-                                        mr: 2
+                ) : (
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow sx={{
+                                    background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
+                                    '& .MuiTableCell-head': {
+                                        color: 'white',
+                                        fontWeight: 800,
+                                        fontSize: '1rem',
+                                        borderBottom: 'none'
                                     }
                                 }}>
-                                    <Typography variant="h6" sx={{ color: 'success.dark', fontWeight: 700 }}>
-                                        Sản Phẩm Nhập Hàng
-                                    </Typography>
-                                </Box>
-                                <Button
-                                    startIcon={<AddIcon />}
-                                    onClick={addItem}
-                                    variant="contained"
-                                    size="medium"
-                                    sx={{
-                                        background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                                        color: '#fff',
-                                        fontWeight: 700,
-                                        borderRadius: 2,
-                                        px: 3,
-                                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                                        '&:hover': {
-                                            boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                                        }
-                                    }}
-                                >
-                                    Thêm Sản Phẩm
-                                </Button>
-                            </Box>
-                            <Divider sx={{ mb: 3 }} />
-
-                            <Stack spacing={3}>
-                                {loading ? (
-                                    <Box sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        p: 4,
-                                        bgcolor: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: 4,
-                                        border: '1px dashed',
-                                        borderColor: 'success.light'
-                                    }}>
-                                        <Typography variant="body1" color="text.secondary">
-                                            Đang tải danh sách sản phẩm...
-                                        </Typography>
-                                    </Box>
-                                ) : succulents.length === 0 && accessories.length === 0 ? (
-                                    <Box sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        flexDirection: 'column',
-                                        p: 6,
-                                        bgcolor: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: 4,
-                                        border: '1px dashed',
-                                        borderColor: 'success.light'
-                                    }}>
-                                        <Typography variant="body1" color="text.secondary" gutterBottom>
-                                            Chưa có sản phẩm nào để nhập hàng
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Vui lòng tạo sản phẩm sen đá trước
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    formData.items.map((item, index) => (
-                                    <Card
-                                        key={index}
-                                        variant="outlined"
+                                    <TableCell>ID</TableCell>
+                                    <TableCell>Tên Sản Phẩm</TableCell>
+                                    <TableCell>Nhà Cung Cấp</TableCell>
+                                    <TableCell>Số Lượng</TableCell>
+                                    <TableCell>Ngày Nhận</TableCell>
+                                    <TableCell>Trạng Thái</TableCell>
+                                    <TableCell align="center">Thao Tác</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {receiveGoodsList.map((item) => (
+                                    <TableRow
+                                        key={item.id}
                                         sx={{
-                                            borderRadius: 3,
-                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.07)',
-                                            background: 'linear-gradient(135deg, #e8f5e9 0%, #f5f8f1 100%)',
-                                            transition: 'all 0.25s ease',
                                             '&:hover': {
-                                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-                                                transform: 'translateY(-2px)'
+                                                backgroundColor: 'rgba(76, 175, 80, 0.05)'
                                             }
                                         }}
                                     >
-                                        <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-                                            <Stack spacing={3}>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <Typography variant="h6" sx={{ color: 'success.dark', fontWeight: 700 }}>
-                                                        Sản phẩm #{index + 1}
-                                                    </Typography>
-                                                    {formData.items.length > 1 && (
-                                                        <Tooltip title="Xóa sản phẩm này">
-                                                            <IconButton
-                                                                onClick={() => removeItem(index)}
-                                                                color="error"
-                                                                sx={{
-                                                                    boxShadow: '0 2px 8px rgba(211, 47, 47, 0.15)',
-                                                                    '&:hover': {
-                                                                        background: 'rgba(211, 47, 47, 0.08)'
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    )}
-                                                </Box>
-
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={12} md={3}>
-                                                        <FormControl fullWidth error={!!errors[`item_${index}_itemType`]} required>
-                                                            <InputLabel>Loại sản phẩm</InputLabel>
-                                                            <Select
-                                                                value={item.itemType}
-                                                                onChange={(e) => handleItemChange(index, 'itemType', e.target.value)}
-                                                                label="Loại sản phẩm"
-                                                            >
-                                                                {ITEM_TYPE_OPTIONS.map((option) => (
-                                                                    <MenuItem key={option.value} value={option.value}>
-                                                                        {option.label}
-                                                                    </MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-
-                                                    <Grid item xs={12} md={3}>
-                                                        <FormControl 
-                                                            fullWidth 
-                                                            error={!!errors[`item_${index}_${item.itemType === 'SUCCULENT' ? 'succulentId' : 'accessoryId'}`]} 
-                                                            required
-                                                        >
-                                                            <InputLabel>
-                                                                {item.itemType === 'SUCCULENT' ? 'Chọn Sen đá' : 'Chọn Phụ kiện'}
-                                                            </InputLabel>
-                                                            <Select
-                                                                value={item.itemType === 'SUCCULENT' ? item.succulentId : item.accessoryId}
-                                                                onChange={(e) => handleItemChange(index, item.itemType === 'SUCCULENT' ? 'succulentId' : 'accessoryId', e.target.value)}
-                                                                label={item.itemType === 'SUCCULENT' ? 'Chọn Sen đá' : 'Chọn Phụ kiện'}
-                                                                disabled={loading}
-                                                            >
-                                                                {item.itemType === 'SUCCULENT' ? (
-                                                                    succulents.map((succulent) => (
-                                                                        <MenuItem key={succulent.id} value={succulent.id}>
-                                                                            <Box>
-                                                                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                                                                    {succulent.speciesName}
-                                                                                </Typography>
-                                                                                <Typography variant="caption" color="text.secondary">
-                                                                                    ID: {succulent.id} | Tồn kho: {succulent.quantity || 0}
-                                                                                </Typography>
-                                                                            </Box>
-                                                                        </MenuItem>
-                                                                    ))
-                                                                ) : (
-                                                                    accessories.map((accessory) => (
-                                                                        <MenuItem key={accessory.id} value={accessory.id}>
-                                                                            <Box>
-                                                                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                                                                    {accessory.name}
-                                                                                </Typography>
-                                                                                <Typography variant="caption" color="text.secondary">
-                                                                                    ID: {accessory.id} | Tồn kho: {accessory.quantity || 0}
-                                                                                </Typography>
-                                                                            </Box>
-                                                                        </MenuItem>
-                                                                    ))
-                                                                )}
-                                                            </Select>
-                                                            {errors[`item_${index}_${item.itemType === 'SUCCULENT' ? 'succulentId' : 'accessoryId'}`] && (
-                                                                <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 2 }}>
-                                                                    {errors[`item_${index}_${item.itemType === 'SUCCULENT' ? 'succulentId' : 'accessoryId'}`]}
-                                                                </Typography>
-                                                            )}
-                                                        </FormControl>
-                                                    </Grid>
-
-                                                    <Grid item xs={12} md={3}>
-                                                        <TextField
-                                                            fullWidth
-                                                            label="Số lượng"
-                                                            value={item.quantity}
-                                                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                                                            error={!!errors[`item_${index}_quantity`]}
-                                                            helperText={errors[`item_${index}_quantity`]}
-                                                            placeholder="20"
-                                                            type="number"
-                                                            inputProps={{ min: 1 }}
-                                                            sx={fieldSx}
-                                                            required
-                                                        />
-                                                    </Grid>
-
-                                                    <Grid item xs={12} md={3}>
-                                                        <TextField
-                                                            fullWidth
-                                                            label="Giá mua (VNĐ)"
-                                                            value={item.priceBuy}
-                                                            onChange={(e) => handleItemChange(index, 'priceBuy', e.target.value)}
-                                                            error={!!errors[`item_${index}_priceBuy`]}
-                                                            helperText={errors[`item_${index}_priceBuy`]}
-                                                            placeholder="9000"
-                                                            type="number"
-                                                            inputProps={{ min: 1 }}
-                                                            InputProps={{
-                                                                startAdornment: <InputAdornment position="start">₫</InputAdornment>
-                                                            }}
-                                                            sx={fieldSx}
-                                                            required
-                                                        />
-                                                    </Grid>
-                                                </Grid>
+                                        <TableCell sx={{ fontWeight: 600, color: 'success.dark' }}>
+                                            #{item.id}
+                                        </TableCell>
+                                        <TableCell sx={{ fontWeight: 700, color: 'success.dark' }}>
+                                            {item.productName}
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.supplier}
+                                        </TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>
+                                            {item.quantity}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(item.receivedDate).toLocaleDateString('vi-VN')}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={item.status}
+                                                color={getStatusColor(item.status)}
+                                                variant="filled"
+                                                size="small"
+                                                sx={{ fontWeight: 600 }}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Stack direction="row" spacing={1} justifyContent="center">
+                                                <Tooltip title="Xem chi tiết">
+                                                    <IconButton
+                                                        color="primary"
+                                                        onClick={() => handleViewDetail(item)}
+                                                        sx={{
+                                                            '&:hover': {
+                                                                backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                                                            }
+                                                        }}
+                                                    >
+                                                        <VisibilityIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Chỉnh sửa">
+                                                    <IconButton
+                                                        color="secondary"
+                                                        sx={{
+                                                            '&:hover': {
+                                                                backgroundColor: 'rgba(156, 39, 176, 0.1)'
+                                                            }
+                                                        }}
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
-                                        </CardContent>
-                                    </Card>
-                                    ))
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {receiveGoodsList.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                                            <Typography variant="body1" color="text.secondary">
+                                                Không có phiếu nhận hàng nào
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
                                 )}
-                            </Stack>
-                        </Box>
-
-                        {/* Submit Button */}
-                        <Divider sx={{ my: 4 }} />
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                size="large"
-                                startIcon={<SaveIcon />}
-                                disabled={isSubmitting}
-                                sx={{
-                                    minWidth: 200,
-                                    borderRadius: 2,
-                                    fontWeight: 700,
-                                    py: 1.2,
-                                    background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                                    boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
-                                    '&:hover': {
-                                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
-                                    }
-                                }}
-                            >
-                                {isSubmitting ? 'Đang nhập hàng...' : 'Nhập Hàng'}
-                            </Button>
-                        </Box>
-                    </Stack>
-                </form>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
             </Paper>
-        </Container>
+
+            {/* Detail Dialog */}
+            <Dialog
+                open={showDetailDialog}
+                onClose={handleCloseDetailDialog}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
+                    color: 'white',
+                    fontWeight: 800,
+                    fontSize: '1.2rem'
+                }}>
+                    Chi Tiết Phiếu Nhận Hàng
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    {selectedItem && (
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    ID Phiếu:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    #{selectedItem.id}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Tên Sản Phẩm:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {selectedItem.productName}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Nhà Cung Cấp:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {selectedItem.supplier}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Số Lượng:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {selectedItem.quantity}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Ngày Nhận:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {new Date(selectedItem.receivedDate).toLocaleDateString('vi-VN')}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Trạng Thái:
+                                </Typography>
+                                <Chip
+                                    label={selectedItem.status}
+                                    color={getStatusColor(selectedItem.status)}
+                                    variant="filled"
+                                    size="small"
+                                    sx={{ fontWeight: 600 }}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                                    Ghi Chú:
+                                </Typography>
+                                <Typography variant="body1">
+                                    {selectedItem.notes}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button
+                        onClick={handleCloseDetailDialog}
+                        variant="outlined"
+                        sx={{ borderRadius: 2, fontWeight: 600 }}
+                    >
+                        Đóng
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Create Dialog */}
+            <Dialog
+                open={showCreateDialog}
+                onClose={handleCloseCreateDialog}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
+                    color: 'white',
+                    fontWeight: 800,
+                    fontSize: '1.2rem'
+                }}>
+                    Thêm Phiếu Nhận Hàng Mới
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Tên Sản Phẩm"
+                                placeholder="Nhập tên sản phẩm"
+                                sx={{ mb: 2 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Nhà Cung Cấp"
+                                placeholder="Nhập tên nhà cung cấp"
+                                sx={{ mb: 2 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Số Lượng"
+                                type="number"
+                                placeholder="Nhập số lượng"
+                                sx={{ mb: 2 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Ngày Nhận"
+                                type="date"
+                                InputLabelProps={{ shrink: true }}
+                                sx={{ mb: 2 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <InputLabel>Trạng Thái</InputLabel>
+                                <Select label="Trạng Thái">
+                                    <MenuItem value="Chờ xác nhận">Chờ xác nhận</MenuItem>
+                                    <MenuItem value="Đã nhận">Đã nhận</MenuItem>
+                                    <MenuItem value="Đã hủy">Đã hủy</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={3}
+                                label="Ghi Chú"
+                                placeholder="Nhập ghi chú (tùy chọn)"
+                                sx={{ mb: 2 }}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, gap: 2 }}>
+                    <Button
+                        onClick={handleCloseCreateDialog}
+                        variant="outlined"
+                        sx={{ borderRadius: 2, fontWeight: 600 }}
+                    >
+                        Hủy
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            borderRadius: 2,
+                            fontWeight: 600,
+                            background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)'
+                        }}
+                    >
+                        Tạo Phiếu Nhận Hàng
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
     );
 };
 
-export default ReceiveGoodsForm;
+export default ReceiveGoods;
