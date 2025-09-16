@@ -124,84 +124,7 @@ export default function UserProfile() {
     const fileInputRef = useRef(null)
     const abortController = useRef(null)
 
-    async function uploadToCloudinary(file) {
-        try {
-            // Validate file
-            if (!file) {
-                enqueueSnackbar("Không có file để upload", {variant: "error"})
-                return null
-            }
 
-            // Check file size (max 10MB)
-            const maxSize = 10 * 1024 * 1024 // 10MB
-            if (file.size > maxSize) {
-                enqueueSnackbar("File quá lớn. Kích thước tối đa: 10MB", {variant: "error"})
-                return null
-            }
-
-            // Check file type
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-            if (!allowedTypes.includes(file.type)) {
-                enqueueSnackbar("Loại file không được hỗ trợ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP", {variant: "error"})
-                return null
-            }
-
-            if (abortController.current) {
-                abortController.current.abort()
-            }
-            abortController.current = new AbortController()
-
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("upload_preset", "psgp_web")
-            formData.append("cloud_name", "dfx4miova")
-            formData.append("folder", "psgp")
-            formData.append("public_id", `user_${Date.now()}`)
-
-
-
-            const response = await axios.post(
-                "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
-                formData,
-                {
-                    onUploadProgress: (progressEvent) => {
-                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                        setUploadProgress(percentCompleted)
-                    },
-                    signal: abortController.current.signal,
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            )
-
-
-            return response.data.secure_url
-        } catch (error) {
-            if (axios.isCancel(error)) {
-                enqueueSnackbar("Upload cancelled", {variant: "info"})
-                return null
-            }
-            
-            console.error("Cloudinary upload error:", error.response?.data || error.message)
-            
-            if (error.response?.status === 400) {
-                const errorData = error.response.data
-                if (errorData.error?.message) {
-                    enqueueSnackbar(`Upload failed: ${errorData.error.message}`, {variant: "error"})
-                } else {
-                    enqueueSnackbar("Upload failed: Bad request. Vui lòng kiểm tra file và thử lại", {variant: "error"})
-                }
-            } else {
-                enqueueSnackbar("Upload failed: " + (error.response?.data?.message || error.message), {variant: "error"})
-            }
-            
-            return null
-        } finally {
-            setUploadProgress(0)
-            abortController.current = null
-        }
-    }
 
     useEffect(() => {
         let mounted = true
@@ -213,7 +136,84 @@ export default function UserProfile() {
                 let formData = {}
                 let accountData = {}
                 let userData = {}
-                
+                async function uploadToCloudinary(file) {
+                    try {
+                        // Validate file
+                        if (!file) {
+                            enqueueSnackbar("Không có file để upload", {variant: "error"})
+                            return null
+                        }
+
+                        // Check file size (max 10MB)
+                        const maxSize = 10 * 1024 * 1024 // 10MB
+                        if (file.size > maxSize) {
+                            enqueueSnackbar("File quá lớn. Kích thước tối đa: 10MB", {variant: "error"})
+                            return null
+                        }
+
+                        // Check file type
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                        if (!allowedTypes.includes(file.type)) {
+                            enqueueSnackbar("Loại file không được hỗ trợ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP", {variant: "error"})
+                            return null
+                        }
+
+                        if (abortController.current) {
+                            abortController.current.abort()
+                        }
+                        abortController.current = new AbortController()
+
+                        const formData = new FormData()
+                        formData.append("file", file)
+                        formData.append("upload_preset", "psgp_web")
+                        formData.append("cloud_name", "dfx4miova")
+                        formData.append("folder", "psgp")
+                        formData.append("public_id", `user_${Date.now()}`)
+
+
+
+                        const response = await axios.post(
+                            "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
+                            formData,
+                            {
+                                onUploadProgress: (progressEvent) => {
+                                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                                    setUploadProgress(percentCompleted)
+                                },
+                                signal: abortController.current.signal,
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            }
+                        )
+
+
+                        return response.data.secure_url
+                    } catch (error) {
+                        if (axios.isCancel(error)) {
+                            enqueueSnackbar("Upload cancelled", {variant: "info"})
+                            return null
+                        }
+
+                        console.error("Cloudinary upload error:", error.response?.data || error.message)
+
+                        if (error.response?.status === 400) {
+                            const errorData = error.response.data
+                            if (errorData.error?.message) {
+                                enqueueSnackbar(`Upload failed: ${errorData.error.message}`, {variant: "error"})
+                            } else {
+                                enqueueSnackbar("Upload failed: Bad request. Vui lòng kiểm tra file và thử lại", {variant: "error"})
+                            }
+                        } else {
+                            enqueueSnackbar("Upload failed: " + (error.response?.data?.message || error.message), {variant: "error"})
+                        }
+
+                        return null
+                    } finally {
+                        setUploadProgress(0)
+                        abortController.current = null
+                    }
+                }
                 try {
                     const userFromStorage = localStorage.getItem('user')
                     if (userFromStorage) {
