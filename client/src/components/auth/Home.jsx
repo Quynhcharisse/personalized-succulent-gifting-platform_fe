@@ -472,28 +472,39 @@ export default function Home() {
                     <div className="contact-dropdown">
                         <div className="contact-dropdown__header">
                             <div className="contact-dropdown__header-icon">
-                                <img src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm" />
+                                <img src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm"/>
                             </div>
                             <div className="contact-dropdown__header-text">
                                 <h3>Lá Nhỏ Bên Thềm có thể hỗ trợ gì cho anh chị?</h3>
                             </div>
-                            <button 
+                            <button
                                 className="contact-dropdown__close"
                                 onClick={() => setShowContactDropdown(false)}
                             >
                                 ×
                             </button>
                         </div>
-                        
+
+                        <div>
+                            <iframe
+                                name="myiFrame"
+                                width="600px"
+                                height="400px"
+                                src="https://udify.app/chatbot/lEPq0T619KaQc5OR"
+                                scrolling="no"
+                                style={{ border: '0px none #ffffff' }}
+                            ></iframe>
+                        </div>
+
                         <div className="contact-dropdown__options">
-                            <a 
-                                href="https://m.me/lanhobenthem" 
+                            <a
+                                href="https://m.me/lanhobenthem"
                                 className="contact-dropdown__option"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
                                 <div className="contact-dropdown__option-icon contact-dropdown__option-icon--messenger">
-                                    <img src="/messengerIcon.png" alt="Messenger" />
+                                    <img src="/messengerIcon.png" alt="Messenger"/>
                                 </div>
                                 <div>
                                     <div className="contact-dropdown__option-title">Messenger</div>
@@ -501,12 +512,12 @@ export default function Home() {
                                 </div>
                             </a>
 
-                            <a 
-                                href="mailto:support@lanhobenthem.com" 
+                            <a
+                                href="mailto:support@lanhobenthem.com"
                                 className="contact-dropdown__option"
                             >
                                 <div className="contact-dropdown__option-icon contact-dropdown__option-icon--email">
-                                    <img src="/mailIcon.png" alt="Email" />
+                                    <img src="/mailIcon.png" alt="Email"/>
                                 </div>
                                 <div>
                                     <div className="contact-dropdown__option-title">Email</div>
@@ -514,12 +525,12 @@ export default function Home() {
                                 </div>
                             </a>
 
-                            <a 
-                                href="tel:0908304247" 
+                            <a
+                                href="tel:0908304247"
                                 className="contact-dropdown__option"
                             >
                                 <div className="contact-dropdown__option-icon contact-dropdown__option-icon--phone">
-                                    <img src="/phoneIcon.png" alt="Phone" />
+                                    <img src="/phoneIcon.png" alt="Phone"/>
                                 </div>
                                 <div>
                                     <div className="contact-dropdown__option-title">Hotline</div>
@@ -527,7 +538,7 @@ export default function Home() {
                                 </div>
                             </a>
                         </div>
-                        
+
                         <div className="contact-dropdown__footer">
                             <p>Cung cấp bởi <strong>Lá Nhỏ Bên Thềm</strong></p>
                         </div>
@@ -535,13 +546,13 @@ export default function Home() {
                 )}
 
                 {/* Contact Float Button */}
-                <button 
+                <button
                     className="contact-widget__button"
                     onClick={() => setShowContactDropdown(!showContactDropdown)}
                     title="Liên hệ Lá Nhỏ Bên Thềm"
                 >
                     <span className="contact-widget__icon">
-                        <img src="/communications.png" alt="Contact" />
+                        <img src="/communications.png" alt="Contact"/>
                     </span>
                     {/* <span className="contact-widget__text">Liên hệ</span> */}
                 </button>
