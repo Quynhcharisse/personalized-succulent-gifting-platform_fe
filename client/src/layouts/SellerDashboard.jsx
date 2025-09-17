@@ -40,7 +40,8 @@ import {
     Add as AddIcon,
     Visibility as VisibilityIcon,
     Store as StoreIcon,
-    LocalShipping as LocalShippingIcon
+    LocalShipping as LocalShippingIcon,
+    Extension as AccessoryIcon
 } from '@mui/icons-material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {NotificationDisplay} from '../services/NotificationService.jsx';
@@ -75,6 +76,12 @@ const NAVIGATION = [
         title: 'Quản lý Sen Đá',
         icon: <InventoryIcon />,
         path: '/seller/succulent'
+    },
+    {
+        segment: 'accessory',
+        title: 'Quản lý phụ kiện',
+        icon: <AccessoryIcon />,
+        path: '/seller/accessory'
     },
     {
         segment: 'products',
@@ -315,6 +322,20 @@ function SellerDashboardContent({ session }) {
                                     }}
                                 >
                                     Tạo sản phẩm sen đá
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<AddIcon />}
+                                    onClick={() => navigate('/seller/accessory')}
+                                    sx={{
+                                        borderRadius: 3,
+                                        px: 3,
+                                        py: 1.5,
+                                        backgroundColor: colors.secondary,
+                                        '&:hover': { backgroundColor: colors.primaryLight }
+                                    }}
+                                >
+                                    Tạo phụ kiện
                                 </Button>
                                 <Button
                                     variant="outlined"

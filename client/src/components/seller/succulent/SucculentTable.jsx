@@ -32,8 +32,8 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
                         <TableCell>ID</TableCell>
                         <TableCell>Tên Sản Phẩm</TableCell>
                         <TableCell>Kích Thước</TableCell>
-                        <TableCell>Created At</TableCell>
-                        <TableCell>Updated At</TableCell>
+                        <TableCell>Ngày tạo</TableCell>
+                        <TableCell>Ngày cập nhật</TableCell>
                         <TableCell>Trạng Thái</TableCell>
                         <TableCell align="center">Thao Tác</TableCell>
                     </TableRow>
