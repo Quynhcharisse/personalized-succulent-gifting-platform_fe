@@ -43,8 +43,23 @@ export const getSucculents = async () => {
     return response || null
 }
 
+export const updateSucculent = async (succulentData) => {
+    const response = await axiosClient.put("/product/succulent", succulentData);
+    return response || null
+}
+
 export const getAccessories = async () => {
     const response = await axiosClient.get("/product/accessories");
     return response || null
 
+}
+
+export const createAccessory = async (accessoryData) => {
+    const response = await axiosClient.post("/product/accessory", accessoryData);
+    return response || null
+}
+
+export const updateAccessory = async (accessoryData) => {
+    const response = await axiosClient.put("/product/accessory", accessoryData);
+    return response || null
 }
