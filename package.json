@@ -1,0 +1,33 @@
+{
+  "name": "personalized-succulent-gifting-platform_fe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5173"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quynhcharisse/personalized-succulent-gifting-platform_fe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Quynhcharisse/personalized-succulent-gifting-platform_fe/issues"
+  },
+  "homepage": "https://github.com/Quynhcharisse/personalized-succulent-gifting-platform_fe#readme",
+  "dependencies": {
+    "notistack": "^3.0.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^6.3.6"
+  }
+}
