@@ -1,3 +1,4 @@
+import React from 'react'
 import '../styles/ui/SiteFooter.css'
 
 export default function SiteFooter() {

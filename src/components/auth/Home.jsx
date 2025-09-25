@@ -1,3 +1,4 @@
+import React from 'react'
 import '../../styles/auth/Home.css'
 import {useEffect, useRef, useState} from 'react'
 
