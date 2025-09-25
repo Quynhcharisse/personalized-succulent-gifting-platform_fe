@@ -1,3 +1,4 @@
+import React from "react";
 import SiteHeader from "./SiteHeader.jsx";
 import SiteFooter from "./SiteFooter.jsx";
 import {Outlet} from "react-router-dom";

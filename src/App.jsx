@@ -1,3 +1,4 @@
+import React from 'react'
 import './styles/App.css'
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom'
 import {lazy, Suspense} from 'react'
