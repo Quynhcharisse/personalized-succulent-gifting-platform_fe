@@ -54,3 +54,5 @@ export const COLORS = {
     }
 };
 
+export const FENG_SHUI_OPTIONS = FENGSHUI;
+export const ZODIAC_OPTIONS = ZODIACS;
