@@ -31,9 +31,9 @@ import {
 import {enqueueSnackbar} from 'notistack'
 import {updateProfile, viewProfile} from '../../services/AccountService.jsx'
 import {COLORS, FENGSHUI, GENDERS, ZODIACS} from '../../hooks/constants.js'
-import axios from 'axios'
-import { UserProfileValidation } from './UserProfileValidation.jsx';
+import {UserProfileValidation} from './UserProfileValidation.jsx';
 import ButtonCancel from "../buttonCustom/ButtonCancel.jsx";
+import {uploadToCloudinary} from '../../hooks/cloudinaryUpload.js';
 
 
 export default function UserProfile() {
@@ -73,81 +73,6 @@ export default function UserProfile() {
                 let formData = {}
                 let accountData = {}
                 let userData = {}
-
-                async function uploadToCloudinary(file) {
-                    try {
-                        if (!file) {
-                            enqueueSnackbar("Không có file để upload", {variant: "error"})
-                            return null
-                        }
-
-                        const maxSize = 10 * 1024 * 1024
-                        if (file.size > maxSize) {
-                            enqueueSnackbar("File quá lớn. Kích thước tối đa: 10MB", {variant: "error"})
-                            return null
-                        }
-
-                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-                        if (!allowedTypes.includes(file.type)) {
-                            enqueueSnackbar("Loại file không được hỗ trợ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP", {variant: "error"})
-                            return null
-                        }
-
-                        if (abortController.current) {
-                            abortController.current.abort()
-                        }
-                        abortController.current = new AbortController()
-
-                        const formData = new FormData()
-                        formData.append("file", file)
-                        formData.append("upload_preset", "psgp_web")
-                        formData.append("cloud_name", "dfx4miova")
-                        formData.append("folder", "psgp")
-                        formData.append("public_id", `user_${Date.now()}`)
-
-
-                        const response = await axios.post(
-                            "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
-                            formData,
-                            {
-                                onUploadProgress: (progressEvent) => {
-                                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                                    setUploadProgress(percentCompleted)
-                                },
-                                signal: abortController.current.signal,
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            }
-                        )
-
-
-                        return response.data.secure_url
-                    } catch (error) {
-                        if (axios.isCancel(error)) {
-                            enqueueSnackbar("Upload cancelled", {variant: "info"})
-                            return null
-                        }
-
-                        console.error("Cloudinary upload error:", error.response?.data || error.message)
-
-                        if (error.response?.status === 400) {
-                            const errorData = error.response.data
-                            if (errorData.error?.message) {
-                                enqueueSnackbar(`Upload failed: ${errorData.error.message}`, {variant: "error"})
-                            } else {
-                                enqueueSnackbar("Upload failed: Bad request. Vui lòng kiểm tra file và thử lại", {variant: "error"})
-                            }
-                        } else {
-                            enqueueSnackbar("Upload failed: " + (error.response?.data?.message || error.message), {variant: "error"})
-                        }
-
-                        return null
-                    } finally {
-                        setUploadProgress(0)
-                        abortController.current = null
-                    }
-                }
 
                 try {
                     const userFromStorage = localStorage.getItem('user')
@@ -522,19 +447,30 @@ export default function UserProfile() {
                                                             };
                                                             reader.readAsDataURL(file);
 
-                                                            // Upload to Cloudinary
-                                                            const imageUrl = await uploadToCloudinary(file);
+                                                            // Nếu đang upload cũ thì abort
+                                                            if (abortController.current) {
+                                                                abortController.current.abort();
+                                                            }
+                                                            abortController.current = new AbortController();
+
+                                                            // Upload to Cloudinary dùng hook chung
+                                                            const imageUrl = await uploadToCloudinary(file, {
+                                                                onProgress: setUploadProgress,
+                                                                signal: abortController.current.signal
+                                                            });
                                                             if (imageUrl) {
                                                                 setForm(prev => ({...prev, avatarUrl: imageUrl}));
                                                                 enqueueSnackbar("Upload ảnh thành công!", {variant: "success"});
                                                             } else {
-                                                                // Nếu upload thất bại, xóa preview
                                                                 setPreviewImage(null);
                                                             }
                                                         } catch (error) {
                                                             console.error("File upload error:", error);
                                                             setPreviewImage(null);
                                                             enqueueSnackbar("Lỗi khi xử lý file", {variant: "error"});
+                                                        } finally {
+                                                            setUploadProgress(0);
+                                                            abortController.current = null;
                                                         }
                                                     }
                                                 }}
@@ -785,7 +721,7 @@ export default function UserProfile() {
                                                                 value={form.address}
                                                                 onChange={handleChange('address')}
                                                                 error={!!errors.address}
-                                                                helperText={errors.address || 'Tối đa 255 ký tự'}
+                                                                helperText={errors.address}
                                                                 placeholder="Nhập địa chỉ của bạn"
                                                                 sx={{
                                                                     '& .MuiOutlinedInput-root': {
@@ -827,7 +763,7 @@ export default function UserProfile() {
                                                                 value={form.phone}
                                                                 onChange={handleChange('phone')}
                                                                 error={!!errors.phone}
-                                                                helperText={errors.phone || 'Định dạng: 0xxxxxxxxx hoặc +84xxxxxxxxx'}
+                                                                helperText={errors.phone}
                                                                 placeholder="Nhập số điện thoại"
                                                                 sx={{
                                                                     '& .MuiOutlinedInput-root': {
