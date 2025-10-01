@@ -1,11 +1,14 @@
 import React from 'react'
 import '../../styles/auth/Home.css'
 import {useEffect, useRef, useState} from 'react'
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import {Box, IconButton} from "@mui/material";
 
 export default function Home() {
     const [bannerVideoReady, setBannerVideoReady] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
     const [showContactDropdown, setShowContactDropdown] = useState(false)
+    const [showChatbot, setShowChatbot] = useState(false);
     const videoRef = useRef(null)
     // Prefer higher bitrate file if you have one, fallback to current mp4
     const bannerVideoSrc = '/videoBanner.mp4'
@@ -468,6 +471,49 @@ export default function Home() {
 
             {/* Contact Float Widget */}
             <div className="contact-widget">
+                {/* Chatbot button above Contact, larger and always visible */}
+                <IconButton
+                    className="header__icon chatbot-float-btn"
+                    title="Chatbot"
+                    onClick={() => setShowChatbot((prev) => !prev)}
+                    sx={{
+                        backgroundColor: showChatbot ? '#e0f7fa' : 'white',
+                        mb: 1,
+                        width: 56,
+                        height: 56,
+                        boxShadow: 3,
+                        borderRadius: '50%',
+                        position: 'fixed',
+                        bottom: showChatbot ? 600 : 120,
+                        right: 32,
+                        zIndex: 1400,
+                        transition: 'bottom 0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0,
+                    }}
+                >
+                    <img src="https://cdn-icons-png.flaticon.com/512/13330/13330989.png" alt="Chatbot" style={{ width: 40, height: 40 }} />
+                </IconButton>
+                {/* Chatbot embed, with close button */}
+                {showChatbot && (
+                    <Box sx={{ position: 'fixed', bottom: 80, right: 24, zIndex: 1300, width: 350, height: 500, boxShadow: 3, borderRadius: 2, background: '#fff', display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+                            <IconButton size="small" onClick={() => setShowChatbot(false)} sx={{ zIndex: 1500 }}>
+                                <span style={{ fontSize: 20, fontWeight: 'bold' }}>×</span>
+                            </IconButton>
+                        </Box>
+                        <iframe
+                            src="https://udify.app/chatbot/lEPq0T619KaQc5OR"
+                            title="Chatbot"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none', borderRadius: '8px', flex: 1 }}
+                        />
+                    </Box>
+                )}
+
                 {/* Contact Dropdown */}
                 {showContactDropdown && (
                     <div className="contact-dropdown">
@@ -484,17 +530,6 @@ export default function Home() {
                             >
                                 ×
                             </button>
-                        </div>
-
-                        <div>
-                            <iframe
-                                name="myiFrame"
-                                width="600px"
-                                height="400px"
-                                src="https://udify.app/chatbot/lEPq0T619KaQc5OR"
-                                scrolling="no"
-                                style={{ border: '0px none #ffffff' }}
-                            ></iframe>
                         </div>
 
                         <div className="contact-dropdown__options">
