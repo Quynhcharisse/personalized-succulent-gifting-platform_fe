@@ -1,12 +1,12 @@
 import axios from "axios"
 import {refreshToken} from "../services/AuthService.jsx";
 
-axios.defaults.baseURL = "http://localhost:8080/api/v1"
-
 const axiosClient = axios.create({
-    baseURL: axios.defaults.baseURL, headers: {
+    baseURL: import.meta.env.VITE_API_URL,
+    headers: {
         "Content-Type": "application/json",
-    }, withCredentials: true,
+    },
+    withCredentials: true,
 });
 
 axiosClient.interceptors.response.use(response => response, async error => {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Box, Button, Container, Paper, Typography} from '@mui/material';
 import {Add as AddIcon, Inventory as InventoryIcon} from '@mui/icons-material';
-import {createAccessory, getAccessories} from '../../../services/ProductService.jsx';
+import {getAccessories} from '../../../services/ProductService.jsx';
 import AccessoryTable from './AccessoryTable.jsx';
 import CreateAccessoryDialog from './CreateAccessoryDialog.jsx';
 import UpdateAccessoryDialog from './UpdateAccessoryDialog.jsx';
@@ -41,17 +41,8 @@ export default function Accessory() {
         setShowCreate(false);
     };
 
-    const handleCreate = async (payload) => {
-        try {
-            const res = await createAccessory(payload);
-            const msg = res?.data?.message || 'Tạo phụ kiện thành công';
-            setSubmitMessage({type: 'success', text: msg});
-            setShowCreate(false);
-            await loadAccessories();
-        } catch (e) {
-            const errMsg = e?.response?.data?.message || 'Tạo phụ kiện thất bại';
-            setSubmitMessage({type: 'error', text: errMsg});
-        }
+    const handleCreateSuccess = async () => {
+        await loadAccessories();
     };
 
     return (
@@ -124,14 +115,14 @@ export default function Accessory() {
             <CreateAccessoryDialog
                 open={showCreate}
                 onClose={handleCloseCreate}
-                onCreate={handleCreate}
+                onCreate={handleCreateSuccess}
             />
 
             <UpdateAccessoryDialog
                 open={showUpdate}
                 onClose={() => { setShowUpdate(false); setSelected(null); }}
-                accessory={selected}
-                onUpdated={loadAccessories}
+                accessoryData={selected}
+                onUpdate={handleCreateSuccess}
             />
         </Container>
     );

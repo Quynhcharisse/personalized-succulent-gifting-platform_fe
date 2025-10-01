@@ -361,16 +361,16 @@ const router = createBrowserRouter([
                 )
             },
             {
+                path: 'store',
+                element: <h1>Cửa hàng của tôi</h1>
+            },
+            {
                 path: 'orders',
                 element: <h1>Quản lý đơn hàng</h1>
             },
             {
                 path: 'analytics',
                 element: <h1>Báo cáo & Thống kê</h1>
-            },
-            {
-                path: 'store',
-                element: <h1>Cửa hàng của tôi</h1>
             },
             {
                 path: 'settings',

@@ -18,8 +18,9 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {FENG_SHUI_OPTIONS, SIZE_OPTIONS, ZODIAC_OPTIONS} from './constants';
+import {FENG_SHUI_OPTIONS, SIZE_OPTIONS, ZODIAC_OPTIONS} from '../../../hooks/constants.js';
 import UploadImageField from './UploadImageField.jsx';
+import ButtonCancel from '../../buttonCustom/ButtonCancel.jsx';
 
 const CreateSucculentDialog = ({
                                    open,
@@ -319,7 +320,7 @@ const CreateSucculentDialog = ({
                                                         }}
                                                         required
                                                     />
-                                                    <Box sx={{height: 12}} />
+                                                    <Box sx={{height: 12}}/>
                                                     <TextField
                                                         fullWidth
                                                         label="Số lượng"
@@ -368,21 +369,13 @@ const CreateSucculentDialog = ({
                 minHeight: '90px',
                 borderRadius: '0 0 24px 24px'
             }}>
-                <Button onClick={onClose} variant="outlined" sx={{
-                    borderRadius: 2,
-                    fontWeight: 700,
-                    px: 4,
-                    py: 1.5,
-                    borderColor: '#6c757d',
-                    color: '#6c757d',
-                    fontSize: '0.95rem',
-                    minWidth: '120px'
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <Box sx={{fontSize: '1.2rem', fontWeight: 600}}>✕</Box>
-                        Hủy
-                    </Box>
-                </Button>
+                <ButtonCancel
+                    onClick={onClose}
+                    variant="contained"
+                    sx={{minWidth: '120px', fontWeight: 700, fontSize: '0.95rem'}}
+                >
+                    Hủy
+                </ButtonCancel>
 
                 <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
                     {currentStep > 1 && (
