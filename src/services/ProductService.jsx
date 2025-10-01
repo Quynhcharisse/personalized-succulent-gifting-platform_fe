@@ -49,7 +49,6 @@ export const updateSucculent = async (succulentData) => {
 export const getAccessories = async () => {
     const response = await axiosClient.get("/product/accessories");
     return response || null
-
 }
 
 //------------------- Accessories ------------------//
