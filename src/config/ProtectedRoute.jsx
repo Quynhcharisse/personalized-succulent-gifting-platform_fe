@@ -1,6 +1,5 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {refreshToken} from "../services/AuthService.jsx";
-import {useEffect, useState} from "react";
 import {signOut} from "../services/AccountService.jsx";
 
 // async function GetAccessData() {
@@ -86,9 +85,16 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 setHasValidRole(true);
             } catch (error) {
                 console.error("Authentication error:", error);
-                //await Logout();
-                try { localStorage.clear(); } catch { console.error("Authentication error:", error)}
-                try { sessionStorage.clear(); } catch {console.error("Authentication error:", error)}
+                try {
+                    localStorage.clear();
+                } catch {
+                    console.error("Authentication error:", error)
+                }
+                try {
+                    sessionStorage.clear();
+                } catch {
+                    console.error("Authentication error:", error)
+                }
                 window.location.replace("/login")
             } finally {
                 setIsLoading(false);

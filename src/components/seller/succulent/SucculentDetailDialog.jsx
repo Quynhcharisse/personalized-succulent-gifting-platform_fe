@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box, Button, Chip, Dialog, DialogContent, DialogTitle, Paper, Typography} from '@mui/material';
 import {LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
-import {FENG_SHUI_OPTIONS, ZODIAC_OPTIONS} from './constants';
+import {FENG_SHUI_OPTIONS, ZODIAC_OPTIONS} from '../../../hooks/constants.js';
 
 const SucculentDetailDialog = ({open, onClose, succulent}) => {
     return (

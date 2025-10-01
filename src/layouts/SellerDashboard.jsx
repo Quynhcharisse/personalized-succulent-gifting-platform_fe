@@ -1,121 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    Box,
-    Drawer,
+    alpha,
     AppBar,
-    Toolbar,
-    Typography,
-    IconButton,
     Avatar,
-    Menu,
-    MenuItem,
-    ListItemIcon,
-    ListItemText,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
     Divider,
+    Drawer,
+    Grid,
+    IconButton,
     List,
     ListItem,
     ListItemButton,
-    useTheme,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Stack,
+    Toolbar,
+    Typography,
     useMediaQuery,
-    Grid,
-    Button,
-    Chip,
-    Card,
-    CardContent,
-    Badge,
-    alpha,
-    Stack
+    useTheme
 } from '@mui/material';
 import {
-    Menu as MenuIcon,
-    Dashboard as DashboardIcon,
-    Inventory as InventoryIcon,
-    ShoppingCart as ShoppingCartIcon,
-    Assessment as AssessmentIcon,
-    Settings as SettingsIcon,
     AccountCircle as AccountCircleIcon,
-    Logout as LogoutIcon,
-    Notifications as NotificationsIcon,
-    TrendingUp as TrendingUpIcon,
     Add as AddIcon,
-    Visibility as VisibilityIcon,
-    Store as StoreIcon,
+    Assessment as AssessmentIcon,
+    Dashboard as DashboardIcon,
+    Extension as AccessoryIcon,
+    Inventory as InventoryIcon,
     LocalShipping as LocalShippingIcon,
-    Extension as AccessoryIcon
+    Logout as LogoutIcon,
+    Menu as MenuIcon,
+    Settings as SettingsIcon,
+    ShoppingCart as ShoppingCartIcon,
+    Store as StoreIcon,
+    TrendingUp as TrendingUpIcon,
+    Visibility as VisibilityIcon
 } from '@mui/icons-material';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import {Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {NotificationDisplay} from '../services/NotificationService.jsx';
+import {COLORS} from '../hooks/constants.js';
 
 const DRAWER_WIDTH = 280;
-
-// Color palette based on #0b3f31
-const colors = {
-    primary: '#0b3f31',
-    primaryLight: '#1a6b4e',
-    primaryDark: '#073026',
-    secondary: '#2c7a5e',
-    accent: '#4ade80',
-    surface: '#f8fffe',
-    surfaceVariant: '#e8f5f2',
-    success: '#22c55e',
-    warning: '#f59e0b',
-    error: '#ef4444',
-    info: '#3b82f6'
-};
 
 // Navigation configuration for sellers
 const NAVIGATION = [
     {
         segment: 'dashboard',
         title: 'Dashboard',
-        icon: <DashboardIcon />,
+        icon: <DashboardIcon/>,
         path: '/seller/dashboard'
+    },
+    {
+        segment: 'store',
+        title: 'Cửa hàng của tôi',
+        icon: <StoreIcon/>,
+        path: '/seller/store'
     },
     {
         segment: 'succulent',
         title: 'Quản lý Sen Đá',
-        icon: <InventoryIcon />,
+        icon: <InventoryIcon/>,
         path: '/seller/succulent'
     },
     {
         segment: 'accessory',
         title: 'Quản lý phụ kiện',
-        icon: <AccessoryIcon />,
+        icon: <AccessoryIcon/>,
         path: '/seller/accessory'
     },
     {
         segment: 'products',
         title: 'Quản lý sản phẩm',
-        icon: <InventoryIcon />,
+        icon: <InventoryIcon/>,
         path: '/seller/products'
     },
     {
         segment: 'orders',
         title: 'Đơn hàng',
-        icon: <ShoppingCartIcon />,
+        icon: <ShoppingCartIcon/>,
         path: '/seller/orders'
     },
     {
         segment: 'analytics',
         title: 'Báo cáo & Thống kê',
-        icon: <AssessmentIcon />,
+        icon: <AssessmentIcon/>,
         path: '/seller/analytics'
     },
     {
-        segment: 'store',
-        title: 'Cửa hàng của tôi',
-        icon: <StoreIcon />,
-        path: '/seller/store'
-    },
-    {
-        segment: 'settings',
-        title: 'Cài đặt',
-        icon: <SettingsIcon />,
-        path: '/seller/settings'
+        segment: 'profile',
+        title: 'Hồ Sơ Của Tôi',
+        icon: <AccountCircleIcon/>,
+        path: '/seller/profile'
     }
 ];
 
-function SellerDashboardContent({ session }) {
+function SellerDashboardContent({session}) {
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         todayOrders: 18,
@@ -151,7 +135,7 @@ function SellerDashboardContent({ session }) {
         }
     }
 
-    const StatCard = ({ title, value, icon, color, trend, suffix }) => (
+    const StatCard = ({title, value, icon, color, trend, suffix}) => (
         <Card sx={{
             background: `linear-gradient(135deg, ${color} 0%, ${alpha(color, 0.8)} 100%)`,
             color: 'white',
@@ -174,7 +158,7 @@ function SellerDashboardContent({ session }) {
                 transform: 'translate(30px, -30px)',
             }
         }}>
-            <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+            <CardContent sx={{p: 3, position: 'relative', zIndex: 1}}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
                     <Box sx={{
                         backgroundColor: alpha('#ffffff', 0.2),
@@ -187,26 +171,26 @@ function SellerDashboardContent({ session }) {
                         {icon}
                     </Box>
                     {trend && (
-                        <Chip 
-                            size="small" 
-                            label={trend} 
-                            sx={{ 
+                        <Chip
+                            size="small"
+                            label={trend}
+                            sx={{
                                 backgroundColor: alpha('#ffffff', 0.2),
                                 color: 'white',
                                 fontWeight: 600
-                            }} 
+                            }}
                         />
                     )}
                 </Stack>
-                <Typography variant="body2" sx={{ opacity: 0.9, mb: 1, fontSize: '0.875rem' }}>
+                <Typography variant="body2" sx={{opacity: 0.9, mb: 1, fontSize: '0.875rem'}}>
                     {title}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <Typography variant="h4" sx={{fontWeight: 700, lineHeight: 1}}>
                         {value}
                     </Typography>
                     {suffix && (
-                        <Chip 
+                        <Chip
                             size="small"
                             label={suffix}
                             sx={{
@@ -222,32 +206,32 @@ function SellerDashboardContent({ session }) {
     );
 
     return (
-        <Box sx={{ px: 4, py: 5 }}>
+        <Box sx={{px: 4, py: 5}}>
             {/* Header */}
-            <Box sx={{ mb: 5 }}>
-                <Typography variant="h3" sx={{ 
-                    fontWeight: 800, 
-                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+            <Box sx={{mb: 5}}>
+                <Typography variant="h3" sx={{
+                    fontWeight: 800,
+                    background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     mb: 1
                 }}>
-                        {session.user.role || 'User'} Dashboard
-                    </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem' }}>
+                    {session.user.role || 'User'} Dashboard
+                </Typography>
+                <Typography variant="body1" sx={{color: 'text.secondary', fontSize: '1.1rem'}}>
                     Tổng quan hiệu suất cửa hàng của bạn hôm nay
-                    </Typography>
+                </Typography>
             </Box>
 
             {/* Stats Cards */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid container spacing={3} sx={{mb: 4}}>
                 <Grid item xs={12} sm={6} lg={3}>
                     <StatCard
                         title="Đơn hàng hôm nay"
                         value={stats.todayOrders}
-                        icon={<ShoppingCartIcon sx={{ fontSize: 28 }} />}
-                        color={colors.primary}
+                        icon={<ShoppingCartIcon sx={{fontSize: 28}}/>}
+                        color={COLORS.primary}
                         trend="+15%"
                     />
                 </Grid>
@@ -255,8 +239,8 @@ function SellerDashboardContent({ session }) {
                     <StatCard
                         title="Doanh thu hôm nay"
                         value={formatCurrencyVnd(stats.revenueVnd)}
-                        icon={<TrendingUpIcon sx={{ fontSize: 28 }} />}
-                        color={colors.success}
+                        icon={<TrendingUpIcon sx={{fontSize: 28}}/>}
+                        color={COLORS.success}
                         trend="+12%"
                     />
                 </Grid>
@@ -264,8 +248,8 @@ function SellerDashboardContent({ session }) {
                     <StatCard
                         title="Sản phẩm đang bán"
                         value={stats.totalProducts}
-                        icon={<InventoryIcon sx={{ fontSize: 28 }} />}
-                        color={colors.info}
+                        icon={<InventoryIcon sx={{fontSize: 28}}/>}
+                        color={COLORS.info}
                         trend="+3"
                     />
                 </Grid>
@@ -273,12 +257,12 @@ function SellerDashboardContent({ session }) {
                     <StatCard
                         title="Sắp hết hàng"
                         value={stats.lowStock}
-                        icon={<LocalShippingIcon sx={{ fontSize: 28 }} />}
-                        color={stats.lowStock > 0 ? colors.warning : colors.success}
+                        icon={<LocalShippingIcon sx={{fontSize: 28}}/>}
+                        color={stats.lowStock > 0 ? COLORS.warning : COLORS.success}
                         suffix={stats.lowStock > 0 ? 'Kiểm tra' : 'Ổn định'}
                     />
                 </Grid>
-                </Grid>
+            </Grid>
 
             {/* Main Content Grid */}
             <Grid container spacing={3}>
@@ -286,16 +270,16 @@ function SellerDashboardContent({ session }) {
                 <Grid item xs={12} lg={8}>
                     <Card sx={{
                         borderRadius: 4,
-                        border: `1px solid ${alpha(colors.primary, 0.1)}`,
-                        background: `linear-gradient(135deg, ${colors.surface} 0%, ${alpha(colors.surfaceVariant, 0.5)} 100%)`,
-                        boxShadow: `0 4px 20px ${alpha(colors.primary, 0.1)}`,
+                        border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
+                        background: `linear-gradient(135deg, ${COLORS.surface} 0%, ${alpha(COLORS.surfaceVariant, 0.5)} 100%)`,
+                        boxShadow: `0 4px 20px ${alpha(COLORS.primary, 0.1)}`,
                         mb: 3
                     }}>
-                        <CardContent sx={{ p: 4 }}>
-                            <Typography variant="h5" sx={{ 
-                                fontWeight: 700, 
+                        <CardContent sx={{p: 4}}>
+                            <Typography variant="h5" sx={{
+                                fontWeight: 700,
                                 mb: 3,
-                                color: colors.primary,
+                                color: COLORS.primary,
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 1
@@ -303,66 +287,63 @@ function SellerDashboardContent({ session }) {
                                 <Box sx={{
                                     width: 6,
                                     height: 24,
-                                    backgroundColor: colors.primary,
+                                    backgroundColor: COLORS.primary,
                                     borderRadius: 1
-                                }} />
+                                }}/>
                                 Tác vụ nhanh
                             </Typography>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
+                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} flexWrap="wrap">
                                 <Button
                                     variant="contained"
-                                    startIcon={<AddIcon />}
+                                    startIcon={<AddIcon/>}
                                     onClick={() => navigate('/seller/succulent')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
                                         py: 1.5,
-                                        backgroundColor: colors.primary,
-                                        '&:hover': { backgroundColor: colors.primaryDark }
+                                        backgroundColor: COLORS.primary,
+                                        '&:hover': {backgroundColor: COLORS.primaryDark}
                                     }}
                                 >
                                     Tạo sản phẩm sen đá
                                 </Button>
                                 <Button
                                     variant="contained"
-                                    startIcon={<AddIcon />}
+                                    startIcon={<AddIcon/>}
                                     onClick={() => navigate('/seller/accessory')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
                                         py: 1.5,
-                                        backgroundColor: colors.secondary,
-                                        '&:hover': { backgroundColor: colors.primaryLight }
+                                        backgroundColor: COLORS.primaryLight
                                     }}
                                 >
                                     Tạo phụ kiện
                                 </Button>
                                 <Button
                                     variant="outlined"
-                                    startIcon={<VisibilityIcon />}
+                                    startIcon={<VisibilityIcon/>}
                                     onClick={() => navigate('/seller/orders')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
                                         py: 1.5,
-                                        borderColor: colors.primary,
-                                        color: colors.primary,
-                                        '&:hover': { borderColor: colors.primaryDark }
+                                        borderColor: COLORS.primaryDark,
+                                        color: COLORS.primaryDark
                                     }}
                                 >
                                     Xem đơn hàng
                                 </Button>
                                 <Button
                                     variant="outlined"
-                                    startIcon={<InventoryIcon />}
+                                    startIcon={<InventoryIcon/>}
                                     onClick={() => navigate('/seller/succulent')}
                                     sx={{
                                         borderRadius: 3,
                                         px: 3,
                                         py: 1.5,
-                                        borderColor: colors.primary,
-                                        color: colors.primary,
-                                        '&:hover': { borderColor: colors.primaryDark }
+                                        borderColor: COLORS.primary,
+                                        color: COLORS.primary
                                     }}
                                 >
                                     Quản lý sen đá
@@ -376,57 +357,59 @@ function SellerDashboardContent({ session }) {
                 <Grid item xs={12} lg={4}>
                     <Card sx={{
                         borderRadius: 4,
-                        border: `1px solid ${alpha(colors.primary, 0.1)}`,
-                        background: `linear-gradient(135deg, ${colors.surface} 0%, ${alpha(colors.surfaceVariant, 0.5)} 100%)`,
-                        boxShadow: `0 4px 20px ${alpha(colors.primary, 0.1)}`,
+                        border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
+                        background: `linear-gradient(135deg, ${COLORS.surface} 0%, ${alpha(COLORS.surfaceVariant, 0.5)} 100%)`,
+                        boxShadow: `0 4px 20px ${alpha(COLORS.primary, 0.1)}`,
                         height: 'fit-content'
                     }}>
-                        <CardContent sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary }}>
+                        <CardContent sx={{p: 3}}>
+                            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3}}>
+                                <Typography variant="h6" sx={{fontWeight: 700, color: COLORS.primary}}>
                                     Đơn gần đây
                                 </Typography>
-                                <Button 
-                                    size="small" 
-                                    sx={{ color: colors.primary }}
+                                <Button
+                                    size="small"
+                                    sx={{color: COLORS.primary}}
                                     onClick={() => navigate('/seller/orders')}
                                 >
                                     Xem tất cả
                                 </Button>
-                        </Box>
-                            <Divider sx={{ mb: 2 }} />
-                            
+                            </Box>
+                            <Divider sx={{mb: 2}}/>
+
                             <Stack spacing={2}>
                                 {recentOrders.map(order => (
                                     <Box key={order.id} sx={{
                                         p: 2,
                                         borderRadius: 2,
-                                        backgroundColor: alpha(colors.primary, 0.05),
-                                        border: `1px solid ${alpha(colors.primary, 0.1)}`,
-                                        transition: 'all 0.2s ease',
-                                        '&:hover': {
-                                            backgroundColor: alpha(colors.primary, 0.1),
-                                            transform: 'translateX(4px)'
-                                        }
+                                        backgroundColor: alpha(COLORS.primary, 0.05),
+                                        border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
+                                        transition: 'all 0.2s ease'
                                     }}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: colors.primary }}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'flex-start',
+                                            mb: 1
+                                        }}>
+                                            <Typography variant="subtitle2"
+                                                        sx={{fontWeight: 600, color: COLORS.primary}}>
                                                 #{order.code}
                                             </Typography>
-                                            <Chip 
-                                                size="small" 
-                                                label={order.statusLabel} 
-                                                sx={{ 
-                                                    backgroundColor: order.statusLabel === 'Mới' ? colors.success : colors.warning,
+                                            <Chip
+                                                size="small"
+                                                label={order.statusLabel}
+                                                sx={{
+                                                    backgroundColor: order.statusLabel === 'Mới' ? COLORS.success : COLORS.warning,
                                                     color: 'white',
                                                     fontSize: '0.75rem'
                                                 }}
                                             />
                                         </Box>
-                                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                                        <Typography variant="body2" sx={{color: 'text.secondary', mb: 1}}>
                                             {order.customerName}
                                         </Typography>
-                                        <Typography variant="body2" sx={{ fontWeight: 600, color: colors.primary }}>
+                                        <Typography variant="body2" sx={{fontWeight: 600, color: COLORS.primary}}>
                                             {formatCurrencyVnd(order.total)}
                                         </Typography>
                                     </Box>
@@ -445,7 +428,7 @@ export default function SellerDashboard() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [session, setSession] = useState({
@@ -459,14 +442,14 @@ export default function SellerDashboard() {
 
     useEffect(() => {
         document.title = 'Kênh người bán | Lá Nhỏ Bên Thềm';
-        
+
         // Lấy thông tin user từ localStorage
         try {
             const userData = localStorage.getItem('user');
-            
+
             if (userData) {
                 const parsedUser = JSON.parse(userData);
-                
+
                 const sessionData = {
                     user: {
                         name: parsedUser.user?.name || parsedUser.name || 'User',
@@ -475,7 +458,7 @@ export default function SellerDashboard() {
                         role: parsedUser.role || ''
                     }
                 };
-                
+
                 setSession(sessionData);
             } else {
                 console.warn('⚠️ No user data found in localStorage');
@@ -502,8 +485,8 @@ export default function SellerDashboard() {
         // Clear user data from localStorage
         localStorage.removeItem('user');
         // Clear cookies if any
-        document.cookie.split(";").forEach(function(c) { 
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        document.cookie.split(";").forEach(function (c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
         });
         // Navigate to home page
         navigate('/');
@@ -519,15 +502,15 @@ export default function SellerDashboard() {
     };
 
     const drawer = (
-        <Box sx={{ 
+        <Box sx={{
             height: '100%',
-            background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
+            background: `linear-gradient(180deg, ${COLORS.primary} 0%, ${COLORS.primaryDark} 100%)`,
             color: 'white',
             overflow: 'hidden'
         }}>
             {/* Logo Section */}
-            <Toolbar sx={{ 
-                background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.primary} 100%)`,
+            <Toolbar sx={{
+                background: `linear-gradient(135deg, ${COLORS.primaryDark} 0%, ${COLORS.primary} 100%)`,
                 borderBottom: `1px solid ${alpha('#ffffff', 0.1)}`,
                 position: 'relative',
                 '&::after': {
@@ -540,7 +523,7 @@ export default function SellerDashboard() {
                     background: `linear-gradient(90deg, transparent 0%, ${alpha('#ffffff', 0.3)} 50%, transparent 100%)`
                 }
             }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <Box sx={{
                         width: 40,
                         height: 40,
@@ -553,8 +536,8 @@ export default function SellerDashboard() {
                         backdropFilter: 'blur(10px)',
                         border: `1px solid ${alpha('#ffffff', 0.2)}`
                     }}>
-                        <img 
-                            src="/LaNhoBenThemLogo.png" 
+                        <img
+                            src="/LaNhoBenThemLogo.png"
                             alt="Lá Nhỏ Bên Thềm Logo"
                             style={{
                                 width: '100%',
@@ -564,7 +547,7 @@ export default function SellerDashboard() {
                             }}
                         />
                     </Box>
-                    <Typography variant="h6" noWrap component="div" sx={{ 
+                    <Typography variant="h6" noWrap component="div" sx={{
                         fontWeight: 700,
                         background: `linear-gradient(135deg, #ffffff 0%, ${alpha('#ffffff', 0.8)} 100%)`,
                         backgroundClip: 'text',
@@ -577,19 +560,19 @@ export default function SellerDashboard() {
             </Toolbar>
 
             {/* Navigation */}
-            <Box sx={{ p: 2, pt: 3 }}>
-                <Typography variant="caption" sx={{ 
-                    px: 2, 
-                    opacity: 0.7, 
+            <Box sx={{p: 2, pt: 3}}>
+                <Typography variant="caption" sx={{
+                    px: 2,
+                    opacity: 0.7,
                     fontWeight: 600,
                     letterSpacing: 1,
                     textTransform: 'uppercase'
                 }}>
                     Kênh {session.user.role?.toLowerCase() || 'người dùng'}
                 </Typography>
-                <List sx={{ mt: 1 }}>
+                <List sx={{mt: 1}}>
                     {NAVIGATION.map((item) => (
-                        <ListItem key={item.segment} disablePadding sx={{ mb: 0.5 }}>
+                        <ListItem key={item.segment} disablePadding sx={{mb: 0.5}}>
                             <ListItemButton
                                 selected={isActiveRoute(item.path)}
                                 onClick={() => navigate(item.path)}
@@ -606,7 +589,7 @@ export default function SellerDashboard() {
                                         top: 0,
                                         bottom: 0,
                                         width: '4px',
-                                        backgroundColor: colors.accent,
+                                        backgroundColor: COLORS.accent,
                                         transform: 'scaleY(0)',
                                         transition: 'transform 0.3s ease',
                                         transformOrigin: 'bottom'
@@ -618,27 +601,20 @@ export default function SellerDashboard() {
                                         '&::before': {
                                             transform: 'scaleY(1)',
                                         },
-                                        '&:hover': {
-                                            backgroundColor: alpha('#ffffff', 0.2),
-                                        },
                                         '& .MuiListItemIcon-root': {
-                                            color: colors.accent,
+                                            color: COLORS.accent,
                                         }
-                                    },
-                                    '&:hover': {
-                                        backgroundColor: alpha('#ffffff', 0.1),
-                                        transform: 'translateX(4px)',
                                     }
                                 }}
                             >
-                                <ListItemIcon sx={{ 
-                                    color: isActiveRoute(item.path) ? colors.accent : alpha('#ffffff', 0.8),
+                                <ListItemIcon sx={{
+                                    color: isActiveRoute(item.path) ? COLORS.accent : alpha('#ffffff', 0.8),
                                     minWidth: 40,
                                     transition: 'all 0.3s ease'
                                 }}>
                                     {item.icon}
                                 </ListItemIcon>
-                                        <ListItemText
+                                <ListItemText
                                     primary={item.title}
                                     primaryTypographyProps={{
                                         fontWeight: isActiveRoute(item.path) ? 600 : 500,
@@ -646,9 +622,9 @@ export default function SellerDashboard() {
                                     }}
                                 />
                             </ListItemButton>
-                                    </ListItem>
-                                ))}
-                            </List>
+                        </ListItem>
+                    ))}
+                </List>
             </Box>
 
             {/* Bottom decoration */}
@@ -660,72 +636,65 @@ export default function SellerDashboard() {
                 height: '120px',
                 background: `linear-gradient(180deg, transparent 0%, ${alpha('#000000', 0.1)} 100%)`,
                 pointerEvents: 'none'
-            }} />
+            }}/>
         </Box>
     );
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{display: 'flex'}}>
             {/* App Bar */}
             <AppBar
                 position="fixed"
                 elevation={0}
                 sx={{
-                    width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-                    ml: { md: `${DRAWER_WIDTH}px` },
-                    background: `linear-gradient(135deg, ${alpha('#ffffff', 0.95)} 0%, ${alpha(colors.surface, 0.9)} 100%)`,
+                    width: {md: `calc(100% - ${DRAWER_WIDTH}px)`},
+                    ml: {md: `${DRAWER_WIDTH}px`},
+                    background: `linear-gradient(135deg, ${alpha('#ffffff', 0.95)} 0%, ${alpha(COLORS.surface, 0.9)} 100%)`,
                     backdropFilter: 'blur(10px)',
-                    borderBottom: `1px solid ${alpha(colors.primary, 0.1)}`,
-                    color: colors.primary,
+                    borderBottom: `1px solid ${alpha(COLORS.primary, 0.1)}`,
+                    color: COLORS.primary,
                 }}
             >
-                <Toolbar sx={{ px: 3 }}>
+                <Toolbar sx={{px: 3}}>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        sx={{ 
-                            mr: 2, 
-                            display: { md: 'none' },
-                            backgroundColor: alpha(colors.primary, 0.1),
-                            '&:hover': {
-                                backgroundColor: alpha(colors.primary, 0.2),
-                            }
+                        sx={{
+                            mr: 2,
+                            display: {md: 'none'},
+                            backgroundColor: alpha(COLORS.primary, 0.1)
                         }}
                     >
-                        <MenuIcon />
+                        <MenuIcon/>
                     </IconButton>
-                    
-                    <Typography variant="h6" noWrap component="div" sx={{ 
+
+                    <Typography variant="h6" noWrap component="div" sx={{
                         flexGrow: 1,
                         fontWeight: 600,
-                        color: colors.primary
+                        color: COLORS.primary
                     }}>
-                        {location.pathname === '/seller/dashboard' ? 'Dashboard' : 
-                         NAVIGATION.find(nav => nav.path === location.pathname)?.title || `Kênh ${session.user.role?.toLowerCase() || 'người dùng'}`}
+                        {location.pathname === '/seller/dashboard' ? 'Dashboard' :
+                            NAVIGATION.find(nav => nav.path === location.pathname)?.title || `Kênh ${session.user.role?.toLowerCase() || 'người dùng'}`}
                     </Typography>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <IconButton 
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <IconButton
                             color="inherit"
                             sx={{
-                                backgroundColor: alpha(colors.primary, 0.1),
-                                color: colors.primary,
-                                '&:hover': {
-                                    backgroundColor: alpha(colors.primary, 0.2),
-                                    transform: 'scale(1.05)',
-                                },
+                                backgroundColor: alpha(COLORS.primary, 0.1),
+                                color: COLORS.primary,
                                 transition: 'all 0.2s ease'
                             }}
                         >
                             <NotificationDisplay/>
                         </IconButton>
-                        
+
                         <IconButton
                             onClick={handleMenuOpen}
                             size="small"
-                            sx={{ 
+                            sx={{
                                 ml: 1,
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
@@ -736,13 +705,13 @@ export default function SellerDashboard() {
                             aria-haspopup="true"
                             aria-expanded={anchorEl ? 'true' : undefined}
                         >
-                            <Avatar 
-                                sx={{ 
-                                    width: 36, 
+                            <Avatar
+                                sx={{
+                                    width: 36,
                                     height: 36,
-                                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                                    background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
                                     fontWeight: 600,
-                                    boxShadow: `0 4px 12px ${alpha(colors.primary, 0.3)}`
+                                    boxShadow: `0 4px 12px ${alpha(COLORS.primary, 0.3)}`
                                 }}
                                 src={session.user.image}
                             >
@@ -760,8 +729,8 @@ export default function SellerDashboard() {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
                 onClick={handleMenuClose}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                transformOrigin={{horizontal: 'right', vertical: 'top'}}
+                anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
                 slotProps={{
                     paper: {
                         elevation: 8,
@@ -771,8 +740,8 @@ export default function SellerDashboard() {
                             mt: 1.5,
                             borderRadius: 3,
                             minWidth: 240,
-                            border: `1px solid ${alpha(colors.primary, 0.1)}`,
-                            background: `linear-gradient(135deg, ${alpha('#ffffff', 0.95)} 0%, ${alpha(colors.surface, 0.9)} 100%)`,
+                            border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
+                            background: `linear-gradient(135deg, ${alpha(COLORS.surface, 0.95)} 0%, ${alpha(COLORS.surface, 0.9)} 100%)`,
                             backdropFilter: 'blur(10px)',
                             '&:before': {
                                 content: '""',
@@ -785,7 +754,7 @@ export default function SellerDashboard() {
                                 bgcolor: 'background.paper',
                                 transform: 'translateY(-50%) rotate(45deg)',
                                 zIndex: 0,
-                                border: `1px solid ${alpha(colors.primary, 0.1)}`,
+                                border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
                                 borderBottom: 'none',
                                 borderRight: 'none',
                             },
@@ -793,25 +762,25 @@ export default function SellerDashboard() {
                     },
                 }}
             >
-                <Box sx={{ 
-                    px: 3, 
+                <Box sx={{
+                    px: 3,
                     py: 2,
-                    background: `linear-gradient(135deg, ${alpha(colors.primary, 0.05)} 0%, ${alpha(colors.surface, 0.8)} 100%)`,
-                    borderBottom: `1px solid ${alpha(colors.primary, 0.1)}`
+                    background: `linear-gradient(135deg, ${alpha(COLORS.primary, 0.05)} 0%, ${alpha(COLORS.surface, 0.8)} 100%)`,
+                    borderBottom: `1px solid ${alpha(COLORS.primary, 0.1)}`
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                        <Avatar 
-                            sx={{ 
-                                width: 40, 
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1}}>
+                        <Avatar
+                            sx={{
+                                width: 40,
                                 height: 40,
-                                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                                background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
                             }}
                             src={session.user.image}
                         >
                             {session.user.name.charAt(0)}
                         </Avatar>
                         <Box>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: colors.primary }}>
+                            <Typography variant="subtitle1" sx={{fontWeight: 600, color: COLORS.primary}}>
                                 {session.user.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -819,54 +788,54 @@ export default function SellerDashboard() {
                             </Typography>
                         </Box>
                     </Box>
-                    <Chip 
-                        size="small" 
-                        label={session.user.role || 'User'} 
-                        sx={{ 
-                            backgroundColor: alpha(colors.primary, 0.1),
-                            color: colors.primary,
+                    <Chip
+                        size="small"
+                        label={session.user.role || 'User'}
+                        sx={{
+                            backgroundColor: alpha(COLORS.primary, 0.1),
+                            color: COLORS.primary,
                             fontWeight: 600,
                             fontSize: '0.75rem'
-                        }} 
+                        }}
                     />
-        </Box>
-                <Box sx={{ py: 1 }}>
-                    <MenuItem 
+                </Box>
+                <Box sx={{py: 1}}>
+                    <MenuItem
                         onClick={handleProfileClick}
                         sx={{
                             mx: 1,
                             borderRadius: 2,
                             transition: 'all 0.2s ease',
                             '&:hover': {
-                                backgroundColor: alpha(colors.primary, 0.1),
+                                backgroundColor: alpha(COLORS.primary, 0.1),
                                 transform: 'translateX(4px)',
                             }
                         }}
                     >
                         <ListItemIcon>
-                            <AccountCircleIcon fontSize="small" sx={{ color: colors.primary }} />
+                            <AccountCircleIcon fontSize="small" sx={{color: COLORS.primary}}/>
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                             primary="Hồ sơ cá nhân"
                         />
                     </MenuItem>
-                    <MenuItem 
+                    <MenuItem
                         onClick={handleLogout}
                         sx={{
                             mx: 1,
                             borderRadius: 2,
-                            color: colors.error,
+                            color: COLORS.error,
                             transition: 'all 0.2s ease',
                             '&:hover': {
-                                backgroundColor: alpha(colors.error, 0.1),
+                                backgroundColor: alpha(COLORS.error, 0.1),
                                 transform: 'translateX(4px)',
                             }
                         }}
                     >
                         <ListItemIcon>
-                            <LogoutIcon fontSize="small" sx={{ color: colors.error }} />
+                            <LogoutIcon fontSize="small" sx={{color: COLORS.error}}/>
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                             primary="Đăng xuất"
                         />
                     </MenuItem>
@@ -876,7 +845,7 @@ export default function SellerDashboard() {
             {/* Navigation Drawer */}
             <Box
                 component="nav"
-                sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+                sx={{width: {md: DRAWER_WIDTH}, flexShrink: {md: 0}}}
             >
                 {/* Mobile drawer */}
                 <Drawer
@@ -887,19 +856,19 @@ export default function SellerDashboard() {
                         keepMounted: true,
                     }}
                     sx={{
-                        display: { xs: 'block', md: 'none' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+                        display: {xs: 'block', md: 'none'},
+                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: DRAWER_WIDTH},
                     }}
                 >
                     {drawer}
                 </Drawer>
-                
+
                 {/* Desktop drawer */}
                 <Drawer
                     variant="permanent"
                     sx={{
-                        display: { xs: 'none', md: 'block' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+                        display: {xs: 'none', md: 'block'},
+                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: DRAWER_WIDTH},
                     }}
                     open
                 >
@@ -912,31 +881,30 @@ export default function SellerDashboard() {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+                    width: {md: `calc(100% - ${DRAWER_WIDTH}px)`},
                     mt: '64px',
                     minHeight: 'calc(100vh - 64px)',
-                    background: `linear-gradient(135deg, ${alpha(colors.surface, 0.3)} 0%, ${alpha(colors.surfaceVariant, 0.1)} 100%)`,
+                    background: `linear-gradient(135deg, ${alpha(COLORS.surface, 0.3)} 0%, ${alpha(COLORS.surfaceVariant, 0.1)} 100%)`,
                     position: 'relative',
                     overflow: 'auto',
                     '&::before': {
                         content: '""',
                         position: 'fixed',
                         top: 0,
-                        left: { md: DRAWER_WIDTH },
+                        left: {md: DRAWER_WIDTH},
                         right: 0,
                         height: '100vh',
-                        background: `radial-gradient(ellipse at top right, ${alpha(colors.primary, 0.05)} 0%, transparent 50%), radial-gradient(ellipse at bottom left, ${alpha(colors.secondary, 0.03)} 0%, transparent 50%)`,
+                        background: `radial-gradient(ellipse at top right, ${alpha(COLORS.primary, 0.05)} 0%, transparent 50%), radial-gradient(ellipse at bottom left, ${alpha(COLORS.secondary, 0.03)} 0%, transparent 50%)`,
                         zIndex: -1,
                         pointerEvents: 'none'
                     }
                 }}
             >
-                                 {/* Dashboard content or nested routes */}
-                 {location.pathname === '/seller/dashboard' ? (
-                     <SellerDashboardContent session={session} />
-                 ) : (
-                    <Box sx={{ p: 4 }}>
-                        <Outlet />
+                {location.pathname === '/seller/dashboard' ? (
+                    <SellerDashboardContent session={session}/>
+                ) : (
+                    <Box sx={{p: 4}}>
+                        <Outlet/>
                     </Box>
                 )}
             </Box>

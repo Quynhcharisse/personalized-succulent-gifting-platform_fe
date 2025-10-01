@@ -1,7 +1,6 @@
 import axiosClient from "../config/APIConfig.jsx";
 
 //------------------- Supplier ------------------//
-
 export const createSupplier = async (supplierData) => {
     const response = await axiosClient.post("/product/supplier", supplierData);
     return response || null
@@ -33,7 +32,6 @@ export const getTotalSupplierCount = async () => {
 };
 
 //------------------- Accessories and Succulents ------------------//
-
 export const createSucculent = async (succulentData) => {
     const response = await axiosClient.post("/product/succulent", succulentData);
     return response || null
@@ -54,12 +52,18 @@ export const getAccessories = async () => {
 
 }
 
-export const createAccessory = async (accessoryData) => {
+//------------------- Accessories ------------------//
+export const createDecorationAccessory = async (accessoryData) => {
     const response = await axiosClient.post("/product/accessory", accessoryData);
     return response || null
 }
 
-export const updateAccessory = async (accessoryData) => {
-    const response = await axiosClient.put("/product/accessory", accessoryData);
+export const createPotAccessory = async (accessoryData) => {
+    const response = await axiosClient.post("/product/accessory", accessoryData);
+    return response || null
+}
+
+export const createSoilAccessory = async (accessoryData) => {
+    const response = await axiosClient.post("/product/accessory", accessoryData);
     return response || null
 }

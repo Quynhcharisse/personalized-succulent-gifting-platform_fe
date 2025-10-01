@@ -3,10 +3,9 @@ import {Alert, Box, Button, Container, Paper, Typography} from '@mui/material';
 import {Add as AddIcon, LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
 import {createSucculent, getSucculents} from '../../../services/ProductService.jsx';
 import SucculentTable from './SucculentTable.jsx';
-import UploadImageField from './UploadImageField.jsx';
 import SucculentDetailDialog from './SucculentDetailDialog.jsx';
 import CreateSucculentDialog from './CreateSucculentDialog.jsx';
-import uploadToCloudinary from "./cloudinaryUpload.js";
+import uploadToCloudinary from "./../../../hooks/cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
 
 const SucculentForm = () => {
@@ -39,32 +38,24 @@ const SucculentForm = () => {
     useRef(null);
     useRef(null);
 
-    
-
     async function handleFileSelect(event) {
-        console.log("File select triggered");
         const file = event.target.files[0];
-        console.log("Selected file:", file);
-
         if (file) {
-            console.log("File details:", {
-                name: file.name,
-                size: file.size,
-                type: file.type
-            });
-
-            const imageUrl = await uploadToCloudinary(file);
-            console.log("Upload result:", imageUrl);
-
-            if (imageUrl) {
-                setFormData(prev => ({...prev, imageUrl}));
-                setSubmitMessage({text: "Upload ảnh thành công!", type: "success"});
-                console.log("Image URL set in form data:", imageUrl);
+            try {
+                // call cloudinary upload API
+                const imageUrl = await uploadToCloudinary(file, {
+                    onProgress: (progress) => setUploadProgress(progress),
+                });
+                if (imageUrl) {
+                    setFormData(prev => ({...prev, imageUrl}));
+                    setSubmitMessage({text: 'Upload ảnh thành công!', type: 'success'});
+                } else {
+                    setSubmitMessage({text: 'Không thể upload ảnh', type: 'error'});
+                }
+            } catch (error) {
+                setSubmitMessage({text: 'Lỗi upload ảnh', type: 'error'});
             }
-        } else {
-            console.log("No file selected");
         }
-
         // Reset file input
         if (event.target) {
             event.target.value = '';
@@ -394,4 +385,3 @@ const SucculentForm = () => {
 };
 
 export default SucculentForm;
-
