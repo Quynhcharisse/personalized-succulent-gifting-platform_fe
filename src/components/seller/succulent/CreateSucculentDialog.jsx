@@ -18,7 +18,7 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {FENG_SHUI_OPTIONS, SIZE_OPTIONS, ZODIAC_OPTIONS} from '../../../hooks/constants.js';
+import {FENGSHUI, SIZE_OPTIONS, ZODIACS} from '../../constants.js';
 import UploadImageField from './UploadImageField.jsx';
 import ButtonCancel from '../../buttonCustom/ButtonCancel.jsx';
 
@@ -183,13 +183,13 @@ const CreateSucculentDialog = ({
                                         renderValue={(selected) => (
                                             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                                                 {selected.map((val) => {
-                                                    const label = FENG_SHUI_OPTIONS.find(opt => opt.value === val)?.label || val;
+                                                    const label = FENGSHUI.find(opt => opt.value === val)?.label || val;
                                                     return <Chip key={val} label={label} size="small"/>;
                                                 })}
                                             </Box>
                                         )}
                                     >
-                                        {FENG_SHUI_OPTIONS.map((option) => (
+                                        {FENGSHUI.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                         ))}
                                     </Select>
@@ -206,13 +206,13 @@ const CreateSucculentDialog = ({
                                         renderValue={(selected) => (
                                             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                                                 {selected.map((val) => {
-                                                    const label = ZODIAC_OPTIONS.find(opt => opt.value === val)?.label || val;
+                                                    const label = ZODIACS.find(opt => opt.value === val)?.label || val;
                                                     return <Chip key={val} label={label} size="small"/>;
                                                 })}
                                             </Box>
                                         )}
                                     >
-                                        {ZODIAC_OPTIONS.map((option) => (
+                                        {ZODIACS.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                         ))}
                                     </Select>

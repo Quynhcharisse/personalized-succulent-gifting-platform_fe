@@ -5,7 +5,7 @@ import {createSucculent, getSucculents} from '../../../services/ProductService.j
 import SucculentTable from './SucculentTable.jsx';
 import SucculentDetailDialog from './SucculentDetailDialog.jsx';
 import CreateSucculentDialog from './CreateSucculentDialog.jsx';
-import uploadToCloudinary from "./../../../hooks/cloudinaryUpload.js";
+import uploadToCloudinary from "../../cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
 
 const SucculentForm = () => {
@@ -208,9 +208,9 @@ const SucculentForm = () => {
                 imageUrl: formData.imageUrl.trim(),
                 fengShuiList: formData.fengShuiList,
                 zodiacList: formData.zodiacList,
-                sizeDetailRequests: formData.sizeDetailRequests.map(size => ({
-                    name: size.name,
-                    priceSell: parseInt(size.priceSell),
+                sizeList: formData.sizeDetailRequests.map(size => ({
+                    sizeName: size.name,
+                    price: parseInt(size.priceSell),
                     quantity: parseInt(size.quantity)
                 }))
             };

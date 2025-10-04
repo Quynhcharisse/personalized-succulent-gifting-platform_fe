@@ -16,7 +16,7 @@ import {
     Typography
 } from '@mui/material';
 import UploadImageField from '../succulent/UploadImageField.jsx';
-import uploadToCloudinary from '../../../hooks/cloudinaryUpload.js';
+import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';
 import ButtonCancel from "../../buttonCustom/ButtonCancel.jsx";
 

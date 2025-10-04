@@ -6,6 +6,9 @@ import ContactWidget from './ContactWidget.jsx'
 export default function Home() {
     const [bannerVideoReady, setBannerVideoReady] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
+    const [isPlaying, setIsPlaying] = useState(true)
+    const [volume, setVolume] = useState(0.5)
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const [showContactDropdown, setShowContactDropdown] = useState(false)
     const videoRef = useRef(null)
     const bannerVideoSrc = '/videoBanner.mp4'
@@ -15,14 +18,90 @@ export default function Home() {
         if (!el) return
         try {
             el.muted = isMuted
-            if (!isMuted && el.paused) {
+            el.volume = isMuted ? 0 : volume
+            if (isPlaying && el.paused) {
                 el.play().catch(() => {
                 })
+            } else if (!isPlaying && !el.paused) {
+                el.pause()
             }
         } catch (error) {
-            console.error('Error setting video muted state:', error)
+            console.error('Error setting video state:', error)
         }
-    }, [isMuted])
+    }, [isMuted, isPlaying, volume])
+
+    // Handle video play/pause
+    const togglePlay = () => {
+        setIsPlaying(prev => !prev)
+    }
+
+    // Handle mute/unmute
+    const toggleMute = () => {
+        setIsMuted(prev => !prev)
+    }
+
+    // Handle volume change with enhanced granular control
+    const handleVolumeChange = (event) => {
+        const newVolume = parseFloat(event.target.value)
+        setVolume(newVolume)
+
+        // Auto mute/unmute based on volume level
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
+
+    // Handle keyboard volume control
+    const handleVolumeKeyDown = (event) => {
+        event.preventDefault()
+        const step = 0.1
+        let newVolume = volume
+
+        switch (event.key) {
+            case 'ArrowUp':
+            case 'ArrowRight':
+                newVolume = Math.min(1, volume + step)
+                break
+            case 'ArrowDown':
+            case 'ArrowLeft':
+                newVolume = Math.max(0, volume - step)
+                break
+            case 'Home':
+                newVolume = 1
+                break
+            case 'End':
+                newVolume = 0
+                break
+            default:
+                return
+        }
+
+        setVolume(Math.round(newVolume * 10) / 10) // Round to 1 decimal place
+
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
+
+    // Handle volume wheel control for fine adjustment
+    const handleVolumeWheel = (event) => {
+        event.preventDefault()
+        const step = 0.05 // Smaller step for wheel control
+        const delta = event.deltaY > 0 ? -step : step
+        const newVolume = Math.max(0, Math.min(1, volume + delta))
+
+        setVolume(Math.round(newVolume * 20) / 20) // Round to 0.05 increments
+
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
 
     // Compact header shadow on scroll
     useEffect(() => {
@@ -36,6 +115,7 @@ export default function Home() {
         onScroll()
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
+
     const bestSellerTeasers = [
         {
             id: 'kit-01',
@@ -273,14 +353,59 @@ export default function Home() {
                         >
                             <source src={bannerVideoSrc} type="video/mp4"/>
                         </video>
-                        <button
-                            className="banner__mute"
-                            title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                            aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                            onClick={() => setIsMuted((m) => !m)}
-                        >
-                            {isMuted ? '🔇' : '🔊'}
-                        </button>
+
+                        {/* Video Controls */}
+                        <div className="banner__controls">
+                            {/* Play/Pause Button */}
+                            <button
+                                className="banner__control-btn banner__play-btn"
+                                title={isPlaying ? 'Tạm dừng video' : 'Phát video'}
+                                aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}
+                                onClick={togglePlay}
+                            >
+                                {isPlaying ? '⏸️' : '▶️'}
+                            </button>
+
+                            {/* Volume Controls */}
+                            <div className="banner__volume-controls">
+                                <button
+                                    className="banner__control-btn banner__volume-btn"
+                                    title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+                                    aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+                                    onClick={toggleMute}
+                                    onMouseEnter={() => setShowVolumeSlider(true)}
+                                    onMouseLeave={() => setShowVolumeSlider(false)}
+                                >
+                                    {isMuted ? '🔇' : volume > 0.5 ? '🔊' : volume > 0 ? '🔉' : '🔈'}
+                                </button>
+
+                                {/* Volume Slider */}
+                                {showVolumeSlider && (
+                                    <div
+                                        className="banner__volume-slider"
+                                        onMouseEnter={() => setShowVolumeSlider(true)}
+                                        onMouseLeave={() => setShowVolumeSlider(false)}
+                                    >
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.1"
+                                            value={isMuted ? 0 : volume}
+                                            onChange={handleVolumeChange}
+                                            onKeyDown={handleVolumeKeyDown}
+                                            onWheel={handleVolumeWheel}
+                                            className="banner__volume-input"
+                                            title="Điều chỉnh âm lượng"
+                                        />
+                                        <div className="banner__volume-percentage">
+                                            {Math.round((isMuted ? 0 : volume) * 100)}%
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {!bannerVideoReady && (
                             <img
                                 className="banner__img"

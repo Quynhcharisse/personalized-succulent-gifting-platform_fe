@@ -40,6 +40,7 @@ import {
     Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import {activateAccount, banAccount, viewAccountBuyerList} from '../../services/AccountService';
+import ActionButton from "../buttonCustom/ActionButton.jsx";
 
 // Helper function to map API response to normalized data
 function mapBuyerAccounts(apiResponse) {
@@ -231,9 +232,10 @@ function AccountDetailModal({open, onClose, account}) {
             </DialogContent>
 
             <DialogActions sx={{px: 3, pb: 3}}>
-                <Button onClick={onClose} variant="outlined">
-                    Đóng
-                </Button>
+                <ActionButton
+                onClick={onClose}
+                action="close"
+                />
             </DialogActions>
         </Dialog>
     );

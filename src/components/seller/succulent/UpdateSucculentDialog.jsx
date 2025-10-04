@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Stack, Alert, Box} from '@mui/material';
 import {updateSucculent} from '../../../services/ProductService.jsx';
-import uploadToCloudinary from '../../../hooks/cloudinaryUpload.js';
+import uploadToCloudinary from '../../cloudinaryUpload.js';
 
 const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
     const [form, setForm] = useState({

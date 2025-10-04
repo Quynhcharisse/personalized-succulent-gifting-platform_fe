@@ -43,7 +43,7 @@ import {
 } from '@mui/icons-material';
 import {Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {NotificationDisplay} from '../services/NotificationService.jsx';
-import {COLORS} from '../hooks/constants.js';
+import {COLORS} from '../components/constants.js';
 
 const DRAWER_WIDTH = 280;
 
