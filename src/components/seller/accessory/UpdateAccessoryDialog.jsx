@@ -18,7 +18,7 @@ import {
 import UploadImageField from '../succulent/UploadImageField.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';
-import ButtonCancel from "../../buttonCustom/ButtonCancel.jsx";
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 export default function UpdateAccessoryDialog({open, onClose, onUpdate, accessoryData}) {
     const [form, setForm] = useState({
@@ -416,10 +416,14 @@ export default function UpdateAccessoryDialog({open, onClose, onUpdate, accessor
                 />
             </DialogContent>
             <DialogActions sx={{p: 3}}>
-                <ButtonCancel/>
-                <Button onClick={handleUpdate} disabled={isSubmitting} variant="contained">
+                <ActionButton
+                    type={"cancel"}
+                    action={"cancel"}
+                    onClick={onClose}
+                />
+                <ActionButton onClick={handleUpdate} disabled={isSubmitting} variant="contained">
                     {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
-                </Button>
+                </ActionButton>
             </DialogActions>
         </Dialog>
     );

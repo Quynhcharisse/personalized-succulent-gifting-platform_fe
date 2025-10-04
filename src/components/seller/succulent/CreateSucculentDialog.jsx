@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     Alert,
     Box,
@@ -18,9 +18,9 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {FENGSHUI, SIZE_OPTIONS, ZODIACS} from '../../constants.js';
+import {FENGSHUI, ZODIACS} from '../../constants.js';
 import UploadImageField from './UploadImageField.jsx';
-import ButtonCancel from '../../buttonCustom/ButtonCancel.jsx';
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 const CreateSucculentDialog = ({
                                    open,
@@ -39,6 +39,27 @@ const CreateSucculentDialog = ({
                                    isUploading,
                                    uploadProgress
                                }) => {
+    const buildCreateSucculentPayload = (data) => {
+        const nonEmpty = (data.sizeDetailRequests || []).filter((item) =>
+            (item && String(item.name || '').trim())
+        );
+        const sizeList = nonEmpty.map((item) => ({
+            sizeName: (item.name || '').toLowerCase(),
+            price: Number(item.price) || 0,
+            maxArea: Number(item.maxArea) || 0,
+            minArea: Number(item.minArea) || 0,
+            quantity: Number(item.quantity) || 0,
+        }));
+
+        return {
+            speciesName: data.species_name,
+            description: data.description,
+            imageUrl: data.imageUrl,
+            fengShuiList: data.fengShuiList || [],
+            zodiacList: data.zodiacList || [],
+            sizeList
+        };
+    };
     return (
         <Dialog
             open={open}
@@ -141,10 +162,10 @@ const CreateSucculentDialog = ({
                 minHeight: '450px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'flex-start'
             }}>
                 <Box sx={{width: '100%', maxWidth: '800px', mx: 'auto'}}>
-                    <Grid container spacing={4}>
+                    <Grid container spacing={4} mt={2}>
                         {currentStep === 1 && (
                             <Box sx={{width: '100%', display: 'flex', flexDirection: 'column', gap: 3}}>
                                 <TextField
@@ -156,7 +177,7 @@ const CreateSucculentDialog = ({
                                     helperText={errors.species_name}
                                     placeholder="Tên loài sen đá *"
                                     required
-                                    sx={{mt: 18}}
+                                    sx={{mt: 5}}
                                 />
 
                                 <TextField
@@ -230,40 +251,17 @@ const CreateSucculentDialog = ({
 
                         {currentStep === 2 && (
                             <Box sx={{width: '100%', display: 'flex', flexDirection: 'column', gap: 3}}>
-                                <FormControl fullWidth error={!!errors.selectedSizes} required sx={{mt: 18}}>
-                                    <InputLabel sx={{fontWeight: 700, color: '#424242', fontSize: '0.95rem'}}>Kích thước
-                                        sản phẩm</InputLabel>
-                                    <Select
-                                        multiple
-                                        value={formData.selectedSizes}
-                                        onChange={(e) => {
-                                            const selectedSizes = e.target.value;
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                selectedSizes,
-                                                sizeDetailRequests: selectedSizes.map(size => ({
-                                                    name: SIZE_OPTIONS.find(opt => opt.value === size)?.label || size,
-                                                    priceSell: '',
-                                                    quantity: ''
-                                                }))
-                                            }));
-                                        }}
-                                        label="Kích thước sản phẩm"
-                                        renderValue={(selected) => (
-                                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
-                                                {selected.map((val) => {
-                                                    const label = SIZE_OPTIONS.find(opt => opt.value === val)?.label || val;
-                                                    return <Chip key={val} label={label} size="small"/>;
-                                                })}
-                                            </Box>
-                                        )}
-                                    >
-                                        {SIZE_OPTIONS.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-
+                                {errors.selectedSizes && (
+                                    <Typography color="error" variant="body2">{errors.selectedSizes}</Typography>
+                                )}
+                                {useEffect(() => {
+                                    if (!Array.isArray(formData.sizeDetailRequests) || formData.sizeDetailRequests.length === 0) {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            sizeDetailRequests: [{ name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                        }))
+                                    }
+                                }, [formData.sizeDetailRequests?.length])}
                                 {formData.sizeDetailRequests.length > 0 && (
                                     <>
                                         <Typography variant="h5" sx={{
@@ -282,8 +280,53 @@ const CreateSucculentDialog = ({
                                                     p: 3,
                                                     borderRadius: 3,
                                                     background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                                                    border: '2px solid rgba(76, 175, 80, 0.1)'
+                                                    border: '2px solid rgba(76, 175, 80, 0.1)',
+                                                    mt: 2
                                                 }}>
+                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                                        <Typography variant="h6" sx={{
+                                                            mb: 2,
+                                                            fontWeight: 700,
+                                                            color: 'success.dark',
+                                                            pb: 1,
+                                                            borderBottom: '2px solid rgba(76, 175, 80, 0.2)'
+                                                        }}>
+                                                            Kích thước #{index + 1}
+                                                        </Typography>
+                                                        <Button color="error" onClick={() => {
+                                                            const updated = [...formData.sizeDetailRequests];
+                                                            updated.splice(index, 1);
+                                                            setFormData(prev => ({...prev, sizeDetailRequests: updated}));
+                                                        }}>Xóa</Button>
+                                                    </Box>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Tên kích thước (ví dụ: small, medium)"
+                                                        value={size.name}
+                                                        onChange={(e) => {
+                                                            const updatedSizes = [...formData.sizeDetailRequests];
+                                                            updatedSizes[index] = {
+                                                                ...updatedSizes[index],
+                                                                name: e.target.value
+                                                            };
+                                                            // auto-append a new empty row if this is the last and now non-empty
+                                                            const isLast = index === updatedSizes.length - 1;
+                                                            const isNonEmpty = String(e.target.value || '').trim().length > 0;
+                                                            const canAdd = updatedSizes.length < 5;
+                                                            const nextList = isLast && isNonEmpty && canAdd
+                                                                ? [...updatedSizes, { name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                                                : updatedSizes;
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                sizeDetailRequests: nextList
+                                                            }));
+                                                        }}
+                                                        error={!!errors[`size_${index}_name`]}
+                                                        helperText={errors[`size_${index}_name`] || 'Nhập tên kích thước'}
+                                                        placeholder="small"
+                                                        required
+                                                    />
+                                                    <Box sx={{height: 12}}/>
                                                     <Typography variant="h6" sx={{
                                                         mb: 2,
                                                         fontWeight: 700,
@@ -292,27 +335,33 @@ const CreateSucculentDialog = ({
                                                         pb: 1,
                                                         borderBottom: '2px solid rgba(76, 175, 80, 0.2)'
                                                     }}>
-                                                        {size.name}
+                                                        Thiết lập giá và số lượng
                                                     </Typography>
                                                     <TextField
                                                         fullWidth
                                                         label="Giá bán (VNĐ)"
                                                         type="number"
                                                         inputProps={{min: 1}}
-                                                        value={size.priceSell}
+                                                        value={size.price}
                                                         onChange={(e) => {
                                                             const updatedSizes = [...formData.sizeDetailRequests];
                                                             updatedSizes[index] = {
                                                                 ...updatedSizes[index],
-                                                                priceSell: e.target.value
+                                                                price: e.target.value
                                                             };
+                                                            const isLast = index === updatedSizes.length - 1;
+                                                            const isNonEmpty = String(e.target.value || '').trim().length > 0;
+                                                            const canAdd = updatedSizes.length < 5;
+                                                            const nextList = isLast && isNonEmpty && canAdd
+                                                                ? [...updatedSizes, { name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                                                : updatedSizes;
                                                             setFormData(prev => ({
                                                                 ...prev,
-                                                                sizeDetailRequests: updatedSizes
+                                                                sizeDetailRequests: nextList
                                                             }));
                                                         }}
-                                                        error={!!errors[`size_${index}_priceSell`]}
-                                                        helperText={errors[`size_${index}_priceSell`] || 'Nhập giá bán cho kích thước này'}
+                                                        error={!!errors[`size_${index}_price`]}
+                                                        helperText={errors[`size_${index}_price`] || 'Nhập giá bán cho kích thước này'}
                                                         placeholder="16500"
                                                         InputProps={{
                                                             startAdornment: <InputAdornment
@@ -320,6 +369,57 @@ const CreateSucculentDialog = ({
                                                         }}
                                                         required
                                                     />
+                                                    <Box sx={{height: 12}}/>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xs={12} sm={6}>
+                                                            <TextField
+                                                                fullWidth
+                                                                label="Diện tích tối thiểu (m²)"
+                                                                type="number"
+                                                                inputProps={{min: 0}}
+                                                                value={size.minArea || ''}
+                                                                onChange={(e) => {
+                                                                    const updatedSizes = [...formData.sizeDetailRequests];
+                                                                    updatedSizes[index] = {
+                                                                        ...updatedSizes[index],
+                                                                        minArea: e.target.value
+                                                                    };
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        sizeDetailRequests: updatedSizes
+                                                                    }));
+                                                                }}
+                                                                error={!!errors[`size_${index}_minArea`]}
+                                                                helperText={errors[`size_${index}_minArea`] || 'Nhập diện tích tối thiểu'}
+                                                                placeholder="1"
+                                                                required
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={12} sm={6}>
+                                                            <TextField
+                                                                fullWidth
+                                                                label="Diện tích tối đa (m²)"
+                                                                type="number"
+                                                                inputProps={{min: 0}}
+                                                                value={size.maxArea || ''}
+                                                                onChange={(e) => {
+                                                                    const updatedSizes = [...formData.sizeDetailRequests];
+                                                                    updatedSizes[index] = {
+                                                                        ...updatedSizes[index],
+                                                                        maxArea: e.target.value
+                                                                    };
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        sizeDetailRequests: updatedSizes
+                                                                    }));
+                                                                }}
+                                                                error={!!errors[`size_${index}_maxArea`]}
+                                                                helperText={errors[`size_${index}_maxArea`] || 'Nhập diện tích tối đa'}
+                                                                placeholder="2"
+                                                                required
+                                                            />
+                                                        </Grid>
+                                                    </Grid>
                                                     <Box sx={{height: 12}}/>
                                                     <TextField
                                                         fullWidth
@@ -369,13 +469,11 @@ const CreateSucculentDialog = ({
                 minHeight: '90px',
                 borderRadius: '0 0 24px 24px'
             }}>
-                <ButtonCancel
+                <ActionButton
                     onClick={onClose}
-                    variant="contained"
-                    sx={{minWidth: '120px', fontWeight: 700, fontSize: '0.95rem'}}
-                >
-                    Hủy
-                </ButtonCancel>
+                    type={"button"}
+                    action={'cancel'}
+                />
 
                 <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
                     {currentStep > 1 && (
@@ -421,15 +519,7 @@ const CreateSucculentDialog = ({
                             </Box>
                         </Button>
                     ) : (
-                        <Button onClick={onSubmit} variant="contained" disabled={isSubmitting || isValidating} sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            px: 5,
-                            py: 1.5,
-                            background: 'linear-gradient(45deg, #ff6b35 30%, #f7931e 90%)',
-                            fontSize: '0.95rem',
-                            minWidth: '160px'
-                        }}>
+                <ActionButton onClick={() => onSubmit && onSubmit(buildCreateSucculentPayload(formData))} disabled={isSubmitting || isValidating}>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 {isSubmitting ? <Box sx={{
                                     width: 18,
@@ -443,7 +533,7 @@ const CreateSucculentDialog = ({
                                     Tạo Sản Phẩm
                                 </>)}
                             </Box>
-                        </Button>
+                        </ActionButton>
                     )}
                 </Box>
             </DialogActions>

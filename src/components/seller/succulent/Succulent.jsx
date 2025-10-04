@@ -7,6 +7,7 @@ import SucculentDetailDialog from './SucculentDetailDialog.jsx';
 import CreateSucculentDialog from './CreateSucculentDialog.jsx';
 import uploadToCloudinary from "../../cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 const SucculentForm = () => {
     // Form state
@@ -119,22 +120,46 @@ const SucculentForm = () => {
     // Step validation functions
     const validateStep1 = () => {
         const newErrors = {};
-        if (!formData.species_name.trim()) {
-            newErrors.species_name = 'Tên loài sen đá là bắt buộc';
+        const species = (formData.species_name || '').trim();
+        const description = (formData.description || '').trim();
+        const imageUrl = (formData.imageUrl || '').trim();
+
+        if (!species) {
+            newErrors.species_name = 'Tên loài là bắt buộc';
+        } else if (species.length > 100) {
+            newErrors.species_name = 'Tên loài không được vượt quá 100 ký tự';
         }
-        if (!formData.description.trim()) {
-            newErrors.description = 'Mô tả sản phẩm là bắt buộc';
+
+        if (!description) {
+            newErrors.description = 'Mô tả là bắt buộc';
+        } else if (description.length > 300) {
+            newErrors.description = 'Mô tả không được vượt quá 300 ký tự';
         }
-        if (!formData.imageUrl.trim()) {
-            newErrors.imageUrl = 'URL hình ảnh là bắt buộc';
+
+        if (!imageUrl) {
+            newErrors.imageUrl = 'Image URL is required';
+        } else if (!/^(http|https):\/\/.+/i.test(imageUrl)) {
+            newErrors.imageUrl = 'Invalid Image URL format';
+        } else if (!/\.(jpg|jpeg|png|gif)$/i.test(imageUrl)) {
+            newErrors.imageUrl = 'Image URL must end with a valid image file extension (jpg, jpeg, png, gif)';
+        }
+
+        if (Array.isArray(formData.fengShuiList) && formData.fengShuiList.some((v) => v == null)) {
+            newErrors.fengShuiList = 'Danh sách phong thủy chứa giá trị không hợp lệ';
+        }
+        if (Array.isArray(formData.zodiacList) && formData.zodiacList.some((v) => v == null)) {
+            newErrors.zodiacList = 'Danh sách cung hoàng đạo chứa giá trị không hợp lệ';
         }
         return newErrors;
     };
 
     const validateStep2 = () => {
         const newErrors = {};
-        if (formData.selectedSizes.length === 0) {
+        const count = Array.isArray(formData.sizeDetailRequests) ? formData.sizeDetailRequests.length : 0;
+        if (count === 0) {
             newErrors.selectedSizes = 'Vui lòng chọn ít nhất một kích thước';
+        } else if (count > 5) {
+            newErrors.selectedSizes = 'Hệ thống chỉ có tối đa 5 kích thước';
         }
         return newErrors;
     };
@@ -142,11 +167,14 @@ const SucculentForm = () => {
     const validateStep3 = () => {
         const newErrors = {};
         formData.sizeDetailRequests.forEach((size, index) => {
-            if (!size.priceSell || size.priceSell <= 0) {
-                newErrors[`size_${index}_priceSell`] = 'Giá bán phải lớn hơn 0';
+            if (!size.name || !String(size.name).trim()) {
+                newErrors[`size_${index}_name`] = 'Tên kích thước là bắt buộc';
             }
-            if (!size.quantity || Number(size.quantity) <= 0) {
-                newErrors[`size_${index}_quantity`] = 'Số lượng phải lớn hơn 0';
+            if (size.price === '' || size.price === null || Number(size.price) <= 0) {
+                newErrors[`size_${index}_price`] = 'Cần nhập giá bán lớn hơn 0';
+            }
+            if (size.quantity === '' || size.quantity === null || Number(size.quantity) < 0) {
+                newErrors[`size_${index}_quantity`] = 'Số lượng cây không được là số âm';
             }
         });
         return newErrors;
@@ -160,8 +188,6 @@ const SucculentForm = () => {
             case 1:
                 stepErrors = {
                     ...validateStep1(),
-                    ...(formData.fengShuiList.length === 0 ? {fengShuiList: 'Phong thủy là bắt buộc'} : {}),
-                    ...(formData.zodiacList.length === 0 ? {zodiacList: 'Cung hoàng đạo là bắt buộc'} : {})
                 };
                 break;
             case 2:
@@ -209,9 +235,11 @@ const SucculentForm = () => {
                 fengShuiList: formData.fengShuiList,
                 zodiacList: formData.zodiacList,
                 sizeList: formData.sizeDetailRequests.map(size => ({
-                    sizeName: size.name,
-                    price: parseInt(size.priceSell),
-                    quantity: parseInt(size.quantity)
+                    sizeName: String(size.name).trim().toLowerCase(),
+                    price: Number(size.price),
+                    minArea: Number(size.minArea) || 0,
+                    maxArea: Number(size.maxArea) || 0,
+                    quantity: Number(size.quantity)
                 }))
             };
 
@@ -301,7 +329,7 @@ const SucculentForm = () => {
                             </Typography>
                         </Box>
                     </Box>
-                    <Button
+                    <ActionButton
                         variant="contained"
                         startIcon={<AddIcon/>}
                         onClick={handleOpenCreateDialog}
@@ -319,7 +347,7 @@ const SucculentForm = () => {
                         }}
                     >
                         Tạo Sản Phẩm
-                    </Button>
+                    </ActionButton>
                 </Box>
 
                 {/* Error Message */}

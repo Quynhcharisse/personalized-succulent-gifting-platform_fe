@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Stack, Alert, Box} from '@mui/material';
 import {updateSucculent} from '../../../services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
     const [form, setForm] = useState({
@@ -183,21 +184,16 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                 </Box>
             </DialogContent>
             <DialogActions sx={{p: 3}}>
-                <Button
+                <ActionButton
                     onClick={onClose}
-                    variant="outlined"
-                    sx={{borderRadius: 2, fontWeight: 600}}
-                >
-                    Đóng
-                </Button>
-                <Button
+                    type={"button"}
+                    action={"close"}/>
+                <ActionButton
                     onClick={handleSubmit}
-                    variant="contained"
                     disabled={submitting}
-                    sx={{borderRadius: 2, fontWeight: 700}}
                 >
                     {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
-                </Button>
+                </ActionButton>
             </DialogActions>
         </Dialog>
     );

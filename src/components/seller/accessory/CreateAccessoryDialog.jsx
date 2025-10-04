@@ -15,7 +15,6 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import ButtonCancel from '../../buttonCustom/ButtonCancel.jsx';
 import UploadImageField from '../succulent/UploadImageField.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';

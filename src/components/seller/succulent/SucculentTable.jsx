@@ -11,6 +11,35 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
         );
     }
 
+    const renderSizeChips = (succulent) => {
+        let labels = [];
+        if (Array.isArray(succulent?.sizeList)) {
+            labels = succulent.sizeList.map((s) => (s.sizeName || s.name || s).toString());
+        } else if (Array.isArray(succulent?.size)) {
+            labels = succulent.size.map((s) => (s.sizeName || s.name || s).toString());
+        } else if (succulent?.size && typeof succulent.size === 'object') {
+            labels = Object.keys(succulent.size);
+        } else if (typeof succulent?.size === 'string') {
+            labels = [succulent.size];
+        }
+
+        if (labels.length === 0) return null;
+        return (
+            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                {labels.map((label) => (
+                    <Chip
+                        key={label}
+                        label={String(label).toUpperCase()}
+                        color="info"
+                        variant="outlined"
+                        size="small"
+                        sx={{fontWeight: 600}}
+                    />
+                ))}
+            </Stack>
+        );
+    };
+
     return (
         <TableContainer component={Paper} sx={{
             borderRadius: 3,
@@ -58,13 +87,7 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
                                 {succulent.speciesName}
                             </TableCell>
                             <TableCell>
-                                <Chip
-                                    label={succulent.size}
-                                    color="info"
-                                    variant="outlined"
-                                    size="small"
-                                    sx={{fontWeight: 600}}
-                                />
+                                {renderSizeChips(succulent)}
                             </TableCell>
                             <TableCell sx={{minWidth: 160}}>
                                 {succulent.createdAt ? new Date(succulent.createdAt).toLocaleString('vi-VN') : '-'}
