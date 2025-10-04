@@ -62,7 +62,8 @@ export const createSoilAccessory = async (accessoryData) => {
     return response || null
 }
 
-export const getAccessories = async () => {
-    const response = await axiosClient.get("/product/accessories");
+export const getAccessories = async (type = 'all') => {
+    const params = new URLSearchParams({ t: String(type || 'all') });
+    const response = await axiosClient.get(`/product/accessories?${params.toString()}`);
     return response || null
 }
