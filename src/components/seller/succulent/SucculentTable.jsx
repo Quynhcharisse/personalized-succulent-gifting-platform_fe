@@ -98,7 +98,7 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
                             <TableCell>
                                 <Chip
                                     label={succulent.status}
-                                    color={succulent.status === 'ACTIVE' || succulent.status === 'Còn hàng' ? 'success' : 'error'}
+                                    color={(succulent.status === 'ACTIVE' || succulent.status === 'AVAILABLE' || succulent.status === 'Còn hàng') ? 'success' : 'error'}
                                     variant="filled"
                                     size="small"
                                     sx={{fontWeight: 600}}
