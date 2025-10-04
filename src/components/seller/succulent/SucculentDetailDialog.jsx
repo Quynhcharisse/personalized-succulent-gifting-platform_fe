@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box, Button, Chip, Dialog, DialogContent, DialogTitle, Paper, Typography} from '@mui/material';
 import {LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
-import {FENG_SHUI_OPTIONS, ZODIAC_OPTIONS} from '../../../hooks/constants.js';
+import {FENGSHUI, ZODIACS} from '../../constants.js';
 
 const SucculentDetailDialog = ({open, onClose, succulent}) => {
     return (
@@ -115,7 +115,9 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                 objectFit: 'cover',
                                                 display: 'block'
                                             }}
-                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
                                         />
                                     </Box>
                                     <Typography variant="h6" sx={{
@@ -142,8 +144,10 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <LocalFloristIcon sx={{fontSize: '4rem', color: 'success.main', opacity: 0.7, mb: 1}}/>
-                                    <Typography variant="h6" sx={{color: 'success.dark', fontWeight: 600, opacity: 0.8}}>
+                                    <LocalFloristIcon
+                                        sx={{fontSize: '4rem', color: 'success.main', opacity: 0.7, mb: 1}}/>
+                                    <Typography variant="h6"
+                                                sx={{color: 'success.dark', fontWeight: 600, opacity: 0.8}}>
                                         {succulent.speciesName || succulent.name}
                                     </Typography>
                                 </Box>
@@ -220,10 +224,20 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     flexDirection: 'column',
                                                     justifyContent: 'center'
                                                 }}>
-                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.8rem'}}>
+                                                    <Typography variant="subtitle2" sx={{
+                                                        fontWeight: 600,
+                                                        mb: 0.5,
+                                                        color: 'text.secondary',
+                                                        fontSize: '0.8rem'
+                                                    }}>
                                                         Giá bán:
                                                     </Typography>
-                                                    <Typography variant="h6" sx={{color: 'success.main', fontWeight: 800, fontSize: '1.1rem', wordBreak: 'break-word'}}>
+                                                    <Typography variant="h6" sx={{
+                                                        color: 'success.main',
+                                                        fontWeight: 800,
+                                                        fontSize: '1.1rem',
+                                                        wordBreak: 'break-word'
+                                                    }}>
                                                         {succulent.priceSell?.toLocaleString('vi-VN')} ₫
                                                     </Typography>
                                                 </Box>
@@ -239,10 +253,19 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     flexDirection: 'column',
                                                     justifyContent: 'center'
                                                 }}>
-                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.8rem'}}>
+                                                    <Typography variant="subtitle2" sx={{
+                                                        fontWeight: 600,
+                                                        mb: 0.5,
+                                                        color: 'text.secondary',
+                                                        fontSize: '0.8rem'
+                                                    }}>
                                                         Số lượng:
                                                     </Typography>
-                                                    <Typography variant="h6" sx={{fontWeight: 800, color: 'purple.main', fontSize: '1.1rem'}}>
+                                                    <Typography variant="h6" sx={{
+                                                        fontWeight: 800,
+                                                        color: 'purple.main',
+                                                        fontSize: '1.1rem'
+                                                    }}>
                                                         {succulent.quantity}
                                                     </Typography>
                                                 </Box>
@@ -258,7 +281,12 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                 flexDirection: 'column',
                                                 justifyContent: 'center'
                                             }}>
-                                                <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.8rem'}}>
+                                                <Typography variant="subtitle2" sx={{
+                                                    fontWeight: 600,
+                                                    mb: 0.5,
+                                                    color: 'text.secondary',
+                                                    fontSize: '0.8rem'
+                                                }}>
                                                     Trạng thái:
                                                 </Typography>
                                                 <Chip
@@ -266,7 +294,14 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     color={succulent.quantity > 0 ? 'success' : 'error'}
                                                     variant="filled"
                                                     size="small"
-                                                    sx={{fontWeight: 700, fontSize: '0.8rem', px: 1.5, py: 0.25, maxWidth: 'fit-content', mx: 'auto'}}
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        fontSize: '0.8rem',
+                                                        px: 1.5,
+                                                        py: 0.25,
+                                                        maxWidth: 'fit-content',
+                                                        mx: 'auto'
+                                                    }}
                                                 />
                                             </Box>
                                         </Box>
@@ -293,14 +328,24 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                 flexDirection: 'column',
                                                 justifyContent: 'center'
                                             }}>
-                                                <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1, color: 'text.secondary', fontSize: '0.8rem'}}>
+                                                <Typography variant="subtitle2" sx={{
+                                                    fontWeight: 600,
+                                                    mb: 1,
+                                                    color: 'text.secondary',
+                                                    fontSize: '0.8rem'
+                                                }}>
                                                     Phong thủy:
                                                 </Typography>
-                                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'flex-start'}}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: 0.5,
+                                                    justifyContent: 'flex-start'
+                                                }}>
                                                     {succulent.fengShuiElements?.map((element, index) => (
                                                         <Chip
                                                             key={index}
-                                                            label={FENG_SHUI_OPTIONS.find(opt => opt.value === element)?.label || element}
+                                                            label={FENGSHUI.find(opt => opt.value === element)?.label || element}
                                                             color="success"
                                                             variant="outlined"
                                                             size="small"
@@ -320,14 +365,24 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                 flexDirection: 'column',
                                                 justifyContent: 'center'
                                             }}>
-                                                <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1, color: 'text.secondary', fontSize: '0.8rem'}}>
+                                                <Typography variant="subtitle2" sx={{
+                                                    fontWeight: 600,
+                                                    mb: 1,
+                                                    color: 'text.secondary',
+                                                    fontSize: '0.8rem'
+                                                }}>
                                                     Cung hoàng đạo:
                                                 </Typography>
-                                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'flex-start'}}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: 0.5,
+                                                    justifyContent: 'flex-start'
+                                                }}>
                                                     {succulent.zodiacs?.map((zodiac, index) => (
                                                         <Chip
                                                             key={index}
-                                                            label={ZODIAC_OPTIONS.find(opt => opt.value === zodiac)?.label || zodiac}
+                                                            label={ZODIACS.find(opt => opt.value === zodiac)?.label || zodiac}
                                                             color="info"
                                                             variant="outlined"
                                                             size="small"

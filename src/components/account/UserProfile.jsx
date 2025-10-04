@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
-    alpha,
     Avatar,
     Box,
     Button,
@@ -19,6 +18,7 @@ import {
     useMediaQuery,
     useTheme
 } from '@mui/material'
+import {alpha} from '@mui/material/styles'
 import {
     AutoAwesome as AutoAwesomeIcon,
     Badge as BadgeIcon,
@@ -30,10 +30,10 @@ import {
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
 import {updateProfile, viewProfile} from '../../services/AccountService.jsx'
-import {COLORS, FENGSHUI, GENDERS, ZODIACS} from '../../hooks/constants.js'
+import {COLORS, FENGSHUI, GENDERS, ZODIACS} from '../constants.js'
 import {UserProfileValidation} from './UserProfileValidation.jsx';
-import ButtonCancel from "../buttonCustom/ButtonCancel.jsx";
-import {uploadToCloudinary} from '../../hooks/cloudinaryUpload.js';
+import {uploadToCloudinary} from '../cloudinaryUpload.js';
+import ActionButton from "../buttonCustom/ActionButton.jsx";
 
 
 export default function UserProfile() {
@@ -63,6 +63,23 @@ export default function UserProfile() {
     const fileInputRef = useRef(null)
     const abortController = useRef(null)
 
+    const normalizeGender = (value) => {
+        return ['MALE', 'FEMALE'].includes(value) ? value : '';
+    };
+
+    const extractUsernameFromEmail = (email) => {
+        if (!email) return '';
+        return email.split('@')[0];
+    };
+
+    const normalizeStringField = (value) => {
+        if (value === null || value === undefined) return '';
+        const str = String(value).trim();
+        if (!str) return '';
+        if (str.toUpperCase() === 'N/A') return '';
+        return str;
+    };
+
     useEffect(() => {
         let mounted = true
 
@@ -79,20 +96,19 @@ export default function UserProfile() {
                     if (userFromStorage) {
                         const parsedUser = JSON.parse(userFromStorage)
 
-
-                        // Lấy dữ liệu cơ bản từ localStorage
+                        // Lấy dữ liệu cơ bản từ localStorage và dùng email làm username nếu không có tên
                         formData = {
-                            name: parsedUser.user?.name || parsedUser.name || '',
+                            name: normalizeStringField(parsedUser.user?.name || parsedUser.name) || extractUsernameFromEmail(parsedUser.email) || '',
                             email: parsedUser.email || '',
                             role: parsedUser.role || '',
                             active: parsedUser.active !== undefined ? parsedUser.active : true,
                             registerDate: parsedUser.registerDate || parsedUser.createdAt || '',
-                            phone: parsedUser.user?.phone || parsedUser.phone || '',
-                            gender: parsedUser.user?.gender || parsedUser.gender || '',
-                            address: parsedUser.user?.address || parsedUser.address || '',
+                            phone: normalizeStringField(parsedUser.user?.phone || parsedUser.phone),
+                            gender: normalizeGender(parsedUser.user?.gender || parsedUser.gender),
+                            address: normalizeStringField(parsedUser.user?.address || parsedUser.address),
                             avatarUrl: parsedUser.user?.avatarUrl || parsedUser.avatarUrl || parsedUser.avatar || '',
-                            fengShui: parsedUser.user?.fengShui || parsedUser.fengShui || '',
-                            zodiac: parsedUser.user?.zodiac || parsedUser.zodiac || ''
+                            fengShui: normalizeStringField(parsedUser.user?.fengShui || parsedUser.fengShui),
+                            zodiac: normalizeStringField(parsedUser.user?.zodiac || parsedUser.zodiac)
                         }
 
 
@@ -115,17 +131,17 @@ export default function UserProfile() {
                         if (mounted) {
                             // Cập nhật form với dữ liệu từ API, ưu tiên dữ liệu mới
                             const updatedFormData = {
-                                name: userData.name || formData.name || '',
+                                name: normalizeStringField(userData.name) || normalizeStringField(formData.name) || extractUsernameFromEmail(accountData.email) || '',
                                 email: accountData.email || formData.email || '',
                                 role: accountData.role || formData.role || '',
                                 active: accountData.active !== undefined ? accountData.active : formData.active,
                                 registerDate: accountData.registerDate || formData.registerDate || '',
-                                phone: userData.phone || formData.phone || '',
-                                gender: userData.gender || formData.gender || '',
-                                address: userData.address || formData.address || '',
+                                phone: normalizeStringField(userData.phone) || normalizeStringField(formData.phone) || '',
+                                gender: normalizeGender(userData.gender || formData.gender),
+                                address: normalizeStringField(userData.address) || normalizeStringField(formData.address) || '',
                                 avatarUrl: userData.avatarUrl || formData.avatarUrl || '',
-                                fengShui: userData.fengShui || formData.fengShui || '',
-                                zodiac: userData.zodiac || formData.zodiac || ''
+                                fengShui: normalizeStringField(userData.fengShui) || normalizeStringField(formData.fengShui) || '',
+                                zodiac: normalizeStringField(userData.zodiac) || normalizeStringField(formData.zodiac) || ''
                             }
 
                             setUserRole(accountData.role || formData.role || '')
@@ -191,6 +207,30 @@ export default function UserProfile() {
         return ZODIACS.find(z => z.value === value) || {label: value, icon: '⭐'}
     }
 
+    function updateLocalStorageUser(partial) {
+        try {
+            const userFromStorage = localStorage.getItem('user')
+            if (!userFromStorage) return
+            const parsedUser = JSON.parse(userFromStorage)
+
+            const updated = {...parsedUser}
+            if (updated.user && typeof updated.user === 'object') {
+                updated.user = {...updated.user, ...partial}
+            }
+            // mirror some fields at top-level if they exist in current shape
+            const mirrorKeys = ['name', 'phone', 'gender', 'address', 'avatarUrl', 'fengShui', 'zodiac']
+            mirrorKeys.forEach((k) => {
+                if (Object.prototype.hasOwnProperty.call(updated, k) && Object.prototype.hasOwnProperty.call(partial, k)) {
+                    updated[k] = partial[k]
+                }
+            })
+
+            localStorage.setItem('user', JSON.stringify(updated))
+        } catch (e) {
+            // no-op
+        }
+    }
+
     async function handleSubmit(e) {
         e.preventDefault()
         const error = UserProfileValidation(form);
@@ -201,8 +241,7 @@ export default function UserProfile() {
         }
         try {
             setLoading(true)
-            const editableFields = {
-                name: form.name,
+            const payload = {
                 phone: form.phone,
                 gender: form.gender,
                 address: form.address,
@@ -210,12 +249,20 @@ export default function UserProfile() {
                 fengShui: form.fengShui,
                 zodiac: form.zodiac
             }
-            const res = await updateProfile(editableFields)
+            // Only update name if user actually changed it
+            const trimmedCurrentName = (form.name || '').trim()
+            const trimmedOriginalName = (originalForm?.name || '').trim()
+            if (trimmedCurrentName !== trimmedOriginalName) {
+                payload.name = trimmedCurrentName
+            }
+
+            const res = await updateProfile(payload)
             if (res?.status === 200) {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật thông tin thành công', {variant: 'success'})
                 setOriginalForm(form)
                 setIsEditing(false)
                 setErrors({})
+                updateLocalStorageUser(payload)
             } else {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật không thành công', {variant: 'warning'})
             }
@@ -977,22 +1024,21 @@ export default function UserProfile() {
                                                     {isEditing && (
                                                         <Stack direction="row" spacing={2} justifyContent="flex-end"
                                                                sx={{mt: 2}}>
-                                                            <ButtonCancel/>
-                                                            <Button
+                                                            <ActionButton
+                                                                action="cancel"
+                                                                type="button"
+                                                                onClick={handleCancel}
+                                                            >
+                                                                Hủy
+                                                            </ActionButton>
+                                                            <ActionButton
+                                                                action="primary"
+                                                                loading={loading}
                                                                 type="submit"
-                                                                variant="contained"
                                                                 disabled={loading}
-                                                                sx={{
-                                                                    borderRadius: 2,
-                                                                    backgroundColor: COLORS.primary,
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: COLORS.primaryDark
-                                                                    }
-                                                                }}
                                                             >
                                                                 {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                                                            </Button>
+                                                            </ActionButton>
                                                         </Stack>
                                                     )}
                                                 </Grid>

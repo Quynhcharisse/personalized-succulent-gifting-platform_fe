@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {
     Avatar,
     Box,
@@ -31,15 +31,13 @@ import {
     ExpandLess,
     ExpandMore
 } from '@mui/icons-material'
-import {useState} from 'react'
 
 // Component để render nội dung có hình ảnh
 const ContentRenderer = ({content}) => {
     // Tách nội dung thành các dòng
     const lines = content.split('\n');
 
-    return (
-        <Box>
+    return (<Box>
             {lines.map((line, index) => {
                 const trimmedLine = line.trim();
 
@@ -47,8 +45,7 @@ const ContentRenderer = ({content}) => {
                 const markdownMatch = trimmedLine.match(/^!\[(.*?)\]\((.*?)\)$/);
                 if (markdownMatch) {
                     const [, altText, src] = markdownMatch;
-                    return (
-                        <Box key={index} sx={{my: 2}}>
+                    return (<Box key={index} sx={{my: 2}}>
                             <img
                                 src={src}
                                 alt={altText}
@@ -65,15 +62,13 @@ const ContentRenderer = ({content}) => {
                                     e.target.style.display = 'none';
                                 }}
                             />
-                        </Box>
-                    );
+                        </Box>);
                 }
 
                 // Kiểm tra nếu là URL hình ảnh thuần túy: http://... hoặc https://...
                 const urlMatch = trimmedLine.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg)(_grande\.jpg|\.jpg)?$/i);
                 if (urlMatch) {
-                    return (
-                        <Box key={index} sx={{my: 2}}>
+                    return (<Box key={index} sx={{my: 2}}>
                             <img
                                 src={trimmedLine}
                                 alt="Hình ảnh minh họa"
@@ -90,15 +85,13 @@ const ContentRenderer = ({content}) => {
                                     e.target.style.display = 'none';
                                 }}
                             />
-                        </Box>
-                    );
+                        </Box>);
                 }
 
                 // Kiểm tra nếu là URL file.hstatic.net (không cần đuôi file)
                 const hstaticMatch = trimmedLine.match(/^https?:\/\/file\.hstatic\.net\/.*$/i);
                 if (hstaticMatch) {
-                    return (
-                        <Box key={index} sx={{my: 2}}>
+                    return (<Box key={index} sx={{my: 2}}>
                             <img
                                 src={trimmedLine}
                                 alt="Hình ảnh minh họa"
@@ -115,35 +108,28 @@ const ContentRenderer = ({content}) => {
                                     e.target.style.display = 'none';
                                 }}
                             />
-                        </Box>
-                    );
+                        </Box>);
                 }
 
                 // Nếu không phải hình ảnh, render như text thường
                 if (trimmedLine) {
-                    return (
-                        <Typography
+                    return (<Typography
                             key={index}
                             variant="body1"
                             sx={{
-                                lineHeight: 1.8,
-                                mb: line === '' ? 1 : 0,
-                                '& strong': {
-                                    color: 'primary.main',
-                                    fontWeight: 700
+                                lineHeight: 1.8, mb: line === '' ? 1 : 0, '& strong': {
+                                    color: 'primary.main', fontWeight: 700
                                 }
                             }}
                         >
                             {line}
-                        </Typography>
-                    );
+                        </Typography>);
                 } else {
                     // Dòng trống tạo khoảng cách
                     return <Box key={index} sx={{height: '0.5rem'}}/>;
                 }
             })}
-        </Box>
-    );
+        </Box>);
 };
 
 export default function Blogs() {
@@ -154,8 +140,7 @@ export default function Blogs() {
 
     const toggleSection = (sectionId) => {
         setExpandedSections(prev => ({
-            ...prev,
-            [sectionId]: !prev[sectionId]
+            ...prev, [sectionId]: !prev[sectionId]
         }))
     }
 
@@ -170,37 +155,31 @@ export default function Blogs() {
         setExpandedSections({})
     }
 
-    const posts = [
-        {
-            id: 'huong-dan-tuoi-nuoc',
-            title: 'Hướng dẫn tưới nước cho sen đá: Bí quyết để cây luôn khỏe mạnh!',
-            author: 'Tòng Nguyễn Thanh',
-            date: 'Thứ 6, 15 Tháng 11, 2025',
-            category: 'Hướng dẫn chăm sóc sen đá',
-            readTime: '5 phút đọc',
-            description: '💧 Tưới nước đúng cách là yếu tố quan trọng nhất quyết định sự sống còn của sen đá. Khám phá những bí quyết vàng từ chuyên gia với hướng dẫn chi tiết từng bước, tần suất và những lưu ý quan trọng.',
-            tags: ['Tưới nước', 'Chăm sóc cơ bản', 'Sen đá'],
-            difficulty: 'Dễ',
-            img: '/huongdantuoinuoc.webp',
-            content: {
-                intro: 'Chào mừng bạn quay trở lại Vườn sen đá! Hôm nay, chúng ta sẽ đi sâu vào một trong những khía cạnh quan trọng nhất và cũng là thách thức lớn nhất khi chăm sóc sen đá: cách tưới nước đúng chuẩn. Dù sen đá nổi tiếng với khả năng chịu hạn, việc tưới nước sai cách lại là nguyên nhân hàng đầu khiến chúng "ra đi" đấy!',
-                sections: [
-                    {
-                        id: 'nguyen-tac-vang',
-                        title: 'Nguyên tắc Vàng: "Ngâm và Khô" (Soak and Dry)',
-                        content: `Đây là phương pháp tưới nước cơ bản và hiệu quả nhất cho sen đá. Hãy nhớ kỹ:
+    const posts = [{
+        id: 'huong-dan-tuoi-nuoc',
+        title: 'Hướng dẫn tưới nước cho sen đá: Bí quyết để cây luôn khỏe mạnh!',
+        author: 'Tòng Nguyễn Thanh',
+        date: 'Thứ 6, 15 Tháng 11, 2025',
+        category: 'Hướng dẫn chăm sóc sen đá',
+        readTime: '5 phút đọc',
+        description: '💧 Tưới nước đúng cách là yếu tố quan trọng nhất quyết định sự sống còn của sen đá. Khám phá những bí quyết vàng từ chuyên gia với hướng dẫn chi tiết từng bước, tần suất và những lưu ý quan trọng.',
+        tags: ['Tưới nước', 'Chăm sóc cơ bản', 'Sen đá'],
+        difficulty: 'Dễ',
+        img: '/huongdantuoinuoc.webp',
+        content: {
+            intro: 'Chào mừng bạn quay trở lại Vườn sen đá! Hôm nay, chúng ta sẽ đi sâu vào một trong những khía cạnh quan trọng nhất và cũng là thách thức lớn nhất khi chăm sóc sen đá: cách tưới nước đúng chuẩn. Dù sen đá nổi tiếng với khả năng chịu hạn, việc tưới nước sai cách lại là nguyên nhân hàng đầu khiến chúng "ra đi" đấy!',
+            sections: [{
+                id: 'nguyen-tac-vang', title: 'Nguyên tắc Vàng: "Ngâm và Khô" (Soak and Dry)', content: `Đây là phương pháp tưới nước cơ bản và hiệu quả nhất cho sen đá. Hãy nhớ kỹ:
 
                         Tưới thật đẫm: Đổ nước từ từ và đều khắp bề mặt đất cho đến khi bạn thấy nước chảy ra từ lỗ thoát nước dưới đáy chậu. Đảm bảo toàn bộ đất trong chậu được làm ẩm hoàn toàn.
 
                         Để nước thoát hoàn toàn: Sau khi tưới, hãy để nước thừa chảy hết. Đừng bao giờ để chậu sen đá của bạn ngâm trong nước đọng ở đĩa lót hoặc khay, vì điều này chắc chắn sẽ dẫn đến thối rễ.
 
                         Đợi đất khô hoàn toàn: Đây là bước quan trọng nhất! Hãy chờ đến khi đất trong chậu khô cong, không còn ẩm chút nào, rồi mới tưới đợt tiếp theo.`
-                    },
+            },
 
-                    {
-                        id: 'cach-kiem-tra',
-                        title: 'Làm thế nào để biết khi nào cần tưới?',
-                        content: `Đừng bao giờ tưới nước cho sen đá theo một lịch trình cố định. Thay vào đó, hãy kiểm tra độ ẩm của đất:
+                {
+                    id: 'cach-kiem-tra', title: 'Làm thế nào để biết khi nào cần tưới?', content: `Đừng bao giờ tưới nước cho sen đá theo một lịch trình cố định. Thay vào đó, hãy kiểm tra độ ẩm của đất:
 
                         Kiểm tra bằng ngón tay: Cắm ngón tay sâu khoảng 2-3cm vào đất. Nếu cảm thấy khô ráo, đó là lúc cây cần nước.
 
@@ -209,12 +188,10 @@ export default function Blogs() {
                         Cân trọng lượng chậu: Một chậu sen đá khô sẽ nhẹ hơn đáng kể so với một chậu vừa được tưới.
 
                         Quan sát cây: Lá sen đá hơi héo, nhăn nheo hoặc mềm nhũn đôi khi là dấu hiệu của việc cây đang khát.`
-                    },
+                },
 
-                    {
-                        id: 'tan-suat-tuoi',
-                        title: 'Tần suất tưới nước: Không có con số cố định!',
-                        content: `Tần suất tưới nước phụ thuộc vào nhiều yếu tố:
+                {
+                    id: 'tan-suat-tuoi', title: 'Tần suất tưới nước: Không có con số cố định!', content: `Tần suất tưới nước phụ thuộc vào nhiều yếu tố:
 
                     Mùa trong năm:
                     Mùa sinh trưởng (xuân và hè): 1-2 tuần/lần
@@ -228,17 +205,14 @@ export default function Blogs() {
                     Ánh sáng: Nhiều ánh sáng = tiêu thụ nước nhiều hơn
                     Kích thước chậu: Chậu nhỏ khô nhanh hơn
                     Loại đất: Đất thoát nước tốt khô nhanh hơn`
-                    },
+                },
 
-                    {
-                        id: 'thoi-diem-tuoi',
-                        title: 'Thời điểm tốt nhất để tưới nước',
-                        content: `Nên tưới nước cho sen đá vào buổi sáng sớm. Điều này giúp đất có thời gian khô ráo trong ngày, giảm thiểu nguy cơ độ ẩm tồn đọng quá lâu. Tránh tưới vào buổi tối muộn vì đất ẩm qua đêm dễ sinh nấm bệnh.`
-                    },
-                    {
-                        id: 'luu-y-quan-trong',
-                        title: 'Những lưu ý quan trọng khác',
-                                                content: `💧 Nguyên tắc tưới nước cơ bản:
+                {
+                    id: 'thoi-diem-tuoi',
+                    title: 'Thời điểm tốt nhất để tưới nước',
+                    content: `Nên tưới nước cho sen đá vào buổi sáng sớm. Điều này giúp đất có thời gian khô ráo trong ngày, giảm thiểu nguy cơ độ ẩm tồn đọng quá lâu. Tránh tưới vào buổi tối muộn vì đất ẩm qua đêm dễ sinh nấm bệnh.`
+                }, {
+                    id: 'luu-y-quan-trong', title: 'Những lưu ý quan trọng khác', content: `💧 Nguyên tắc tưới nước cơ bản:
 
                         1. Tưới vào đất, không tưới lên lá: Hạn chế việc để nước đọng trên lá, đặc biệt ở phần lõi để tránh thối nhũn.
 
@@ -249,11 +223,8 @@ export default function Blogs() {
                         4. Không phun sương: Phun sương không cung cấp đủ nước cho rễ và tạo điều kiện cho nấm phát triển.
 
                         5. Tưới "đẫm" nhưng không "ngâm": Đảm bảo nước chảy ra khỏi lỗ thoát nước, sau đó để ráo hoàn toàn.`
-                    },
-                    {
-                        id: 'dau-hieu-sai-cach',
-                        title: 'Dấu hiệu của việc tưới nước sai cách',
-                        content: `Úng nước (Overwatering):
+                }, {
+                    id: 'dau-hieu-sai-cach', title: 'Dấu hiệu của việc tưới nước sai cách', content: `Úng nước (Overwatering):
                         1. Lá chuyển màu vàng, nhũn, trong mờ và mềm
                         2. Lá dễ rụng khi chạm vào
                         3. Thân cây mềm nhũn, có đốm đen hoặc nâu
@@ -264,29 +235,24 @@ export default function Blogs() {
                         2. Cây có vẻ yếu ớt, không căng mọng
                         
                         Bằng cách tuân thủ nguyên tắc "ngâm và khô" và quan sát kỹ cây, bạn sẽ sớm trở thành bậc thầy trong việc tưới nước cho sen đá. Hãy nhớ: thà để cây khát một chút còn hơn là để cây úng nước!`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'ten-goi-cac-loai-sen-da',
-            title: 'Tên gọi của các loại sen đá',
-            author: 'Nguyễn Thanh Tòng',
-            date: 'Chủ nhật, 23 Tháng 11, 2025',
-            category: 'Kiến thức cơ bản',
-            readTime: '7 phút đọc',
-            description: '🌿 Khám phá thế giới đa dạng của sen đá với hàng trăm loài khác nhau. Cùng tìm hiểu tên gọi khoa học và tên thường gọi của các loại sen đá phổ biến tại Việt Nam qua video hướng dẫn chi tiết.',
-            tags: ['Phân loại', 'Kiến thức', 'Đa dạng sinh học'],
-            difficulty: 'Trung bình',
-            img: 'https://file.hstatic.net/1000187613/article/3114278_501865876025351308_n_copy_e916b1c9aa604492b627610d379c113f_5b930c122bc84777b7b8fc3f16deeb60.jpg',
-            content: {
-                intro: 'Sen đá thuộc họ Crassulaceae với hơn 400 loài khác nhau trên toàn thế giới. Mỗi loài có đặc điểm riêng về hình dáng, màu sắc và cách chăm sóc.',
-                videoUrl: 'https://youtu.be/C7ytQoOSN2I',
-                sections: [
-                    {
-                        id: 'video-huong-dan',
-                        title: '🎥 Video hướng dẫn nhận biết các loại sen đá',
-                        content: `Xem video chi tiết để nhận biết và phân biệt các loại sen đá phổ biến:
+                }]
+        }
+    }, {
+        id: 'ten-goi-cac-loai-sen-da',
+        title: 'Tên gọi của các loại sen đá',
+        author: 'Nguyễn Thanh Tòng',
+        date: 'Chủ nhật, 23 Tháng 11, 2025',
+        category: 'Kiến thức cơ bản',
+        readTime: '7 phút đọc',
+        description: '🌿 Khám phá thế giới đa dạng của sen đá với hàng trăm loài khác nhau. Cùng tìm hiểu tên gọi khoa học và tên thường gọi của các loại sen đá phổ biến tại Việt Nam qua video hướng dẫn chi tiết.',
+        tags: ['Phân loại', 'Kiến thức', 'Đa dạng sinh học'],
+        difficulty: 'Trung bình',
+        img: 'https://file.hstatic.net/1000187613/article/3114278_501865876025351308_n_copy_e916b1c9aa604492b627610d379c113f_5b930c122bc84777b7b8fc3f16deeb60.jpg',
+        content: {
+            intro: 'Sen đá thuộc họ Crassulaceae với hơn 400 loài khác nhau trên toàn thế giới. Mỗi loài có đặc điểm riêng về hình dáng, màu sắc và cách chăm sóc.',
+            videoUrl: 'https://youtu.be/C7ytQoOSN2I',
+            sections: [{
+                id: 'video-huong-dan', title: '🎥 Video hướng dẫn nhận biết các loại sen đá', content: `Xem video chi tiết để nhận biết và phân biệt các loại sen đá phổ biến:
 
                         Nội dung video bao gồm:
                         Cách nhận biết sen đá qua hình dáng lá
@@ -294,11 +260,8 @@ export default function Blogs() {
                         Kích thước và cách phát triển
                         Mẹo phân biệt các loài tương tự
                         Video này sẽ giúp bạn nhận biết chính xác các loại sen đá phổ biến và tránh nhầm lẫn khi mua sắm.`
-                    },
-                    {
-                        id: 'sen-da-pho-bien',
-                        title: 'Các loại sen đá phổ biến tại Việt Nam',
-                        content: `Echeveria (Sen đá hoa hồng):
+            }, {
+                id: 'sen-da-pho-bien', title: 'Các loại sen đá phổ biến tại Việt Nam', content: `Echeveria (Sen đá hoa hồng):
                         Echeveria elegans - Sen đá trắng: Lá dày, màu xanh bạc với viền hồng nhạt
                         Echeveria pulidonis - Sen đá xanh bạc: Lá có viền đỏ cam đặc trưng
                         Echeveria Black Prince - Sen đá đen: Lá màu tím đen, rất độc đáo
@@ -317,11 +280,8 @@ export default function Blogs() {
                         2. Chú ý đến màu sắc và texture của lá
                         3. Xem cách lá xếp chồng lên nhau
                         4. Kiểm tra có lông tơ hay không`
-                    },
-                    {
-                        id: 'cach-phan-biet',
-                        title: 'Cách phân biệt các loại sen đá tương tự',
-                        content: `Echeveria vs Sempervivum:
+            }, {
+                id: 'cach-phan-biet', title: 'Cách phân biệt các loại sen đá tương tự', content: `Echeveria vs Sempervivum:
                         1. Echeveria: Lá mịn, bóng, không có lông
                         2. Sempervivum: Thường có lông mịn, chịu lạnh tốt hơn
 
@@ -334,29 +294,26 @@ export default function Blogs() {
                         2. Aloe: Lá có gai nhỏ ở viền
 
                         Việc nhận biết chính xác tên loài sẽ giúp bạn chăm sóc đúng cách và tìm hiểu thêm thông tin chuyên sâu về từng loại.`
-                    }
-                ]
-            }
-        },
-        {
-            id: '3-phuong-phap-nhan-giong',
-            title: '3 Phương pháp nhân giống sen đá phổ biến',
-            author: 'Nguyễn Thanh Tòng',
-            date: 'Thứ 3, 05 Tháng 11, 2025',
-            category: 'Kỹ thuật nâng cao',
-            readTime: '10 phút đọc',
-            description: '🌱 Học cách nhân giống sen đá bằng lá, chồi bên và chia cụm một cách hiệu quả. Mỗi phương pháp có ưu nhược điểm riêng, phù hợp với từng loại sen đá khác nhau. Tạo vườn sen đá của riêng bạn!',
-            tags: ['Nhân giống', 'Kỹ thuật', 'Lá cành'],
-            difficulty: 'Nâng cao',
-            img: 'https://file.hstatic.net/1000187613/article/57015457904_7174790791213088768_n_fb56bd2012fd4b098a7b92312258f9ad_3f24a91b5c884ff88621dadf66d5c4c8.jpg',
-            content: {
-                intro: 'Nhân giống sen đá là cách tuyệt vời để mở rộng bộ sưu tập mà không tốn chi phí. Có 3 phương pháp chính được sử dụng phổ biến: nhân giống bằng lá, chồi bên và chia cụm.',
-                videoUrl: 'https://youtu.be/QgtHwOEW1VU',
-                sections: [
-                    {
-                        id: 'video-huong-dan-nhan-giong',
-                        title: '🎥 Video hướng dẫn chi tiết 3 phương pháp nhân giống',
-                        content: `Xem video hướng dẫn từng bước cách nhân giống sen đá hiệu quả:
+            }]
+        }
+    }, {
+        id: '3-phuong-phap-nhan-giong',
+        title: '3 Phương pháp nhân giống sen đá phổ biến',
+        author: 'Nguyễn Thanh Tòng',
+        date: 'Thứ 3, 05 Tháng 11, 2025',
+        category: 'Kỹ thuật nâng cao',
+        readTime: '10 phút đọc',
+        description: '🌱 Học cách nhân giống sen đá bằng lá, chồi bên và chia cụm một cách hiệu quả. Mỗi phương pháp có ưu nhược điểm riêng, phù hợp với từng loại sen đá khác nhau. Tạo vườn sen đá của riêng bạn!',
+        tags: ['Nhân giống', 'Kỹ thuật', 'Lá cành'],
+        difficulty: 'Nâng cao',
+        img: 'https://file.hstatic.net/1000187613/article/57015457904_7174790791213088768_n_fb56bd2012fd4b098a7b92312258f9ad_3f24a91b5c884ff88621dadf66d5c4c8.jpg',
+        content: {
+            intro: 'Nhân giống sen đá là cách tuyệt vời để mở rộng bộ sưu tập mà không tốn chi phí. Có 3 phương pháp chính được sử dụng phổ biến: nhân giống bằng lá, chồi bên và chia cụm.',
+            videoUrl: 'https://youtu.be/QgtHwOEW1VU',
+            sections: [{
+                id: 'video-huong-dan-nhan-giong',
+                title: '🎥 Video hướng dẫn chi tiết 3 phương pháp nhân giống',
+                content: `Xem video hướng dẫn từng bước cách nhân giống sen đá hiệu quả:
 
                         Nội dung video bao gồm:
                         1. Cách chọn lá khỏe mạnh để nhân giống
@@ -364,11 +321,8 @@ export default function Blogs() {
                         3. Phương pháp chia cụm đúng cách
                         4. Chuẩn bị đất và môi trường phù hợp
                         Video này sẽ giúp bạn thực hành thành công các phương pháp nhân giống sen đá ngay tại nhà.`
-                    },
-                    {
-                        id: 'nhan-giong-bang-la',
-                        title: '1. Phương pháp nhân giống bằng lá 🍃',
-                        content: `Đây là phương pháp phổ biến và dễ thực hiện nhất:
+            }, {
+                id: 'nhan-giong-bang-la', title: '1. Phương pháp nhân giống bằng lá 🍃', content: `Đây là phương pháp phổ biến và dễ thực hiện nhất:
 
                         Bước 1: Chọn lá
                         1. Chọn lá khỏe mạnh, đầy đặn từ cây mẹ
@@ -390,11 +344,8 @@ export default function Blogs() {
                         3. Khi cây con đủ lớn (3-5cm) có thể tách riêng
 
                         Tỷ lệ thành công: 70-80% với hầu hết các loại sen đá`
-                    },
-                    {
-                        id: 'nhan-giong-bang-choi-ben',
-                        title: '2. Phương pháp nhân giống bằng chồi bên 🌿',
-                        content: `Phù hợp với sen đá có khả năng đẻ chồi bên:
+            }, {
+                id: 'nhan-giong-bang-choi-ben', title: '2. Phương pháp nhân giống bằng chồi bên 🌿', content: `Phù hợp với sen đá có khả năng đẻ chồi bên:
 
                         Bước 1: Xác định chồi bên
                         1. Chồi bên mọc từ thân chính của cây mẹ
@@ -418,11 +369,8 @@ export default function Blogs() {
 
                         Thời gian: Chồi sẽ ổn định sau 1-2 tuần
                         Tỷ lệ thành công: 85-90%`
-                    },
-                    {
-                        id: 'nhan-giong-bang-chia-cum',
-                        title: '3. Phương pháp chia cụm 🌺',
-                        content: `Áp dụng cho sen đá phát triển thành cụm lớn:
+            }, {
+                id: 'nhan-giong-bang-chia-cum', title: '3. Phương pháp chia cụm 🌺', content: `Áp dụng cho sen đá phát triển thành cụm lớn:
 
                         Bước 1: Chuẩn bị
                         1. Ngừng tưới nước 3-5 ngày trước khi chia
@@ -451,11 +399,8 @@ export default function Blogs() {
                         1. Thực hiện vào mùa xuân hoặc đầu mùa hè
                         2. Tránh chia cụm khi cây đang ra hoa
                         3. Theo dõi cây sát trong 2 tuần đầu`
-                    },
-                    {
-                        id: 'luu-y-chung',
-                        title: '📋 Lưu ý chung cho tất cả phương pháp',
-                        content: `Môi trường lý tưởng:
+            }, {
+                id: 'luu-y-chung', title: '📋 Lưu ý chung cho tất cả phương pháp', content: `Môi trường lý tưởng:
                         1. Nhiệt độ: 18-25°C
                         2. Độ ẩm: 40-60%
                         3. Ánh sáng: Sáng nhưng không trực tiếp
@@ -483,29 +428,24 @@ export default function Blogs() {
                         2. Xuất hiện lá mới
                         3. Rễ phát triển tốt
                         4. Cây đứng vững`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'mua-mua-cham-soc',
-            title: 'Mùa mưa chăm sóc sen đá thế nào?',
-            author: 'Nguyễn Thanh Tòng',
-            date: 'Thứ 4, 12 Tháng 11, 2025',
-            category: 'Chăm sóc theo mùa',
-            readTime: '8 phút đọc',
-            description: '☔ Mùa mưa là thử thách lớn đối với sen đá. Khám phá những bí quyết chuyên gia để bảo vệ cây khỏi úng rễ, thối thân và các bệnh do độ ẩm cao. Giữ sen đá luôn khỏe mạnh cả mùa mưa!',
-            tags: ['Mùa mưa', 'Phòng bệnh', 'Chăm sóc đặc biệt'],
-            difficulty: 'Trung bình',
-            img: 'https://file.hstatic.net/1000187613/article/img_6097_copy_0958f7b8930a4224a83002a1f965e110_ffe532ad87024513811b08820f523d70.jpg',
-            content: {
-                intro: 'Mùa mưa với độ ẩm cao và ít ánh sáng là thử thách lớn cho sen đá. Tuy nhiên, với những biện pháp đúng đắn, bạn hoàn toàn có thể giữ cho sen đá khỏe mạnh và phát triển tốt ngay cả trong mùa khó khăn này.',
-                videoUrl: 'https://youtu.be/yurv8gG9Dq4',
-                sections: [
-                    {
-                        id: 'video-cham-soc-mua-mua',
-                        title: '🎥 Video hướng dẫn chăm sóc sen đá mùa mưa',
-                        content: `Xem video chi tiết về cách chăm sóc sen đá hiệu quả trong mùa mưa:
+            }]
+        }
+    }, {
+        id: 'mua-mua-cham-soc',
+        title: 'Mùa mưa chăm sóc sen đá thế nào?',
+        author: 'Nguyễn Thanh Tòng',
+        date: 'Thứ 4, 12 Tháng 11, 2025',
+        category: 'Chăm sóc theo mùa',
+        readTime: '8 phút đọc',
+        description: '☔ Mùa mưa là thử thách lớn đối với sen đá. Khám phá những bí quyết chuyên gia để bảo vệ cây khỏi úng rễ, thối thân và các bệnh do độ ẩm cao. Giữ sen đá luôn khỏe mạnh cả mùa mưa!',
+        tags: ['Mùa mưa', 'Phòng bệnh', 'Chăm sóc đặc biệt'],
+        difficulty: 'Trung bình',
+        img: 'https://file.hstatic.net/1000187613/article/img_6097_copy_0958f7b8930a4224a83002a1f965e110_ffe532ad87024513811b08820f523d70.jpg',
+        content: {
+            intro: 'Mùa mưa với độ ẩm cao và ít ánh sáng là thử thách lớn cho sen đá. Tuy nhiên, với những biện pháp đúng đắn, bạn hoàn toàn có thể giữ cho sen đá khỏe mạnh và phát triển tốt ngay cả trong mùa khó khăn này.',
+            videoUrl: 'https://youtu.be/yurv8gG9Dq4',
+            sections: [{
+                id: 'video-cham-soc-mua-mua', title: '🎥 Video hướng dẫn chăm sóc sen đá mùa mưa', content: `Xem video chi tiết về cách chăm sóc sen đá hiệu quả trong mùa mưa:
 
                         Nội dung video bao gồm:
                         1. Cách di chuyển sen đá tránh mưa trực tiếp
@@ -514,11 +454,8 @@ export default function Blogs() {
                         4. Điều chỉnh lịch tưới nước phù hợp
 
                         Video này sẽ giúp bạn nắm vững các kỹ thuật chăm sóc sen đá chuyên nghiệp trong mùa mưa.`
-                    },
-                    {
-                        id: 'van-de-mua-mua',
-                        title: '⚠️ Những thách thức chính trong mùa mưa',
-                        content: `1. Độ ẩm cao (70-90%)
+            }, {
+                id: 'van-de-mua-mua', title: '⚠️ Những thách thức chính trong mùa mưa', content: `1. Độ ẩm cao (70-90%)
                         + Tạo điều kiện lý tưởng cho nấm phát triển
                         + Làm chậm quá trình bay hơi nước từ đất
                         + Tăng nguy cơ thối rễ và thối thân
@@ -542,11 +479,8 @@ export default function Blogs() {
                         + Không khí ẩm ướt, ứ đọng
                         + Tạo môi trường ủ bệnh
                         + Làm chậm quá trình làm khô đất sau tưới`
-                    },
-                    {
-                        id: 'bien-phap-phong-ngua',
-                        title: '🛡️ Biện pháp phòng ngừa và bảo vệ',
-                        content: `Di chuyển vị trí:
+            }, {
+                id: 'bien-phap-phong-ngua', title: '🛡️ Biện pháp phòng ngừa và bảo vệ', content: `Di chuyển vị trí:
                         + Chuyển sen đá vào chỗ có mái che
                         + Tránh để cây ngoài trời khi mưa lớn
                         + Đặt ở ban công có mái hiên hoặc trong nhà
@@ -570,11 +504,8 @@ export default function Blogs() {
                         + Sử dụng máy hút ẩm nếu cần thiết
                         + Đặt cây gần cửa sổ có nắng lọt
                         + Tránh phun sương trong mùa mưa`
-                    },
-                    {
-                        id: 'dieu-chinh-cham-soc',
-                        title: '🔧 Điều chỉnh cách chăm sóc',
-                        content: `Giảm tần suất tưới nước:
+            }, {
+                id: 'dieu-chinh-cham-soc', title: '🔧 Điều chỉnh cách chăm sóc', content: `Giảm tần suất tưới nước:
                         + Từ 1-2 tuần/lần xuống 3-4 tuần/lần
                         + Chỉ tưới khi đất thật sự khô cong
                         + Tưới vào buổi sáng để có thời gian bay hơi
@@ -598,11 +529,8 @@ export default function Blogs() {
                         + Phun fungicide hữu cơ (neem oil)
                         + Tăng thông gió và giảm độ ẩm
                         + Cách ly cây bị bệnh khỏi cây khỏe`
-                    },
-                    {
-                        id: 'phuong-phap-nang-cao',
-                        title: '⚡ Phương pháp chăm sóc nâng cao',
-                        content: `Tạo môi trường micro:
+            }, {
+                id: 'phuong-phap-nang-cao', title: '⚡ Phương pháp chăm sóc nâng cao', content: `Tạo môi trường micro:
                         + Dùng khay sỏi để tạo độ ẩm cục bộ
                         + Nhóm cây cùng loại lại với nhau
                         + Sử dụng màng phủ trong suốt nếu cần
@@ -626,11 +554,8 @@ export default function Blogs() {
                         + Chuẩn bị từ trước mùa mưa
                         + Tạo kho chứa cây trong nhà
                         + Đầu tư hệ thống đèn và quạt chuyên dụng`
-                    },
-                    {
-                        id: 'dau-hieu-canh-bao',
-                        title: '🚨 Dấu hiệu cảnh báo cần xử lý ngay',
-                        content: `Dấu hiệu nguy hiểm:
+            }, {
+                id: 'dau-hieu-canh-bao', title: '🚨 Dấu hiệu cảnh báo cần xử lý ngay', content: `Dấu hiệu nguy hiểm:
                         Lá chuyển màu vàng, trong suốt
                         + Thân cây mềm nhũn khi chạm vào
                         + Xuất hiện đốm đen hoặc nâu trên lá
@@ -653,28 +578,23 @@ export default function Blogs() {
                         + Cách ly cây mới về ít nhất 2 tuần
                         + Không tái sử dụng đất cũ đã từng bị bệnh
                         + Ghi chép nhật ký chăm sóc để rút kinh nghiệm`
-                    }
-                ]
-            }
-        },
-        {
-            id: '10-sai-lam',
-            title: '10 Sai lầm ai cũng mắc khi chăm sóc sen đá',
-            author: 'Vườn Sen Đá Việt Nam',
-            date: 'Thứ 7, 09 Tháng 11, 2025',
-            category: 'Kinh nghiệm thực tế',
-            readTime: '12 phút đọc',
-            description: '⚠️ Tổng hợp những sai lầm phổ biến nhất mà người mới bắt đầu thường mắc phải. Từ việc tưới nước sai cách đến chọn chậu không phù hợp. Kinh nghiệm thực tế từ vườn sen đá lâu năm tại Sài Gòn!',
-            tags: ['Sai lầm thường gặp', 'Kinh nghiệm', 'Người mới'],
-            difficulty: 'Dễ',
-            img: 'http://file.hstatic.net/1000187613/article/img_39741.jpg',
-            content: {
-                intro: 'Vườn nhận được rất nhiều câu hỏi liên quan đến việc sen đá có dễ trồng hay không? Thường đối với câu hỏi này vườn rất ít trả lời "Có" hoặc "Không". Vì chăm sóc sen đá không hẳn dễ hoặc khó, mà quan trọng là bạn có chăm sóc đúng cách hay không. Với kinh nghiệm trồng sen đá lâu năm tại Sài Gòn, vườn xin chia sẻ những sai lầm phổ biến để giúp các bạn vừa tiếp xúc với sen đá.',
-                sections: [
-                    {
-                        id: 'sai-lam-tuoi-it-nuoc',
-                        title: '1️⃣ Sai lầm: Tưới nước rất ít vì sợ cây úng',
-                        content: `Quan niệm sai lầm phổ biến:
+            }]
+        }
+    }, {
+        id: '10-sai-lam',
+        title: '10 Sai lầm ai cũng mắc khi chăm sóc sen đá',
+        author: 'Vườn Sen Đá Việt Nam',
+        date: 'Thứ 7, 09 Tháng 11, 2025',
+        category: 'Kinh nghiệm thực tế',
+        readTime: '12 phút đọc',
+        description: '⚠️ Tổng hợp những sai lầm phổ biến nhất mà người mới bắt đầu thường mắc phải. Từ việc tưới nước sai cách đến chọn chậu không phù hợp. Kinh nghiệm thực tế từ vườn sen đá lâu năm tại Sài Gòn!',
+        tags: ['Sai lầm thường gặp', 'Kinh nghiệm', 'Người mới'],
+        difficulty: 'Dễ',
+        img: 'http://file.hstatic.net/1000187613/article/img_39741.jpg',
+        content: {
+            intro: 'Vườn nhận được rất nhiều câu hỏi liên quan đến việc sen đá có dễ trồng hay không? Thường đối với câu hỏi này vườn rất ít trả lời "Có" hoặc "Không". Vì chăm sóc sen đá không hẳn dễ hoặc khó, mà quan trọng là bạn có chăm sóc đúng cách hay không. Với kinh nghiệm trồng sen đá lâu năm tại Sài Gòn, vườn xin chia sẻ những sai lầm phổ biến để giúp các bạn vừa tiếp xúc với sen đá.',
+            sections: [{
+                id: 'sai-lam-tuoi-it-nuoc', title: '1️⃣ Sai lầm: Tưới nước rất ít vì sợ cây úng', content: `Quan niệm sai lầm phổ biến:
                         Rất nhiều bạn nghĩ rằng sen đá là cây mọng nước do đó cần rất ít nước, hoặc thậm chí có bạn không tưới nước cho cây trong thời gian dài. Quan niệm này hoàn toàn sai!
 
                         Hậu quả của việc tưới ít nước:
@@ -693,11 +613,8 @@ export default function Blogs() {
                         + Tuyệt đối không dùng đất sạch bán ngoài thị trường
                         + Sử dụng chậu đất nung để giúp đất mau khô hơn
                         + Tưới đẫm nhưng đảm bảo thoát nước tốt`
-                    },
-                    {
-                        id: 'sai-lam-chau-qua-to',
-                        title: '2️⃣ Sai lầm: Trồng cây nhỏ trong chậu rất to',
-                        content: `Tại sao không nên trồng cây nhỏ trong chậu quá to:
+            }, {
+                id: 'sai-lam-chau-qua-to', title: '2️⃣ Sai lầm: Trồng cây nhỏ trong chậu rất to', content: `Tại sao không nên trồng cây nhỏ trong chậu quá to:
                         1. Chậu to → lượng đất nhiều → giữ lại rất nhiều nước
                         2. Cây nhỏ có nhu cầu nước ít
                         3. Nước dư thừa gây úng rễ cho cây
@@ -713,11 +630,8 @@ export default function Blogs() {
                         + Chậu vừa với kích thước cây hiện tại
                         + Để dư 1-2cm mỗi bên so với đường kính cây
                         + Ưu tiên chậu đất nung thay vì nhựa`
-                    },
-                    {
-                        id: 'sai-lam-khong-thay-dat',
-                        title: '3️⃣ Sai lầm: Không thay đất khi vừa mua về',
-                        content: `Tại sao cần thay đất khi mua về:
+            }, {
+                id: 'sai-lam-khong-thay-dat', title: '3️⃣ Sai lầm: Không thay đất khi vừa mua về', content: `Tại sao cần thay đất khi mua về:
                         + Hầu hết sen đá được trồng và nhân giống tại Đà Lạt
                         + Khí hậu Đà Lạt lạnh khô → đất cần giữ nước cao
                         + Khí hậu Sài Gòn nóng ẩm → đất cần thoát nước nhanh
@@ -735,11 +649,10 @@ export default function Blogs() {
                         + Lấy cây ra khỏi chậu cũ
                         + Rũ sạch đất cũ ở rễ
                         + Trồng vào đất mới phù hợp với khí hậu địa phương`
-                    },
-                    {
-                        id: 'sai-lam-trong-phong-may-lanh',
-                        title: '4️⃣ Sai lầm: Nghĩ sen đá không trồng được trong máy lạnh',
-                        content: `Quan niệm sai lầm:
+            }, {
+                id: 'sai-lam-trong-phong-may-lanh',
+                title: '4️⃣ Sai lầm: Nghĩ sen đá không trồng được trong máy lạnh',
+                content: `Quan niệm sai lầm:
                         Nhiều bạn nghĩ rằng để trong máy lạnh, lạnh quá nên cây không sống được. Điều này hoàn toàn sai!
 
                         Sự thật:
@@ -757,11 +670,8 @@ export default function Blogs() {
                         + Đặt cây gần cửa sổ có gió tự nhiên
                         + Sử dụng quạt nhỏ để tạo luồng không khí
                         + Tránh để cây trong không gian kín, ngợp`
-                    },
-                    {
-                        id: 'sai-lam-trong-bang-hat',
-                        title: '5️⃣ Sai lầm: Tin vào việc trồng sen đá bằng hạt giả',
-                        content: `Câu hỏi phổ biến: Sen đá có trồng được bằng hạt hay không?
+            }, {
+                id: 'sai-lam-trong-bang-hat', title: '5️⃣ Sai lầm: Tin vào việc trồng sen đá bằng hạt giả', content: `Câu hỏi phổ biến: Sen đá có trồng được bằng hạt hay không?
 
                         Câu trả lời: CÓ, NHƯNG hạt sen đá cực kì khó kiếm!
 
@@ -782,11 +692,8 @@ export default function Blogs() {
                         + Nhân giống bằng chồi bên
                         + Chia cụm sen đá lớn
                         + Đây là những cách hiệu quả và dễ thành công`
-                    },
-                    {
-                        id: 'sai-lam-dung-dat-sach',
-                        title: '6️⃣ Sai lầm: Sử dụng đất sạch thương mại',
-                        content: `Vấn đề với đất sạch bán sẵn:
+            }, {
+                id: 'sai-lam-dung-dat-sach', title: '6️⃣ Sai lầm: Sử dụng đất sạch thương mại', content: `Vấn đề với đất sạch bán sẵn:
                         + Đất sạch giữ nước rất lâu
                         + Không phù hợp với sen đá cần thoát nước nhanh
                         + Dễ gây úng nước và thối rễ
@@ -805,11 +712,8 @@ export default function Blogs() {
                         + Đất chuyên dụng cho sen đá
                         + Tự trộn theo hướng dẫn chuyên gia
                         + Tránh mua đất sạch thông thường`
-                    },
-                    {
-                        id: 'sai-lam-khong-chau-thoat-nuoc',
-                        title: '7️⃣ Sai lầm: Dùng chậu không có lỗ thoát nước',
-                        content: `Tầm quan trọng của lỗ thoát nước:
+            }, {
+                id: 'sai-lam-khong-chau-thoat-nuoc', title: '7️⃣ Sai lầm: Dùng chậu không có lỗ thoát nước', content: `Tầm quan trọng của lỗ thoát nước:
                         + Điều kiện bắt buộc số 1 cho sen đá
                         + Không có lỗ thoát = cây chết chắc chắn
                         + Nước đọng sẽ làm thối rễ
@@ -828,11 +732,8 @@ export default function Blogs() {
                         + Dùng mũi khoan để tạo lỗ
                         + Đường kính lỗ 8-10mm
                         + Tạo 3-5 lỗ cho chậu trung bình`
-                    },
-                    {
-                        id: 'sai-lam-dat-sai-vi-tri',
-                        title: '8️⃣ Sai lầm: Đặt sen đá ở vị trí sai',
-                        content: `Vị trí không phù hợp:
+            }, {
+                id: 'sai-lam-dat-sai-vi-tri', title: '8️⃣ Sai lầm: Đặt sen đá ở vị trí sai', content: `Vị trí không phù hợp:
                         + Nơi quá tối, thiếu ánh sáng
                         + Dưới gầm bàn, trong góc tối
                         + Phòng tắm ẩm ướt
@@ -849,11 +750,8 @@ export default function Blogs() {
                         + Lá nhạt màu, mất độ căng mọng
                         + Cây phát triển chậm hoặc không phát triển
                         + Dễ bị nấm bệnh`
-                    },
-                    {
-                        id: 'sai-lam-bon-phan-qua-nhieu',
-                        title: '9️⃣ Sai lầm: Bón phân quá nhiều hoặc sai cách',
-                        content: `Quan niệm sai lầm:
+            }, {
+                id: 'sai-lam-bon-phan-qua-nhieu', title: '9️⃣ Sai lầm: Bón phân quá nhiều hoặc sai cách', content: `Quan niệm sai lầm:
                         + Nghĩ sen đá cần nhiều phân để phát triển
                         + Bón phân thường xuyên như cây khác
                         + Dùng phân hóa học nồng độ cao
@@ -873,11 +771,8 @@ export default function Blogs() {
                         + Phân NPK cân bằng (10-10-10)
                         + Phân hữu cơ loãng
                         + Tránh phân đạm cao`
-                    },
-                    {
-                        id: 'sai-lam-khong-quan-sat-cay',
-                        title: '🔟 Sai lầm: Không quan sát và chăm sóc kịp thời',
-                        content: `Dấu hiệu cảnh báo thường bị bỏ qua:
+            }, {
+                id: 'sai-lam-khong-quan-sat-cay', title: '🔟 Sai lầm: Không quan sát và chăm sóc kịp thời', content: `Dấu hiệu cảnh báo thường bị bỏ qua:
                         + Lá bắt đầu nhăn nheo
                         + Màu lá thay đổi bất thường
                         + Xuất hiện đốm lạ trên lá
@@ -897,29 +792,24 @@ export default function Blogs() {
 
                         Lời khuyên cuối:
                         Chăm sóc sen đá thành công phụ thuộc vào việc hiểu đúng bản chất của cây và môi trường sống. Hãy học hỏi từ kinh nghiệm của những người đi trước và không ngại thử nghiệm để tìm ra cách chăm sóc phù hợp nhất với điều kiện của bạn.`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'nhat-ky-30-ngay',
-            title: 'Nhật ký chăm sóc sen đá trong vòng 30 ngày',
-            author: 'Chuyên gia Sen Đá',
-            date: 'Thứ 2, 18 Tháng 11, 2025',
-            category: 'Thực hành',
-            readTime: '15 phút đọc',
-            description: '📝 Theo dõi chi tiết quá trình chăm sóc sen đá từng ngày trong 30 ngày với video thực tế. Từ cách thay chậu, trộn đất, tưới nước đến phơi nắng. Chứng kiến sự thay đổi tuyệt vời sau 1 tháng!',
-            tags: ['Nhật ký', 'Theo dõi', '30 ngày', 'Thực hành', 'Video hướng dẫn'],
-            difficulty: 'Trung bình',
-            img: 'https://file.hstatic.net/1000187613/article/img_8217_copy_e25c8557449847fca84f3f2cb94408d9_62c695be8dd448bba0ac8841e2f3d4ac.jpg',
-            content: {
-                intro: 'Video này ghi lại quá trình chăm sóc sen đá trong vòng 1 tháng, mô tả chi tiết cách thay chậu, trộn đất, tưới nước và phơi nắng cho sen đá. Hãy cùng chứng kiến sự thay đổi tuyệt vời của sen đá sau 30 ngày chăm sóc đúng cách!',
-                videoUrl: 'https://youtu.be/4gNUbeuWq1s',
-                sections: [
-                    {
-                        id: 'video-huong-dan',
-                        title: '🎥 Video Hướng Dẫn Chi Tiết 30 Ngày',
-                        content: `Video thực tế ghi lại toàn bộ quá trình:
+            }]
+        }
+    }, {
+        id: 'nhat-ky-30-ngay',
+        title: 'Nhật ký chăm sóc sen đá trong vòng 30 ngày',
+        author: 'Chuyên gia Sen Đá',
+        date: 'Thứ 2, 18 Tháng 11, 2025',
+        category: 'Thực hành',
+        readTime: '15 phút đọc',
+        description: '📝 Theo dõi chi tiết quá trình chăm sóc sen đá từng ngày trong 30 ngày với video thực tế. Từ cách thay chậu, trộn đất, tưới nước đến phơi nắng. Chứng kiến sự thay đổi tuyệt vời sau 1 tháng!',
+        tags: ['Nhật ký', 'Theo dõi', '30 ngày', 'Thực hành', 'Video hướng dẫn'],
+        difficulty: 'Trung bình',
+        img: 'https://file.hstatic.net/1000187613/article/img_8217_copy_e25c8557449847fca84f3f2cb94408d9_62c695be8dd448bba0ac8841e2f3d4ac.jpg',
+        content: {
+            intro: 'Video này ghi lại quá trình chăm sóc sen đá trong vòng 1 tháng, mô tả chi tiết cách thay chậu, trộn đất, tưới nước và phơi nắng cho sen đá. Hãy cùng chứng kiến sự thay đổi tuyệt vời của sen đá sau 30 ngày chăm sóc đúng cách!',
+            videoUrl: 'https://youtu.be/4gNUbeuWq1s',
+            sections: [{
+                id: 'video-huong-dan', title: '🎥 Video Hướng Dẫn Chi Tiết 30 Ngày', content: `Video thực tế ghi lại toàn bộ quá trình:
                         + So sánh sen đá trước và sau 30 ngày
                         + Hướng dẫn thay chậu từng bước
                         + Cách trộn đất chuyên nghiệp
@@ -929,11 +819,8 @@ export default function Blogs() {
 
                         Kết quả đáng kinh ngạc:
                         Sau 30 ngày chăm sóc đúng cách, sen đá đã có những thay đổi tích cực rõ rệt về kích thước, màu sắc và sức khỏe tổng thể.`
-                    },
-                    {
-                        id: 'tuan-1-lam-quen',
-                        title: 'Tuần 1: Làm quen và chuẩn bị (Ngày 1-7)',
-                        content: `Ngày 1: Đánh giá tình trạng ban đầu
+            }, {
+                id: 'tuan-1-lam-quen', title: 'Tuần 1: Làm quen và chuẩn bị (Ngày 1-7)', content: `Ngày 1: Đánh giá tình trạng ban đầu
                         + Chụp ảnh ghi lại tình trạng sen đá lúc đầu
                         + Đo kích thước và đếm số lá
                         + Kiểm tra tình trạng rễ (nếu có thể)
@@ -955,11 +842,8 @@ export default function Blogs() {
                         + Quan sát dấu hiệu stress (lá nhăn, đổi màu)
                         + KHÔNG tưới nước (để rễ khô và hồi phục)
                         + Ghi chép hàng ngày về sự thay đổi`
-                    },
-                    {
-                        id: 'tuan-2-phat-trien',
-                        title: 'Tuần 2: Bắt đầu phát triển (Ngày 8-14)',
-                        content: `Ngày 8: Lần tưới nước đầu tiên
+            }, {
+                id: 'tuan-2-phat-trien', title: 'Tuần 2: Bắt đầu phát triển (Ngày 8-14)', content: `Ngày 8: Lần tưới nước đầu tiên
                         + Kiểm tra độ khô của đất (cắm ngón tay sâu 3cm)
                         + Tưới đẫm cho đến khi nước chảy ra lỗ thoát
                         + Để nước thoát hoàn toàn, không ngâm
@@ -979,11 +863,8 @@ export default function Blogs() {
                         + Thiết lập thói quen kiểm tra hàng ngày
                         + Ghi chép: thời tiết, độ ẩm không khí
                         + Đo kích thước và so sánh với tuần đầu`
-                    },
-                    {
-                        id: 'tuan-3-tang-truong',
-                        title: 'Tuần 3: Tăng trưởng mạnh (Ngày 15-21)',
-                        content: `Ngày 15: Tưới nước lần thứ 2
+            }, {
+                id: 'tuan-3-tang-truong', title: 'Tuần 3: Tăng trưởng mạnh (Ngày 15-21)', content: `Ngày 15: Tưới nước lần thứ 2
                         + Kiểm tra đất đã khô hoàn toàn
                         + Tưới nước với lượng tương tự lần đầu
                         + Quan sát thời gian đất khô (khoảng 7 ngày)
@@ -1003,11 +884,8 @@ export default function Blogs() {
                         + Đếm số lá mới mọc
                         + Chụp ảnh so sánh với tuần trước
                         + Ghi chép sự thay đổi về màu sắc`
-                    },
-                    {
-                        id: 'tuan-4-hoan-thien',
-                        title: 'Tuần 4: Hoàn thiện và đánh giá (Ngày 22-30)',
-                        content: `Ngày 22: Tưới nước lần thứ 3
+            }, {
+                id: 'tuan-4-hoan-thien', title: 'Tuần 4: Hoàn thiện và đánh giá (Ngày 22-30)', content: `Ngày 22: Tưới nước lần thứ 3
                         + Chu kỳ tưới nước đã ổn định (7-8 ngày/lần)
                         + Cây đã thích ứng hoàn toàn
                         + Lượng nước hấp thụ tăng lên
@@ -1034,11 +912,8 @@ export default function Blogs() {
                         + Màu sắc tươi sáng hơn
                         + Xuất hiện 2-3 chồi non ở gốc
                         + Cây khỏe mạnh, thích ứng tốt với môi trường mới`
-                    },
-                    {
-                        id: 'bang-ghi-chep',
-                        title: '📊 Bảng Ghi Chép Hàng Ngày',
-                        content: `Thông tin cần ghi chép mỗi ngày:
+            }, {
+                id: 'bang-ghi-chep', title: '📊 Bảng Ghi Chép Hàng Ngày', content: `Thông tin cần ghi chép mỗi ngày:
 
                         Thông tin cơ bản:
                         +Ngày/tháng/năm
@@ -1063,11 +938,8 @@ export default function Blogs() {
                         + Thay đổi tích cực
                         + Điều cần điều chỉnh
                         + Ảnh chụp (nếu có)`
-                    },
-                    {
-                        id: 'meo-thanh-cong',
-                        title: '🏆 Bí Quyết Thành Công',
-                        content: `Những điều quan trọng nhất:
+            }, {
+                id: 'meo-thanh-cong', title: '🏆 Bí Quyết Thành Công', content: `Những điều quan trọng nhất:
                         1. Kiên nhẫn và đều đặn
                         + Ghi chép hàng ngày không bỏ sót
                         + Không thay đổi chế độ chăm sóc đột ngột
@@ -1095,29 +967,24 @@ export default function Blogs() {
                         + Thấy được sự thay đổi tích cực rõ rệt
 
                         Hành trình 30 ngày này sẽ biến bạn từ người mới bắt đầu thành người có kinh nghiệm chăm sóc sen đá!`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'nhan-giong-nuoc-chai-nhua',
-            title: 'Nhân giống sen đá bằng nước và chai nhựa',
-            author: 'Chuyên gia Nhân giống',
-            date: 'Thứ 4, 20 Tháng 11, 2025',
-            category: 'Nhân giống',
-            readTime: '8 phút đọc',
-            description: '🧪 Phương pháp nhân giống sen đá hiện đại bằng nước và chai nhựa. Kỹ thuật đơn giản, hiệu quả cao, phù hợp cho người mới bắt đầu. Tỷ lệ thành công lên đến 90%!',
-            tags: ['Nhân giống', 'Kỹ thuật mới', 'Hiệu quả cao', 'Dễ thực hiện'],
-            difficulty: 'Dễ',
-            img: 'https://file.hstatic.net/1000187613/article/img_4464_copy_copy_5783a493360f46419390eff6612eb9eb_47d7df78c7584409af7ed5d1f1be4b3e.jpg',
-            content: {
-                intro: 'Phương pháp nhân giống sen đá bằng nước và chai nhựa là kỹ thuật hiện đại, đơn giản và hiệu quả cao. Với tỷ lệ thành công lên đến 90%, đây là lựa chọn hoàn hảo cho người mới bắt đầu.',
-                videoUrl: 'https://youtu.be/UUN6aqSmTf0',
-                sections: [
-                    {
-                        id: 'video-huong-dan-nhan-giong',
-                        title: '🎥 Video Hướng Dẫn Chi Tiết',
-                        content: `Xem video để hiểu rõ từng bước:
+            }]
+        }
+    }, {
+        id: 'nhan-giong-nuoc-chai-nhua',
+        title: 'Nhân giống sen đá bằng nước và chai nhựa',
+        author: 'Chuyên gia Nhân giống',
+        date: 'Thứ 4, 20 Tháng 11, 2025',
+        category: 'Nhân giống',
+        readTime: '8 phút đọc',
+        description: '🧪 Phương pháp nhân giống sen đá hiện đại bằng nước và chai nhựa. Kỹ thuật đơn giản, hiệu quả cao, phù hợp cho người mới bắt đầu. Tỷ lệ thành công lên đến 90%!',
+        tags: ['Nhân giống', 'Kỹ thuật mới', 'Hiệu quả cao', 'Dễ thực hiện'],
+        difficulty: 'Dễ',
+        img: 'https://file.hstatic.net/1000187613/article/img_4464_copy_copy_5783a493360f46419390eff6612eb9eb_47d7df78c7584409af7ed5d1f1be4b3e.jpg',
+        content: {
+            intro: 'Phương pháp nhân giống sen đá bằng nước và chai nhựa là kỹ thuật hiện đại, đơn giản và hiệu quả cao. Với tỷ lệ thành công lên đến 90%, đây là lựa chọn hoàn hảo cho người mới bắt đầu.',
+            videoUrl: 'https://youtu.be/UUN6aqSmTf0',
+            sections: [{
+                id: 'video-huong-dan-nhan-giong', title: '🎥 Video Hướng Dẫn Chi Tiết', content: `Xem video để hiểu rõ từng bước:
                         + Cách chuẩn bị chai nhựa và dụng cụ
                         + Kỹ thuật lấy lá sen đá đúng cách
                         + Phương pháp ủ lá trong môi trường ẩm
@@ -1129,56 +996,46 @@ export default function Blogs() {
                         + Thời gian ra rễ nhanh (7-14 ngày)
                         + Tiết kiệm chi phí, dụng cụ đơn giản
                         + Kiểm soát được môi trường phát triển`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'khu-vuon-mini-sen-da',
-            title: 'Hướng dẫn làm khu vườn mini từ sen đá',
-            author: 'Nghệ nhân Trang trí',
-            date: 'Thứ 5, 21 Tháng 11, 2025',
-            category: 'Trang trí',
-            readTime: '10 phút đọc',
-            description: '🏡 Tạo khu vườn mini tuyệt đẹp từ sen đá trong nhà. Hướng dẫn chi tiết từ chọn chậu, bố trí cây đến trang trí phụ kiện. Biến không gian sống thành thiên đường xanh!',
-            tags: ['Trang trí', 'Khu vườn mini', 'DIY', 'Không gian xanh'],
-            difficulty: 'Trung bình',
-            img: 'https://file.hstatic.net/1000187613/article/img_5247_copy_ffc726bfc1e34860a094a3817093c7e4_89a48de147584469a4f6f7b0dc22e7ef.jpg',
-            content: {
-                intro: 'Tạo một khu vườn mini từ sen đá là cách tuyệt vời để mang thiên nhiên vào không gian sống. Với hướng dẫn chi tiết này, bạn sẽ tạo được những góc xanh đẹp mắt và ý nghĩa.',
-                videoUrl: 'https://youtu.be/r1pPXtbTekY',
-                sections: [
-                    {
-                        id: 'video-huong-dan-lam-vuon',
-                        title: '🎥 Video Hướng Dẫn Tạo Khu Vườn Mini',
-                        content: `Xem video để học cách:
+            }]
+        }
+    }, {
+        id: 'khu-vuon-mini-sen-da',
+        title: 'Hướng dẫn làm khu vườn mini từ sen đá',
+        author: 'Nghệ nhân Trang trí',
+        date: 'Thứ 5, 21 Tháng 11, 2025',
+        category: 'Trang trí',
+        readTime: '10 phút đọc',
+        description: '🏡 Tạo khu vườn mini tuyệt đẹp từ sen đá trong nhà. Hướng dẫn chi tiết từ chọn chậu, bố trí cây đến trang trí phụ kiện. Biến không gian sống thành thiên đường xanh!',
+        tags: ['Trang trí', 'Khu vườn mini', 'DIY', 'Không gian xanh'],
+        difficulty: 'Trung bình',
+        img: 'https://file.hstatic.net/1000187613/article/img_5247_copy_ffc726bfc1e34860a094a3817093c7e4_89a48de147584469a4f6f7b0dc22e7ef.jpg',
+        content: {
+            intro: 'Tạo một khu vườn mini từ sen đá là cách tuyệt vời để mang thiên nhiên vào không gian sống. Với hướng dẫn chi tiết này, bạn sẽ tạo được những góc xanh đẹp mắt và ý nghĩa.',
+            videoUrl: 'https://youtu.be/r1pPXtbTekY',
+            sections: [{
+                id: 'video-huong-dan-lam-vuon', title: '🎥 Video Hướng Dẫn Tạo Khu Vườn Mini', content: `Xem video để học cách:
                         + Chọn container và vật liệu phù hợp
                         + Kỹ thuật bố trí cây theo tầng lớp
                         + Cách trang trí với đá, rêu, phụ kiện
                         + Tạo điểm nhấn và cân bằng màu sắc
                         + Chăm sóc khu vườn mini lâu dài`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'huong-dan-phoi-nang',
-            title: 'PHƠI NẮNG SEN ĐÁ ĐÚNG CÁCH',
-            author: 'Vườn Sen Đá Expert',
-            date: 'Thứ 6, 22 Tháng 11, 2025',
-            category: 'Chăm sóc cơ bản',
-            readTime: '15 phút đọc',
-            description: '☀️ Hướng dẫn phơi nắng đúng cách cho sen đá. Nắng là yếu tố quan trọng nhất quyết định cây đẹp hay xấu, khỏe hay bệnh. Phân biệt nắng trực tiếp và ánh sáng gián tiếp với hình ảnh minh họa chi tiết!',
-            tags: ['Phơi nắng', 'Ánh sáng', 'Nắng trực tiếp', 'Chăm sóc cơ bản', 'Màu sắc sen đá'],
-            difficulty: 'Trung bình',
-            img: 'http://file.hstatic.net/1000187613/article/img_0014_copy.jpg',
-            content: {
-                intro: 'Theo kinh nghiệm của vườn, nắng là yếu tố quan trọng nhất trong việc chăm sóc sen đá. Nắng quyết định cây phát triển nhanh hay chậm, đẹp hay xấu, và cũng là yếu tố quyết định cây có khỏe hay dễ bệnh.',
-                sections: [
-                    {
-                        id: 'tai-sao-nang-quan-trong-nhat',
-                        title: '☀️ Tại Sao Nắng Là Yếu Tố Quan Trọng Nhất?',
-                        content: `🌟 Nắng quyết định mọi thứ:
+            }]
+        }
+    }, {
+        id: 'huong-dan-phoi-nang',
+        title: 'PHƠI NẮNG SEN ĐÁ ĐÚNG CÁCH',
+        author: 'Vườn Sen Đá Expert',
+        date: 'Thứ 6, 22 Tháng 11, 2025',
+        category: 'Chăm sóc cơ bản',
+        readTime: '15 phút đọc',
+        description: '☀️ Hướng dẫn phơi nắng đúng cách cho sen đá. Nắng là yếu tố quan trọng nhất quyết định cây đẹp hay xấu, khỏe hay bệnh. Phân biệt nắng trực tiếp và ánh sáng gián tiếp với hình ảnh minh họa chi tiết!',
+        tags: ['Phơi nắng', 'Ánh sáng', 'Nắng trực tiếp', 'Chăm sóc cơ bản', 'Màu sắc sen đá'],
+        difficulty: 'Trung bình',
+        img: 'http://file.hstatic.net/1000187613/article/img_0014_copy.jpg',
+        content: {
+            intro: 'Theo kinh nghiệm của vườn, nắng là yếu tố quan trọng nhất trong việc chăm sóc sen đá. Nắng quyết định cây phát triển nhanh hay chậm, đẹp hay xấu, và cũng là yếu tố quyết định cây có khỏe hay dễ bệnh.',
+            sections: [{
+                id: 'tai-sao-nang-quan-trong-nhat', title: '☀️ Tại Sao Nắng Là Yếu Tố Quan Trọng Nhất?', content: `🌟 Nắng quyết định mọi thứ:
                         1. Tốc độ phát triển: Nắng đủ = phát triển nhanh, thiếu nắng = chậm lớn
                         2. Vẻ đẹp: Nắng đủ = màu sắc rực rỡ, thiếu nắng = xanh nhạt nhẽo
                         3. Sức khỏe: Nắng đủ = cây chắc khỏe, thiếu nắng = yếu ớt dễ bệnh
@@ -1196,11 +1053,8 @@ export default function Blogs() {
                         2. Tốc độ sinh trưởng và phát triển
                         3. Màu sắc và hình dáng cuối cùng
                         4. Tuổi thọ và sức sống lâu dài`
-                    },
-                    {
-                        id: 'cay-du-nang-vs-thieu-nang',
-                        title: '🌈 So Sánh: Cây Đủ Nắng vs Thiếu Nắng',
-                        content: `✅ CÂY SEN ĐÁ ĐỦ NẮNG:
+            }, {
+                id: 'cay-du-nang-vs-thieu-nang', title: '🌈 So Sánh: Cây Đủ Nắng vs Thiếu Nắng', content: `✅ CÂY SEN ĐÁ ĐỦ NẮNG:
                         
                         ![Cây sen đá đủ nắng, màu sắc đẹp](https://file.hstatic.net/1000187613/file/img_0014_58e1d51f0b4642649d412a3567d9b9e0_grande.jpg)
                         
@@ -1233,11 +1087,10 @@ export default function Blogs() {
 
                         💡 Lưu ý quan trọng:
                         Một khi cây đã bị thiếu nắng và kéo dài, rất khó để phục hồi lại hình dáng ban đầu. "Phòng bệnh hơn chữa bệnh" - điều này đặc biệt đúng với sen đá!`
-                    },
-                    {
-                        id: 'phan-biet-nang-truc-tiep-gian-tiep',
-                        title: '🔍 Phân Biệt: Nắng Trực Tiếp vs Ánh Sáng Gián Tiếp',
-                        content: `⭐ SAI LẦM PHỔ BIẾN NHẤT:
+            }, {
+                id: 'phan-biet-nang-truc-tiep-gian-tiep',
+                title: '🔍 Phân Biệt: Nắng Trực Tiếp vs Ánh Sáng Gián Tiếp',
+                content: `⭐ SAI LẦM PHỔ BIẾN NHẤT:
                         Rất nhiều người nhầm lẫn giữa "để cây ở chỗ có ánh sáng" và "phơi nắng trực tiếp". Đây là sai lầm nghiêm trọng khiến cây yếu dần và chết!
 
                         ✅ PHƠI NẮNG ĐÚNG CÁCH - NẮNG TRỰC TIẾP:
@@ -1302,29 +1155,24 @@ export default function Blogs() {
                         2. Test nhiệt: Chạm lá cây, nếu ấm = nắng trực tiếp  
                         3. Test thời gian: Quan sát cây 1 tuần, nếu màu đẹp lên = đúng
                         4. Test di chuyển: Chuyển vị trí và so sánh sự khác biệt`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'tri-rep-sap-sen-da',
-            title: 'Hướng dẫn trị rệp sáp cho sen đá dễ nhất',
-            author: 'Chuyên gia Bảo vệ thực vật',
-            date: 'Chủ nhật, 24 Tháng 11, 2025',
-            category: 'Bệnh hại',
-            readTime: '6 phút đọc',
-            description: '🐛 Phương pháp đơn giản và hiệu quả nhất để trị rệp sáp cho sen đá. Từ nhận biết dấu hiệu đến cách xử lý an toàn. Cứu cây yêu của bạn ngay hôm nay!',
-            tags: ['Rệp sáp', 'Bệnh hại', 'Xử lý côn trùng', 'Chăm sóc cây'],
-            difficulty: 'Dễ',
-            img: 'https://file.hstatic.net/1000187613/article/een_shot_2019-08-31_at_6.46.16_pm_0e132282691440e7bce9336b4ba8bb2d_4555fbd4c68543cc9566310429743236.jpg',
-            content: {
-                intro: 'Rệp sáp là một trong những loại sâu bệnh phổ biến nhất gây hại cho sen đá. Với hướng dẫn đơn giản này, bạn sẽ học cách nhận biết và xử lý rệp sáp hiệu quả, an toàn cho cây và người.',
-                videoUrl: 'https://youtu.be/l33sbycJkU0',
-                sections: [
-                    {
-                        id: 'video-huong-dan-tri-rep',
-                        title: '🎥 Video Hướng Dẫn Trị Rệp Sáp',
-                        content: `Xem video để học cách:
+            }]
+        }
+    }, {
+        id: 'tri-rep-sap-sen-da',
+        title: 'Hướng dẫn trị rệp sáp cho sen đá dễ nhất',
+        author: 'Chuyên gia Bảo vệ thực vật',
+        date: 'Chủ nhật, 24 Tháng 11, 2025',
+        category: 'Bệnh hại',
+        readTime: '6 phút đọc',
+        description: '🐛 Phương pháp đơn giản và hiệu quả nhất để trị rệp sáp cho sen đá. Từ nhận biết dấu hiệu đến cách xử lý an toàn. Cứu cây yêu của bạn ngay hôm nay!',
+        tags: ['Rệp sáp', 'Bệnh hại', 'Xử lý côn trùng', 'Chăm sóc cây'],
+        difficulty: 'Dễ',
+        img: 'https://file.hstatic.net/1000187613/article/een_shot_2019-08-31_at_6.46.16_pm_0e132282691440e7bce9336b4ba8bb2d_4555fbd4c68543cc9566310429743236.jpg',
+        content: {
+            intro: 'Rệp sáp là một trong những loại sâu bệnh phổ biến nhất gây hại cho sen đá. Với hướng dẫn đơn giản này, bạn sẽ học cách nhận biết và xử lý rệp sáp hiệu quả, an toàn cho cây và người.',
+            videoUrl: 'https://youtu.be/l33sbycJkU0',
+            sections: [{
+                id: 'video-huong-dan-tri-rep', title: '🎥 Video Hướng Dẫn Trị Rệp Sáp', content: `Xem video để học cách:
                         1. Nhận biết rệp sáp trên sen đá
                         2. Phương pháp xử lý bằng tay an toàn
                         3. Sử dụng dung dịch xà phòng tự nhiên
@@ -1336,11 +1184,8 @@ export default function Blogs() {
                         2. Kỹ thuật làm sạch từng kẽ lá
                         3. Thời điểm xử lý tốt nhất trong ngày
                         4. Tần suất kiểm tra và xử lý định kỳ`
-                    },
-                    {
-                        id: 'nhan-biet-rep-sap',
-                        title: '🔍 Nhận Biết Rệp Sáp Trên Sen Đá',
-                        content: `Dấu hiệu nhận biết rệp sáp:
+            }, {
+                id: 'nhan-biet-rep-sap', title: '🔍 Nhận Biết Rệp Sáp Trên Sen Đá', content: `Dấu hiệu nhận biết rệp sáp:
 
                         🐛 Hình dáng và màu sắc:
                         1. Màu trắng hoặc hơi vàng
@@ -1365,11 +1210,8 @@ export default function Blogs() {
                         2. Dùng đèn pin chiếu để thấy rõ hơn
                         3. Chú ý các vết trắng nhỏ di chuyển
                         4. Tìm các đốm trắng bám chặt trên thân`
-                    },
-                    {
-                        id: 'nguyen-nhan-gay-benh',
-                        title: '🌡️ Nguyên Nhân Gây Bệnh',
-                        content: `Môi trường thuận lợi cho rệp sáp:
+            }, {
+                id: 'nguyen-nhan-gay-benh', title: '🌡️ Nguyên Nhân Gây Bệnh', content: `Môi trường thuận lợi cho rệp sáp:
 
                         🌡️ Điều kiện khí hậu:
                         1. Nhiệt độ 25-30°C (môi trường trong nhà)
@@ -1394,11 +1236,8 @@ export default function Blogs() {
                         2. Lây lan từ cây khác trong vườn
                         3. Côn trùng mang theo từ bên ngoài
                         4. Dụng cụ chăm sóc không sạch sẽ`
-                    },
-                    {
-                        id: 'phuong-phap-xu-ly',
-                        title: '🛠️ Phương Pháp Xử Lý Hiệu Quả',
-                        content: `Bước 1: Cách ly ngay lập tức
+            }, {
+                id: 'phuong-phap-xu-ly', title: '🛠️ Phương Pháp Xử Lý Hiệu Quả', content: `Bước 1: Cách ly ngay lập tức
                         1. Tách cây bị nhiễm ra khỏi các cây khác
                         2. Đặt ở nơi thoáng mát, có ánh sáng
                         3. Không tưới nước trong 2-3 ngày đầu
@@ -1433,11 +1272,8 @@ export default function Blogs() {
                         2. Xử lý ngay khi phát hiện rệp mới
                         3. Tiếp tục cách ly 2-3 tuần
                         4. Chỉ đưa cây về khi hoàn toàn sạch`
-                    },
-                    {
-                        id: 'cong-thuc-tu-nhien',
-                        title: '🌿 Công Thức Tự Nhiên An Toàn',
-                        content: `1. Dung dịch tỏi + nước
+            }, {
+                id: 'cong-thuc-tu-nhien', title: '🌿 Công Thức Tự Nhiên An Toàn', content: `1. Dung dịch tỏi + nước
                         Nguyên liệu:
                         1. 3-4 tép tỏi tươi
                         2. 500ml nước
@@ -1480,11 +1316,8 @@ export default function Blogs() {
                         1. Ngâm ớt trong nước nóng 2h
                         2. Lọc, thêm xà phòng
                         3. Phun nhẹ, tránh vào mắt`
-                    },
-                    {
-                        id: 'phong-ngua-rep-sap',
-                        title: '🛡️ Biện Pháp Phòng Ngừa',
-                        content: `Chăm sóc môi trường:
+            }, {
+                id: 'phong-ngua-rep-sap', title: '🛡️ Biện Pháp Phòng Ngừa', content: `Chăm sóc môi trường:
 
                         🌬️ Cải thiện thông gió:
                         1. Đặt quạt nhỏ gần khu vực trồng cây
@@ -1531,11 +1364,8 @@ export default function Blogs() {
                         2. Khử trùng bằng cồn 70%
                         3. Không dùng chung dụng cụ giữa các cây
                         4. Rửa tay trước và sau khi chăm cây`
-                    },
-                    {
-                        id: 'luu-y-quan-trong',
-                        title: '⚠️ Lưu Ý Quan Trọng',
-                        content: `An toàn khi xử lý:
+            }, {
+                id: 'luu-y-quan-trong', title: '⚠️ Lưu Ý Quan Trọng', content: `An toàn khi xử lý:
 
                         👤 Bảo vệ bản thân:
                         1. Đeo găng tay khi xử lý
@@ -1587,52 +1417,39 @@ export default function Blogs() {
 
                         Lời khuyên cuối:
                         Kiên nhẫn và đều đặn là chìa khóa thành công. Rệp sáp rất dễ tái phát nếu không xử lý triệt để. Phòng bệnh luôn tốt hơn chữa bệnh!`
-                    }
-                ]
-            }
-        },
-        {
-            id: 've-sinh-la-gia-nho-co',
-            title: 'Vệ sinh lá già và nhổ cỏ cho sen đá',
-            author: 'Chuyên gia Chăm sóc',
-            date: 'Thứ 2, 25 Tháng 11, 2025',
-            category: 'Chăm sóc cơ bản',
-            readTime: '6 phút đọc',
-            description: '🧹 Hướng dẫn vệ sinh lá già và nhổ cỏ dại cho sen đá. Kỹ thuật làm sạch an toàn, giữ cây khỏe mạnh và đẹp mắt. Ngăn ngừa sâu bệnh và cải thiện thẩm mỹ!',
-            tags: ['Vệ sinh cây', 'Lá già', 'Nhổ cỏ', 'Bảo dưỡng', 'Phòng bệnh'],
-            difficulty: 'Dễ',
-            img: 'http://file.hstatic.net/1000187613/article/1_l__gi_.jpg',
-            content: {
-                intro: 'Sen đá sau khi trồng một thời gian sẽ có những lá già ở sát gốc. Việc vệ sinh lá già thường xuyên không chỉ giúp cây đẹp hơn mà còn ngăn ngừa sâu bệnh hiệu quả.',
-                videoUrl: 'https://youtu.be/yEOihAe-ELE',
-                sections: [
-                    {
-                        id: 'video-ve-sinh-chinh',
-                        title: '🎥 Video Hướng Dẫn Vệ Sinh Sen Đá',
-                        content: `Video chính hướng dẫn:
+            }]
+        }
+    }, {
+        id: 've-sinh-la-gia-nho-co',
+        title: 'Vệ sinh lá già và nhổ cỏ cho sen đá',
+        author: 'Chuyên gia Chăm sóc',
+        date: 'Thứ 2, 25 Tháng 11, 2025',
+        category: 'Chăm sóc cơ bản',
+        readTime: '6 phút đọc',
+        description: '🧹 Hướng dẫn vệ sinh lá già và nhổ cỏ dại cho sen đá. Kỹ thuật làm sạch an toàn, giữ cây khỏe mạnh và đẹp mắt. Ngăn ngừa sâu bệnh và cải thiện thẩm mỹ!',
+        tags: ['Vệ sinh cây', 'Lá già', 'Nhổ cỏ', 'Bảo dưỡng', 'Phòng bệnh'],
+        difficulty: 'Dễ',
+        img: 'http://file.hstatic.net/1000187613/article/1_l__gi_.jpg',
+        content: {
+            intro: 'Sen đá sau khi trồng một thời gian sẽ có những lá già ở sát gốc. Việc vệ sinh lá già thường xuyên không chỉ giúp cây đẹp hơn mà còn ngăn ngừa sâu bệnh hiệu quả.',
+            videoUrl: 'https://youtu.be/yEOihAe-ELE',
+            sections: [{
+                id: 'video-ve-sinh-chinh', title: '🎥 Video Hướng Dẫn Vệ Sinh Sen Đá', content: `Video chính hướng dẫn:
                         1. Nhận biết lá già cần loại bỏ
                         2. Kỹ thuật tháo lá an toàn không làm tổn thương cây
                         3. Cách nhổ cỏ dại mọc quanh gốc
                         4. Vệ sinh chậu và bề mặt đất
-                        5. Sắp xếp lại cây sau khi vệ sinh`,
-                        videoEmbed: 'https://www.youtube.com/embed/yEOihAe-ELE'
-                    },
-                    {
-                        id: 'video-bo-sung',
-                        title: '🎥 Video Bổ Sung: Kỹ Thuật Chuyên Sâu',
-                        content: `Video chi tiết về vệ sinh lá già:
+                        5. Sắp xếp lại cây sau khi vệ sinh`, videoEmbed: 'https://www.youtube.com/embed/yEOihAe-ELE'
+            }, {
+                id: 'video-bo-sung', title: '🎥 Video Bổ Sung: Kỹ Thuật Chuyên Sâu', content: `Video chi tiết về vệ sinh lá già:
                         1. Cách nhận biết lá già cần loại bỏ
                         2. Kỹ thuật bứt lá nhẹ nhàng không làm tổn thương
                         3. Thời điểm tốt nhất để vệ sinh
                         4. Dụng cụ hỗ trợ an toàn
                         5. Xử lý sau khi loại bỏ lá già
-                        `,
-                        videoEmbed: 'https://www.youtube.com/embed/om9yZNcuwRs'
-                    },
-                    {
-                        id: 'tai-sao-can-ve-sinh',
-                        title: '❓ Tại Sao Cần Vệ Sinh Lá Già?',
-                        content: `🦠 Ngăn ngừa sâu bệnh:
+                        `, videoEmbed: 'https://www.youtube.com/embed/om9yZNcuwRs'
+            }, {
+                id: 'tai-sao-can-ve-sinh', title: '❓ Tại Sao Cần Vệ Sinh Lá Già?', content: `🦠 Ngăn ngừa sâu bệnh:
                         Lá già là nơi trú ẩn lý tưởng cho các loại sâu bệnh:
                         1. Rệp sáp thường ẩn náu dưới lá già
                         2. Nấm mốc phát triển trong môi trường ẩm ướt
@@ -1650,11 +1467,8 @@ export default function Blogs() {
                         2. Cải thiện thông gió quanh gốc
                         3. Giảm nguy cơ nhiễm bệnh
                         4. Kích thích cây phát triển tốt hơn`
-                    },
-                    {
-                        id: 'nhan-biet-la-gia',
-                        title: '🔍 Nhận Biết Lá Già Cần Loại Bỏ',
-                        content: `📍 Vị trí lá già:
+            }, {
+                id: 'nhan-biet-la-gia', title: '🔍 Nhận Biết Lá Già Cần Loại Bỏ', content: `📍 Vị trí lá già:
                         1. Ở sát gốc cây, tầng lá dưới cùng
                         2. Thường bị che khuất bởi lá mới
                         3. Gần bề mặt đất
@@ -1677,11 +1491,8 @@ export default function Blogs() {
                         2. Lá hơi vàng nhẹ nhưng còn cứng
                         3. Lá đang trong quá trình chuyển màu tự nhiên
                         4. Lá chỉ bị bụi bẩn (có thể lau sạch)`
-                    },
-                    {
-                        id: 'ky-thuat-but-la',
-                        title: '🤏 Kỹ Thuật Bứt Lá Đúng Cách',
-                        content: `🕐 Thời điểm tốt nhất:
+            }, {
+                id: 'ky-thuat-but-la', title: '🤏 Kỹ Thuật Bứt Lá Đúng Cách', content: `🕐 Thời điểm tốt nhất:
                         + Buổi sáng sớm khi cây tươi mát
                         + Sau khi tưới nước 1-2 ngày (lá mềm hơn)
                         + Tránh buổi trưa nắng gắt
@@ -1705,11 +1516,8 @@ export default function Blogs() {
                         + Tránh làm tổn thương thân cây
                         + Nếu lá bám chặt, dùng kéo cắt
                         + Khử trùng dụng cụ trước khi dùng`
-                    },
-                    {
-                        id: 'xu-ly-sau-but-la',
-                        title: '🧼 Xử Lý Sau Khi Bứt Lá',
-                        content: `🗑️ Vứt bỏ lá già:
+            }, {
+                id: 'xu-ly-sau-but-la', title: '🧼 Xử Lý Sau Khi Bứt Lá', content: `🗑️ Vứt bỏ lá già:
                         + Không để lá già rơi vãi trong chậu
                         + Bỏ vào túi rác, tránh ôi thối
                         + Không dùng làm phân compost (có thể mang bệnh)
@@ -1732,11 +1540,8 @@ export default function Blogs() {
                         + Quan sát cây có phản ứng bất thường không
                         + Điều chỉnh tưới nước nếu cần
                         + Ghi chép thời gian vệ sinh để theo dõi`
-                    },
-                    {
-                        id: 'nho-co-dai',
-                        title: '🌿 Nhổ Cỏ Dại Quanh Gốc',
-                        content: `🔍 Nhận biết cỏ dại:
+            }, {
+                id: 'nho-co-dai', title: '🌿 Nhổ Cỏ Dại Quanh Gốc', content: `🔍 Nhận biết cỏ dại:
                         1. Cây mọc tự nhiên trong chậu
                         2. Không phải sen đá (lá khác hẳn)
                         3. Thường có rễ chính sâu
@@ -1759,11 +1564,8 @@ export default function Blogs() {
                         + Che khuất ánh sáng
                         + Tạo môi trường ẩm ướt (dễ nấm mốc)
                         + Làm mất thẩm mỹ chậu cây`
-                    },
-                    {
-                        id: 'lich-ve-sinh-dinh-ky',
-                        title: '📅 Lịch Vệ Sinh Định Kỳ',
-                        content: `📆 Tần suất vệ sinh:
+            }, {
+                id: 'lich-ve-sinh-dinh-ky', title: '📅 Lịch Vệ Sinh Định Kỳ', content: `📆 Tần suất vệ sinh:
                         + Hàng tuần: Kiểm tra tổng quát
                         + 2 tuần/lần: Vệ sinh lá già rõ rệt
                         + Hàng tháng: Vệ sinh toàn diện
@@ -1795,11 +1597,8 @@ export default function Blogs() {
                         + Kết hợp với lịch tưới nước
                         + Ghi chép nhật ký chăm sóc
                         + Chụp ảnh trước/sau để so sánh`
-                    },
-                    {
-                        id: 'loi-ich-ve-sinh-dung-cach',
-                        title: '🏆 Lợi Ích Khi Vệ Sinh Đúng Cách',
-                        content: `🌱 Về sức khỏe cây:
+            }, {
+                id: 'loi-ich-ve-sinh-dung-cach', title: '🏆 Lợi Ích Khi Vệ Sinh Đúng Cách', content: `🌱 Về sức khỏe cây:
                         + Giảm 80% nguy cơ nhiễm sâu bệnh
                         + Cây phát triển nhanh hơn 30%
                         + Tăng tuổi thọ cây
@@ -1825,112 +1624,92 @@ export default function Blogs() {
 
                         🌍 Lời khuyên cuối:
                         Vệ sinh lá già là việc đơn giản nhưng mang lại hiệu quả lớn. Hãy biến nó thành thói quen hàng tuần để có một vườn sen đá luôn khỏe mạnh và đẹp mắt!`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'nhan-giong-bang-nuoc-2',
-            title: 'Nhân giống sen đá bằng nước (Phương pháp nâng cao)',
-            author: 'Chuyên gia Nhân giống Pro',
-            date: 'Thứ 3, 26 Tháng 11, 2025',
-            category: 'Kỹ thuật nâng cao',
-            readTime: '12 phút đọc',
-            description: '💧 Phương pháp nhân giống sen đá bằng nước nâng cao với 2 video hướng dẫn chi tiết. Kỹ thuật chuyên nghiệp, tỷ lệ thành công cao, phù hợp cho người có kinh nghiệm!',
-            tags: ['Nhân giống nâng cao', 'Thủy canh', 'Kỹ thuật pro', 'Hiệu quả cao'],
-            difficulty: 'Khó',
-            img: 'https://file.hstatic.net/1000187613/article/maxresdefault_7ca4637e0adb4e509e41f2a0f31d3839.jpg',
-            content: {
-                intro: 'Phương pháp nhân giống sen đá bằng nước nâng cao với hai kỹ thuật khác nhau. Dành cho những ai muốn thành thạo nghệ thuật nhân giống sen đá chuyên nghiệp.',
-                videoUrl: 'https://youtu.be/5Iq2Acbm2PA',
-                sections: [
-                    {
-                        id: 'video-nhan-giong-1',
-                        title: '🎥 Video 1: Kỹ Thuật Nhân Giống Cơ Bản',
-                        content: `Video đầu tiên hướng dẫn:
+            }]
+        }
+    }, {
+        id: 'nhan-giong-bang-nuoc-2',
+        title: 'Nhân giống sen đá bằng nước (Phương pháp nâng cao)',
+        author: 'Chuyên gia Nhân giống Pro',
+        date: 'Thứ 3, 26 Tháng 11, 2025',
+        category: 'Kỹ thuật nâng cao',
+        readTime: '12 phút đọc',
+        description: '💧 Phương pháp nhân giống sen đá bằng nước nâng cao với 2 video hướng dẫn chi tiết. Kỹ thuật chuyên nghiệp, tỷ lệ thành công cao, phù hợp cho người có kinh nghiệm!',
+        tags: ['Nhân giống nâng cao', 'Thủy canh', 'Kỹ thuật pro', 'Hiệu quả cao'],
+        difficulty: 'Khó',
+        img: 'https://file.hstatic.net/1000187613/article/maxresdefault_7ca4637e0adb4e509e41f2a0f31d3839.jpg',
+        content: {
+            intro: 'Phương pháp nhân giống sen đá bằng nước nâng cao với hai kỹ thuật khác nhau. Dành cho những ai muốn thành thạo nghệ thuật nhân giống sen đá chuyên nghiệp.',
+            videoUrl: 'https://youtu.be/5Iq2Acbm2PA',
+            sections: [{
+                id: 'video-nhan-giong-1', title: '🎥 Video 1: Kỹ Thuật Nhân Giống Cơ Bản', content: `Video đầu tiên hướng dẫn:
                         1. Chuẩn bị dụng cụ chuyên nghiệp
                         2. Chọn lá và cành phù hợp cho nhân giống
                         3. Thiết lập hệ thống nhân giống bằng nước
                         4. Theo dõi quá trình phát triển rễ từng ngày
                         5. Chuyển cây con sang môi trường đất`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'sen-da-thieu-nang',
-            title: 'Biểu hiện sen đá thiếu nắng',
-            author: 'Chuyên gia Ánh sáng',
-            date: 'Thứ 4, 27 Tháng 11, 2025',
-            category: 'Chăm sóc cơ bản',
-            readTime: '7 phút đọc',
-            description: '☀️ Nhận biết các dấu hiệu sen đá thiếu nắng qua hình ảnh so sánh rõ ràng. Học cách khắc phục và điều chỉnh ánh sáng cho cây phát triển tốt nhất!',
-            tags: ['Thiếu nắng', 'Ánh sáng', 'Dấu hiệu bệnh', 'Khắc phục'],
-            difficulty: 'Dễ',
-            img: 'https://file.hstatic.net/1000187613/article/succulent_with_enough_light_vs._etiolated_2048x.progressive_7cf15f47fd264597b531b0142691dd36.jpg',
-            content: {
-                intro: 'So sánh trực quan giữa sen đá có đủ ánh sáng và sen đá thiếu nắng. Học cách nhận biết sớm và khắc phục kịp thời để cây phát triển khỏe mạnh.',
-                videoUrl: 'https://youtu.be/NM8dnd9Livg',
-                sections: [
-                    {
-                        id: 'video-thieu-nang',
-                        title: '🎥 Video Phân Tích Thiếu Nắng',
-                        content: `Video chi tiết về:
+            }]
+        }
+    }, {
+        id: 'sen-da-thieu-nang',
+        title: 'Biểu hiện sen đá thiếu nắng',
+        author: 'Chuyên gia Ánh sáng',
+        date: 'Thứ 4, 27 Tháng 11, 2025',
+        category: 'Chăm sóc cơ bản',
+        readTime: '7 phút đọc',
+        description: '☀️ Nhận biết các dấu hiệu sen đá thiếu nắng qua hình ảnh so sánh rõ ràng. Học cách khắc phục và điều chỉnh ánh sáng cho cây phát triển tốt nhất!',
+        tags: ['Thiếu nắng', 'Ánh sáng', 'Dấu hiệu bệnh', 'Khắc phục'],
+        difficulty: 'Dễ',
+        img: 'https://file.hstatic.net/1000187613/article/succulent_with_enough_light_vs._etiolated_2048x.progressive_7cf15f47fd264597b531b0142691dd36.jpg',
+        content: {
+            intro: 'So sánh trực quan giữa sen đá có đủ ánh sáng và sen đá thiếu nắng. Học cách nhận biết sớm và khắc phục kịp thời để cây phát triển khỏe mạnh.',
+            videoUrl: 'https://youtu.be/NM8dnd9Livg',
+            sections: [{
+                id: 'video-thieu-nang', title: '🎥 Video Phân Tích Thiếu Nắng', content: `Video chi tiết về:
                         1. So sánh trực quan sen đá đủ nắng vs thiếu nắng
                         2. Giải thích hiện tượng etiolation (vươn dài tìm sáng)
                         3. Các dấu hiệu cảnh báo sớm
                         4. Cách đo lường cường độ ánh sáng
                         5. Phương pháp khắc phục hiệu quả`
-                    }
-                ]
-            }
-        },
-        {
-            id: 'bau-cuu-vao-vuon-sen-da',
-            title: 'Bạn cừu béo đi lạc vào vườn sen đá và cái kết',
-            author: 'Storyteller Vườn',
-            date: 'Thứ 5, 28 Tháng 11, 2025',
-            category: 'Giải trí',
-            readTime: '4 phút đọc',
-            description: '🐑 Câu chuyện thú vị về chú cừu béo đi lạc vào vườn sen đá. Video hài hước và ý nghĩa về mối quan hệ giữa động vật và thực vật. Cười vui và học hỏi!',
-            tags: ['Giải trí', 'Câu chuyện', 'Động vật', 'Hài hước'],
-            difficulty: 'Dễ',
-            img: 'https://file.hstatic.net/1000187613/article/img_5376_copy_453d1d7c28e74cf9a1767d0d15619e21_7ba40e16e93d42a49c57f318f09b2776.jpg',
-            content: {
-                intro: 'Một câu chuyện nhẹ nhàng và thú vị về cuộc phiêu lưu của chú cừu béo trong vườn sen đá. Đôi khi những điều bất ngờ lại mang đến niềm vui và bài học ý nghĩa.',
-                videoUrl: 'https://youtu.be/VXjVEWayFfQ',
-                sections: [
-                    {
-                        id: 'video-cuu-beo',
-                        title: '🎥 Video Câu Chuyện Cừu Béo',
-                        content: `Câu chuyện thú vị về:
+            }]
+        }
+    }, {
+        id: 'bau-cuu-vao-vuon-sen-da',
+        title: 'Bạn cừu béo đi lạc vào vườn sen đá và cái kết',
+        author: 'Storyteller Vườn',
+        date: 'Thứ 5, 28 Tháng 11, 2025',
+        category: 'Giải trí',
+        readTime: '4 phút đọc',
+        description: '🐑 Câu chuyện thú vị về chú cừu béo đi lạc vào vườn sen đá. Video hài hước và ý nghĩa về mối quan hệ giữa động vật và thực vật. Cười vui và học hỏi!',
+        tags: ['Giải trí', 'Câu chuyện', 'Động vật', 'Hài hước'],
+        difficulty: 'Dễ',
+        img: 'https://file.hstatic.net/1000187613/article/img_5376_copy_453d1d7c28e74cf9a1767d0d15619e21_7ba40e16e93d42a49c57f318f09b2776.jpg',
+        content: {
+            intro: 'Một câu chuyện nhẹ nhàng và thú vị về cuộc phiêu lưu của chú cừu béo trong vườn sen đá. Đôi khi những điều bất ngờ lại mang đến niềm vui và bài học ý nghĩa.',
+            videoUrl: 'https://youtu.be/VXjVEWayFfQ',
+            sections: [{
+                id: 'video-cuu-beo', title: '🎥 Video Câu Chuyện Cừu Béo', content: `Câu chuyện thú vị về:
                         1. Chú cừu béo đáng yêu đi lạc vào vườn
                         2. Cuộc gặp gỡ bất ngờ với các chậu sen đá
                         3. Những tình huống hài hước xảy ra
                         4. Cái kết bất ngờ và ý nghĩa
                         5. Bài học về sự hòa hợp trong tự nhiên`
-                    }
-                ]
-            }
-        },
-        {
-            id: 're-con-moc-giua-than',
-            title: 'RỄ CON MỌC GIỮA THÂN',
-            author: 'Chuyên gia Sinh lý thực vật',
-            date: 'Thứ 6, 29 Tháng 11, 2025',
-            category: 'Kiến thức cơ bản',
-            readTime: '12 phút đọc',
-            description: '🌱 Hiện tượng rễ con mọc trên thân sen đá - Tín hiệu cảnh báo điều kiện sinh trưởng. 3 nguyên nhân phổ biến và cách xử lý chi tiết với hình ảnh minh họa thực tế!',
-            tags: ['Rễ con', 'Rễ khí sinh', 'Sinh lý cây', 'Chẩn đoán', 'Thiếu nước', 'Thiếu nắng'],
-            difficulty: 'Trung bình',
-            img: 'http://file.hstatic.net/1000187613/article/he-little-white-strands-are-roots-now-i-know-why-my-succulent-has-them.jpg',
-            content: {
-                intro: 'Nếu bạn trồng sen đá đã lâu chắc hẳn đã từng thấy hiện tượng trên thân sen đá mọc ra khá nhiều rễ li ti. Hiện tượng này không quá đáng lo, tuy nhiên khi cây có biểu hiện như vậy, tức là có một điều kiện sinh trưởng không được đáp ứng. Để sen đá phát triển tốt nhất, chúng ta cần tìm hiểu rõ nguyên nhân và điều chỉnh kịp thời.',
-                sections: [
-                    {
-                        id: 'hien-tuong-re-con-la-gi',
-                        title: '🔍 Hiện Tượng Rễ Con Mọc Trên Thân Là Gì?',
-                        content: `![Rễ con mọc trên thân sen đá](http://file.hstatic.net/1000187613/article/he-little-white-strands-are-roots-now-i-know-why-my-succulent-has-them.jpg)
+            }]
+        }
+    }, {
+        id: 're-con-moc-giua-than',
+        title: 'RỄ CON MỌC GIỮA THÂN',
+        author: 'Chuyên gia Sinh lý thực vật',
+        date: 'Thứ 6, 29 Tháng 11, 2025',
+        category: 'Kiến thức cơ bản',
+        readTime: '12 phút đọc',
+        description: '🌱 Hiện tượng rễ con mọc trên thân sen đá - Tín hiệu cảnh báo điều kiện sinh trưởng. 3 nguyên nhân phổ biến và cách xử lý chi tiết với hình ảnh minh họa thực tế!',
+        tags: ['Rễ con', 'Rễ khí sinh', 'Sinh lý cây', 'Chẩn đoán', 'Thiếu nước', 'Thiếu nắng'],
+        difficulty: 'Trung bình',
+        img: 'http://file.hstatic.net/1000187613/article/he-little-white-strands-are-roots-now-i-know-why-my-succulent-has-them.jpg',
+        content: {
+            intro: 'Nếu bạn trồng sen đá đã lâu chắc hẳn đã từng thấy hiện tượng trên thân sen đá mọc ra khá nhiều rễ li ti. Hiện tượng này không quá đáng lo, tuy nhiên khi cây có biểu hiện như vậy, tức là có một điều kiện sinh trưởng không được đáp ứng. Để sen đá phát triển tốt nhất, chúng ta cần tìm hiểu rõ nguyên nhân và điều chỉnh kịp thời.',
+            sections: [{
+                id: 'hien-tuong-re-con-la-gi', title: '🔍 Hiện Tượng Rễ Con Mọc Trên Thân Là Gì?', content: `![Rễ con mọc trên thân sen đá](http://file.hstatic.net/1000187613/article/he-little-white-strands-are-roots-now-i-know-why-my-succulent-has-them.jpg)
                        
                          🌱 Định nghĩa khoa học:
                         Rễ con mọc trên thân còn gọi là "rễ khí sinh" (aerial roots) - đây là những rễ phụ phát triển từ thân cây, không phải từ hệ thống rễ chính dưới đất.
@@ -1952,11 +1731,8 @@ export default function Blogs() {
                         2. Cây cần tìm kiếm nguồn nước/dinh dưỡng bổ sung
                         3. Điều kiện môi trường không phù hợp
                         4. Cây chuẩn bị cho việc nhân giống tự nhiên`
-                    },
-                    {
-                        id: 'nguyen-nhan-1-thieu-nuoc',
-                        title: '💧 Nguyên Nhân 1: Cây Bị Thiếu Nước',
-                        content: `![Sen đá thiếu nước mọc rễ con màu hồng](https://file.hstatic.net/1000187613/file/a-graptoveria-debbie-succulent-with-pink-aerial-roots_grande.jpg)
+            }, {
+                id: 'nguyen-nhan-1-thieu-nuoc', title: '💧 Nguyên Nhân 1: Cây Bị Thiếu Nước', content: `![Sen đá thiếu nước mọc rễ con màu hồng](https://file.hstatic.net/1000187613/file/a-graptoveria-debbie-succulent-with-pink-aerial-roots_grande.jpg)
 
                         🔬 Cơ chế sinh lý chi tiết:
                         Khi sen đá bị thiếu nước lâu ngày, đất trồng khô cứng không cung cấp đủ độ ẩm cho rễ chính. Cây sẽ kích hoạt cơ chế sinh tồn bằng cách mọc rễ mới ở thân để "tìm nước" từ những nguồn khác, chủ yếu từ độ ẩm trong không khí.
@@ -1992,11 +1768,8 @@ export default function Blogs() {
 
                         ⚠️ Lưu ý quan trọng:
                         Việc tưới nước đầy đủ không thể hiện ở số lần tưới trong tuần, mà thể hiện ở lượng nước mỗi lần tưới - mỗi khi tưới phải tưới ướt đẫm sao cho toàn bộ bộ rễ của cây nhận được nước.`
-                    },
-                    {
-                        id: 'nguyen-nhan-2-thieu-nang',
-                        title: '☀️ Nguyên Nhân 2: Cây Bị Thiếu Nắng',
-                        content: `![Thân sen đá có nhiều rễ khí sinh do thiếu nắng](https://file.hstatic.net/1000187613/file/a-succulent-stem-with-lots-of-aerial-roots_grande.jpg)
+            }, {
+                id: 'nguyen-nhan-2-thieu-nang', title: '☀️ Nguyên Nhân 2: Cây Bị Thiếu Nắng', content: `![Thân sen đá có nhiều rễ khí sinh do thiếu nắng](https://file.hstatic.net/1000187613/file/a-succulent-stem-with-lots-of-aerial-roots_grande.jpg)
 
                         🌱 Các loại sen đá dễ bị:
                         Trường hợp này thường gặp ở những loại cần nắng nhiều, điển hình là:
@@ -2035,11 +1808,8 @@ export default function Blogs() {
 
                         💡 Đánh giá mức độ nguy hiểm:
                         Đối với những trường hợp thiếu nắng, hiện tượng rễ con hầu như VÔ HẠI đối với sen đá. Chỉ cần điều chỉnh lại thời gian phơi nắng sẽ giúp cây đẹp hơn và rễ con sẽ tự nhiên biến mất.`
-                    },
-                    {
-                        id: 'nguyen-nhan-3-hu-re-chinh',
-                        title: '🚨 Nguyên Nhân 3: Rễ Chính Bị Hư (NGUY HIỂM NHẤT)',
-                        content: `⚠️ Cảnh báo: Đây là nguyên nhân nguy hiểm nhất theo kinh nghiệm! Nếu không điều chỉnh kịp thời, sen đá sẽ chết.
+            }, {
+                id: 'nguyen-nhan-3-hu-re-chinh', title: '🚨 Nguyên Nhân 3: Rễ Chính Bị Hư (NGUY HIỂM NHẤT)', content: `⚠️ Cảnh báo: Đây là nguyên nhân nguy hiểm nhất theo kinh nghiệm! Nếu không điều chỉnh kịp thời, sen đá sẽ chết.
 
                         🔍 Nguyên nhân gốc:
                         Khi trồng sen đá bằng hỗn hợp đất quá giữ nước mà không trộn thêm bất kỳ thành phần thoát nước nào (ví dụ điển hình: đất sạch Tribat thuần). Đặc điểm của những loại đất này:
@@ -2104,11 +1874,8 @@ export default function Blogs() {
 
                         🌟 Lời khuyên từ kinh nghiệm:
                         Do vậy, khi cây rơi vào trường hợp này, các bạn nên kiểm tra ngay đất trồng và có phương pháp thay thế kịp thời để sen đá không bị chết. Đây là kinh nghiệm thực tế từ việc trồng sen đá lâu năm tại Sài Gòn.`
-                    },
-                    {
-                        id: 'ket-luan-kinh-nghiem',
-                        title: '📝 Kết Luận Và Chia Sẻ Kinh Nghiệm',
-                        content: `🌍 Lời kết từ người có kinh nghiệm:
+            }, {
+                id: 'ket-luan-kinh-nghiem', title: '📝 Kết Luận Và Chia Sẻ Kinh Nghiệm', content: `🌍 Lời kết từ người có kinh nghiệm:
 
                         Trên đây là một vài kinh nghiệm mà mình đúc kết được sau thời gian dài trồng sen đá tại Sài Gòn. Vì đây là kinh nghiệm thực tế nên chắc chắn sẽ có những thiếu sót, và có thể sẽ khác khi các bạn trồng sen đá tại một nơi có điều kiện khí hậu khác với Sài Gòn.
 
@@ -2125,11 +1892,9 @@ export default function Blogs() {
 
                         📞 Hỗ trợ cộng đồng:
                         Nếu bạn gặp trường hợp khác hoặc cần tư vấn thêm, đừng ngại chia sẻ trong cộng đồng yêu sen đá để cùng nhau học hỏi và phát triển! 🌵💚`
-                    }
-                ]
-            }
-        },
-    ]
+            }]
+        }
+    },]
 
     const getDifficultyColor = (difficulty) => {
         switch (difficulty) {
@@ -2161,8 +1926,7 @@ export default function Blogs() {
         return colors[category] || 'default'
     }
 
-    return (
-        <Box
+    return (<Box
             component="section"
             sx={{
                 minHeight: '100vh',
@@ -2181,7 +1945,8 @@ export default function Blogs() {
                 }
             }}
         >
-            <Container maxWidth="xl" sx={{position: 'relative', zIndex: 1, py: {xs: 6, md: 8}, px: {xs: 2, sm: 3, md: 4}}}>
+            <Container maxWidth="xl"
+                       sx={{position: 'relative', zIndex: 1, py: {xs: 6, md: 8}, px: {xs: 2, sm: 3, md: 4}}}>
                 {/* Clean Header Section */}
                 <Box sx={{textAlign: 'center', mb: {xs: 5, md: 6}}}>
                     <Typography
@@ -2250,13 +2015,10 @@ export default function Blogs() {
                     container
                     spacing={{xs: 2, sm: 3, md: 3, lg: 4}}
                     sx={{
-                        mb: {xs: 4, md: 6},
-                        justifyContent: 'center',
-                        alignItems: 'stretch'
+                        mb: {xs: 4, md: 6}, justifyContent: 'center', alignItems: 'stretch'
                     }}
                 >
-                    {posts.slice(0, showAdditionalPosts ? posts.length : posts.length - 3).map((post) => (
-                        <Grid
+                    {posts.slice(0, showAdditionalPosts ? posts.length : posts.length - 3).map((post) => (<Grid
                             item
                             xs={12}
                             sm={6}
@@ -2303,8 +2065,7 @@ export default function Blogs() {
                                             e.target.src = '/nen.jpg'
                                         }}
                                         sx={{
-                                            transition: 'transform 0.3s ease',
-                                            '.MuiCard-root:hover &': {
+                                            transition: 'transform 0.3s ease', '.MuiCard-root:hover &': {
                                                 transform: 'scale(1.03)',
                                             }
                                         }}
@@ -2345,18 +2106,14 @@ export default function Blogs() {
                                 </Box>
 
                                 <CardContent sx={{
-                                    flexGrow: 1,
-                                    p: 3,
-                                    position: 'relative',
+                                    flexGrow: 1, p: 3, position: 'relative',
                                 }}>
                                     {/* Clean Meta Information */}
                                     <Stack
                                         direction="row"
                                         spacing={1.5}
                                         sx={{
-                                            mb: 2.5,
-                                            color: '#6b7280',
-                                            fontSize: '0.8rem'
+                                            mb: 2.5, color: '#6b7280', fontSize: '0.8rem'
                                         }}
                                         alignItems="center"
                                         justifyContent="center"
@@ -2420,8 +2177,7 @@ export default function Blogs() {
 
                                     {/* Clean Tags */}
                                     <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap', gap: 0.5, mb: 2.5}}>
-                                        {post.tags.slice(0, 3).map((tag, index) => (
-                                            <Chip
+                                        {post.tags.slice(0, 3).map((tag, index) => (<Chip
                                                 key={index}
                                                 label={tag}
                                                 size="small"
@@ -2434,8 +2190,7 @@ export default function Blogs() {
                                                     color: '#059669',
                                                     borderRadius: 2,
                                                 }}
-                                            />
-                                        ))}
+                                            />))}
                                     </Stack>
                                 </CardContent>
 
@@ -2443,9 +2198,7 @@ export default function Blogs() {
 
                                 {/* Clean Card Actions */}
                                 <CardActions sx={{
-                                    p: 3,
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
+                                    p: 3, justifyContent: 'space-between', alignItems: 'center',
                                 }}>
                                     <Stack direction="row" spacing={1.5} alignItems="center">
                                         <Avatar
@@ -2495,13 +2248,11 @@ export default function Blogs() {
                                     </Button>
                                 </CardActions>
                             </Card>
-                        </Grid>
-                    ))}
+                        </Grid>))}
                 </Grid>
 
                 {/* Additional Posts Section */}
-                {showAdditionalPosts && (
-                    <>
+                {showAdditionalPosts && (<>
                         <Box sx={{textAlign: 'center', mb: 4, mt: 6}}>
                             <Typography
                                 variant="h4"
@@ -2517,9 +2268,7 @@ export default function Blogs() {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    color: '#6b7280',
-                                    maxWidth: '600px',
-                                    mx: 'auto'
+                                    color: '#6b7280', maxWidth: '600px', mx: 'auto'
                                 }}
                             >
                                 Những kỹ thuật và mẹo hay từ cộng đồng yêu sen đá
@@ -2530,13 +2279,10 @@ export default function Blogs() {
                             container
                             spacing={{xs: 2, sm: 3, md: 3, lg: 4}}
                             sx={{
-                                mb: {xs: 4, md: 6},
-                                justifyContent: 'center',
-                                alignItems: 'stretch'
+                                mb: {xs: 4, md: 6}, justifyContent: 'center', alignItems: 'stretch'
                             }}
                         >
-                            {posts.slice(-3).map((post) => (
-                                <Grid
+                            {posts.slice(-3).map((post) => (<Grid
                                     item
                                     xs={12}
                                     sm={6}
@@ -2599,9 +2345,7 @@ export default function Blogs() {
                                                         size="small"
                                                         color={getCategoryColor(post.category)}
                                                         sx={{
-                                                            fontSize: '0.7rem',
-                                                            fontWeight: 600,
-                                                            borderRadius: 2
+                                                            fontSize: '0.7rem', fontWeight: 600, borderRadius: 2
                                                         }}
                                                     />
                                                     <Chip
@@ -2610,9 +2354,7 @@ export default function Blogs() {
                                                         color={getDifficultyColor(post.difficulty)}
                                                         variant="outlined"
                                                         sx={{
-                                                            fontSize: '0.7rem',
-                                                            fontWeight: 500,
-                                                            borderRadius: 2
+                                                            fontSize: '0.7rem', fontWeight: 500, borderRadius: 2
                                                         }}
                                                     />
                                                 </Stack>
@@ -2660,8 +2402,7 @@ export default function Blogs() {
                                                 </Typography>
 
                                                 <Stack direction="row" spacing={1} sx={{mb: 2}}>
-                                                    {post.tags.slice(0, 3).map((tag, index) => (
-                                                        <Chip
+                                                    {post.tags.slice(0, 3).map((tag, index) => (<Chip
                                                             key={index}
                                                             label={tag}
                                                             size="small"
@@ -2677,8 +2418,7 @@ export default function Blogs() {
                                                                     backgroundColor: 'rgba(16, 185, 129, 0.05)'
                                                                 }
                                                             }}
-                                                        />
-                                                    ))}
+                                                        />))}
                                                 </Stack>
 
                                                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -2732,11 +2472,9 @@ export default function Blogs() {
                                             </Button>
                                         </CardActions>
                                     </Card>
-                                </Grid>
-                            ))}
+                                </Grid>))}
                         </Grid>
-                    </>
-                )}
+                    </>)}
 
                 {/* Clean Footer CTA */}
                 <Box sx={{
@@ -2753,9 +2491,7 @@ export default function Blogs() {
                         variant="h5"
                         fontWeight={700}
                         sx={{
-                            mb: 2,
-                            color: '#059669',
-                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                            mb: 2, color: '#059669', fontFamily: '"Inter", "Segoe UI", sans-serif',
                         }}
                     >
                         Muốn học thêm? 🌱
@@ -2763,11 +2499,7 @@ export default function Blogs() {
                     <Typography
                         variant="body1"
                         sx={{
-                            mb: 4,
-                            fontWeight: 400,
-                            color: '#6b7280',
-                            maxWidth: '500px',
-                            mx: 'auto'
+                            mb: 4, fontWeight: 400, color: '#6b7280', maxWidth: '500px', mx: 'auto'
                         }}
                     >
                         Khám phá thêm những bí quyết chăm sóc sen đá từ cộng đồng yêu cây
@@ -2788,19 +2520,11 @@ export default function Blogs() {
                             px: 4,
                             py: 1.5,
                             fontSize: '0.95rem',
-                            background: showAdditionalPosts
-                                ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
-                                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            boxShadow: showAdditionalPosts
-                                ? '0 6px 24px rgba(220,38,38,0.25)'
-                                : '0 6px 24px rgba(16,185,129,0.25)',
+                            background: showAdditionalPosts ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            boxShadow: showAdditionalPosts ? '0 6px 24px rgba(220,38,38,0.25)' : '0 6px 24px rgba(16,185,129,0.25)',
                             '&:hover': {
-                                background: showAdditionalPosts
-                                    ? 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)'
-                                    : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                boxShadow: showAdditionalPosts
-                                    ? '0 8px 32px rgba(220,38,38,0.35)'
-                                    : '0 8px 32px rgba(16,185,129,0.35)',
+                                background: showAdditionalPosts ? 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                boxShadow: showAdditionalPosts ? '0 8px 32px rgba(220,38,38,0.35)' : '0 8px 32px rgba(16,185,129,0.35)',
                                 transform: 'translateY(-2px)'
                             }
                         }}
@@ -2826,8 +2550,7 @@ export default function Blogs() {
                     }
                 }}
             >
-                {selectedPost && (
-                    <>
+                {selectedPost && (<>
                         <DialogTitle sx={{
                             p: 4,
                             background: 'linear-gradient(135deg, #0b3f31 0%, #1e6f57 100%)',
@@ -2861,8 +2584,7 @@ export default function Blogs() {
                                 <IconButton
                                     onClick={handleClosePost}
                                     sx={{
-                                        color: 'white',
-                                        '&:hover': {
+                                        color: 'white', '&:hover': {
                                             backgroundColor: 'rgba(255,255,255,0.1)'
                                         }
                                     }}
@@ -2893,8 +2615,7 @@ export default function Blogs() {
                             </Typography>
 
                             {/* Video Player (if video exists) */}
-                            {selectedPost.content.videoUrl && (
-                                <Box sx={{
+                            {selectedPost.content.videoUrl && (<Box sx={{
                                     mb: 4,
                                     position: 'relative',
                                     borderRadius: 3,
@@ -2938,13 +2659,11 @@ export default function Blogs() {
                                             💡 Xem video để hiểu rõ hơn về cách nhận biết và phân loại sen đá
                                         </Typography>
                                     </Stack>
-                                </Box>
-                            )}
+                                </Box>)}
 
                             {/* Content Sections */}
                             <List sx={{width: '100%'}}>
-                                {selectedPost.content.sections.map((section, index) => (
-                                    <Box key={section.id}>
+                                {selectedPost.content.sections.map((section, index) => (<Box key={section.id}>
                                         <ListItem
                                             button
                                             onClick={() => toggleSection(section.id)}
@@ -2959,11 +2678,9 @@ export default function Blogs() {
                                             }}
                                         >
                                             <ListItemText
-                                                primary={
-                                                    <Typography variant="h6" fontWeight={700} color="primary.main">
-                                                        {section.title}
-                                                    </Typography>
-                                                }
+                                                primary={<Typography variant="h6" fontWeight={700} color="primary.main">
+                                                    {section.title}
+                                                </Typography>}
                                             />
                                             {expandedSections[section.id] ? <ExpandLess/> : <ExpandMore/>}
                                         </ListItem>
@@ -2977,8 +2694,7 @@ export default function Blogs() {
                                                 mb: 2
                                             }}>
                                                 <ContentRenderer content={section.content}/>
-                                                {section.videoEmbed && (
-                                                    <Box sx={{
+                                                {section.videoEmbed && (<Box sx={{
                                                         mt: 3,
                                                         borderRadius: 2,
                                                         overflow: 'hidden',
@@ -2996,12 +2712,10 @@ export default function Blogs() {
                                                                 borderRadius: '8px'
                                                             }}
                                                         />
-                                                    </Box>
-                                                )}
+                                                    </Box>)}
                                             </Box>
                                         </Collapse>
-                                    </Box>
-                                ))}
+                                    </Box>))}
                             </List>
                         </DialogContent>
 
@@ -3012,8 +2726,7 @@ export default function Blogs() {
                         }}>
                             <Stack direction="row" spacing={2} sx={{width: '100%', justifyContent: 'space-between'}}>
                                 <Stack direction="row" spacing={1}>
-                                    {selectedPost.tags.map((tag, index) => (
-                                        <Chip
+                                    {selectedPost.tags.map((tag, index) => (<Chip
                                             key={index}
                                             label={tag}
                                             size="small"
@@ -3023,8 +2736,7 @@ export default function Blogs() {
                                                 color: 'success.main',
                                                 fontWeight: 600
                                             }}
-                                        />
-                                    ))}
+                                        />))}
                                 </Stack>
                                 <Button
                                     variant="outlined"
@@ -3043,11 +2755,9 @@ export default function Blogs() {
                                 </Button>
                             </Stack>
                         </DialogActions>
-                    </>
-                )}
+                    </>)}
             </Dialog>
-        </Box>
-    )
+        </Box>)
 }
 
 

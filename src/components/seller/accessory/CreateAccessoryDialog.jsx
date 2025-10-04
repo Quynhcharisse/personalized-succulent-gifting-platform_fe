@@ -15,10 +15,10 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import ButtonCancel from '../../buttonCustom/ButtonCancel.jsx';
 import UploadImageField from '../succulent/UploadImageField.jsx';
-import uploadToCloudinary from '../../../hooks/cloudinaryUpload.js';
+import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 export default function CreateAccessoryDialog({open, onClose, onCreate}) {
     const [form, setForm] = useState({
@@ -651,11 +651,12 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     justifyContent: 'space-between'
                 }}
             >
-                <ButtonCancel
+                <ActionButton
+                    action={"cancel"}
                     onClick={onClose}
-                    sx={{minWidth: 120}}
                 />
-                <Button
+
+                <ActionButton
                     onClick={handleCreate}
                     disabled={isSubmitting}
                     variant="contained"
@@ -679,7 +680,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     }}
                 >
                     {isSubmitting ? 'Đang tạo...' : 'Tạo mới'}
-                </Button>
+                </ActionButton>
             </DialogActions>
         </Dialog>
     );

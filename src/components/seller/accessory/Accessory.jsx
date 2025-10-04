@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Box, Button, Container, Paper, Typography} from '@mui/material';
+import {Alert, Box, Container, Paper, Typography} from '@mui/material';
 import {Add as AddIcon, Inventory as InventoryIcon} from '@mui/icons-material';
 import {getAccessories} from '../../../services/ProductService.jsx';
 import AccessoryTable from './AccessoryTable.jsx';
 import CreateAccessoryDialog from './CreateAccessoryDialog.jsx';
 import UpdateAccessoryDialog from './UpdateAccessoryDialog.jsx';
+import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 export default function Accessory() {
     const [accessories, setAccessories] = useState([]);
@@ -77,8 +78,8 @@ export default function Accessory() {
                             </Typography>
                         </Box>
                     </Box>
-                    <Button
-                        variant="contained"
+
+                    <ActionButton
                         startIcon={<AddIcon/>}
                         onClick={handleOpenCreate}
                         sx={{
@@ -92,10 +93,9 @@ export default function Accessory() {
                                 background: 'linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)',
                                 boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)'
                             }
-                        }}
-                    >
+                        }}>
                         Tạo Phụ Kiện
-                    </Button>
+                    </ActionButton>
                 </Box>
 
                 {submitMessage.text && (
@@ -107,8 +107,12 @@ export default function Accessory() {
                 <AccessoryTable
                     items={accessories}
                     isLoading={isLoading}
-                    onViewDetail={(acc) => { /* TODO: integrate detail dialog later */ }}
-                    onUpdate={(acc) => { setSelected(acc); setShowUpdate(true); }}
+                    onViewDetail={(acc) => { /* TODO: integrate detail dialog later */
+                    }}
+                    onUpdate={(acc) => {
+                        setSelected(acc);
+                        setShowUpdate(true);
+                    }}
                 />
             </Paper>
 
@@ -120,7 +124,10 @@ export default function Accessory() {
 
             <UpdateAccessoryDialog
                 open={showUpdate}
-                onClose={() => { setShowUpdate(false); setSelected(null); }}
+                onClose={() => {
+                    setShowUpdate(false);
+                    setSelected(null);
+                }}
                 accessoryData={selected}
                 onUpdate={handleCreateSuccess}
             />
