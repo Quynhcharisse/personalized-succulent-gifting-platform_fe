@@ -31,7 +31,7 @@ export const getTotalSupplierCount = async () => {
     }
 };
 
-//------------------- Accessories and Succulents ------------------//
+//------------------- Succulents ------------------//
 export const createSucculent = async (succulentData) => {
     const response = await axiosClient.post("/product/succulent", succulentData);
     return response || null
