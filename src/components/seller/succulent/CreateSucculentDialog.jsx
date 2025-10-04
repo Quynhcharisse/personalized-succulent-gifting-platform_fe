@@ -519,7 +519,7 @@ const CreateSucculentDialog = ({
                             </Box>
                         </Button>
                     ) : (
-                <ActionButton onClick={() => onSubmit && onSubmit(buildCreateSucculentPayload(formData))} disabled={isSubmitting || isValidating}>
+                <ActionButton onClick={() => onSubmit && onSubmit(buildCreateSucculentPayload(formData))} disabled={isSubmitting || isValidating} action={"create"} type={"submit"}>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 {isSubmitting ? <Box sx={{
                                     width: 18,

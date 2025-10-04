@@ -52,6 +52,11 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
         setForm(prev => ({...prev, [name]: value}));
     };
 
+    const currentSizeKeys = (() => {
+        if (!succulent?.size || typeof succulent.size !== 'object') return new Set();
+        return new Set(Object.keys(succulent.size).map(k => String(k).trim().toLowerCase()));
+    })();
+
     const validate = () => {
         const errors = {};
         const name = (form.speciesName || '').trim();
@@ -68,8 +73,22 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
         const sizes = form.sizeList || [];
         if (sizes.length === 0) errors.sizeList = 'Vui lòng chọn ít nhất một kích thước';
         if (sizes.length > 5) errors.sizeList = 'Hệ thống chỉ có tối đa 5 kích thước';
+        const seen = new Set();
         sizes.forEach((s, i) => {
-            if (!s.sizeName || !String(s.sizeName).trim()) errors[`size_${i}_name`] = 'Tên kích thước là bắt buộc';
+            const raw = s.sizeName;
+            if (!raw || !String(raw).trim()) {
+                errors[`size_${i}_name`] = 'Tên kích thước là bắt buộc';
+            } else {
+                const key = String(raw).trim().toLowerCase();
+                if (seen.has(key)) {
+                    errors[`size_${i}_name`] = `Kích thước '${s.sizeName}' bị trùng lặp trong yêu cầu cập nhật`;
+                } else {
+                    seen.add(key);
+                    if (!currentSizeKeys.has(key)) {
+                        errors[`size_${i}_name`] = `Kích thước '${s.sizeName}' không tồn tại trong hệ thống`;
+                    }
+                }
+            }
             if (s.price === '' || Number(s.price) <= 0) errors[`size_${i}_price`] = 'Cần nhập giá bán lớn hơn 0';
             if (s.quantity === '' || Number(s.quantity) < 0) errors[`size_${i}_quantity`] = 'Số lượng cây không được là số âm';
         });
@@ -233,19 +252,30 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                     </FormControl>
 
                     <Typography variant="h6" sx={{mt: 2, fontWeight: 700}}>Kích thước</Typography>
-                    {form.sizeList.map((s, idx) => (
+                    {form.sizeList.map((s, idx) => {
+                        const usedKeys = new Set((form.sizeList || []).map((x, xIdx) => xIdx === idx ? null : String(x.sizeName || '').trim().toLowerCase()));
+                        const options = Array.from(currentSizeKeys).filter((k) => !usedKeys.has(k));
+                        const currentValue = String(s.sizeName || '').trim().toLowerCase();
+                        if (currentValue && !options.includes(currentValue)) options.unshift(currentValue);
+                        return (
                         <Grid key={idx} container spacing={2} alignItems="center">
                             <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="Tên kích thước"
-                                    value={s.sizeName}
-                                    onChange={(e) => {
-                                        const list = [...form.sizeList];
-                                        list[idx] = {...list[idx], sizeName: e.target.value};
-                                        setForm(prev => ({...prev, sizeList: list}));
-                                    }}
-                                />
+                                <FormControl fullWidth>
+                                    <InputLabel>Tên kích thước</InputLabel>
+                                    <Select
+                                        label="Tên kích thước"
+                                        value={s.sizeName || ''}
+                                        onChange={(e) => {
+                                            const list = [...form.sizeList];
+                                            list[idx] = {...list[idx], sizeName: e.target.value};
+                                            setForm(prev => ({...prev, sizeList: list}));
+                                        }}
+                                    >
+                                        {options.map((opt) => (
+                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </Grid>
                             <Grid item xs={12} sm={4}>
                                 <TextField
@@ -281,11 +311,12 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                                 }}>Xóa</Button>
                             </Grid>
                         </Grid>
-                    ))}
+                        );
+                    })}
                     <Box>
                         <Button variant="outlined" onClick={() => setForm(prev => ({
                             ...prev,
-                            sizeList: (prev.sizeList || []).length >= 5
+                            sizeList: (prev.sizeList || []).length >= Math.min(5, currentSizeKeys.size)
                                 ? prev.sizeList
                                 : [...prev.sizeList, { sizeName: '', price: '', quantity: '' }]
                         }))}>Thêm kích thước</Button>
@@ -321,6 +352,8 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                 <ActionButton
                     onClick={handleSubmit}
                     disabled={submitting}
+                    action={"update"}
+                    type={"submit"}
                 >
                     {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </ActionButton>
