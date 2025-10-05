@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Box, Container, Paper, Typography, Tabs, Tab} from '@mui/material';
+import {Alert, Box, Container, Paper, Typography, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
 import {Add as AddIcon, Inventory as InventoryIcon} from '@mui/icons-material';
 import {getAccessories} from '../../../services/ProductService.jsx';
 import AccessoryTable from './AccessoryTable.jsx';
@@ -114,7 +114,7 @@ export default function Accessory() {
                     alignItems: {xs: 'flex-start', sm: 'center'},
                     justifyContent: 'space-between',
                     gap: 2,
-                    mb: 4
+                    mb: 3
                 }}>
                     <Box sx={{display: 'flex', alignItems: 'center'}}>
                         <InventoryIcon sx={{
@@ -132,31 +132,66 @@ export default function Accessory() {
                         </Box>
                     </Box>
 
-                    <ActionButton
-                        startIcon={<AddIcon/>}
-                        onClick={handleOpenCreate}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            py: 1.2,
-                            px: 3,
-                            background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                            '&:hover': {
-                                background: 'linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)',
-                                boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)'
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        p: 1.5,
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        borderRadius: 2,
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.06)'
+                    }}>
+                        <FormControl size="small" sx={{
+                            minWidth: 240,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: 'white',
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: 'success.main',
+                                    borderWidth: 2
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: 'success.main',
+                                    borderWidth: 2
+                                }
+                            },
+                            '& .MuiInputLabel-root': {
+                                fontWeight: 600
                             }
                         }}>
-                        Tạo Phụ Kiện
-                    </ActionButton>
-                </Box>
+                            <InputLabel>Danh mục</InputLabel>
+                            <Select
+                                label="Danh mục"
+                                value={activeType}
+                                onChange={(e) => setActiveType(e.target.value)}
+                            >
+                                <MenuItem value="all">Tất cả</MenuItem>
+                                <MenuItem value="pots">Chậu (pots)</MenuItem>
+                                <MenuItem value="soils">Đất (soils)</MenuItem>
+                                <MenuItem value="decorations">Trang trí (decorations)</MenuItem>
+                            </Select>
+                        </FormControl>
 
-                <Tabs value={activeType} onChange={(e, v) => setActiveType(v)} sx={{mb: 2}}>
-                    <Tab value="all" label="Tất cả" />
-                    <Tab value="pots" label="Chậu (pots)" />
-                    <Tab value="soils" label="Đất (soils)" />
-                    <Tab value="decorations" label="Trang trí (decorations)" />
-                </Tabs>
+                        <ActionButton
+                            startIcon={<AddIcon/>}
+                            onClick={handleOpenCreate}
+                            sx={{
+                                borderRadius: 2,
+                                fontWeight: 700,
+                                py: 1.2,
+                                px: 3,
+                                background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
+                                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+                                '&:hover': {
+                                    background: 'linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)',
+                                    boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)'
+                                }
+                            }}>
+                            Tạo Phụ Kiện
+                        </ActionButton>
+                    </Box>
+                </Box>
+                
 
                 {submitMessage.text && (
                     <Alert severity={submitMessage.type === 'success' ? 'success' : 'error'} sx={{mb: 3}}>

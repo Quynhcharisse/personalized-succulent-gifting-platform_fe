@@ -67,3 +67,5 @@ export const getAccessories = async (type = 'all') => {
     const response = await axiosClient.get(`/product/accessories?${params.toString()}`);
     return response || null
 }
+
+//------------------- Product ------------------//

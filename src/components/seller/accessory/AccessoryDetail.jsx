@@ -32,7 +32,22 @@ export default function AccessoryDetail({ open, onClose, item }) {
                 px: 3,
                 pt: 3
             }}>Chi tiết phụ kiện</DialogTitle>
-            <DialogContent sx={{ p: 3, pt: 1 }}>
+            <DialogContent sx={{
+                p: 0,
+                background: 'linear-gradient(135deg, #f2fff5 0%, #eef9ff 100%)',
+                '&::-webkit-scrollbar': { width: 8 },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(76, 175, 80, 0.3)', borderRadius: 8 },
+                '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' }
+            }}>
+                <Box sx={{
+                    m: { xs: 2, sm: 3 },
+                    p: { xs: 2.5, sm: 4 },
+                    pt: { xs: 2, sm: 3 },
+                    borderRadius: 3,
+                    backgroundColor: 'white',
+                    border: '1px solid rgba(76,175,80,0.12)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+                }}>
                 {!item ? (
                     <Typography color="text.secondary">Không có dữ liệu</Typography>
                 ) : (
@@ -75,7 +90,17 @@ export default function AccessoryDetail({ open, onClose, item }) {
                         {item.category === 'pots' && (
                             <Box sx={{ p: 2, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #fdfcf7 100%)', border: '1px solid rgba(255,193,7,0.15)'}}>
                                 <Typography sx={{ fontWeight: 800, mb: 1, color: 'warning.dark' }}>Thuộc tính chậu</Typography>
-                                <Typography>Màu sắc: {val.color || '-'}</Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                                    <Typography>Màu sắc:</Typography>
+                                    {val.color ? (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Box sx={{ width: 22, height: 22, borderRadius: 1, border: '1px solid rgba(0,0,0,0.2)', backgroundColor: val.color }} />
+                                            <Typography sx={{ fontFamily: 'monospace', fontWeight: 800 }}>{val.color}</Typography>
+                                        </Box>
+                                    ) : (
+                                        <Typography>-</Typography>
+                                    )}
+                                </Box>
                                 <Typography>Chất liệu: {val.material || '-'}</Typography>
                                 <Typography>Mô tả: {val.description || '-'}</Typography>
                                 <Box sx={{ mt: 1 }}>
@@ -123,6 +148,7 @@ export default function AccessoryDetail({ open, onClose, item }) {
                         </Box>
                     </Box>
                 )}
+                </Box>
             </DialogContent>
         </Dialog>
     );
