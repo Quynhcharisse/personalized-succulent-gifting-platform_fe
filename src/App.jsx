@@ -24,6 +24,7 @@ const AccountBuyerInfo = lazy(() => import('./components/admin/AccountBuyerInfo.
 const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
 const SucculentForm = lazy(() => import('./components/seller/succulent/Succulent.jsx'))
 const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx'))
+const PostsManager = lazy(() => import('./components/seller/post/PostsManager.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
@@ -375,6 +376,10 @@ const router = createBrowserRouter([
             {
                 path: 'settings',
                 element: <h1>Cài đặt</h1>
+            },
+            {
+                path: '/seller/posts',
+                element: <PostsManager />
             }
         ]
     },

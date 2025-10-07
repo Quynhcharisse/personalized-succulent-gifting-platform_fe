@@ -86,6 +86,12 @@ const NAVIGATION = [
         path: '/seller/orders'
     },
     {
+        segment: 'posts',
+        title: 'Bài viết',
+        icon: <AssessmentIcon/>,
+        path: '/seller/posts'
+    },
+    {
         segment: 'analytics',
         title: 'Báo cáo & Thống kê',
         icon: <AssessmentIcon/>,

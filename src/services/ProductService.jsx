@@ -67,3 +67,15 @@ export const createSoilAccessory = async (accessoryData) => {
     const response = await axiosClient.post("/product/accessory", accessoryData);
     return response || null
 }
+
+// View all products (for seller)
+export const viewProduct = async () => {
+    const response = await axiosClient.get("/product/");
+    return response || null;
+};
+
+// Deactivate a product by ID
+export const deactivateProduct = async (id) => {
+    const response = await axiosClient.delete(`/product/${id}`);
+    return response || null;
+};
