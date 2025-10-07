@@ -7,11 +7,13 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    Divider,
     FormControl,
-    Grid,
+    InputAdornment,
     InputLabel,
     MenuItem,
     Select,
+    TextareaAutosize,
     TextField,
     Typography
 } from '@mui/material';
@@ -35,13 +37,46 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
             massValue: '',
             massUnit: 'gram',
             price: ''
-        }
+        },
+        sizes: []
     });
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState({type: '', text: ''});
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleAddSize = () => {
+        setForm(prev => ({
+            ...prev,
+            sizes: [
+                ...prev.sizes,
+                {
+                    name: '',
+                    potHeight: '',
+                    potUpperCrossSectionArea: '',
+                    maxSoilMassValue: '',
+                    price: '',
+                    availableQty: ''
+                }
+            ]
+        }));
+    };
+
+    const handleUpdateSizeField = (index, field, value) => {
+        setForm(prev => {
+            const sizes = [...prev.sizes];
+            sizes[index] = { ...sizes[index], [field]: value };
+            return { ...prev, sizes };
+        });
+    };
+
+    const handleRemoveSize = (index) => {
+        setForm(prev => ({
+            ...prev,
+            sizes: prev.sizes.filter((_, i) => i !== index)
+        }));
+    };
 
     const validate = () => {
         const e = {};
@@ -60,6 +95,19 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
         if (form.category === 'PLANT_POT') {
             if (!form.material.trim()) e.material = 'Chất liệu là bắt buộc';
             if (!form.color || !form.color.match(/^#[0-9A-F]{6}$/i)) e.color = 'Màu sắc là bắt buộc';
+            if (!form.sizes || form.sizes.length === 0) {
+                e.sizes = 'Thêm ít nhất 1 kích cỡ chậu';
+            } else {
+                const invalid = form.sizes.some(s =>
+                    !s.name?.trim() ||
+                    !s.potHeight || Number(s.potHeight) <= 0 ||
+                    !s.potUpperCrossSectionArea || Number(s.potUpperCrossSectionArea) <= 0 ||
+                    !s.maxSoilMassValue || Number(s.maxSoilMassValue) <= 0 ||
+                    !s.price || Number(s.price) <= 0 ||
+                    !s.availableQty || Number(s.availableQty) <= 0
+                );
+                if (invalid) e.sizes = 'Điền đầy đủ và hợp lệ cho tất cả trường size';
+            }
         }
 
         // Soil specific validations
@@ -99,7 +147,14 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 material: form.material.trim(),
                 color: form.color,
                 images: form.imageUrl ? [{image: form.imageUrl.trim()}] : [],
-                sizes: []
+                sizes: (form.sizes || []).map(s => ({
+                    name: s.name.trim(),
+                    potHeight: Number(s.potHeight),
+                    potUpperCrossSectionArea: Number(s.potUpperCrossSectionArea),
+                    maxSoilMassValue: Number(s.maxSoilMassValue),
+                    price: Number(s.price),
+                    availableQty: Number(s.availableQty)
+                }))
             },
             createSoil: false,
             soilData: null,
@@ -202,12 +257,12 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
         <Dialog
             open={open}
             onClose={onClose}
-            maxWidth="sm"
+            maxWidth="md"
             fullWidth
             slotProps={{
                 paper: {
                     sx: {
-                        borderRadius: 3,
+                        borderRadius: 8,
                         boxShadow: '0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2)',
                         overflow: 'hidden'
                     }
@@ -216,7 +271,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
         >
             <DialogTitle
                 sx={{
-                    background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
+                    background: 'linear-gradient(90deg, #43a047 0%, #66bb6a 100%)',
                     color: 'white',
                     fontSize: '1.5rem',
                     fontWeight: 600,
@@ -225,8 +280,12 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 }}
             >
                 Tạo Phụ Kiện Mới
+                <Typography variant="body2" sx={{opacity: 0.9, mt: 0.5, fontWeight: 400}}>
+                    Thiết lập thông tin và đăng bán nhanh chóng
+                </Typography>
             </DialogTitle>
-            <DialogContent sx={{p: 4, backgroundColor: '#fafafa'}}>
+            
+            <DialogContent sx={{p: 4, backgroundColor: '#f7faf7'}}>
                 {message.text && (
                     <Alert
                         severity={message.type === 'error' ? 'error' : 'success'}
@@ -242,106 +301,113 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     </Alert>
                 )}
 
-                {/* Danh mục - Đưa lên đầu */}
-                <FormControl
-                    fullWidth
-                    error={!!errors.category}
-                    sx={{
-                        mb: 3,
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            }
-                        },
-                        '& .MuiInputLabel-root': {
-                            fontWeight: 500,
-                            color: '#424242'
-                        }
-                    }}
-                >
-                    <InputLabel>Danh mục sản phẩm</InputLabel>
-                    <Select
-                        label="Danh mục sản phẩm"
-                        value={form.category}
-                        onChange={(e) => setForm(prev => ({...prev, category: e.target.value}))}
-                        variant={"outlined"}
-                    >
-                        {CATEGORIES.map(c => (
-                            <MenuItem key={c.value} value={c.value}>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    {c.value === 'PLANT_POT'}
-                                    {c.value === 'SOIL'}
-                                    {c.value === 'DECOR_ACCESSORY'}
-                                    {c.label}
-                                </Box>
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <Box sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 2,
+                    backgroundColor: 'white',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    marginTop: 5
+                }}>
+                    <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Thông tin cơ bản</Typography>
+                    <Divider sx={{mb: 2}}/>
 
-                <TextField
-                    label="Tên phụ kiện"
-                    fullWidth
-                    value={form.name}
-                    onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
-                    error={!!errors.name}
-                    helperText={errors.name}
-                    sx={{
-                        mb: 3,
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
+                    {/* Danh mục - Đưa lên đầu */}
+                    <FormControl
+                        fullWidth
+                        error={!!errors.category}
+                        sx={{
+                            mb: 2,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: 'white',
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#4caf50',
+                                    borderWidth: 2
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#4caf50',
+                                    borderWidth: 2
+                                }
                             },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
+                            '& .MuiInputLabel-root': {
+                                fontWeight: 500,
+                                color: '#424242'
                             }
-                        },
-                        '& .MuiInputLabel-root': {
-                            fontWeight: 500,
-                            color: '#424242'
-                        }
-                    }}
-                />
-                <TextField
-                    label="Mô tả chi tiết"
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    value={form.description}
-                    onChange={(e) => setForm(prev => ({...prev, description: e.target.value}))}
-                    error={!!errors.description}
-                    helperText={errors.description}
-                    sx={{
-                        mb: 3,
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            }
-                        },
-                        '& .MuiInputLabel-root': {
-                            fontWeight: 500,
-                            color: '#424242'
-                        }
-                    }}
-                />
+                        }}
+                    >
+                        <InputLabel>Danh mục sản phẩm</InputLabel>
+                        <Select
+                            label="Danh mục sản phẩm"
+                            value={form.category}
+                            onChange={(e) => setForm(prev => ({...prev, category: e.target.value}))}
+                            variant={"outlined"}
+                        >
+                            {CATEGORIES.map(c => (
+                                <MenuItem key={c.value} value={c.value}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                        {c.label}
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Box>
+                            <TextField
+                                label="Tên phụ kiện"
+                                fullWidth
+                                value={form.name}
+                                onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
+                                error={!!errors.name}
+                                helperText={errors.name}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        backgroundColor: 'white',
+                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#4caf50',
+                                            borderWidth: 2
+                                        },
+                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#4caf50',
+                                            borderWidth: 2
+                                        }
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        fontWeight: 500,
+                                        color: '#424242'
+                                    }
+                                }}
+                            />
+                        </Box>
+                        <Box>
+                            <TextareaAutosize
+                                value={form.description}
+                                onChange={(e) => setForm(prev => ({...prev, description: e.target.value}))}
+                                placeholder="Nhập mô tả chi tiết"
+                                style={{
+                                    height: 190,
+                                    width: 771,
+                                    overflow: 'hidden',
+                                    fontSize: '1rem',
+                                    lineHeight: 1.5,
+                                    fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                                    padding: 12,
+                                    borderRadius: 8,
+                                    border: '1px solid rgba(0,0,0,0.23)'
+                                }}
+                            />
+                            {errors.description && (
+                                <Typography variant="caption" color="error">{errors.description}</Typography>
+                            )}
+                        </Box>
+                    </Box>
+                </Box>
                 {/* Conditional fields based on category */}
                 {form.category === 'DECOR_ACCESSORY' && (
                     <>
@@ -373,6 +439,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                     color: '#424242'
                                 }
                             }}
+                            InputProps={{ endAdornment: <InputAdornment position="end">VNĐ</InputAdornment> }}
                         />
                         <TextField
                             label="Số lượng"
@@ -402,13 +469,14 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                     color: '#424242'
                                 }
                             }}
+                            InputProps={{ endAdornment: <InputAdornment position="end">sp</InputAdornment> }}
                         />
                     </>
                 )}
 
                 {form.category === 'PLANT_POT' && (
-                    <Grid container spacing={3} sx={{mb: 3}}>
-                        <Grid item xs={6}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
+                        <Box>
                             <TextField
                                 label="Chất liệu"
                                 fullWidth
@@ -435,8 +503,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                     }
                                 }}
                             />
-                        </Grid>
-                        <Grid item xs={6}>
+                        </Box>
+                        <Box>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 <TextField
                                     label="Màu sắc"
@@ -474,8 +542,87 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                     }}
                                 />
                             </Box>
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Box>
+                )}
+
+                {form.category === 'PLANT_POT' && (
+                    <Box sx={{
+                        p: 3,
+                        mb: 3,
+                        borderRadius: 2,
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.06)'
+                    }}>
+                        <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Kích cỡ chậu</Typography>
+                        <Divider sx={{mb: 2}}/>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                            <Button variant="outlined" onClick={handleAddSize}>+ Thêm size</Button>
+                        </Box>
+
+                        {errors.sizes && (
+                            <Typography variant="body2" color="error" sx={{ mb: 1 }}>{errors.sizes}</Typography>
+                        )}
+
+                        {(form.sizes || []).map((size, index) => (
+                            <Box key={index} sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 2,
+                                mb: 2
+                            }}>
+                                <TextField
+                                    label="Tên size"
+                                    value={size.name}
+                                    onChange={(e) => handleUpdateSizeField(index, 'name', e.target.value)}
+                                />
+                                <TextField
+                                    label="Chiều cao (cm)"
+                                    type="number"
+                                    inputProps={{ min: 0 }}
+                                    value={size.potHeight}
+                                    onChange={(e) => handleUpdateSizeField(index, 'potHeight', e.target.value)}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">cm</InputAdornment> }}
+                                />
+                                <TextField
+                                    label="Tiết diện miệng (cm²)"
+                                    type="number"
+                                    inputProps={{ min: 0 }}
+                                    value={size.potUpperCrossSectionArea}
+                                    onChange={(e) => handleUpdateSizeField(index, 'potUpperCrossSectionArea', e.target.value)}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">cm²</InputAdornment> }}
+                                />
+                                <TextField
+                                    label="Đất tối đa (g)"
+                                    type="number"
+                                    inputProps={{ min: 0 }}
+                                    value={size.maxSoilMassValue}
+                                    onChange={(e) => handleUpdateSizeField(index, 'maxSoilMassValue', e.target.value)}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">g</InputAdornment> }}
+                                />
+                                <TextField
+                                    label="Giá (VNĐ)"
+                                    type="number"
+                                    inputProps={{ min: 0 }}
+                                    value={size.price}
+                                    onChange={(e) => handleUpdateSizeField(index, 'price', e.target.value)}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">VNĐ</InputAdornment> }}
+                                />
+                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                    <TextField
+                                        label="Số lượng"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        value={size.availableQty}
+                                        onChange={(e) => handleUpdateSizeField(index, 'availableQty', e.target.value)}
+                                        sx={{ flex: 1 }}
+                                    />
+                                    <Button color="error" variant="text" onClick={() => handleRemoveSize(index)}>Xóa</Button>
+                                </Box>
+                            </Box>
+                        ))}
+                    </Box>
                 )}
 
                 {form.category === 'SOIL' && (
@@ -510,6 +657,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                     color: '#424242'
                                 }
                             }}
+                            InputProps={{ endAdornment: <InputAdornment position="end">g</InputAdornment> }}
                         />
                         <Typography
                             variant="h6"
@@ -525,8 +673,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                         >
                             Giá cơ bản
                         </Typography>
-                        <Grid container spacing={3} sx={{mb: 3}}>
-                            <Grid item xs={4}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
+                            <Box>
                                 <TextField
                                     label="Khối lượng (gram)"
                                     type="number"
@@ -540,7 +688,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                         basePricing: {...prev.basePricing, massValue: e.target.value}
                                     }))}
                                     error={!!errors.basePricingMassValue}
-                                    helperText={errors.basePricingMassValue}
+                                    helperText={!!errors.basePricingMassValue ? errors.basePricingMassValue : (form.basePricing.massUnit === 'kg' ? 'Nhập theo kg' : 'Nhập theo gram')}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 2,
@@ -559,9 +707,10 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                             color: '#424242'
                                         }
                                     }}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">{form.basePricing.massUnit}</InputAdornment> }}
                                 />
-                            </Grid>
-                            <Grid item xs={4}>
+                            </Box>
+                            <Box>
                                 <FormControl
                                     fullWidth
                                     sx={{
@@ -595,8 +744,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                         <MenuItem value="kg">Kilogram</MenuItem>
                                     </Select>
                                 </FormControl>
-                            </Grid>
-                            <Grid item xs={4}>
+                            </Box>
+                            <Box>
                                 <TextField
                                     label="💰 Giá (VNĐ)"
                                     type="number"
@@ -629,24 +778,38 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                             color: '#424242'
                                         }
                                     }}
+                                    InputProps={{ endAdornment: <InputAdornment position="end">VNĐ</InputAdornment> }}
                                 />
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </Box>
                     </>
                 )}
 
-                <UploadImageField
-                    imageUrl={form.imageUrl}
-                    isUploading={isUploading}
-                    uploadProgress={uploadProgress}
-                    onFileSelected={handleFileSelected}
-                    errorText={errors.imageUrl}
-                />
+                <Box sx={{
+                    p: 3,
+                    mt: 1,
+                    borderRadius: 2,
+                    backgroundColor: 'white',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                }}>
+                    <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Hình ảnh sản phẩm</Typography>
+                    <Divider sx={{mb: 2}}/>
+                    <UploadImageField
+                        imageUrl={form.imageUrl}
+                        isUploading={isUploading}
+                        uploadProgress={uploadProgress}
+                        onFileSelected={handleFileSelected}
+                        errorText={errors.imageUrl}
+                    />
+                </Box>
             </DialogContent>
             <DialogActions
                 sx={{
                     p: 4,
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: '#eff5ef',
                     borderTop: '1px solid #e0e0e0',
                     justifyContent: 'space-between'
                 }}
