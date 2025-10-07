@@ -19,7 +19,7 @@ const PostDetailDialog = ({ open, onClose, post }) => (
                     <Typography variant="h6" sx={{ mb: 1 }}>{post.title}</Typography>
                     <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                         <Typography variant="subtitle2">
-                            Product: <b>{post.productName}</b>
+                            Product: <b>{post.product.name}</b>
                         </Typography>
                         <Chip
                             label={statusLabels[post.status] || post.status}

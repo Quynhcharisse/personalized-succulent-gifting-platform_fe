@@ -53,7 +53,7 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
                         <TableRow key={post.id}>
                             <TableCell>#{post.id}</TableCell>
                             <TableCell>{post.title}</TableCell>
-                            <TableCell>{post.productName}</TableCell>
+                            <TableCell>{post.product.name}</TableCell>
                             <TableCell>
                                 <Chip
                                     label={statusLabels[post.status] || post.status}
