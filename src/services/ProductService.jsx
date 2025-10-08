@@ -72,3 +72,18 @@ export const getAccessories = async (type = 'all') => {
 }
 
 //------------------- Product ------------------//
+export const createOrUpdateProduct = async (productData, createAction = true) => {
+    const payload = {...productData, createAction};
+    const response = await axiosClient.post("/product", payload);
+    return response || null
+}
+
+export const viewProduct = async () => {
+    const response = await axiosClient.get("/product");
+    return response || null
+}
+
+export const deactiveProduct = async (id) => {
+    const response = await axiosClient.put(`/product/${id}`);
+    return response || null
+}
