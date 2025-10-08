@@ -22,14 +22,14 @@ import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
-export default function CreateAccessoryDialog({open, onClose, onCreate}) {
+export default function CreateAccessoryDialog({open, onClose, onCreate, editItem = null, isEdit = false}) {
     const [form, setForm] = useState({
         name: '',
         description: '',
         category: '',
         priceSell: '',
         quantity: '',
-        imageUrl: '',
+        image: '',
         material: '',
         color: '#2196f3',
         availableMassValue: '',
@@ -46,6 +46,48 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Initialize form with edit data if in edit mode
+    React.useEffect(() => {
+        if (isEdit && editItem) {
+            setForm({
+                name: editItem.name || '',
+                description: editItem.description || '',
+                category: editItem.category || '',
+                priceSell: editItem.price || '',
+                quantity: editItem.availableQty || '',
+                image: editItem.image?.[0] || '',
+                material: editItem.material || '',
+                color: editItem.color || '#2196f3',
+                availableMassValue: editItem.availableMassValue || '',
+                basePricing: {
+                    massValue: editItem.basePricing?.massValue || '',
+                    massUnit: editItem.basePricing?.massUnit || 'gram',
+                    price: editItem.basePricing?.price || ''
+                },
+                sizes: editItem.sizes || []
+            });
+        } else {
+            // Reset form for create mode
+            setForm({
+                name: '',
+                description: '',
+                category: '',
+                priceSell: '',
+                quantity: '',
+                image: '',
+                material: '',
+                color: '#2196f3',
+                availableMassValue: '',
+                basePricing: {
+                    massValue: '',
+                    massUnit: 'gram',
+                    price: ''
+                },
+                sizes: []
+            });
+        }
+    }, [isEdit, editItem, open]);
+
     const handleAddSize = () => {
         setForm(prev => ({
             ...prev,
@@ -53,9 +95,6 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 ...prev.sizes,
                 {
                     name: '',
-                    potHeight: '',
-                    potUpperCrossSectionArea: '',
-                    maxSoilMassValue: '',
                     price: '',
                     availableQty: ''
                 }
@@ -80,15 +119,17 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
 
     const validate = () => {
         const e = {};
+        
+        // Common validations - Backend yêu cầu tất cả
         if (!form.name.trim()) e.name = 'Tên là bắt buộc';
         if (!form.description.trim()) e.description = 'Mô tả là bắt buộc';
         if (!form.category) e.category = 'Danh mục là bắt buộc';
-        if (!form.imageUrl.trim()) e.imageUrl = 'Hình ảnh là bắt buộc';
+        if (!form.image.trim()) e.image = 'Hình ảnh là bắt buộc';
 
-        // Common validations
+        // Decoration specific validations
         if (form.category === 'DECOR_ACCESSORY') {
             if (!form.priceSell || Number(form.priceSell) <= 0) e.priceSell = 'Giá bán > 0';
-            if (!form.quantity || Number(form.quantity) <= 0) e.quantity = 'Số lượng > 0';
+            if (!form.quantity || Number(form.quantity) < 0) e.quantity = 'Số lượng >= 0';
         }
 
         // Pot specific validations
@@ -98,15 +139,17 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
             if (!form.sizes || form.sizes.length === 0) {
                 e.sizes = 'Thêm ít nhất 1 kích cỡ chậu';
             } else {
-                const invalid = form.sizes.some(s =>
-                    !s.name?.trim() ||
-                    !s.potHeight || Number(s.potHeight) <= 0 ||
-                    !s.potUpperCrossSectionArea || Number(s.potUpperCrossSectionArea) <= 0 ||
-                    !s.maxSoilMassValue || Number(s.maxSoilMassValue) <= 0 ||
-                    !s.price || Number(s.price) <= 0 ||
-                    !s.availableQty || Number(s.availableQty) <= 0
-                );
-                if (invalid) e.sizes = 'Điền đầy đủ và hợp lệ cho tất cả trường size';
+                const validSizes = form.sizes.filter(s => s.name?.trim());
+                if (validSizes.length === 0) {
+                    e.sizes = 'Thêm ít nhất 1 size có tên hợp lệ';
+                } else {
+                    const invalid = validSizes.some(s =>
+                        !s.sizeName?.trim() ||
+                        !s.price || Number(s.price) <= 0 ||
+                        s.availableQty === '' || Number(s.availableQty) < 0
+                    );
+                    if (invalid) e.sizes = 'Điền đầy đủ tên size, giá và số lượng';
+                }
             }
         }
 
@@ -115,6 +158,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
             if (!form.availableMassValue || Number(form.availableMassValue) <= 0) e.availableMassValue = 'Khối lượng có sẵn > 0';
             if (!form.basePricing.massValue || Number(form.basePricing.massValue) <= 0) e.basePricingMassValue = 'Khối lượng cơ bản > 0';
             if (!form.basePricing.price || Number(form.basePricing.price) <= 0) e.basePricingPrice = 'Giá cơ bản > 0';
+            if (!form.basePricing.massUnit.trim()) e.basePricingMassUnit = 'Đơn vị là bắt buộc';
         }
 
         setErrors(e);
@@ -133,7 +177,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 description: form.description.trim(),
                 price: Number(form.priceSell),
                 availableQty: Number(form.quantity),
-                images: form.imageUrl ? [{image: form.imageUrl.trim()}] : []
+                image: form.image ? [{image: form.image.trim()}] : [{image: ''}]
             }
         };
     }
@@ -146,15 +190,15 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 description: form.description.trim(),
                 material: form.material.trim(),
                 color: form.color,
-                images: form.imageUrl ? [{image: form.imageUrl.trim()}] : [],
-                sizes: (form.sizes || []).map(s => ({
-                    name: s.name.trim(),
-                    potHeight: Number(s.potHeight),
-                    potUpperCrossSectionArea: Number(s.potUpperCrossSectionArea),
-                    maxSoilMassValue: Number(s.maxSoilMassValue),
-                    price: Number(s.price),
-                    availableQty: Number(s.availableQty)
-                }))
+                image: form.image ? [{image: form.image.trim()}] : [{image: ''}],
+                sizes: (form.sizes || [])
+                    .filter(s => s.name?.trim()) // Lọc bỏ size có tên rỗng
+                    .map(s => ({
+                        name: s.name.trim(),
+                        sizeName: s.name.trim(), // Thêm cả hai field
+                        price: Number(s.price),
+                        quantity: Number(s.availableQty)
+                    }))
             },
             createSoil: false,
             soilData: null,
@@ -177,7 +221,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     massUnit: form.basePricing.massUnit,
                     price: Number(form.basePricing.price)
                 },
-                images: form.imageUrl ? [{image: form.imageUrl.trim()}] : []
+                image: form.image ? [{image: form.image.trim()}] : [{image: ''}]
             },
             createDecoration: false,
             decorationData: null
@@ -195,32 +239,46 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
             switch (form.category) {
                 case 'DECOR_ACCESSORY':
                     accessoryData = createDecorationData();
-                    response = await createDecorationAccessory(accessoryData);
+                    console.log('Decoration payload:', accessoryData, 'createAction:', !isEdit);
+                    response = await createDecorationAccessory(accessoryData, !isEdit);
                     break;
                 case 'PLANT_POT':
                     accessoryData = createPotData();
-                    response = await createPotAccessory(accessoryData);
+                    console.log('Pot payload:', accessoryData, 'createAction:', !isEdit);
+                    console.log('Pot sizes:', accessoryData.potData.sizes);
+                    console.log('Form sizes before mapping:', form.sizes);
+                    accessoryData.potData.sizes.forEach((size, index) => {
+                        console.log(`Size ${index}:`, size);
+                    });
+                    response = await createPotAccessory(accessoryData, !isEdit);
                     break;
                 case 'SOIL':
                     accessoryData = createSoilData();
-                    response = await createSoilAccessory(accessoryData);
+                    console.log('Soil payload:', accessoryData, 'createAction:', !isEdit);
+                    response = await createSoilAccessory(accessoryData, !isEdit);
                     break;
                 default:
                     throw new Error('Loại phụ kiện không hợp lệ');
             }
 
-            if (response && response.status === 200) {
-                setMessage({type: 'success', text: 'Tạo phụ kiện thành công!'});
+            if (response && (response.status === 200 || response.status === 201)) {
+                setMessage({type: 'success', text: isEdit ? 'Cập nhật phụ kiện thành công!' : 'Tạo phụ kiện thành công!'});
                 setTimeout(() => {
                     onClose();
                     onCreate && onCreate();
                 }, 1500);
             } else {
-                setMessage({type: 'error', text: 'Tạo phụ kiện thất bại'});
+                setMessage({type: 'error', text: isEdit ? 'Cập nhật phụ kiện thất bại' : 'Tạo phụ kiện thất bại'});
             }
         } catch (error) {
-            console.error('Error creating accessory:', error);
-            setMessage({type: 'error', text: 'Có lỗi xảy ra khi tạo phụ kiện'});
+            console.error('Error creating/updating accessory:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            // Show specific error message from backend if available
+            const errorMessage = error.response?.data?.message || 
+                                (isEdit ? 'Có lỗi xảy ra khi cập nhật phụ kiện' : 'Có lỗi xảy ra khi tạo phụ kiện');
+            setMessage({type: 'error', text: errorMessage});
         } finally {
             setIsSubmitting(false);
         }
@@ -233,8 +291,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
         setUploadProgress(0);
         setMessage({type: '', text: ''});
         try {
-            const url = await uploadToCloudinary(file, {onProgress: (p) => setUploadProgress(p)});
-            setForm(prev => ({...prev, imageUrl: url}));
+            const image = await uploadToCloudinary(file, {onProgress: (p) => setUploadProgress(p)});
+            setForm(prev => ({...prev, image: image}));
         } catch (e) {
             setMessage({type: 'error', text: 'Tải ảnh thất bại'});
         } finally {
@@ -279,9 +337,9 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     textAlign: 'center'
                 }}
             >
-                Tạo Phụ Kiện Mới
+                {isEdit ? 'Cập Nhật Phụ Kiện' : 'Tạo Phụ Kiện Mới'}
                 <Typography variant="body2" sx={{opacity: 0.9, mt: 0.5, fontWeight: 400}}>
-                    Thiết lập thông tin và đăng bán nhanh chóng
+                    {isEdit ? 'Chỉnh sửa thông tin phụ kiện' : 'Thiết lập thông tin và đăng bán nhanh chóng'}
                 </Typography>
             </DialogTitle>
             
@@ -315,80 +373,80 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                     <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Thông tin cơ bản</Typography>
                     <Divider sx={{mb: 2}}/>
 
-                    {/* Danh mục - Đưa lên đầu */}
-                    <FormControl
-                        fullWidth
-                        error={!!errors.category}
-                        sx={{
+                {/* Danh mục - Đưa lên đầu */}
+                <FormControl
+                    fullWidth
+                    error={!!errors.category}
+                    sx={{
                             mb: 2,
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: 'white',
-                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: '#4caf50',
-                                    borderWidth: 2
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: '#4caf50',
-                                    borderWidth: 2
-                                }
+                        '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#4caf50',
+                                borderWidth: 2
                             },
-                            '& .MuiInputLabel-root': {
-                                fontWeight: 500,
-                                color: '#424242'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#4caf50',
+                                borderWidth: 2
                             }
-                        }}
+                        },
+                        '& .MuiInputLabel-root': {
+                            fontWeight: 500,
+                            color: '#424242'
+                        }
+                    }}
+                >
+                    <InputLabel>Danh mục sản phẩm</InputLabel>
+                    <Select
+                        label="Danh mục sản phẩm"
+                        value={form.category}
+                        onChange={(e) => setForm(prev => ({...prev, category: e.target.value}))}
+                        variant={"outlined"}
                     >
-                        <InputLabel>Danh mục sản phẩm</InputLabel>
-                        <Select
-                            label="Danh mục sản phẩm"
-                            value={form.category}
-                            onChange={(e) => setForm(prev => ({...prev, category: e.target.value}))}
-                            variant={"outlined"}
-                        >
-                            {CATEGORIES.map(c => (
-                                <MenuItem key={c.value} value={c.value}>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        {c.label}
-                                    </Box>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                        {CATEGORIES.map(c => (
+                            <MenuItem key={c.value} value={c.value}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                    {c.label}
+                                </Box>
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <Box>
-                            <TextField
-                                label="Tên phụ kiện"
-                                fullWidth
-                                value={form.name}
-                                onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
-                                error={!!errors.name}
-                                helperText={errors.name}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: 2,
-                                        backgroundColor: 'white',
-                                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: '#4caf50',
-                                            borderWidth: 2
-                                        },
-                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: '#4caf50',
-                                            borderWidth: 2
-                                        }
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        fontWeight: 500,
-                                        color: '#424242'
-                                    }
-                                }}
-                            />
+                <TextField
+                    label="Tên phụ kiện"
+                    fullWidth
+                    value={form.name}
+                    onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
+                    error={!!errors.name}
+                    helperText={errors.name}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#4caf50',
+                                borderWidth: 2
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#4caf50',
+                                borderWidth: 2
+                            }
+                        },
+                        '& .MuiInputLabel-root': {
+                            fontWeight: 500,
+                            color: '#424242'
+                        }
+                    }}
+                />
                         </Box>
                         <Box>
                             <TextareaAutosize
-                                value={form.description}
-                                onChange={(e) => setForm(prev => ({...prev, description: e.target.value}))}
+                    value={form.description}
+                    onChange={(e) => setForm(prev => ({...prev, description: e.target.value}))}
                                 placeholder="Nhập mô tả chi tiết"
                                 style={{
                                     height: 190,
@@ -570,55 +628,61 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 2,
-                                mb: 2
+                                mb: 2,
+                                p: 2,
+                                border: '1px solid #e0e0e0',
+                                borderRadius: 2,
+                                backgroundColor: '#fafafa'
                             }}>
                                 <TextField
                                     label="Tên size"
                                     value={size.name}
                                     onChange={(e) => handleUpdateSizeField(index, 'name', e.target.value)}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 2,
+                                            backgroundColor: 'white'
+                                        }
+                                    }}
                                 />
-                                <TextField
-                                    label="Chiều cao (cm)"
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                    value={size.potHeight}
-                                    onChange={(e) => handleUpdateSizeField(index, 'potHeight', e.target.value)}
-                                    InputProps={{ endAdornment: <InputAdornment position="end">cm</InputAdornment> }}
-                                />
-                                <TextField
-                                    label="Tiết diện miệng (cm²)"
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                    value={size.potUpperCrossSectionArea}
-                                    onChange={(e) => handleUpdateSizeField(index, 'potUpperCrossSectionArea', e.target.value)}
-                                    InputProps={{ endAdornment: <InputAdornment position="end">cm²</InputAdornment> }}
-                                />
-                                <TextField
-                                    label="Đất tối đa (g)"
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                    value={size.maxSoilMassValue}
-                                    onChange={(e) => handleUpdateSizeField(index, 'maxSoilMassValue', e.target.value)}
-                                    InputProps={{ endAdornment: <InputAdornment position="end">g</InputAdornment> }}
-                                />
-                                <TextField
-                                    label="Giá (VNĐ)"
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                    value={size.price}
-                                    onChange={(e) => handleUpdateSizeField(index, 'price', e.target.value)}
-                                    InputProps={{ endAdornment: <InputAdornment position="end">VNĐ</InputAdornment> }}
-                                />
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <TextField
+                                        label="Giá (VNĐ)"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        value={size.price}
+                                        onChange={(e) => handleUpdateSizeField(index, 'price', e.target.value)}
+                                        InputProps={{ endAdornment: <InputAdornment position="end">VNĐ</InputAdornment> }}
+                                        sx={{ 
+                                            flex: 1,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                backgroundColor: 'white'
+                                            }
+                                        }}
+                                    />
                                     <TextField
                                         label="Số lượng"
                                         type="number"
                                         inputProps={{ min: 0 }}
                                         value={size.availableQty}
                                         onChange={(e) => handleUpdateSizeField(index, 'availableQty', e.target.value)}
-                                        sx={{ flex: 1 }}
+                                        sx={{ 
+                                            flex: 1,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                backgroundColor: 'white'
+                                            }
+                                        }}
                                     />
-                                    <Button color="error" variant="text" onClick={() => handleRemoveSize(index)}>Xóa</Button>
+                                    <Button 
+                                        color="error" 
+                                        variant="outlined" 
+                                        onClick={() => handleRemoveSize(index)}
+                                        sx={{ minWidth: 'auto', px: 2 }}
+                                    >
+                                        Xóa
+                                    </Button>
                                 </Box>
                             </Box>
                         ))}
@@ -713,6 +777,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                             <Box>
                                 <FormControl
                                     fullWidth
+                                    error={!!errors.basePricingMassUnit}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 2,
@@ -743,6 +808,11 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                                         <MenuItem value="gram">Gram</MenuItem>
                                         <MenuItem value="kg">Kilogram</MenuItem>
                                     </Select>
+                                    {errors.basePricingMassUnit && (
+                                        <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                                            {errors.basePricingMassUnit}
+                                        </Typography>
+                                    )}
                                 </FormControl>
                             </Box>
                             <Box>
@@ -797,13 +867,13 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                 }}>
                     <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Hình ảnh sản phẩm</Typography>
                     <Divider sx={{mb: 2}}/>
-                    <UploadImageField
-                        imageUrl={form.imageUrl}
-                        isUploading={isUploading}
-                        uploadProgress={uploadProgress}
-                        onFileSelected={handleFileSelected}
-                        errorText={errors.imageUrl}
-                    />
+                <UploadImageField
+                    image={form.image}
+                    isUploading={isUploading}
+                    uploadProgress={uploadProgress}
+                    onFileSelected={handleFileSelected}
+                    errorText={errors.image}
+                />
                 </Box>
             </DialogContent>
             <DialogActions
@@ -842,7 +912,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate}) {
                         }
                     }}
                 >
-                    {isSubmitting ? 'Đang tạo...' : 'Tạo mới'}
+                    {isSubmitting ? (isEdit ? 'Đang cập nhật...' : 'Đang tạo...') : (isEdit ? 'Cập nhật' : 'Tạo mới')}
                 </ActionButton>
             </DialogActions>
         </Dialog>

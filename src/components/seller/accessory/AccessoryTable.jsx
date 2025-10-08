@@ -124,15 +124,20 @@ export default function AccessoryTable({ items, isLoading, onViewDetail, onUpdat
                             }}>
                                 <TableCell sx={{width: 96}}>
                                     {(() => {
-                                        const val = acc.imageUrl || (Array.isArray(acc.images) && acc.images[0]);
-                                        const isUrl = typeof val === 'string' && /^(http|https):\/\//i.test(val);
+                                        // Lấy ảnh đầu tiên từ images array
+                                        const image = Array.isArray(acc.image) && acc.image.length > 0 ? acc.image[0] : '';
+                                        
+                                        const isUrl = typeof image === 'string' && /^(http|https):\/\//i.test(image);
                                         if (isUrl) {
                                             return (
                                                 <img
-                                                    src={val}
+                                                    src={image}
                                                     alt={acc.name}
                                                     style={{ width: 46, height: 46, objectFit: 'cover', borderRadius: 6 }}
-                                                    onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                                                    onError={(e) => { 
+                                                        console.log('Image load error:', image);
+                                                        e.currentTarget.style.visibility = 'hidden'; 
+                                                    }}
                                                 />
                                             );
                                         }
@@ -151,7 +156,7 @@ export default function AccessoryTable({ items, isLoading, onViewDetail, onUpdat
                                                 textAlign: 'center',
                                                 overflow: 'hidden'
                                             }}>
-                                                {typeof val === 'string' ? val : ''}
+                                                No Image
                                             </Box>
                                         );
                                     })()}

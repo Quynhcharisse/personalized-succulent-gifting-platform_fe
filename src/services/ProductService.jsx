@@ -47,18 +47,21 @@ export const updateSucculent = async (succulentData) => {
 }
 
 //------------------- Accessories ------------------//
-export const createDecorationAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createDecorationAccessory = async (accessoryData, createAction = true) => {
+    const payload = { ...accessoryData, createAction };
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
-export const createPotAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createPotAccessory = async (accessoryData, createAction = true) => {
+    const payload = { ...accessoryData, createAction };
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
-export const createSoilAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createSoilAccessory = async (accessoryData, createAction = true) => {
+    const payload = { ...accessoryData, createAction };
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 

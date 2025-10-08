@@ -22,14 +22,13 @@ export default function Accessory() {
         try {
             const response = await getAccessories(type);
             const data = response?.data?.data;
-            const pickImageUrl = (arr) => Array.isArray(arr) && arr.length > 0 ? (arr[0]?.image || '') : '';
+            
             const mapPots = (arr = []) => arr.map((item, idx) => {
                 const totalQty = Array.isArray(item.size) ? item.size.reduce((sum, s) => sum + (Number(s.availableQty) || 0), 0) : 0;
                 return {
                     id: `pots-${idx}-${item.name}`,
                     name: item.name,
-                    imageUrl: pickImageUrl(item.image),
-                    images: Array.isArray(item.image) ? item.image.map(it => it?.image).filter(Boolean) : [],
+                    image: Array.isArray(item.image) ? item.image.map(it => it?.url).filter(Boolean) : [],
                     category: 'pots',
                     status: totalQty > 0 ? 'ACTIVE' : 'OUT_OF_STOCK',
                     createdAt: null,
@@ -40,8 +39,7 @@ export default function Accessory() {
             const mapDecorations = (arr = []) => arr.map((item, idx) => ({
                 id: `decor-${idx}-${item.name}`,
                 name: item.name,
-                imageUrl: pickImageUrl(item.image),
-                images: Array.isArray(item.image) ? item.image.map(it => it?.image).filter(Boolean) : [],
+                image: Array.isArray(item.image) ? item.image.map(it => it?.url).filter(Boolean) : [],
                 category: 'decorations',
                 status: (Number(item.availableQty) || 0) > 0 ? 'ACTIVE' : 'OUT_OF_STOCK',
                 createdAt: null,
@@ -51,8 +49,7 @@ export default function Accessory() {
             const mapSoils = (arr = []) => arr.map((item, idx) => ({
                 id: `soils-${idx}-${item.name}`,
                 name: item.name,
-                imageUrl: pickImageUrl(item.image),
-                images: Array.isArray(item.image) ? item.image.map(it => it?.image).filter(Boolean) : [],
+                image: Array.isArray(item.image) ? item.image.map(it => it?.url).filter(Boolean) : [],
                 category: 'soils',
                 status: (Number(item.availableMassValue) || 0) > 0 ? 'ACTIVE' : 'OUT_OF_STOCK',
                 createdAt: null,
@@ -217,6 +214,14 @@ export default function Accessory() {
                 open={showCreate}
                 onClose={handleCloseCreate}
                 onCreate={handleCreateSuccess}
+            />
+
+            <CreateAccessoryDialog
+                open={showUpdate}
+                onClose={() => setShowUpdate(false)}
+                onCreate={handleCreateSuccess}
+                editItem={selected}
+                isEdit={true}
             />
 
             <AccessoryDetail

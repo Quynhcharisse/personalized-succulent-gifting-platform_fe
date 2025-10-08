@@ -4,8 +4,10 @@ import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
 export default function AccessoryDetail({ open, onClose, item }) {
     const val = item?.raw || {};
-    const images = Array.isArray(val.image) ? val.image.map(i => i?.image).filter(Boolean) : (item?.images || []);
-
+    // Lấy ảnh từ cấu trúc API chuẩn: image[0].url
+    const image = Array.isArray(val.image) ? val.image.map(i => i?.url).filter(Boolean) : 
+                   (Array.isArray(item?.image) ? item.image : []);
+    
     return (
         <Dialog
             open={open}
@@ -74,7 +76,7 @@ export default function AccessoryDetail({ open, onClose, item }) {
                         }}>
                             <Typography sx={{ fontWeight: 800, mb: 1, color: 'text.secondary' }}>Hình ảnh</Typography>
                             <Stack direction="row" spacing={1} flexWrap="wrap">
-                                {images.length > 0 ? images.map((src, idx) => (
+                                {image.length > 0 ? image.map((src, idx) => (
                                     /^https?:\/\//i.test(src) ? (
                                         <img key={idx} src={src} alt={`img-${idx}`} style={{ width: 92, height: 92, objectFit: 'cover', borderRadius: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
                                     ) : (
