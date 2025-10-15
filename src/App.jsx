@@ -24,6 +24,7 @@ const AccountBuyerInfo = lazy(() => import('./components/admin/AccountBuyerInfo.
 const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
 const SucculentForm = lazy(() => import('./components/seller/succulent/Succulent.jsx'))
 const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx'))
+const PostsManager = lazy(() => import('./components/seller/post/PostsManager.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
@@ -32,6 +33,7 @@ const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 import SucculentList from './components/buyer/SucculentList.jsx';
 import SucculentDetail from './components/buyer/SucculentDetail.jsx';
 import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
+import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -375,6 +377,10 @@ const router = createBrowserRouter([
             {
                 path: 'settings',
                 element: <h1>Cài đặt</h1>
+            },
+            {
+                path: '/seller/posts',
+                element: <PostsManager />
             }
         ]
     },
@@ -418,7 +424,11 @@ const router = createBrowserRouter([
             {
                 path: 'succulent/:id/design',
                 element: <PotAccessoryDesigner/>
-            }
+            },
+            {
+                path: 'posts',
+                element: <BuyerPosts />
+            },
         ]
     },
     {
