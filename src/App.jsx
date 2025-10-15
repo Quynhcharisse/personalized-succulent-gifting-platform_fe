@@ -33,6 +33,7 @@ const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 import SucculentList from './components/buyer/SucculentList.jsx';
 import SucculentDetail from './components/buyer/SucculentDetail.jsx';
 import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
+import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -423,7 +424,11 @@ const router = createBrowserRouter([
             {
                 path: 'succulent/:id/design',
                 element: <PotAccessoryDesigner/>
-            }
+            },
+            {
+                path: 'posts',
+                element: <BuyerPosts />
+            },
         ]
     },
     {
