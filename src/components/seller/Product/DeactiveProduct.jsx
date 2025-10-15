@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Box,
     Alert,
-    CircularProgress
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Typography
 } from '@mui/material';
-import {
-    Warning as WarningIcon,
-    Delete as DeleteIcon
-} from '@mui/icons-material';
-import { deactiveProduct } from '../../../services/ProductService.jsx';
-import { useNotify } from '../../../hooks/useNotify.js';
+import {Delete as DeleteIcon, Warning as WarningIcon} from '@mui/icons-material';
+import {deactiveProduct} from '../../../services/ProductService.jsx';
+import useNotify from '../../../hooks/useNotify.js';
 
 const DeactiveProduct = ({
-    open,
-    onClose,
-    product,
-    onSuccess
-}) => {
+                             open,
+                             onClose,
+                             product,
+                             onSuccess
+                         }) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState(null);
-    
-    const { showNotification } = useNotify();
+
+    const {showNotification} = useNotify();
 
     const handleDeactive = async () => {
         if (!product?.id) {
@@ -37,9 +34,9 @@ const DeactiveProduct = ({
         try {
             setIsDeleting(true);
             setError(null);
-            
+
             const response = await deactiveProduct(product.id);
-            
+
             if (response && (response.status === 200 || response.status === 204)) {
                 showNotification('Vô hiệu hóa sản phẩm thành công!', 'success');
                 onSuccess && onSuccess();
@@ -99,27 +96,27 @@ const DeactiveProduct = ({
                     background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
                 }
             }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <WarningIcon sx={{ fontSize: '2rem' }} />
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                    <WarningIcon sx={{fontSize: '2rem'}}/>
                     <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
+                        <Typography variant="h5" sx={{fontWeight: 800, mb: 0.5}}>
                             Vô hiệu hóa sản phẩm
                         </Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 400 }}>
+                        <Typography variant="body2" sx={{opacity: 0.9, fontWeight: 400}}>
                             Xác nhận vô hiệu hóa sản phẩm
                         </Typography>
                     </Box>
                 </Box>
             </DialogTitle>
 
-            <DialogContent sx={{ p: 4 }}>
+            <DialogContent sx={{p: 4}}>
                 {error && (
-                    <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                    <Alert severity="error" sx={{mb: 3, borderRadius: 2}}>
                         {error}
                     </Alert>
                 )}
 
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <Box sx={{textAlign: 'center', mb: 3}}>
                     <Box sx={{
                         width: 80,
                         height: 80,
@@ -131,10 +128,10 @@ const DeactiveProduct = ({
                         mx: 'auto',
                         mb: 2
                     }}>
-                        <DeleteIcon sx={{ fontSize: '2.5rem', color: '#f44336' }} />
+                        <DeleteIcon sx={{fontSize: '2.5rem', color: '#f44336'}}/>
                     </Box>
-                    
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+
+                    <Typography variant="h6" sx={{fontWeight: 600, mb: 2, color: 'text.primary'}}>
                         Bạn có chắc chắn muốn vô hiệu hóa sản phẩm này?
                     </Typography>
                 </Box>
@@ -147,10 +144,10 @@ const DeactiveProduct = ({
                         border: '1px solid #e9ecef',
                         mb: 3
                     }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1, color: 'text.primary'}}>
                             Thông tin sản phẩm:
                         </Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
                             <Typography variant="body2">
                                 <strong>Tên:</strong> {product.name}
                             </Typography>
@@ -158,12 +155,12 @@ const DeactiveProduct = ({
                                 <strong>ID:</strong> {product.id}
                             </Typography>
                             <Typography variant="body2">
-                                <strong>Trạng thái hiện tại:</strong> 
-                                <Box component="span" sx={{ 
-                                    ml: 1, 
-                                    px: 1, 
-                                    py: 0.5, 
-                                    borderRadius: 1, 
+                                <strong>Trạng thái hiện tại:</strong>
+                                <Box component="span" sx={{
+                                    ml: 1,
+                                    px: 1,
+                                    py: 0.5,
+                                    borderRadius: 1,
                                     backgroundColor: product.status === 'available' ? '#e8f5e8' : '#fff3e0',
                                     color: product.status === 'available' ? '#2e7d32' : '#f57c00',
                                     fontSize: '0.75rem',
@@ -176,9 +173,9 @@ const DeactiveProduct = ({
                     </Box>
                 )}
 
-                <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        <strong>Lưu ý:</strong> Sản phẩm sẽ được vô hiệu hóa và không còn hiển thị cho khách hàng. 
+                <Alert severity="warning" sx={{borderRadius: 2}}>
+                    <Typography variant="body2" sx={{fontWeight: 500}}>
+                        <strong>Lưu ý:</strong> Sản phẩm sẽ được vô hiệu hóa và không còn hiển thị cho khách hàng.
                         Bạn có thể kích hoạt lại sản phẩm này sau nếu cần thiết.
                     </Typography>
                 </Alert>
@@ -237,13 +234,13 @@ const DeactiveProduct = ({
                     }}
                 >
                     {isDeleting ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <CircularProgress size={18} color="inherit" />
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <CircularProgress size={18} color="inherit"/>
                             <Typography variant="body2">Đang xử lý...</Typography>
                         </Box>
                     ) : (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <DeleteIcon sx={{ fontSize: '1.2rem' }} />
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <DeleteIcon sx={{fontSize: '1.2rem'}}/>
                             Vô hiệu hóa
                         </Box>
                     )}

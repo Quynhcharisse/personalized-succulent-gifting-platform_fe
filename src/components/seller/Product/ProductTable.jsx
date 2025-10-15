@@ -1,67 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Alert,
+    Avatar,
     Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    Grid,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
     Paper,
+    Select,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
     TablePagination,
-    Typography,
-    Chip,
-    IconButton,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Alert,
-    CircularProgress,
-    Tooltip,
-    Avatar,
-    Menu,
-    MenuItem,
-    ListItemIcon,
-    ListItemText,
+    TableRow,
     TextField,
-    InputAdornment,
-    FormControl,
-    InputLabel,
-    Select,
-    Grid,
-    Card,
-    CardContent,
-    Divider,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    List,
-    ListItem
+    Tooltip,
+    Typography
 } from '@mui/material';
 import {
     Add as AddIcon,
-    Edit as EditIcon,
+    Cancel as UnavailableIcon,
+    CheckCircle as AvailableIcon,
     Delete as DeleteIcon,
-    Visibility as ViewIcon,
+    Edit as EditIcon,
+    ExpandMore as ExpandMoreIcon,
+    Grass as SoilIcon,
+    LocalFlorist as SucculentIcon,
+    LocalFlorist as PotIcon,
     MoreVert as MoreVertIcon,
     Search as SearchIcon,
-    FilterList as FilterIcon,
-    ExpandMore as ExpandMoreIcon,
-    LocalFlorist as SucculentIcon,
-    Pot as PotIcon,
-    Eco as SoilIcon,
+    SortByAlpha as SortIcon,
     Star as DecorationIcon,
-    Image as ImageIcon,
-    CalendarToday as DateIcon,
-    CheckCircle as AvailableIcon,
-    Cancel as UnavailableIcon,
-    Sort as SortIcon
+    Visibility as ViewIcon
 } from '@mui/icons-material';
-import { viewProduct, deleteProduct } from '../../../services/ProductService.jsx';
+import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
-import { useNotify } from '../../../hooks/useNotify.js';
+import useNotify from '../../../hooks/useNotify.js';
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
@@ -74,7 +69,7 @@ const ProductTable = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('createAt');
     const [sortOrder, setSortOrder] = useState('desc');
-    
+
     // Dialog states
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -83,12 +78,12 @@ const ProductTable = () => {
     const [productToDelete, setProductToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
-    
+
     // Menu states
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
-    
-    const { showNotification } = useNotify();
+
+    const {showNotification} = useNotify();
 
     // Load products
     const loadProducts = async () => {
@@ -96,8 +91,8 @@ const ProductTable = () => {
             setLoading(true);
             setError(null);
             const response = await viewProduct();
-            
-            if (response && response.data) {
+
+            if (response && response.data && Array.isArray(response.data)) {
                 setProducts(response.data);
                 setFilteredProducts(response.data);
             } else {
@@ -137,7 +132,7 @@ const ProductTable = () => {
         // Sort
         filtered.sort((a, b) => {
             let aValue, bValue;
-            
+
             switch (sortBy) {
                 case 'name':
                     aValue = a.name.toLowerCase();
@@ -202,11 +197,11 @@ const ProductTable = () => {
 
     const confirmDelete = async () => {
         if (!productToDelete) return;
-        
+
         try {
             setIsDeleting(true);
             const response = await deleteProduct(productToDelete.id);
-            
+
             if (response && (response.status === 200 || response.status === 204)) {
                 showNotification('Xóa sản phẩm thành công!', 'success');
                 loadProducts(); // Reload the list
@@ -234,7 +229,7 @@ const ProductTable = () => {
     const handleProductSaved = () => {
         loadProducts();
         showNotification(
-            isEdit ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!', 
+            isEdit ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!',
             'success'
         );
     };
@@ -285,10 +280,13 @@ const ProductTable = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case 'available':
+            case 'có sẵn':
                 return 'success';
             case 'unavailable':
+            case 'hết hàng':
                 return 'error';
             case 'draft':
+            case 'bản nháp':
                 return 'warning';
             default:
                 return 'default';
@@ -299,10 +297,13 @@ const ProductTable = () => {
     const getStatusLabel = (status) => {
         switch (status) {
             case 'available':
+            case 'có sẵn':
                 return 'Có sẵn';
             case 'unavailable':
+            case 'hết hàng':
                 return 'Hết hàng';
             case 'draft':
+            case 'bản nháp':
                 return 'Bản nháp';
             default:
                 return status;
@@ -312,28 +313,36 @@ const ProductTable = () => {
     // Calculate total price for a size
     const calculateSizePrice = (size) => {
         let totalPrice = 0;
-        
-        // Add succulent prices
-        size.succulents.forEach(succulent => {
-            totalPrice += (succulent.size?.price || 0) * succulent.quantity;
+
+        // Add succulent prices - handle new structure where size is array
+        size.succulents?.forEach(succulent => {
+            if (succulent.size && Array.isArray(succulent.size)) {
+                // New structure: size is array with quantity
+                succulent.size.forEach(sizeItem => {
+                    totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
+                });
+            } else if (succulent.size?.price) {
+                // Old structure: size is object
+                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+            }
         });
-        
+
         // Add pot price
         if (size.pot?.size && size.pot.size.length > 0) {
             totalPrice += size.pot.size[0].price || 0;
         }
-        
+
         // Add soil price
         if (size.soil?.basePricing) {
             const soilPrice = (size.soil.basePricing.price / size.soil.basePricing.massValue) * size.soil.massAmount;
             totalPrice += soilPrice;
         }
-        
+
         // Add decoration prices
         size.decorations?.forEach(decoration => {
             totalPrice += decoration.totalPrice || 0;
         });
-        
+
         return totalPrice;
     };
 
@@ -345,9 +354,9 @@ const ProductTable = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-                <CircularProgress size={60} />
-                <Typography variant="h6" sx={{ ml: 2 }}>
+            <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px'}}>
+                <CircularProgress size={60}/>
+                <Typography variant="h6" sx={{ml: 2}}>
                     Đang tải danh sách sản phẩm...
                 </Typography>
             </Box>
@@ -356,8 +365,8 @@ const ProductTable = () => {
 
     if (error) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="error" sx={{ mb: 2 }}>
+            <Box sx={{p: 3}}>
+                <Alert severity="error" sx={{mb: 2}}>
                     {error}
                 </Alert>
                 <Button variant="contained" onClick={loadProducts}>
@@ -368,15 +377,15 @@ const ProductTable = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{p: 3}}>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.dark' }}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
+                <Typography variant="h4" sx={{fontWeight: 700, color: 'success.dark'}}>
                     Bảng sản phẩm
                 </Typography>
                 <Button
                     variant="contained"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon/>}
                     onClick={handleCreateProduct}
                     sx={{
                         background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
@@ -390,7 +399,7 @@ const ProductTable = () => {
             </Box>
 
             {/* Filters and Search */}
-            <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+            <Paper sx={{p: 2, mb: 3, borderRadius: 2}}>
                 <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} sm={6} md={4}>
                         <TextField
@@ -401,7 +410,7 @@ const ProductTable = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <SearchIcon />
+                                        <SearchIcon/>
                                     </InputAdornment>
                                 ),
                             }}
@@ -442,7 +451,7 @@ const ProductTable = () => {
                         <Button
                             fullWidth
                             variant="outlined"
-                            startIcon={<SortIcon />}
+                            startIcon={<SortIcon/>}
                             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                             size="small"
                         >
@@ -453,48 +462,48 @@ const ProductTable = () => {
             </Paper>
 
             {/* Table */}
-            <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <Paper sx={{borderRadius: 2, overflow: 'hidden'}}>
                 <TableContainer>
                     <Table>
-                        <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+                        <TableHead sx={{backgroundColor: '#f5f5f5'}}>
                             <TableRow>
-                                <TableCell sx={{ fontWeight: 700 }}>Hình ảnh</TableCell>
-                                <TableCell 
-                                    sx={{ fontWeight: 700, cursor: 'pointer' }}
+                                <TableCell sx={{fontWeight: 700}}>Hình ảnh</TableCell>
+                                <TableCell
+                                    sx={{fontWeight: 700, cursor: 'pointer'}}
                                     onClick={() => handleSort('name')}
                                 >
                                     Tên sản phẩm
                                     {sortBy === 'name' && (
-                                        <SortIcon sx={{ ml: 1, fontSize: 16 }} />
+                                        <SortIcon sx={{ml: 1, fontSize: 16}}/>
                                     )}
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Mô tả</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Kích thước</TableCell>
-                                <TableCell 
-                                    sx={{ fontWeight: 700, cursor: 'pointer' }}
+                                <TableCell sx={{fontWeight: 700}}>Mô tả</TableCell>
+                                <TableCell sx={{fontWeight: 700}}>Kích thước</TableCell>
+                                <TableCell
+                                    sx={{fontWeight: 700, cursor: 'pointer'}}
                                     onClick={() => handleSort('status')}
                                 >
                                     Trạng thái
                                     {sortBy === 'status' && (
-                                        <SortIcon sx={{ ml: 1, fontSize: 16 }} />
+                                        <SortIcon sx={{ml: 1, fontSize: 16}}/>
                                     )}
                                 </TableCell>
-                                <TableCell 
-                                    sx={{ fontWeight: 700, cursor: 'pointer' }}
+                                <TableCell
+                                    sx={{fontWeight: 700, cursor: 'pointer'}}
                                     onClick={() => handleSort('createAt')}
                                 >
                                     Ngày tạo
                                     {sortBy === 'createAt' && (
-                                        <SortIcon sx={{ ml: 1, fontSize: 16 }} />
+                                        <SortIcon sx={{ml: 1, fontSize: 16}}/>
                                     )}
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Thao tác</TableCell>
+                                <TableCell sx={{fontWeight: 700}}>Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {paginatedProducts.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                                    <TableCell colSpan={7} sx={{textAlign: 'center', py: 4}}>
                                         <Typography variant="body1" color="text.secondary">
                                             Không tìm thấy sản phẩm nào
                                         </Typography>
@@ -507,12 +516,12 @@ const ProductTable = () => {
                                             <Avatar
                                                 src={product.images?.[0]?.url}
                                                 alt={product.name}
-                                                sx={{ width: 60, height: 60 }}
+                                                sx={{width: 60, height: 60}}
                                                 variant="rounded"
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                            <Typography variant="subtitle2" sx={{fontWeight: 600}}>
                                                 {product.name}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
@@ -520,9 +529,9 @@ const ProductTable = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography 
-                                                variant="body2" 
-                                                sx={{ 
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
                                                     maxWidth: 200,
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
@@ -533,7 +542,7 @@ const ProductTable = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
                                                 {product.sizes?.slice(0, 2).map((size, index) => (
                                                     <Chip
                                                         key={index}
@@ -552,7 +561,7 @@ const ProductTable = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Chip
-                                                icon={product.status === 'available' ? <AvailableIcon /> : <UnavailableIcon />}
+                                                icon={(product.status === 'available' || product.status === 'có sẵn') ? <AvailableIcon/> : <UnavailableIcon/>}
                                                 label={getStatusLabel(product.status)}
                                                 color={getStatusColor(product.status)}
                                                 size="small"
@@ -564,33 +573,33 @@ const ProductTable = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <Box sx={{display: 'flex', gap: 1}}>
                                                 <Tooltip title="Xem chi tiết">
                                                     <IconButton
                                                         color="info"
                                                         size="small"
                                                         onClick={() => handleViewProduct(product)}
                                                     >
-                                                        <ViewIcon />
+                                                        <ViewIcon/>
                                                     </IconButton>
                                                 </Tooltip>
-                                                
+
                                                 <Tooltip title="Chỉnh sửa">
                                                     <IconButton
                                                         color="primary"
                                                         size="small"
                                                         onClick={() => handleEditProduct(product)}
                                                     >
-                                                        <EditIcon />
+                                                        <EditIcon/>
                                                     </IconButton>
                                                 </Tooltip>
-                                                
+
                                                 <Tooltip title="Thêm">
                                                     <IconButton
                                                         size="small"
                                                         onClick={(e) => handleMenuOpen(e, product.id)}
                                                     >
-                                                        <MoreVertIcon />
+                                                        <MoreVertIcon/>
                                                     </IconButton>
                                                 </Tooltip>
                                             </Box>
@@ -612,7 +621,7 @@ const ProductTable = () => {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     labelRowsPerPage="Số dòng mỗi trang:"
-                    labelDisplayedRows={({ from, to, count }) => 
+                    labelDisplayedRows={({from, to, count}) =>
                         `${from}-${to} của ${count !== -1 ? count : `nhiều hơn ${to}`}`
                     }
                 />
@@ -629,7 +638,7 @@ const ProductTable = () => {
                     if (product) handleViewProduct(product);
                 }}>
                     <ListItemIcon>
-                        <ViewIcon fontSize="small" />
+                        <ViewIcon fontSize="small"/>
                     </ListItemIcon>
                     <ListItemText>Xem chi tiết</ListItemText>
                 </MenuItem>
@@ -638,16 +647,16 @@ const ProductTable = () => {
                     if (product) handleEditProduct(product);
                 }}>
                     <ListItemIcon>
-                        <EditIcon fontSize="small" />
+                        <EditIcon fontSize="small"/>
                     </ListItemIcon>
                     <ListItemText>Chỉnh sửa</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={() => {
                     const product = products.find(p => p.id === selectedRowId);
                     if (product) handleDeleteProduct(product);
-                }} sx={{ color: 'error.main' }}>
+                }} sx={{color: 'error.main'}}>
                     <ListItemIcon>
-                        <DeleteIcon fontSize="small" color="error" />
+                        <DeleteIcon fontSize="small" color="error"/>
                     </ListItemIcon>
                     <ListItemText>Xóa</ListItemText>
                 </MenuItem>
@@ -674,24 +683,25 @@ const ProductTable = () => {
                     color: 'white',
                     fontWeight: 700
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <ViewIcon />
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                        <ViewIcon/>
                         Chi tiết sản phẩm: {selectedProduct?.name}
                     </Box>
                 </DialogTitle>
-                
-                <DialogContent sx={{ p: 3 }}>
+
+                <DialogContent sx={{p: 3}}>
                     {selectedProduct && (
                         <Box>
                             {/* Basic Info */}
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                            <Box sx={{mb: 3}}>
+                                <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                     Thông tin cơ bản
                                 </Typography>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="body2" color="text.secondary">Tên sản phẩm:</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>{selectedProduct.name}</Typography>
+                                        <Typography variant="body1"
+                                                    sx={{fontWeight: 500}}>{selectedProduct.name}</Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
@@ -708,18 +718,18 @@ const ProductTable = () => {
                                 </Grid>
                             </Box>
 
-                            <Divider sx={{ my: 2 }} />
+                            <Divider sx={{my: 2}}/>
 
                             {/* Images */}
                             {selectedProduct.images && selectedProduct.images.length > 0 && (
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                                <Box sx={{mb: 3}}>
+                                    <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                         Hình ảnh ({selectedProduct.images.length})
                                     </Typography>
                                     <Grid container spacing={2}>
                                         {selectedProduct.images.map((image, index) => (
                                             <Grid item xs={12} sm={6} md={4} key={image.id}>
-                                                <Box sx={{ position: 'relative' }}>
+                                                <Box sx={{position: 'relative'}}>
                                                     <img
                                                         src={image.url}
                                                         alt={image.altText}
@@ -750,37 +760,38 @@ const ProductTable = () => {
                                 </Box>
                             )}
 
-                            <Divider sx={{ my: 2 }} />
+                            <Divider sx={{my: 2}}/>
 
                             {/* Sizes */}
                             <Box>
-                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                                <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                     Cấu hình kích thước ({selectedProduct.sizes?.length || 0})
                                 </Typography>
-                                
+
                                 {selectedProduct.sizes?.map((size, sizeIndex) => (
-                                    <Accordion key={sizeIndex} sx={{ mb: 2 }}>
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                                Kích thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
+                                    <Accordion key={sizeIndex} sx={{mb: 2}}>
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+                                                Kích
+                                                thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
                                             </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                                 {/* Succulents */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Sen đá ({size.succulents?.length || 0})
                                                     </Typography>
                                                     <List dense>
                                                         {size.succulents?.map((succulent, index) => (
-                                                            <ListItem key={index} sx={{ pl: 0 }}>
+                                                            <ListItem key={index} sx={{pl: 0}}>
                                                                 <ListItemIcon>
-                                                                    <SucculentIcon color="success" />
+                                                                    <SucculentIcon color="success"/>
                                                                 </ListItemIcon>
                                                                 <ListItemText
-                                                                    primary={`${succulent.name} (${succulent.size?.name})`}
-                                                                    secondary={`Số lượng: ${succulent.quantity} - Giá: ${new Intl.NumberFormat('vi-VN').format(succulent.size?.price || 0)}₫`}
+                                                                    primary={`${succulent.name} ${succulent.size && Array.isArray(succulent.size) ? `(${succulent.size[0]?.name})` : `(${succulent.size?.name})`}`}
+                                                                    secondary={`Số lượng: ${succulent.size && Array.isArray(succulent.size) ? succulent.size[0]?.quantity : succulent.quantity} - Giá: ${new Intl.NumberFormat('vi-VN').format(succulent.size && Array.isArray(succulent.size) ? succulent.size[0]?.price : succulent.size?.price || 0)}₫`}
                                                                 />
                                                             </ListItem>
                                                         ))}
@@ -789,13 +800,13 @@ const ProductTable = () => {
 
                                                 {/* Pot */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Chậu
                                                     </Typography>
                                                     <List dense>
-                                                        <ListItem sx={{ pl: 0 }}>
+                                                        <ListItem sx={{pl: 0}}>
                                                             <ListItemIcon>
-                                                                <PotIcon color="primary" />
+                                                                <PotIcon color="primary"/>
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 primary={size.pot?.name}
@@ -807,13 +818,13 @@ const ProductTable = () => {
 
                                                 {/* Soil */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Đất trồng
                                                     </Typography>
                                                     <List dense>
-                                                        <ListItem sx={{ pl: 0 }}>
+                                                        <ListItem sx={{pl: 0}}>
                                                             <ListItemIcon>
-                                                                <SoilIcon color="secondary" />
+                                                                <SoilIcon color="secondary"/>
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 primary={size.soil?.name}
@@ -826,14 +837,14 @@ const ProductTable = () => {
                                                 {/* Decorations */}
                                                 {size.decorations && size.decorations.length > 0 && (
                                                     <Box>
-                                                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                        <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                             Trang trí ({size.decorations.length})
                                                         </Typography>
                                                         <List dense>
                                                             {size.decorations.map((decoration, index) => (
-                                                                <ListItem key={index} sx={{ pl: 0 }}>
+                                                                <ListItem key={index} sx={{pl: 0}}>
                                                                     <ListItemIcon>
-                                                                        <DecorationIcon color="warning" />
+                                                                        <DecorationIcon color="warning"/>
                                                                     </ListItemIcon>
                                                                     <ListItemText
                                                                         primary={decoration.name}
@@ -852,14 +863,14 @@ const ProductTable = () => {
                         </Box>
                     )}
                 </DialogContent>
-                
-                <DialogActions sx={{ p: 3 }}>
+
+                <DialogActions sx={{p: 3}}>
                     <Button onClick={() => setViewDialogOpen(false)}>
                         Đóng
                     </Button>
                     <Button
                         variant="contained"
-                        startIcon={<EditIcon />}
+                        startIcon={<EditIcon/>}
                         onClick={() => {
                             setViewDialogOpen(false);
                             handleEditProduct(selectedProduct);
@@ -883,7 +894,7 @@ const ProductTable = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Bạn có chắc chắn muốn xóa sản phẩm "{productToDelete?.name}"? 
+                        Bạn có chắc chắn muốn xóa sản phẩm "{productToDelete?.name}"?
                         Hành động này không thể hoàn tác.
                     </Typography>
                 </DialogContent>

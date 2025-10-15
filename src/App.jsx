@@ -1,10 +1,14 @@
-import React from 'react'
+import React, {lazy, Suspense} from 'react'
 import './styles/App.css'
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom'
-import {lazy, Suspense} from 'react'
 import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
+// Buyer components
+import SucculentList from './components/buyer/SucculentList.jsx';
+import SucculentDetail from './components/buyer/SucculentDetail.jsx';
+import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
+import ProductList from "./components/seller/Product/ProductList.jsx";
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -27,11 +31,6 @@ const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
-
-// Buyer components
-import SucculentList from './components/buyer/SucculentList.jsx';
-import SucculentDetail from './components/buyer/SucculentDetail.jsx';
-import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -350,7 +349,11 @@ const router = createBrowserRouter([
             },
             {
                 path: 'products',
-                element: <h1>Quản lý sản phẩm</h1>
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <ProductList/>
+                    </Suspense>
+                )
             },
             {
                 path: 'accessory',

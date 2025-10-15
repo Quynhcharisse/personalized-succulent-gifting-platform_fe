@@ -1,51 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Alert,
+    Badge,
     Box,
+    Button,
     Card,
     CardContent,
     CardMedia,
-    Typography,
     Chip,
-    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
     Grid,
     IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Alert,
-    CircularProgress,
-    Fab,
-    Tooltip,
-    Badge,
-    Divider,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
     List,
     ListItem,
+    ListItemIcon,
     ListItemText,
-    ListItemIcon
+    Tooltip,
+    Typography
 } from '@mui/material';
 import {
     Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Visibility as ViewIcon,
-    ExpandMore as ExpandMoreIcon,
-    LocalFlorist as SucculentIcon,
-    Pot as PotIcon,
-    Eco as SoilIcon,
-    Star as DecorationIcon,
-    Image as ImageIcon,
     CalendarToday as DateIcon,
+    Cancel as UnavailableIcon,
     CheckCircle as AvailableIcon,
-    Cancel as UnavailableIcon
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    ExpandMore as ExpandMoreIcon,
+    Grass as SoilIcon,
+    Image as ImageIcon,
+    LocalFlorist as SucculentIcon,
+    LocalFlorist as PotIcon,
+    Star as DecorationIcon,
+    Visibility as ViewIcon
 } from '@mui/icons-material';
-import { viewProduct, deleteProduct } from '../../../services/ProductService.jsx';
+import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
 import DeactiveProduct from './DeactiveProduct.jsx';
-import { useNotify } from '../../../hooks/useNotify.js';
+import useNotify from '../../../hooks/useNotify.js';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -60,8 +59,8 @@ const ProductList = () => {
     const [isEdit, setIsEdit] = useState(false);
     const [deactiveDialogOpen, setDeactiveDialogOpen] = useState(false);
     const [productToDeactive, setProductToDeactive] = useState(null);
-    
-    const { showNotification } = useNotify();
+
+    const {showNotification} = useNotify();
 
     // Load products
     const loadProducts = async () => {
@@ -69,8 +68,8 @@ const ProductList = () => {
             setLoading(true);
             setError(null);
             const response = await viewProduct();
-            
-            if (response && response.data) {
+
+            if (response && response.data && Array.isArray(response.data)) {
                 setProducts(response.data);
             } else {
                 setProducts([]);
@@ -122,11 +121,11 @@ const ProductList = () => {
 
     const confirmDelete = async () => {
         if (!productToDelete) return;
-        
+
         try {
             setIsDeleting(true);
             const response = await deleteProduct(productToDelete.id);
-            
+
             if (response && (response.status === 200 || response.status === 204)) {
                 showNotification('Xóa sản phẩm thành công!', 'success');
                 loadProducts(); // Reload the list
@@ -154,7 +153,7 @@ const ProductList = () => {
     const handleProductSaved = () => {
         loadProducts();
         showNotification(
-            isEdit ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!', 
+            isEdit ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!',
             'success'
         );
     };
@@ -179,10 +178,13 @@ const ProductList = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case 'available':
+            case 'có sẵn':
                 return 'success';
             case 'unavailable':
+            case 'hết hàng':
                 return 'error';
             case 'draft':
+            case 'bản nháp':
                 return 'warning';
             default:
                 return 'default';
@@ -193,10 +195,13 @@ const ProductList = () => {
     const getStatusLabel = (status) => {
         switch (status) {
             case 'available':
+            case 'có sẵn':
                 return 'Có sẵn';
             case 'unavailable':
+            case 'hết hàng':
                 return 'Hết hàng';
             case 'draft':
+            case 'bản nháp':
                 return 'Bản nháp';
             default:
                 return status;
@@ -206,36 +211,44 @@ const ProductList = () => {
     // Calculate total price for a size
     const calculateSizePrice = (size) => {
         let totalPrice = 0;
-        
-        // Add succulent prices
-        size.succulents.forEach(succulent => {
-            totalPrice += (succulent.size?.price || 0) * succulent.quantity;
+
+        // Add succulent prices - handle new structure where size is array
+        size.succulents?.forEach(succulent => {
+            if (succulent.size && Array.isArray(succulent.size)) {
+                // New structure: size is array with quantity
+                succulent.size.forEach(sizeItem => {
+                    totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
+                });
+            } else if (succulent.size?.price) {
+                // Old structure: size is object
+                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+            }
         });
-        
+
         // Add pot price
         if (size.pot?.size && size.pot.size.length > 0) {
             totalPrice += size.pot.size[0].price || 0;
         }
-        
+
         // Add soil price
         if (size.soil?.basePricing) {
             const soilPrice = (size.soil.basePricing.price / size.soil.basePricing.massValue) * size.soil.massAmount;
             totalPrice += soilPrice;
         }
-        
+
         // Add decoration prices
         size.decorations?.forEach(decoration => {
             totalPrice += decoration.totalPrice || 0;
         });
-        
+
         return totalPrice;
     };
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-                <CircularProgress size={60} />
-                <Typography variant="h6" sx={{ ml: 2 }}>
+            <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px'}}>
+                <CircularProgress size={60}/>
+                <Typography variant="h6" sx={{ml: 2}}>
                     Đang tải danh sách sản phẩm...
                 </Typography>
             </Box>
@@ -244,8 +257,8 @@ const ProductList = () => {
 
     if (error) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="error" sx={{ mb: 2 }}>
+            <Box sx={{p: 3}}>
+                <Alert severity="error" sx={{mb: 2}}>
                     {error}
                 </Alert>
                 <Button variant="contained" onClick={loadProducts}>
@@ -257,16 +270,16 @@ const ProductList = () => {
 
     if (products.length === 0) {
         return (
-            <Box sx={{ textAlign: 'center', p: 4 }}>
-                <Typography variant="h5" sx={{ mb: 2, color: 'text.secondary' }}>
+            <Box sx={{textAlign: 'center', p: 4}}>
+                <Typography variant="h5" sx={{mb: 2, color: 'text.secondary'}}>
                     Chưa có sản phẩm nào
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+                <Typography variant="body1" sx={{mb: 3, color: 'text.secondary'}}>
                     Hãy tạo sản phẩm đầu tiên của bạn
                 </Typography>
                 <Button
                     variant="contained"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon/>}
                     onClick={handleCreateProduct}
                     size="large"
                     sx={{
@@ -281,15 +294,15 @@ const ProductList = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{p: 3}}>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.dark' }}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
+                <Typography variant="h4" sx={{fontWeight: 700, color: 'success.dark'}}>
                     Danh sách sản phẩm
                 </Typography>
                 <Button
                     variant="contained"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon/>}
                     onClick={handleCreateProduct}
                     sx={{
                         background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
@@ -319,7 +332,7 @@ const ProductList = () => {
                             }
                         }}>
                             {/* Product Image */}
-                            <Box sx={{ position: 'relative' }}>
+                            <Box sx={{position: 'relative'}}>
                                 <CardMedia
                                     component="img"
                                     height="200"
@@ -331,10 +344,10 @@ const ProductList = () => {
                                         borderTopRightRadius: 12
                                     }}
                                 />
-                                
+
                                 {/* Status Badge */}
                                 <Chip
-                                    icon={product.status === 'available' ? <AvailableIcon /> : <UnavailableIcon />}
+                                    icon={(product.status === 'available' || product.status === 'có sẵn') ? <AvailableIcon/> : <UnavailableIcon/>}
                                     label={getStatusLabel(product.status)}
                                     color={getStatusColor(product.status)}
                                     size="small"
@@ -357,27 +370,33 @@ const ProductList = () => {
                                             left: 8
                                         }}
                                     >
-                                        <ImageIcon sx={{ color: 'white', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 1, p: 0.5 }} />
+                                        <ImageIcon sx={{
+                                            color: 'white',
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
+                                            borderRadius: 1,
+                                            p: 0.5
+                                        }}/>
                                     </Badge>
                                 )}
                             </Box>
 
                             {/* Product Content */}
-                            <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                            <CardContent sx={{flexGrow: 1, p: 3}}>
+                                <Typography variant="h6" sx={{fontWeight: 700, mb: 1, color: 'text.primary'}}>
                                     {product.name}
                                 </Typography>
-                                
-                                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, minHeight: '40px' }}>
+
+                                <Typography variant="body2" sx={{color: 'text.secondary', mb: 2, minHeight: '40px'}}>
                                     {product.description}
                                 </Typography>
 
                                 {/* Sizes Summary */}
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'success.dark' }}>
+                                <Box sx={{mb: 2}}>
+                                    <Typography variant="subtitle2"
+                                                sx={{fontWeight: 600, mb: 1, color: 'success.dark'}}>
                                         Kích thước có sẵn:
                                     </Typography>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                                         {product.sizes?.map((size, index) => (
                                             <Chip
                                                 key={index}
@@ -391,9 +410,9 @@ const ProductList = () => {
                                 </Box>
 
                                 {/* Dates */}
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                        <DateIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                        <DateIcon sx={{fontSize: 16, color: 'text.secondary'}}/>
                                         <Typography variant="caption" color="text.secondary">
                                             Tạo: {formatDate(product.createAt)}
                                         </Typography>
@@ -401,46 +420,46 @@ const ProductList = () => {
                                 </Box>
 
                                 {/* Action Buttons */}
-                                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                                <Box sx={{display: 'flex', gap: 1, justifyContent: 'flex-end'}}>
                                     <Tooltip title="Xem chi tiết">
                                         <IconButton
                                             color="info"
                                             onClick={() => handleViewProduct(product)}
                                             size="small"
                                         >
-                                            <ViewIcon />
+                                            <ViewIcon/>
                                         </IconButton>
                                     </Tooltip>
-                                    
+
                                     <Tooltip title="Chỉnh sửa">
                                         <IconButton
                                             color="primary"
                                             onClick={() => handleEditProduct(product)}
                                             size="small"
                                         >
-                                            <EditIcon />
+                                            <EditIcon/>
                                         </IconButton>
                                     </Tooltip>
-                                    
-                                    {product.status === 'available' && (
+
+                                    {(product.status === 'available' || product.status === 'có sẵn') && (
                                         <Tooltip title="Vô hiệu hóa">
                                             <IconButton
                                                 color="warning"
                                                 onClick={() => handleDeactiveProduct(product)}
                                                 size="small"
                                             >
-                                                <UnavailableIcon />
+                                                <UnavailableIcon/>
                                             </IconButton>
                                         </Tooltip>
                                     )}
-                                    
+
                                     <Tooltip title="Xóa">
                                         <IconButton
                                             color="error"
                                             onClick={() => handleDeleteProduct(product)}
                                             size="small"
                                         >
-                                            <DeleteIcon />
+                                            <DeleteIcon/>
                                         </IconButton>
                                     </Tooltip>
                                 </Box>
@@ -471,24 +490,25 @@ const ProductList = () => {
                     color: 'white',
                     fontWeight: 700
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <ViewIcon />
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                        <ViewIcon/>
                         Chi tiết sản phẩm: {selectedProduct?.name}
                     </Box>
                 </DialogTitle>
-                
-                <DialogContent sx={{ p: 3 }}>
+
+                <DialogContent sx={{p: 3}}>
                     {selectedProduct && (
                         <Box>
                             {/* Basic Info */}
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                            <Box sx={{mb: 3}}>
+                                <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                     Thông tin cơ bản
                                 </Typography>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="body2" color="text.secondary">Tên sản phẩm:</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>{selectedProduct.name}</Typography>
+                                        <Typography variant="body1"
+                                                    sx={{fontWeight: 500}}>{selectedProduct.name}</Typography>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
@@ -505,18 +525,18 @@ const ProductList = () => {
                                 </Grid>
                             </Box>
 
-                            <Divider sx={{ my: 2 }} />
+                            <Divider sx={{my: 2}}/>
 
                             {/* Images */}
                             {selectedProduct.images && selectedProduct.images.length > 0 && (
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                                <Box sx={{mb: 3}}>
+                                    <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                         Hình ảnh ({selectedProduct.images.length})
                                     </Typography>
                                     <Grid container spacing={2}>
                                         {selectedProduct.images.map((image, index) => (
                                             <Grid item xs={12} sm={6} md={4} key={image.id}>
-                                                <Box sx={{ position: 'relative' }}>
+                                                <Box sx={{position: 'relative'}}>
                                                     <img
                                                         src={image.url}
                                                         alt={image.altText}
@@ -547,37 +567,38 @@ const ProductList = () => {
                                 </Box>
                             )}
 
-                            <Divider sx={{ my: 2 }} />
+                            <Divider sx={{my: 2}}/>
 
                             {/* Sizes */}
                             <Box>
-                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                                <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>
                                     Cấu hình kích thước ({selectedProduct.sizes?.length || 0})
                                 </Typography>
-                                
+
                                 {selectedProduct.sizes?.map((size, sizeIndex) => (
-                                    <Accordion key={sizeIndex} sx={{ mb: 2 }}>
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                                Kích thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
+                                    <Accordion key={sizeIndex} sx={{mb: 2}}>
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+                                                Kích
+                                                thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
                                             </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                                 {/* Succulents */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Sen đá ({size.succulents?.length || 0})
                                                     </Typography>
                                                     <List dense>
                                                         {size.succulents?.map((succulent, index) => (
-                                                            <ListItem key={index} sx={{ pl: 0 }}>
+                                                            <ListItem key={index} sx={{pl: 0}}>
                                                                 <ListItemIcon>
-                                                                    <SucculentIcon color="success" />
+                                                                    <SucculentIcon color="success"/>
                                                                 </ListItemIcon>
                                                                 <ListItemText
-                                                                    primary={`${succulent.name} (${succulent.size?.name})`}
-                                                                    secondary={`Số lượng: ${succulent.quantity} - Giá: ${new Intl.NumberFormat('vi-VN').format(succulent.size?.price || 0)}₫`}
+                                                                    primary={`${succulent.name} ${succulent.size && Array.isArray(succulent.size) ? `(${succulent.size[0]?.name})` : `(${succulent.size?.name})`}`}
+                                                                    secondary={`Số lượng: ${succulent.size && Array.isArray(succulent.size) ? succulent.size[0]?.quantity : succulent.quantity} - Giá: ${new Intl.NumberFormat('vi-VN').format(succulent.size && Array.isArray(succulent.size) ? succulent.size[0]?.price : succulent.size?.price || 0)}₫`}
                                                                 />
                                                             </ListItem>
                                                         ))}
@@ -586,13 +607,13 @@ const ProductList = () => {
 
                                                 {/* Pot */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Chậu
                                                     </Typography>
                                                     <List dense>
-                                                        <ListItem sx={{ pl: 0 }}>
+                                                        <ListItem sx={{pl: 0}}>
                                                             <ListItemIcon>
-                                                                <PotIcon color="primary" />
+                                                                <PotIcon color="primary"/>
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 primary={size.pot?.name}
@@ -604,13 +625,13 @@ const ProductList = () => {
 
                                                 {/* Soil */}
                                                 <Box>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                    <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                         Đất trồng
                                                     </Typography>
                                                     <List dense>
-                                                        <ListItem sx={{ pl: 0 }}>
+                                                        <ListItem sx={{pl: 0}}>
                                                             <ListItemIcon>
-                                                                <SoilIcon color="secondary" />
+                                                                <SoilIcon color="secondary"/>
                                                             </ListItemIcon>
                                                             <ListItemText
                                                                 primary={size.soil?.name}
@@ -623,14 +644,14 @@ const ProductList = () => {
                                                 {/* Decorations */}
                                                 {size.decorations && size.decorations.length > 0 && (
                                                     <Box>
-                                                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                                        <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
                                                             Trang trí ({size.decorations.length})
                                                         </Typography>
                                                         <List dense>
                                                             {size.decorations.map((decoration, index) => (
-                                                                <ListItem key={index} sx={{ pl: 0 }}>
+                                                                <ListItem key={index} sx={{pl: 0}}>
                                                                     <ListItemIcon>
-                                                                        <DecorationIcon color="warning" />
+                                                                        <DecorationIcon color="warning"/>
                                                                     </ListItemIcon>
                                                                     <ListItemText
                                                                         primary={decoration.name}
@@ -649,14 +670,14 @@ const ProductList = () => {
                         </Box>
                     )}
                 </DialogContent>
-                
-                <DialogActions sx={{ p: 3 }}>
+
+                <DialogActions sx={{p: 3}}>
                     <Button onClick={() => setViewDialogOpen(false)}>
                         Đóng
                     </Button>
                     <Button
                         variant="contained"
-                        startIcon={<EditIcon />}
+                        startIcon={<EditIcon/>}
                         onClick={() => {
                             setViewDialogOpen(false);
                             handleEditProduct(selectedProduct);
