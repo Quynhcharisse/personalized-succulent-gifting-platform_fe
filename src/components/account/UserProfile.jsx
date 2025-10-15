@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {
-    alpha,
     Avatar,
     Box,
     Button,
@@ -19,6 +18,7 @@ import {
     useMediaQuery,
     useTheme
 } from '@mui/material'
+import {alpha} from '@mui/material/styles'
 import {
     AutoAwesome as AutoAwesomeIcon,
     Badge as BadgeIcon,
@@ -30,10 +30,10 @@ import {
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
 import {updateProfile, viewProfile} from '../../services/AccountService.jsx'
-import {COLORS, FENGSHUI, GENDERS, ZODIACS} from '../../hooks/constants.js'
-import axios from 'axios'
-import { UserProfileValidation } from './UserProfileValidation.jsx';
-import ButtonCancel from "../buttonCustom/ButtonCancel.jsx";
+import {COLORS, FENGSHUI, GENDERS, ZODIACS} from '../constants.js'
+import {UserProfileValidation} from './UserProfileValidation.jsx';
+import {uploadToCloudinary} from '../cloudinaryUpload.js';
+import ActionButton from "../buttonCustom/ActionButton.jsx";
 
 
 export default function UserProfile() {
@@ -63,6 +63,23 @@ export default function UserProfile() {
     const fileInputRef = useRef(null)
     const abortController = useRef(null)
 
+    const normalizeGender = (value) => {
+        return ['MALE', 'FEMALE'].includes(value) ? value : '';
+    };
+
+    const extractUsernameFromEmail = (email) => {
+        if (!email) return '';
+        return email.split('@')[0];
+    };
+
+    const normalizeStringField = (value) => {
+        if (value === null || value === undefined) return '';
+        const str = String(value).trim();
+        if (!str) return '';
+        if (str.toUpperCase() === 'N/A') return '';
+        return str;
+    };
+
     useEffect(() => {
         let mounted = true
 
@@ -74,100 +91,24 @@ export default function UserProfile() {
                 let accountData = {}
                 let userData = {}
 
-                async function uploadToCloudinary(file) {
-                    try {
-                        if (!file) {
-                            enqueueSnackbar("Không có file để upload", {variant: "error"})
-                            return null
-                        }
-
-                        const maxSize = 10 * 1024 * 1024
-                        if (file.size > maxSize) {
-                            enqueueSnackbar("File quá lớn. Kích thước tối đa: 10MB", {variant: "error"})
-                            return null
-                        }
-
-                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-                        if (!allowedTypes.includes(file.type)) {
-                            enqueueSnackbar("Loại file không được hỗ trợ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP", {variant: "error"})
-                            return null
-                        }
-
-                        if (abortController.current) {
-                            abortController.current.abort()
-                        }
-                        abortController.current = new AbortController()
-
-                        const formData = new FormData()
-                        formData.append("file", file)
-                        formData.append("upload_preset", "psgp_web")
-                        formData.append("cloud_name", "dfx4miova")
-                        formData.append("folder", "psgp")
-                        formData.append("public_id", `user_${Date.now()}`)
-
-
-                        const response = await axios.post(
-                            "https://api.cloudinary.com/v1_1/dfx4miova/image/upload",
-                            formData,
-                            {
-                                onUploadProgress: (progressEvent) => {
-                                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                                    setUploadProgress(percentCompleted)
-                                },
-                                signal: abortController.current.signal,
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            }
-                        )
-
-
-                        return response.data.secure_url
-                    } catch (error) {
-                        if (axios.isCancel(error)) {
-                            enqueueSnackbar("Upload cancelled", {variant: "info"})
-                            return null
-                        }
-
-                        console.error("Cloudinary upload error:", error.response?.data || error.message)
-
-                        if (error.response?.status === 400) {
-                            const errorData = error.response.data
-                            if (errorData.error?.message) {
-                                enqueueSnackbar(`Upload failed: ${errorData.error.message}`, {variant: "error"})
-                            } else {
-                                enqueueSnackbar("Upload failed: Bad request. Vui lòng kiểm tra file và thử lại", {variant: "error"})
-                            }
-                        } else {
-                            enqueueSnackbar("Upload failed: " + (error.response?.data?.message || error.message), {variant: "error"})
-                        }
-
-                        return null
-                    } finally {
-                        setUploadProgress(0)
-                        abortController.current = null
-                    }
-                }
-
                 try {
                     const userFromStorage = localStorage.getItem('user')
                     if (userFromStorage) {
                         const parsedUser = JSON.parse(userFromStorage)
 
-
-                        // Lấy dữ liệu cơ bản từ localStorage
+                        // Lấy dữ liệu cơ bản từ localStorage và dùng email làm username nếu không có tên
                         formData = {
-                            name: parsedUser.user?.name || parsedUser.name || '',
+                            name: normalizeStringField(parsedUser.user?.name || parsedUser.name) || extractUsernameFromEmail(parsedUser.email) || '',
                             email: parsedUser.email || '',
                             role: parsedUser.role || '',
                             active: parsedUser.active !== undefined ? parsedUser.active : true,
                             registerDate: parsedUser.registerDate || parsedUser.createdAt || '',
-                            phone: parsedUser.user?.phone || parsedUser.phone || '',
-                            gender: parsedUser.user?.gender || parsedUser.gender || '',
-                            address: parsedUser.user?.address || parsedUser.address || '',
+                            phone: normalizeStringField(parsedUser.user?.phone || parsedUser.phone),
+                            gender: normalizeGender(parsedUser.user?.gender || parsedUser.gender),
+                            address: normalizeStringField(parsedUser.user?.address || parsedUser.address),
                             avatarUrl: parsedUser.user?.avatarUrl || parsedUser.avatarUrl || parsedUser.avatar || '',
-                            fengShui: parsedUser.user?.fengShui || parsedUser.fengShui || '',
-                            zodiac: parsedUser.user?.zodiac || parsedUser.zodiac || ''
+                            fengShui: normalizeStringField(parsedUser.user?.fengShui || parsedUser.fengShui),
+                            zodiac: normalizeStringField(parsedUser.user?.zodiac || parsedUser.zodiac)
                         }
 
 
@@ -190,17 +131,17 @@ export default function UserProfile() {
                         if (mounted) {
                             // Cập nhật form với dữ liệu từ API, ưu tiên dữ liệu mới
                             const updatedFormData = {
-                                name: userData.name || formData.name || '',
+                                name: normalizeStringField(userData.name) || normalizeStringField(formData.name) || extractUsernameFromEmail(accountData.email) || '',
                                 email: accountData.email || formData.email || '',
                                 role: accountData.role || formData.role || '',
                                 active: accountData.active !== undefined ? accountData.active : formData.active,
                                 registerDate: accountData.registerDate || formData.registerDate || '',
-                                phone: userData.phone || formData.phone || '',
-                                gender: userData.gender || formData.gender || '',
-                                address: userData.address || formData.address || '',
+                                phone: normalizeStringField(userData.phone) || normalizeStringField(formData.phone) || '',
+                                gender: normalizeGender(userData.gender || formData.gender),
+                                address: normalizeStringField(userData.address) || normalizeStringField(formData.address) || '',
                                 avatarUrl: userData.avatarUrl || formData.avatarUrl || '',
-                                fengShui: userData.fengShui || formData.fengShui || '',
-                                zodiac: userData.zodiac || formData.zodiac || ''
+                                fengShui: normalizeStringField(userData.fengShui) || normalizeStringField(formData.fengShui) || '',
+                                zodiac: normalizeStringField(userData.zodiac) || normalizeStringField(formData.zodiac) || ''
                             }
 
                             setUserRole(accountData.role || formData.role || '')
@@ -266,6 +207,30 @@ export default function UserProfile() {
         return ZODIACS.find(z => z.value === value) || {label: value, icon: '⭐'}
     }
 
+    function updateLocalStorageUser(partial) {
+        try {
+            const userFromStorage = localStorage.getItem('user')
+            if (!userFromStorage) return
+            const parsedUser = JSON.parse(userFromStorage)
+
+            const updated = {...parsedUser}
+            if (updated.user && typeof updated.user === 'object') {
+                updated.user = {...updated.user, ...partial}
+            }
+            // mirror some fields at top-level if they exist in current shape
+            const mirrorKeys = ['name', 'phone', 'gender', 'address', 'avatarUrl', 'fengShui', 'zodiac']
+            mirrorKeys.forEach((k) => {
+                if (Object.prototype.hasOwnProperty.call(updated, k) && Object.prototype.hasOwnProperty.call(partial, k)) {
+                    updated[k] = partial[k]
+                }
+            })
+
+            localStorage.setItem('user', JSON.stringify(updated))
+        } catch (e) {
+            // no-op
+        }
+    }
+
     async function handleSubmit(e) {
         e.preventDefault()
         const error = UserProfileValidation(form);
@@ -276,8 +241,7 @@ export default function UserProfile() {
         }
         try {
             setLoading(true)
-            const editableFields = {
-                name: form.name,
+            const payload = {
                 phone: form.phone,
                 gender: form.gender,
                 address: form.address,
@@ -285,12 +249,20 @@ export default function UserProfile() {
                 fengShui: form.fengShui,
                 zodiac: form.zodiac
             }
-            const res = await updateProfile(editableFields)
+            // Only update name if user actually changed it
+            const trimmedCurrentName = (form.name || '').trim()
+            const trimmedOriginalName = (originalForm?.name || '').trim()
+            if (trimmedCurrentName !== trimmedOriginalName) {
+                payload.name = trimmedCurrentName
+            }
+
+            const res = await updateProfile(payload)
             if (res?.status === 200) {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật thông tin thành công', {variant: 'success'})
                 setOriginalForm(form)
                 setIsEditing(false)
                 setErrors({})
+                updateLocalStorageUser(payload)
             } else {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật không thành công', {variant: 'warning'})
             }
@@ -522,19 +494,30 @@ export default function UserProfile() {
                                                             };
                                                             reader.readAsDataURL(file);
 
-                                                            // Upload to Cloudinary
-                                                            const imageUrl = await uploadToCloudinary(file);
+                                                            // Nếu đang upload cũ thì abort
+                                                            if (abortController.current) {
+                                                                abortController.current.abort();
+                                                            }
+                                                            abortController.current = new AbortController();
+
+                                                            // Upload to Cloudinary dùng hook chung
+                                                            const imageUrl = await uploadToCloudinary(file, {
+                                                                onProgress: setUploadProgress,
+                                                                signal: abortController.current.signal
+                                                            });
                                                             if (imageUrl) {
                                                                 setForm(prev => ({...prev, avatarUrl: imageUrl}));
                                                                 enqueueSnackbar("Upload ảnh thành công!", {variant: "success"});
                                                             } else {
-                                                                // Nếu upload thất bại, xóa preview
                                                                 setPreviewImage(null);
                                                             }
                                                         } catch (error) {
                                                             console.error("File upload error:", error);
                                                             setPreviewImage(null);
                                                             enqueueSnackbar("Lỗi khi xử lý file", {variant: "error"});
+                                                        } finally {
+                                                            setUploadProgress(0);
+                                                            abortController.current = null;
                                                         }
                                                     }
                                                 }}
@@ -785,7 +768,7 @@ export default function UserProfile() {
                                                                 value={form.address}
                                                                 onChange={handleChange('address')}
                                                                 error={!!errors.address}
-                                                                helperText={errors.address || 'Tối đa 255 ký tự'}
+                                                                helperText={errors.address}
                                                                 placeholder="Nhập địa chỉ của bạn"
                                                                 sx={{
                                                                     '& .MuiOutlinedInput-root': {
@@ -827,7 +810,7 @@ export default function UserProfile() {
                                                                 value={form.phone}
                                                                 onChange={handleChange('phone')}
                                                                 error={!!errors.phone}
-                                                                helperText={errors.phone || 'Định dạng: 0xxxxxxxxx hoặc +84xxxxxxxxx'}
+                                                                helperText={errors.phone}
                                                                 placeholder="Nhập số điện thoại"
                                                                 sx={{
                                                                     '& .MuiOutlinedInput-root': {
@@ -1041,22 +1024,21 @@ export default function UserProfile() {
                                                     {isEditing && (
                                                         <Stack direction="row" spacing={2} justifyContent="flex-end"
                                                                sx={{mt: 2}}>
-                                                            <ButtonCancel/>
-                                                            <Button
+                                                            <ActionButton
+                                                                action="cancel"
+                                                                type="button"
+                                                                onClick={handleCancel}
+                                                            >
+                                                                Hủy
+                                                            </ActionButton>
+                                                            <ActionButton
+                                                                action="primary"
+                                                                loading={loading}
                                                                 type="submit"
-                                                                variant="contained"
                                                                 disabled={loading}
-                                                                sx={{
-                                                                    borderRadius: 2,
-                                                                    backgroundColor: COLORS.primary,
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: COLORS.primaryDark
-                                                                    }
-                                                                }}
                                                             >
                                                                 {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                                                            </Button>
+                                                            </ActionButton>
                                                         </Stack>
                                                     )}
                                                 </Grid>

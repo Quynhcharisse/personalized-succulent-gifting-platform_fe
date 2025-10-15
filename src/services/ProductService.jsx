@@ -31,7 +31,7 @@ export const getTotalSupplierCount = async () => {
     }
 };
 
-//------------------- Accessories and Succulents ------------------//
+//------------------- Succulents ------------------//
 export const createSucculent = async (succulentData) => {
     const response = await axiosClient.post("/product/succulent", succulentData);
     return response || null
@@ -44,12 +44,6 @@ export const getSucculents = async () => {
 export const updateSucculent = async (succulentData) => {
     const response = await axiosClient.put("/product/succulent", succulentData);
     return response || null
-}
-
-export const getAccessories = async () => {
-    const response = await axiosClient.get("/product/accessories");
-    return response || null
-
 }
 
 //------------------- Accessories ------------------//
@@ -68,26 +62,10 @@ export const createSoilAccessory = async (accessoryData) => {
     return response || null
 }
 
-// View all products (for seller)
-export const viewProduct = async () => {
-    const response = await axiosClient.get("/product/");
-    return response || null;
-};
+export const getAccessories = async (type = 'all') => {
+    const params = new URLSearchParams({ t: String(type || 'all') });
+    const response = await axiosClient.get(`/product/accessories?${params.toString()}`);
+    return response || null
+}
 
-// Deactivate a product by ID
-export const deactivateProduct = async (id) => {
-    const response = await axiosClient.delete(`/product/${id}`);
-    return response || null;
-};
-
-// View all products (for seller)
-export const viewProduct = async () => {
-    const response = await axiosClient.get("/product/");
-    return response || null;
-};
-
-// Deactivate a product by ID
-export const deactivateProduct = async (id) => {
-    const response = await axiosClient.delete(`/product/${id}`);
-    return response || null;
-};
+//------------------- Product ------------------//

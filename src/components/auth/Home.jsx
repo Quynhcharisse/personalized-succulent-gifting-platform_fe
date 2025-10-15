@@ -1,16 +1,16 @@
-import React from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import '../../styles/auth/Home.css'
-import {useEffect, useRef, useState} from 'react'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import {Box, IconButton} from "@mui/material";
+import ChatBot from './ChatBot.jsx'
+import ContactWidget from './ContactWidget.jsx'
 
 export default function Home() {
     const [bannerVideoReady, setBannerVideoReady] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
+    const [isPlaying, setIsPlaying] = useState(true)
+    const [volume, setVolume] = useState(0.5)
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const [showContactDropdown, setShowContactDropdown] = useState(false)
-    const [showChatbot, setShowChatbot] = useState(false);
     const videoRef = useRef(null)
-    // Prefer higher bitrate file if you have one, fallback to current mp4
     const bannerVideoSrc = '/videoBanner.mp4'
 
     useEffect(() => {
@@ -18,14 +18,90 @@ export default function Home() {
         if (!el) return
         try {
             el.muted = isMuted
-            if (!isMuted && el.paused) {
+            el.volume = isMuted ? 0 : volume
+            if (isPlaying && el.paused) {
                 el.play().catch(() => {
                 })
+            } else if (!isPlaying && !el.paused) {
+                el.pause()
             }
         } catch (error) {
-            console.error('Error setting video muted state:', error)
+            console.error('Error setting video state:', error)
         }
-    }, [isMuted])
+    }, [isMuted, isPlaying, volume])
+
+    // Handle video play/pause
+    const togglePlay = () => {
+        setIsPlaying(prev => !prev)
+    }
+
+    // Handle mute/unmute
+    const toggleMute = () => {
+        setIsMuted(prev => !prev)
+    }
+
+    // Handle volume change with enhanced granular control
+    const handleVolumeChange = (event) => {
+        const newVolume = parseFloat(event.target.value)
+        setVolume(newVolume)
+
+        // Auto mute/unmute based on volume level
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
+
+    // Handle keyboard volume control
+    const handleVolumeKeyDown = (event) => {
+        event.preventDefault()
+        const step = 0.1
+        let newVolume = volume
+
+        switch (event.key) {
+            case 'ArrowUp':
+            case 'ArrowRight':
+                newVolume = Math.min(1, volume + step)
+                break
+            case 'ArrowDown':
+            case 'ArrowLeft':
+                newVolume = Math.max(0, volume - step)
+                break
+            case 'Home':
+                newVolume = 1
+                break
+            case 'End':
+                newVolume = 0
+                break
+            default:
+                return
+        }
+
+        setVolume(Math.round(newVolume * 10) / 10) // Round to 1 decimal place
+
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
+
+    // Handle volume wheel control for fine adjustment
+    const handleVolumeWheel = (event) => {
+        event.preventDefault()
+        const step = 0.05 // Smaller step for wheel control
+        const delta = event.deltaY > 0 ? -step : step
+        const newVolume = Math.max(0, Math.min(1, volume + delta))
+
+        setVolume(Math.round(newVolume * 20) / 20) // Round to 0.05 increments
+
+        if (newVolume === 0) {
+            setIsMuted(true)
+        } else if (isMuted && newVolume > 0) {
+            setIsMuted(false)
+        }
+    }
 
     // Compact header shadow on scroll
     useEffect(() => {
@@ -39,6 +115,7 @@ export default function Home() {
         onScroll()
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
+
     const bestSellerTeasers = [
         {
             id: 'kit-01',
@@ -163,8 +240,6 @@ export default function Home() {
     const formatPrice = (vnd) =>
         new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(vnd)
 
-    document.title = 'Lá Nhỏ Bên Thềm | Sen đá & quà tặng xanh'
-
     // Highlight only sections on Home (exclude /cham-soc which is a separate page)
     useEffect(() => {
         const sectionIds = ['san-pham', 'danh-gia', 'ly-do']
@@ -178,8 +253,11 @@ export default function Home() {
                     link.classList.add('active')
                 }
             })
-        }, { root: null, rootMargin: '0px 0px -40% 0px', threshold: [0.5, 0.75, 1] })
-        sectionIds.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el) })
+        }, {root: null, rootMargin: '0px 0px -40% 0px', threshold: [0.5, 0.75, 1]})
+        sectionIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el)
+        })
         return () => observer.disconnect()
     }, [])
 
@@ -195,404 +273,343 @@ export default function Home() {
     }, [showContactDropdown])
 
     return (
-        <div className="home">
-
-            <header className="hero">
-                <div className="container hero__content">
-                <div className="hero__panel">
-                        <p className="hero__poem">
-                            Chăm một lá nhỏ, gieo ngàn cung bậc<br/>
-                            Bên thềm xanh mát, dệt mộng bình yên<br/>
-                            Sen đá lung linh, từng nhánh dịu hiền<br/>
-                            Mỗi chậu bé xinh, kể chuyện kiêu hãnh.<br/>
-                            Cỏ cây quyện gió, hơi thở vỗ về<br/>
-                            Không gian thầm lặng, vang vọng yêu thương<br/>
-                            Lá ngắn, lá dài, nụ hoa hé nụ<br/>
-                            Lá Nhỏ Bên Thềm – đong đầy cảm xúc
-                        </p>
-                        <div className="hero__actions">
-                            <a className="btn btn--primary" href="#san-pham">Mua ngay</a>
-                            <a className="btn btn--ghost" href="#ly-do">Vì sao chọn chúng tôi</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <section className="features">
-                <div className="container features__grid features__grid--3">
-                    <div className="feature feature--card">
-                        <div className="feature__icon-bubble">
-                            <img src="/ButtonCar.png" alt="Điện cây"/>
-                        </div>
-                        <div>
-                            <h3>Điện cây</h3>
-                            <p>
-                                Dịch vụ nhắc lịch đặt cây và gửi quà thân tặng vào dịp sinh nhật, kỷ niệm… Chúng tôi
-                                chuẩn bị chậu cây xinh và giao đúng hẹn.
+        <>
+            <div className="home">
+                <header className="hero">
+                    <div className="container hero__content">
+                        <div className="hero__panel">
+                            <p className="hero__poem">
+                                Chăm một lá nhỏ, gieo ngàn cung bậc<br/>
+                                Bên thềm xanh mát, dệt mộng bình yên<br/>
+                                Sen đá lung linh, từng nhánh dịu hiền<br/>
+                                Mỗi chậu bé xinh, kể chuyện kiêu hãnh.<br/>
+                                Cỏ cây quyện gió, hơi thở vỗ về<br/>
+                                Không gian thầm lặng, vang vọng yêu thương<br/>
+                                Lá ngắn, lá dài, nụ hoa hé nụ<br/>
+                                Lá Nhỏ Bên Thềm – đong đầy cảm xúc
                             </p>
-                        </div>
-                    </div>
-                    <div className="feature feature--card">
-                        <div className="feature__icon-bubble">
-                            <img src="/ButtonCommunity.png" alt="Tích hợp cộng đồng yêu cây"/>
-                        </div>
-                        <div>
-                            <h3>Tích hợp cộng đồng yêu cây</h3>
-                            <p>
-                                Không gian thân thiện để bạn khoe cây, chia sẻ kinh nghiệm, hỏi – đáp và lan tỏa cảm
-                                hứng mỗi ngày.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="feature feature--card">
-                        <div className="feature__icon-bubble">
-                            <img src="/ButtonMoney.png" alt="Chất lượng trong tầm giá"/>
-                        </div>
-                        <div>
-                            <h3>Chất lượng trong tầm giá</h3>
-                            <p>
-                                Chọn tận vườn, đóng gói cẩn thận và tư vấn tận tâm để mỗi món quà xanh luôn xứng đáng
-                                với niềm tin bạn gửi gắm.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div className="banner banner--bleed">
-                <div className="banner__inner">
-                    <video
-                        className="banner__video"
-                        autoPlay
-                        loop
-                        muted={isMuted}
-                        playsInline
-                        preload="metadata"
-                        poster="/nen.jpg"
-                        onCanPlay={() => setBannerVideoReady(true)}
-                        ref={videoRef}
-                    >
-                        <source src={bannerVideoSrc} type="video/mp4"/>
-                    </video>
-                    <button
-                        className="banner__mute"
-                        title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                        aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                        onClick={() => setIsMuted((m) => !m)}
-                    >
-                        {isMuted ? '🔇' : '🔊'}
-                    </button>
-                    {!bannerVideoReady && (
-                        <img
-                            className="banner__img"
-                            src="/nen.jpg"
-                            alt="Bộ sưu tập sen đá"
-                            loading="lazy"
-                            decoding="async"
-                            fetchPriority="low"
-                        />
-                    )}
-                </div>
-            </div>
-
-            <section id="san-pham" className="bestsellers">
-                <div className="container">
-                    <h2 className="section-title">Sản phẩm bán chạy</h2>
-                    <div className="bestsellers__grid">
-                        <aside className="promo-card">
-                            <div className="promo-card__content">
-                                <h3>Đặt cây</h3>
-                                <p>
-                                    Chọn mẫu, đặt lịch giao, chúng tôi trồng phối cảnh theo yêu cầu. Thiết kế tối giản
-                                    cho bàn làm việc.
-                                </p>
-                                <a className="btn btn--primary" href="#catalog">Mua ngay</a>
+                            <div className="hero__actions">
+                                <a className="btn btn--primary" href="#san-pham">Mua ngay</a>
+                                <a className="btn btn--ghost" href="#ly-do">Vì sao chọn chúng tôi</a>
                             </div>
-                        </aside>
-                        {bestSellerTeasers.map((t) => (
-                            <article key={t.id} className="teaser">
-                                <div className="teaser__media">
-                                    <img loading="lazy" src={t.image} alt={t.name}/>
-                                </div>
-                                <div className="teaser__body">
-                                    <h3>{t.name}</h3>
-                                    <div className="price">{formatPrice(t.priceVnd)}</div>
-                                    <button className="btn btn--sm">Thêm vào giỏ</button>
-                                </div>
-                            </article>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </header>
 
-            <section id="danh-gia" className="testimonials">
-                <div className="container">
-                    <h2 className="section-title">Đánh giá của khách hàng</h2>
-                    <div className="testimonials__grid">
-                        {testimonials.map((r) => (
-                            <article key={r.id} className="review">
-                                <div className="review__header">
-                                    <div className="stars" aria-label={`${r.rating} sao`}>
-                                        {'★★★★★'.slice(0, r.rating)}
-                                    </div>
-                                    <span className="review__name">{r.name}</span>
-                                </div>
-                                <p className="review__text">{r.text}</p>
-                            </article>
-                        ))}
+                <section className="features">
+                    <div className="container features__grid features__grid--3">
+                        <div className="feature feature--card">
+                            <div className="feature__icon-bubble">
+                                <img src="/ButtonCar.png" alt="Điện cây"/>
+                            </div>
+                            <div>
+                                <h3>Điện cây</h3>
+                                <p>
+                                    Dịch vụ nhắc lịch đặt cây và gửi quà thân tặng vào dịp sinh nhật, kỷ niệm… Chúng tôi
+                                    chuẩn bị chậu cây xinh và giao đúng hẹn.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="feature feature--card">
+                            <div className="feature__icon-bubble">
+                                <img src="/ButtonCommunity.png" alt="Tích hợp cộng đồng yêu cây"/>
+                            </div>
+                            <div>
+                                <h3>Tích hợp cộng đồng yêu cây</h3>
+                                <p>
+                                    Không gian thân thiện để bạn khoe cây, chia sẻ kinh nghiệm, hỏi – đáp và lan tỏa cảm
+                                    hứng mỗi ngày.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="feature feature--card">
+                            <div className="feature__icon-bubble">
+                                <img src="/ButtonMoney.png" alt="Chất lượng trong tầm giá"/>
+                            </div>
+                            <div>
+                                <h3>Chất lượng trong tầm giá</h3>
+                                <p>
+                                    Chọn tận vườn, đóng gói cẩn thận và tư vấn tận tâm để mỗi món quà xanh luôn xứng
+                                    đáng
+                                    với niềm tin bạn gửi gắm.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section id="catalog" className="catalog">
-                <div className="container">
-                    <h2 className="section-title">Sản phẩm</h2>
-                    <div className="catalog__subnav">
-                        <button className="chip chip--active">Mới nhất</button>
-                        <button className="chip">Bán chạy</button>
-                        <button className="chip">Giảm giá</button>
-                        <button className="chip">Phù hợp nơi sáng</button>
-                    </div>
-                    <div className="card-grid">
-                        {catalogProducts.map((p) => (
-                            <article key={p.id} className="product-card">
-                                {p.badge && <span className="badge">{p.badge}</span>}
-                                <div className="product-card__media">
-                                    <img loading="lazy" src={p.image} alt={p.name}/>
-                                </div>
-                                <div className="product-card__body">
-                                    <h3>{p.name}</h3>
-                                    <div className="product-card__meta">
-                                        <div>
-                                            {p.salePriceVnd ? (
-                                                <>
-                                                    <span
-                                                        className="price price--sale">{formatPrice(p.salePriceVnd)}</span>
-                                                    <span className="price price--old">{formatPrice(p.priceVnd)}</span>
-                                                </>
-                                            ) : (
-                                                <span className="price">{formatPrice(p.priceVnd)}</span>
-                                            )}
+                <div className="banner banner--bleed">
+                    <div className="banner__inner">
+                        <video
+                            className="banner__video"
+                            autoPlay
+                            loop
+                            muted={isMuted}
+                            playsInline
+                            preload="metadata"
+                            poster="/nen.jpg"
+                            onCanPlay={() => setBannerVideoReady(true)}
+                            ref={videoRef}
+                        >
+                            <source src={bannerVideoSrc} type="video/mp4"/>
+                        </video>
+
+                        {/* Video Controls */}
+                        <div className="banner__controls">
+                            {/* Play/Pause Button */}
+                            <button
+                                className="banner__control-btn banner__play-btn"
+                                title={isPlaying ? 'Tạm dừng video' : 'Phát video'}
+                                aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}
+                                onClick={togglePlay}
+                            >
+                                {isPlaying ? '⏸️' : '▶️'}
+                            </button>
+
+                            {/* Volume Controls */}
+                            <div className="banner__volume-controls">
+                                <button
+                                    className="banner__control-btn banner__volume-btn"
+                                    title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+                                    aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+                                    onClick={toggleMute}
+                                    onMouseEnter={() => setShowVolumeSlider(true)}
+                                    onMouseLeave={() => setShowVolumeSlider(false)}
+                                >
+                                    {isMuted ? '🔇' : volume > 0.5 ? '🔊' : volume > 0 ? '🔉' : '🔈'}
+                                </button>
+
+                                {/* Volume Slider */}
+                                {showVolumeSlider && (
+                                    <div
+                                        className="banner__volume-slider"
+                                        onMouseEnter={() => setShowVolumeSlider(true)}
+                                        onMouseLeave={() => setShowVolumeSlider(false)}
+                                    >
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.1"
+                                            value={isMuted ? 0 : volume}
+                                            onChange={handleVolumeChange}
+                                            onKeyDown={handleVolumeKeyDown}
+                                            onWheel={handleVolumeWheel}
+                                            className="banner__volume-input"
+                                            title="Điều chỉnh âm lượng"
+                                        />
+                                        <div className="banner__volume-percentage">
+                                            {Math.round((isMuted ? 0 : volume) * 100)}%
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {!bannerVideoReady && (
+                            <img
+                                className="banner__img"
+                                src="/nen.jpg"
+                                alt="Bộ sưu tập sen đá"
+                                loading="lazy"
+                                decoding="async"
+                                fetchPriority="low"
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <section id="san-pham" className="bestsellers">
+                    <div className="container">
+                        <h2 className="section-title">Sản phẩm bán chạy</h2>
+                        <div className="bestsellers__grid">
+                            <aside className="promo-card">
+                                <div className="promo-card__content">
+                                    <h3>Đặt cây</h3>
+                                    <p>
+                                        Chọn mẫu, đặt lịch giao, chúng tôi trồng phối cảnh theo yêu cầu. Thiết kế tối
+                                        giản
+                                        cho bàn làm việc.
+                                    </p>
+                                    <a className="btn btn--primary" href="#catalog">Mua ngay</a>
+                                </div>
+                            </aside>
+                            {bestSellerTeasers.map((t) => (
+                                <article key={t.id} className="teaser">
+                                    <div className="teaser__media">
+                                        <img loading="lazy" src={t.image} alt={t.name}/>
+                                    </div>
+                                    <div className="teaser__body">
+                                        <h3>{t.name}</h3>
+                                        <div className="price">{formatPrice(t.priceVnd)}</div>
                                         <button className="btn btn--sm">Thêm vào giỏ</button>
                                     </div>
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section id="danh-gia" className="testimonials">
+                    <div className="container">
+                        <h2 className="section-title">Đánh giá của khách hàng</h2>
+                        <div className="testimonials__grid">
+                            {testimonials.map((r) => (
+                                <article key={r.id} className="review">
+                                    <div className="review__header">
+                                        <div className="stars" aria-label={`${r.rating} sao`}>
+                                            {'★★★★★'.slice(0, r.rating)}
+                                        </div>
+                                        <span className="review__name">{r.name}</span>
+                                    </div>
+                                    <p className="review__text">{r.text}</p>
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section id="catalog" className="catalog">
+                    <div className="container">
+                        <h2 className="section-title">Sản phẩm</h2>
+                        <div className="catalog__subnav">
+                            <button className="chip chip--active">Mới nhất</button>
+                            <button className="chip">Bán chạy</button>
+                            <button className="chip">Giảm giá</button>
+                            <button className="chip">Phù hợp nơi sáng</button>
+                        </div>
+                        <div className="card-grid">
+                            {catalogProducts.map((p) => (
+                                <article key={p.id} className="product-card">
+                                    {p.badge && <span className="badge">{p.badge}</span>}
+                                    <div className="product-card__media">
+                                        <img loading="lazy" src={p.image} alt={p.name}/>
+                                    </div>
+                                    <div className="product-card__body">
+                                        <h3>{p.name}</h3>
+                                        <div className="product-card__meta">
+                                            <div>
+                                                {p.salePriceVnd ? (
+                                                    <>
+                                                        <span
+                                                            className="price price--sale">{formatPrice(p.salePriceVnd)}</span>
+                                                        <span
+                                                            className="price price--old">{formatPrice(p.priceVnd)}</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="price">{formatPrice(p.priceVnd)}</span>
+                                                )}
+                                            </div>
+                                            <button className="btn btn--sm">Thêm vào giỏ</button>
+                                        </div>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                        <div className="center mt-16">
+                            <a className="btn" href="#">Xem thêm</a>
+                        </div>
+                    </div>
+                </section>
+
+
+                <section id="ly-do" className="reasons">
+                    <div className="container">
+                        <div className="section-title-card">
+                            <h2 className="section-title">Điều gì giúp chúng tôi trở thành lựa chọn hàng đầu giúp bạn sở
+                                hữu
+                                sen đá ưng ý</h2>
+                        </div>
+                        <div className="reasons__grid">
+                            <article className="reason-card">
+                                <div className="reason-card__icon">
+                                    <img src="/IconChatBox.png" alt="Chat box AI"/>
                                 </div>
+                                <h3>Chat box AI</h3>
+                                <p>
+                                    Bất cứ khi nào bạn cần tư vấn chọn cây, hỏi cách chăm sóc, nhờ gợi ý quà tặng hay
+                                    đóng
+                                    góp ý kiến, chatbot thông minh của Lá Nhỏ Bên Thềm luôn sẵn sàng lắng nghe và phản
+                                    hồi.
+                                </p>
                             </article>
-                        ))}
-                    </div>
-                    <div className="center mt-16">
-                        <a className="btn" href="#">Xem thêm</a>
-                    </div>
-                </div>
-            </section>
 
-
-            <section id="ly-do" className="reasons">
-                <div className="container">
-                    <div className="section-title-card">
-                        <h2 className="section-title">Điều gì giúp chúng tôi trở thành lựa chọn hàng đầu giúp bạn sở hữu sen đá ưng ý</h2>
-                    </div>
-                    <div className="reasons__grid">
-                        <article className="reason-card">
-                            <div className="reason-card__icon">
-                                <img src="/IconChatBox.png" alt="Chat box AI" />
-                            </div>
-                            <h3>Chat box AI</h3>
-                            <p>
-                                Bất cứ khi nào bạn cần tư vấn chọn cây, hỏi cách chăm sóc, nhờ gợi ý quà tặng hay đóng
-                                góp ý kiến, chatbot thông minh của Lá Nhỏ Bên Thềm luôn sẵn sàng lắng nghe và phản hồi.
-                            </p>
-                        </article>
-
-                        <article className="reason-card">
-                            <div className="reason-card__icon">
-                                <img src="/IconMem.png" alt="Cộng đồng yêu cây" />
-                            </div>
-                            <h3>Cộng đồng yêu cây</h3>
-                            <p>
-                                Chúng tôi xây dựng một không gian thân thiện để bạn có thể đăng bài chia sẻ kinh nghiệm
-                                chăm cây, khoe chậu cây xinh, hỏi – đáp các vấn đề thường gặp hay đơn giản là cùng nhau
-                                ngắm lá mỗi ngày.
-                            </p>
-                        </article>
-
-                        <article className="reason-card">
-                            <div className="reason-card__icon">
-                                <img src="/IconDiamon.png" alt="Chất lượng trong tầm giá" />
-                            </div>
-                            <h3>Chất lượng trong tầm giá</h3>
-                            <p>
-                                Từng sản phẩm đều được tuyển chọn kỹ lưỡng và chăm chút tỉ mỉ, đi kèm dịch vụ tư vấn –
-                                bảo hành đầy đủ để bạn yên tâm gắn bó lâu dài cùng Lá Nhỏ Bên Thềm.
-                            </p>
-                        </article>
-
-                        <article className="reason-card">
-                            <div className="reason-card__icon">
-                                <img src="/IconTree.png" alt="Thiết bị IoT đo độ ẩm đất" />
-                            </div>
-                            <h3>Thiết bị IOT đo độ ẩm đất</h3>
-                            <p>
-                                Theo dõi độ ẩm trong đất và nhắc tưới nước đúng lúc qua điện thoại. Không còn lo cây thiếu
-                                nước hay úng rễ, bạn chăm cây như một người làm vườn chuyên nghiệp.
-                            </p>
-                        </article>
-
-                        <article className="reason-card">
-                            <div className="reason-card__icon">
-                                <img src="/IconCar.png" alt="Điện cây" />
-                            </div>
-                            <h3>Điện cây</h3>
-                            <p>
-                                Dịch vụ “Điện cây” sẽ gọi điện hoặc nhắn tin nhắc bạn đặt cây vào các dịp lễ, sinh nhật,
-                                kỷ niệm… để kịp trao quà cho người thân yêu. Chỉ cần để lại danh sách ngày quan trọng, chúng
-                                tôi sẽ chuẩn bị và nhắc đúng lúc.
-                            </p>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <section className="newsletter newsletter--bleed">
-                <div className="container newsletter__inner">
-                    <div>
-                        <span className="eyebrow">Ưu đãi đặc biệt</span>
-                        <h2 className="newsletter__title">
-                        🎁 Giảm giá 20% cho đơn đặt hàng đầu tiên của bạn
-                        </h2>
-                        <p className="muted">Nhận tin cây hằng tuần và ưu đãi hấp dẫn của chúng tôi.</p>
-                    </div>
-                    <form className="newsletter__form" onSubmit={(e) => e.preventDefault()}>
-                        <input type="email" placeholder="Email" required/>
-                        <button className="btn btn--primary" type="submit">Nhận thông tin</button>
-                    </form>
-                </div>
-            </section>
-
-            {/* Contact Float Widget */}
-            <div className="contact-widget">
-                {/* Chatbot button above Contact, larger and always visible */}
-                <IconButton
-                    className="header__icon chatbot-float-btn"
-                    title="Chatbot"
-                    onClick={() => setShowChatbot((prev) => !prev)}
-                    sx={{
-                        backgroundColor: showChatbot ? '#e0f7fa' : 'white',
-                        mb: 1,
-                        width: 56,
-                        height: 56,
-                        boxShadow: 3,
-                        borderRadius: '50%',
-                        position: 'fixed',
-                        bottom: showChatbot ? 600 : 120,
-                        right: 32,
-                        zIndex: 1400,
-                        transition: 'bottom 0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: 0,
-                    }}
-                >
-                    <img src="https://cdn-icons-png.flaticon.com/512/13330/13330989.png" alt="Chatbot" style={{ width: 40, height: 40 }} />
-                </IconButton>
-                {/* Chatbot embed, with close button */}
-                {showChatbot && (
-                    <Box sx={{ position: 'fixed', bottom: 80, right: 24, zIndex: 1300, width: 350, height: 500, boxShadow: 3, borderRadius: 2, background: '#fff', display: 'flex', flexDirection: 'column' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-                            <IconButton size="small" onClick={() => setShowChatbot(false)} sx={{ zIndex: 1500 }}>
-                                <span style={{ fontSize: 20, fontWeight: 'bold' }}>×</span>
-                            </IconButton>
-                        </Box>
-                        <iframe
-                            src="https://udify.app/chatbot/lEPq0T619KaQc5OR"
-                            title="Chatbot"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 'none', borderRadius: '8px', flex: 1 }}
-                        />
-                    </Box>
-                )}
-
-                {/* Contact Dropdown */}
-                {showContactDropdown && (
-                    <div className="contact-dropdown">
-                        <div className="contact-dropdown__header">
-                            <div className="contact-dropdown__header-icon">
-                                <img src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm"/>
-                            </div>
-                            <div className="contact-dropdown__header-text">
-                                <h3>Lá Nhỏ Bên Thềm có thể hỗ trợ gì cho anh chị?</h3>
-                            </div>
-                            <button
-                                className="contact-dropdown__close"
-                                onClick={() => setShowContactDropdown(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <div className="contact-dropdown__options">
-                            <a
-                                href="https://m.me/lanhobenthem"
-                                className="contact-dropdown__option"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--messenger">
-                                    <img src="/messengerIcon.png" alt="Messenger"/>
+                            <article className="reason-card">
+                                <div className="reason-card__icon">
+                                    <img src="/IconMem.png" alt="Cộng đồng yêu cây"/>
                                 </div>
-                                <div>
-                                    <div className="contact-dropdown__option-title">Messenger</div>
-                                    <div className="contact-dropdown__option-subtitle">https://m.me/lanhobenthem</div>
-                                </div>
-                            </a>
+                                <h3>Cộng đồng yêu cây</h3>
+                                <p>
+                                    Chúng tôi xây dựng một không gian thân thiện để bạn có thể đăng bài chia sẻ kinh
+                                    nghiệm
+                                    chăm cây, khoe chậu cây xinh, hỏi – đáp các vấn đề thường gặp hay đơn giản là cùng
+                                    nhau
+                                    ngắm lá mỗi ngày.
+                                </p>
+                            </article>
 
-                            <a
-                                href="mailto:support@lanhobenthem.com"
-                                className="contact-dropdown__option"
-                            >
-                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--email">
-                                    <img src="/mailIcon.png" alt="Email"/>
+                            <article className="reason-card">
+                                <div className="reason-card__icon">
+                                    <img src="/IconDiamon.png" alt="Chất lượng trong tầm giá"/>
                                 </div>
-                                <div>
-                                    <div className="contact-dropdown__option-title">Email</div>
-                                    <div className="contact-dropdown__option-subtitle">support@lanhobenthem.com</div>
-                                </div>
-                            </a>
+                                <h3>Chất lượng trong tầm giá</h3>
+                                <p>
+                                    Từng sản phẩm đều được tuyển chọn kỹ lưỡng và chăm chút tỉ mỉ, đi kèm dịch vụ tư vấn
+                                    –
+                                    bảo hành đầy đủ để bạn yên tâm gắn bó lâu dài cùng Lá Nhỏ Bên Thềm.
+                                </p>
+                            </article>
 
-                            <a
-                                href="tel:0908304247"
-                                className="contact-dropdown__option"
-                            >
-                                <div className="contact-dropdown__option-icon contact-dropdown__option-icon--phone">
-                                    <img src="/phoneIcon.png" alt="Phone"/>
+                            <article className="reason-card">
+                                <div className="reason-card__icon">
+                                    <img src="/IconTree.png" alt="Thiết bị IoT đo độ ẩm đất"/>
                                 </div>
-                                <div>
-                                    <div className="contact-dropdown__option-title">Hotline</div>
-                                    <div className="contact-dropdown__option-subtitle">0908304247</div>
-                                </div>
-                            </a>
-                        </div>
+                                <h3>Thiết bị IOT đo độ ẩm đất</h3>
+                                <p>
+                                    Theo dõi độ ẩm trong đất và nhắc tưới nước đúng lúc qua điện thoại. Không còn lo cây
+                                    thiếu
+                                    nước hay úng rễ, bạn chăm cây như một người làm vườn chuyên nghiệp.
+                                </p>
+                            </article>
 
-                        <div className="contact-dropdown__footer">
-                            <p>Cung cấp bởi <strong>Lá Nhỏ Bên Thềm</strong></p>
+                            <article className="reason-card">
+                                <div className="reason-card__icon">
+                                    <img src="/IconCar.png" alt="Điện cây"/>
+                                </div>
+                                <h3>Điện cây</h3>
+                                <p>
+                                    Dịch vụ “Điện cây” sẽ gọi điện hoặc nhắn tin nhắc bạn đặt cây vào các dịp lễ, sinh
+                                    nhật,
+                                    kỷ niệm… để kịp trao quà cho người thân yêu. Chỉ cần để lại danh sách ngày quan
+                                    trọng,
+                                    chúng
+                                    tôi sẽ chuẩn bị và nhắc đúng lúc.
+                                </p>
+                            </article>
                         </div>
                     </div>
-                )}
+                </section>
 
-                {/* Contact Float Button */}
-                <button
-                    className="contact-widget__button"
-                    onClick={() => setShowContactDropdown(!showContactDropdown)}
-                    title="Liên hệ Lá Nhỏ Bên Thềm"
-                >
-                    <span className="contact-widget__icon">
-                        <img src="/communications.png" alt="Contact"/>
-                    </span>
-                    {/* <span className="contact-widget__text">Liên hệ</span> */}
-                </button>
+                <section className="newsletter newsletter--bleed">
+                    <div className="container newsletter__inner">
+                        <div>
+                            <span className="eyebrow">Ưu đãi đặc biệt</span>
+                            <h2 className="newsletter__title">
+                                🎁 Giảm giá 20% cho đơn đặt hàng đầu tiên của bạn
+                            </h2>
+                            <p className="muted">Nhận tin cây hằng tuần và ưu đãi hấp dẫn của chúng tôi.</p>
+                        </div>
+                        <form className="newsletter__form" onSubmit={(e) => e.preventDefault()}>
+                            <input type="email" placeholder="Email" required/>
+                            <button className="btn btn--primary" type="submit">Nhận thông tin</button>
+                        </form>
+                    </div>
+                </section>
             </div>
-        </div>
+
+            <ContactWidget/>
+
+            <ChatBot/>
+        </>
     )
 }

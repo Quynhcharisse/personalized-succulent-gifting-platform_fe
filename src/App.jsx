@@ -105,59 +105,59 @@ const theme = createTheme({
         },
     },
     typography: {
-        fontFamily: '"Open Sans", sans-serif',
+        fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         h1: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
             lineHeight: 1.2,
         },
         h2: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(1.5rem, 4vw, 2rem)',
             lineHeight: 1.3,
         },
         h3: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(1.25rem, 3.5vw, 1.75rem)',
             lineHeight: 1.4,
         },
         h4: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
             lineHeight: 1.4,
         },
         h5: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
             lineHeight: 1.5,
         },
         h6: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.875rem, 2vw, 1.125rem)',
             lineHeight: 1.5,
         },
         body1: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             lineHeight: 1.6,
         },
         body2: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.75rem, 1.8vw, 0.875rem)',
             lineHeight: 1.6,
         },
         button: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.875rem, 2vw, 1rem)',
             fontWeight: 600,
         },
         caption: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
             lineHeight: 1.4,
         },
         overline: {
-            fontFamily: '"Open Sans", sans-serif',
+            fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
             letterSpacing: '0.08em',
         },
@@ -166,7 +166,7 @@ const theme = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
-                    fontFamily: '"Open Sans", sans-serif',
+                    fontFamily: 'Inter, "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                     margin: 0,
                     padding: 0,
                     boxSizing: 'border-box',

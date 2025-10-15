@@ -7,18 +7,18 @@ export const FENGSHUI = [
 ]
 
 export const ZODIACS = [
-    {value: 'ARIES', label: 'Bạch Dương', icon: '♈'},
-    {value: 'TAURUS', label: 'Kim Ngưu', icon: '♉'},
-    {value: 'GEMINI', label: 'Song Tử', icon: '♊'},
-    {value: 'CANCER', label: 'Cự Giải', icon: '♋'},
-    {value: 'LEO', label: 'Sư Tử', icon: '♌'},
-    {value: 'VIRGO', label: 'Xử Nữ', icon: '♍'},
-    {value: 'LIBRA', label: 'Thiên Bình', icon: '♎'},
-    {value: 'SCORPIO', label: 'Bọ Cạp', icon: '♏'},
-    {value: 'SAGITTARIUS', label: 'Nhân Mã', icon: '♐'},
-    {value: 'CAPRICORN', label: 'Ma Kết', icon: '♑'},
-    {value: 'AQUARIUS', label: 'Bảo Bình', icon: '♒'},
-    {value: 'PISCES', label: 'Song Ngư', icon: '♓'}
+    {value: 'BACH_DUONG', label: 'Bạch Dương', icon: '♈'},
+    {value: 'KIM_NGUU', label: 'Kim Ngưu', icon: '♉'},
+    {value: 'SONG_TU', label: 'Song Tử', icon: '♊'},
+    {value: 'CU_GIAI', label: 'Cự Giải', icon: '♋'},
+    {value: 'SU_TU', label: 'Sư Tử', icon: '♌'},
+    {value: 'XU_NU', label: 'Xử Nữ', icon: '♍'},
+    {value: 'THIEN_BINH', label: 'Thiên Bình', icon: '♎'},
+    {value: 'BO_CAP', label: 'Bọ Cạp', icon: '♏'},
+    {value: 'NHAN_MA', label: 'Nhân Mã', icon: '♐'},
+    {value: 'MA_KET', label: 'Ma Kết', icon: '♑'},
+    {value: 'BAO_BINH', label: 'Bảo Bình', icon: '♒'},
+    {value: 'SONG_NGU', label: 'Song Ngư', icon: '♓'}
 ]
 
 export const SIZE_OPTIONS = [
@@ -53,6 +53,3 @@ export const COLORS = {
         card: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,255,254,0.8) 100%)',
     }
 };
-
-export const FENG_SHUI_OPTIONS = FENGSHUI;
-export const ZODIAC_OPTIONS = ZODIACS;
