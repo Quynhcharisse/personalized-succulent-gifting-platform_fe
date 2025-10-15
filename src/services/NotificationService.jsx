@@ -3,7 +3,6 @@ import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import useNotify from '../hooks/useNotify';
 import {
-    IconButton,
     Badge,
     Menu,
     MenuItem,
@@ -18,7 +17,7 @@ export function NotificationDisplay() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        const socket = new SockJS('/ws-endpoint');
+        const socket = new SockJS(import.meta.env.VITE_API_URL + '/ws-endpoint');
         const stompClient = Stomp.over(socket);
         let isConnected = false;
 
