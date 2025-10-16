@@ -1,6 +1,8 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Tooltip, CircularProgress, Box, Typography, Chip, Stack } from '@mui/material';
+import { IconButton, Tooltip, Typography, Chip, Stack } from '@mui/material';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
+import DataTable from '../../common/DataTable.jsx';
+import usePagination from '../../../hooks/usePagination.js';
 
 const statusLabels = {
     DRAFT: 'Draft',
@@ -15,84 +17,110 @@ const statusColors = {
 };
 
 const PostTable = ({ postList, isLoading, onViewDetail }) => {
-    if (isLoading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress color="primary" size={60} />
-            </Box>
-        );
-    }
+    // Pagination hook
+    const { page, rowsPerPage, handleChangePage, handleChangeRowsPerPage } = usePagination(0, 10);
+
+    // Column configuration for DataTable
+    const columns = [
+        {
+            field: 'id',
+            header: 'ID',
+            render: (row) => (
+                <Typography sx={{fontWeight: 600, color: 'primary.dark'}}>
+                    #{row.id}
+                </Typography>
+            )
+        },
+        {
+            field: 'title',
+            header: 'Title',
+            render: (row) => (
+                <Typography sx={{fontWeight: 500}}>
+                    {row.title}
+                </Typography>
+            )
+        },
+        {
+            field: 'product',
+            header: 'Product',
+            render: (row) => (
+                <Typography>
+                    {row.product?.name || '-'}
+                </Typography>
+            )
+        },
+        {
+            field: 'status',
+            header: 'Status',
+            render: (row) => (
+                <Chip
+                    label={statusLabels[row.status] || row.status}
+                    color={statusColors[row.status] || 'default'}
+                    size="small"
+                />
+            )
+        },
+        {
+            field: 'tags',
+            header: 'Tags',
+            render: (row) => (
+                <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                    {Array.isArray(row.tags) && row.tags.length > 0
+                        ? row.tags.map((tag, idx) => (
+                            <Chip key={idx} label={tag} size="small" variant="outlined" />
+                        ))
+                        : <Typography variant="caption" color="text.secondary">-</Typography>
+                    }
+                </Stack>
+            )
+        },
+        {
+            field: 'createdAt',
+            header: 'Created At',
+            render: (row) => (
+                <Typography>
+                    {row.createdAt ? new Date(row.createdAt).toLocaleString('vi-VN') : '-'}
+                </Typography>
+            )
+        },
+        {
+            field: 'actions',
+            header: 'Actions',
+            align: 'center',
+            render: (row) => (
+                <Tooltip title="View Details">
+                    <IconButton 
+                        color="primary" 
+                        onClick={() => onViewDetail(row)}
+                        sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}
+                    >
+                        <VisibilityIcon />
+                    </IconButton>
+                </Tooltip>
+            )
+        }
+    ];
+
     return (
-        <TableContainer component={Paper} sx={{
-            borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-            border: '1px solid rgba(33, 150, 243, 0.1)'
-        }}>
-            <Table>
-                <TableHead>
-                    <TableRow sx={{
-                        background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)',
-                        '& .MuiTableCell-head': {
-                            color: 'white',
-                            fontWeight: 800,
-                            fontSize: '1rem'
-                        }
-                    }}>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Title</TableCell>
-                        <TableCell>Product</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Tags</TableCell>
-                        <TableCell>Created At</TableCell>
-                        <TableCell align="center">Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {Array.isArray(postList) && postList.map(post => (
-                        <TableRow key={post.id}>
-                            <TableCell>#{post.id}</TableCell>
-                            <TableCell>{post.title}</TableCell>
-                            <TableCell>{post.product.name}</TableCell>
-                            <TableCell>
-                                <Chip
-                                    label={statusLabels[post.status] || post.status}
-                                    color={statusColors[post.status] || 'default'}
-                                    size="small"
-                                />
-                            </TableCell>
-                            <TableCell>
-                                <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                                    {Array.isArray(post.tags) && post.tags.length > 0
-                                        ? post.tags.map((tag, idx) => (
-                                            <Chip key={idx} label={tag} size="small" variant="outlined" />
-                                        ))
-                                        : <Typography variant="caption" color="text.secondary">-</Typography>
-                                    }
-                                </Stack>
-                            </TableCell>
-                            <TableCell>{post.createdAt ? new Date(post.createdAt).toLocaleString('vi-VN') : '-'}</TableCell>
-                            <TableCell align="center">
-                                <Tooltip title="View Details">
-                                    <IconButton color="primary" onClick={() => onViewDetail(post)}>
-                                        <VisibilityIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                    {Array.isArray(postList) && postList.length === 0 && (
-                        <TableRow>
-                            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                <Typography variant="body1" color="text.secondary">
-                                    No posts found
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-        </TableContainer>
+        <DataTable
+            data={postList || []}
+            columns={columns}
+            loading={isLoading}
+            pagination={true}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            totalCount={postList?.length || 0}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            headerBgColor="#1976D2"
+            headerTextColor="white"
+            hoverColor="rgba(25, 118, 210, 0.05)"
+            borderColor="#e0e0e0"
+            emptyMessage="No posts found"
+            stickyHeader={false}
+            size="medium"
+        />
     );
 };
 

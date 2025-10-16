@@ -8,8 +8,12 @@ import CreateSucculentDialog from './CreateSucculentDialog.jsx';
 import uploadToCloudinary from "../../cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
+import usePagination from '../../../hooks/usePagination.js';
 
 const SucculentForm = () => {
+    // Pagination hook
+    const { resetPagination } = usePagination(0, 10);
+    
     // Form state
     const [formData, setFormData] = useState({
         species_name: '',
@@ -34,10 +38,8 @@ const SucculentForm = () => {
     const [selectedSucculent, setSelectedSucculent] = useState(null);
     const [currentStep, setCurrentStep] = useState(1);
     const [isValidating, setIsValidating] = useState(false);
-    const [uploadProgress] = useState(0);
-    const [isUploading] = useState(false);
-    useRef(null);
-    useRef(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
 
     async function handleFileSelect(event) {
         const file = event.target.files[0];
@@ -70,6 +72,7 @@ const SucculentForm = () => {
             const response = await getSucculents();
             if (response && response.data && Array.isArray(response.data.data)) {
                 setSucculentList(response.data.data);
+                resetPagination(); // Reset pagination when data changes
             } else {
                 setSucculentList([]);
                 console.warn('API response data is not an array:', response);

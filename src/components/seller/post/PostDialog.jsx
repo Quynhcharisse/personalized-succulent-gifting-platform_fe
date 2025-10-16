@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Box, Stack, Chip } from '@mui/material';
-import { viewProduct } from '../../../services/ProductService.jsx';
+import React, {useEffect, useState} from 'react';
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    MenuItem,
+    Stack,
+    TextField
+} from '@mui/material';
+import {viewProduct} from '../../../services/ProductService.jsx';
 
 const STATUS_OPTIONS = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'PUBLISHED', label: 'Published' },
-    { value: 'ARCHIVED', label: 'Archived' }
+    {value: 'DRAFT', label: 'Draft'},
+    {value: 'PUBLISHED', label: 'Published'},
+    {value: 'ARCHIVED', label: 'Archived'}
 ];
 
-const PostDialog = ({ open, onClose, onCreated }) => {
+const PostDialog = ({open, onClose, onCreated}) => {
     const [products, setProducts] = useState([]);
     const [form, setForm] = useState({
         title: '',
@@ -31,7 +42,7 @@ const PostDialog = ({ open, onClose, onCreated }) => {
         }
     }, [open]);
 
-    const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = e => setForm({...form, [e.target.name]: e.target.value});
 
     const handleSubmit = () => {
         // Prepare tags as array
@@ -48,7 +59,7 @@ const PostDialog = ({ open, onClose, onCreated }) => {
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>New Post</DialogTitle>
             <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, mt: 2}}>
                     <TextField
                         label="Title"
                         name="title"
@@ -107,7 +118,7 @@ const PostDialog = ({ open, onClose, onCreated }) => {
                     {form.tags && (
                         <Stack direction="row" spacing={0.5} flexWrap="wrap">
                             {form.tags.split(',').map((tag, idx) => (
-                                tag.trim() && <Chip key={idx} label={tag.trim()} size="small" variant="outlined" />
+                                tag.trim() && <Chip key={idx} label={tag.trim()} size="small" variant="outlined"/>
                             ))}
                         </Stack>
                     )}

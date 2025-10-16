@@ -48,25 +48,25 @@ export const updateSucculent = async (succulentData) => {
 
 //------------------- Accessories ------------------//
 export const createDecorationAccessory = async (accessoryData, createAction = true) => {
-    const payload = { ...accessoryData, createAction };
+    const payload = {...accessoryData, createAction};
     const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
 export const createPotAccessory = async (accessoryData, createAction = true) => {
-    const payload = { ...accessoryData, createAction };
+    const payload = {...accessoryData, createAction};
     const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
 export const createSoilAccessory = async (accessoryData, createAction = true) => {
-    const payload = { ...accessoryData, createAction };
+    const payload = {...accessoryData, createAction};
     const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
 export const getAccessories = async (type = 'all') => {
-    const params = new URLSearchParams({ t: String(type || 'all') });
+    const params = new URLSearchParams({t: String(type || 'all')});
     const response = await axiosClient.get(`/product/accessories?${params.toString()}`);
     return response || null
 }
@@ -80,7 +80,7 @@ export const createOrUpdateProduct = async (productData, createAction = true) =>
 
 export const viewProduct = async () => {
     const response = await axiosClient.get("/product");
-    return response || null
+    return response || null;
 }
 
 export const deactiveProduct = async (id) => {

@@ -18,13 +18,11 @@ export default function ActionButton({
     const handleDefaultAction = () => {
         switch (action) {
             case 'close':
-                // Đóng dialog/modal gần nhất nếu có
                 if (window.closeCurrentDialog) {
                     window.closeCurrentDialog();
                 }
                 break;
             case 'cancel':
-                // Trigger sự kiện cancel mặc định
                 if (window.cancelCurrentAction) {
                     window.cancelCurrentAction();
                 }

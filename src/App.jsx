@@ -5,10 +5,7 @@ import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 // Buyer components
-import SucculentList from './components/buyer/SucculentList.jsx';
-import SucculentDetail from './components/buyer/SucculentDetail.jsx';
-import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
-import ProductList from "./components/seller/Product/ProductList.jsx";
+
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -29,15 +26,16 @@ const SellerDashboard = lazy(() => import('./layouts/SellerDashboard.jsx'))
 const SucculentForm = lazy(() => import('./components/seller/succulent/Succulent.jsx'))
 const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx'))
 const PostsManager = lazy(() => import('./components/seller/post/PostsManager.jsx'))
+const ProductTable = lazy(() => import('./components/seller/product/ProductTable.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
 // Buyer components
-import SucculentList from './components/buyer/SucculentList.jsx';
-import SucculentDetail from './components/buyer/SucculentDetail.jsx';
-import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
-import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
+const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
+const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
+const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
+const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -355,18 +353,18 @@ const router = createBrowserRouter([
                 )
             },
             {
-                path: 'products',
-                element: (
-                    <Suspense fallback={<LoadingFallback/>}>
-                        <ProductList/>
-                    </Suspense>
-                )
-            },
-            {
                 path: 'accessory',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <Accessory/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'products',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <ProductTable/>
                     </Suspense>
                 )
             },
@@ -388,7 +386,7 @@ const router = createBrowserRouter([
             },
             {
                 path: '/seller/posts',
-                element: <PostsManager />
+                element: <PostsManager/>
             }
         ]
     },
@@ -420,7 +418,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-            // --- Buyer Succulent Pages ---
             {
                 path: 'succulent',
                 element: <SucculentList/>
@@ -435,7 +432,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'posts',
-                element: <BuyerPosts />
+                element: <BuyerPosts/>
             },
         ]
     },
@@ -451,10 +448,6 @@ const router = createBrowserRouter([
 
 export default function App() {
     const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "fallback_client_id"
-
-    if (!clientID || clientID === "your_actual_google_client_id_here" || clientID === "fallback_client_id") {
-        console.warn("Google Client ID not configured. Please set VITE_GOOGLE_CLIENT_ID in your .env file")
-    }
 
     return (
         <SnackbarProvider
