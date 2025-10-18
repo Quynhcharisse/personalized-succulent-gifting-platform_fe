@@ -7,6 +7,7 @@ import AccessoryDetail from './AccessoryDetail.jsx';
 import CreateAccessoryDialog from './CreateAccessoryDialog.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import usePagination from '../../../hooks/usePagination.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 export default function Accessory() {
     const [accessories, setAccessories] = useState([]);
@@ -73,18 +74,25 @@ export default function Accessory() {
 
     const getCategoryChip = (category) => {
         const map = {
-            pots: { label: 'CHẬU', color: 'success' },
-            soils: { label: 'ĐẤT', color: 'warning' },
-            decorations: { label: 'TRANG TRÍ', color: 'info' }
+            pots: { label: 'CHẬU', color: '#0b3f31' },
+            soils: { label: 'ĐẤT', color: '#f59e0b' },
+            decorations: { label: 'TRANG TRÍ', color: '#3b82f6' }
         };
-        const cfg = map[category] || { label: String(category || '').toUpperCase(), color: 'default' };
+        const cfg = map[category] || { label: String(category || '').toUpperCase(), color: '#666' };
         return (
             <Chip
                 label={cfg.label}
-                color={cfg.color}
                 size="small"
                 variant="outlined"
-                sx={{ fontWeight: 800, letterSpacing: 0.3 }}
+                sx={{ 
+                    fontWeight: 800, 
+                    letterSpacing: 0.3,
+                    color: cfg.color,
+                    borderColor: cfg.color,
+                    '&:hover': {
+                        backgroundColor: `${cfg.color}15`
+                    }
+                }}
             />
         );
     };
@@ -135,7 +143,7 @@ export default function Accessory() {
             field: 'name',
             header: 'Tên',
             render: (row) => (
-                <Typography fontWeight={700} noWrap title={row.name} sx={{ color: 'success.dark' }}>
+                <Typography fontWeight={700} noWrap title={row.name} sx={{ color: '#0b3f31' }}>
                     {row.name}
                 </Typography>
             )
@@ -168,11 +176,14 @@ export default function Accessory() {
             header: 'Trạng thái',
             render: (row) => (
                 <Chip
-                    label={row.status}
-                    color={row.status === 'ACTIVE' || row.status === 'Còn hàng' ? 'success' : 'error'}
+                    label={row.status === 'ACTIVE' ? 'Còn hàng' : 'Hết hàng'}
                     variant="filled"
                     size="small"
-                    sx={{fontWeight: 600}}
+                    sx={{
+                        fontWeight: 600,
+                        backgroundColor: row.status === 'ACTIVE' ? '#22c55e' : '#ef4444',
+                        color: 'white'
+                    }}
                 />
             )
         },
@@ -291,65 +302,23 @@ export default function Accessory() {
     };
 
     return (
-        <Container maxWidth="xl" sx={{py: {xs: 3, sm: 5}}}>
-            <Paper elevation={0} sx={{
-                p: {xs: 2.5, sm: 4, md: 5},
-                borderRadius: 4,
-                background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.7)'
-            }}>
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: {xs: 'column', sm: 'row'},
-                    alignItems: {xs: 'flex-start', sm: 'center'},
-                    justifyContent: 'space-between',
-                    gap: 2,
-                    mb: 3
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                        <InventoryIcon sx={{
-                            fontSize: {xs: 38, sm: 44},
-                            color: 'success.main',
-                            mr: 2
-                        }}/>
+        <Container maxWidth={DASHBOARD_STYLES.container.maxWidth} sx={DASHBOARD_STYLES.container}>
+            <Paper elevation={0} sx={DASHBOARD_STYLES.paper}>
+                <Box sx={DASHBOARD_STYLES.headerSection}>
+                    <Box sx={DASHBOARD_STYLES.titleSection}>
+                        <InventoryIcon sx={DASHBOARD_STYLES.titleIcon}/>
                         <Box>
-                            <Typography variant="h4" sx={{fontWeight: 900, color: 'success.dark'}}>
+                            <Typography sx={DASHBOARD_STYLES.mainTitle}>
                                 Quản Lý Phụ Kiện
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography sx={DASHBOARD_STYLES.subtitle}>
                                 Danh sách phụ kiện và thao tác tạo mới
                             </Typography>
                         </Box>
                     </Box>
 
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 1.5,
-                        backgroundColor: 'rgba(255,255,255,0.9)',
-                        borderRadius: 2,
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.06)'
-                    }}>
-                        <FormControl size="small" sx={{
-                            minWidth: 240,
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                backgroundColor: 'white',
-                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: 'success.main',
-                                    borderWidth: 2
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: 'success.main',
-                                    borderWidth: 2
-                                }
-                            },
-                            '& .MuiInputLabel-root': {
-                                fontWeight: 600
-                            }
-                        }}>
+                    <Box sx={DASHBOARD_STYLES.actionSection}>
+                        <FormControl size="small" sx={DASHBOARD_STYLES.filterSelect}>
                             <InputLabel>Danh mục</InputLabel>
                             <Select
                                 label="Danh mục"
@@ -366,18 +335,7 @@ export default function Accessory() {
                         <ActionButton
                             startIcon={<AddIcon/>}
                             onClick={handleOpenCreate}
-                            sx={{
-                                borderRadius: 2,
-                                fontWeight: 700,
-                                py: 1.2,
-                                px: 3,
-                                background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                                '&:hover': {
-                                    background: 'linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)',
-                                    boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)'
-                                }
-                            }}>
+                            sx={DASHBOARD_STYLES.primaryButton}>
                             Tạo Phụ Kiện
                         </ActionButton>
                     </Box>
@@ -401,13 +359,13 @@ export default function Accessory() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     rowsPerPageOptions={[5, 10, 25, 50]}
-                    headerBgColor="#4CAF50"
-                    headerTextColor="white"
-                    hoverColor="#f8f9fa"
-                    borderColor="#e0e0e0"
+                    headerBgColor={DASHBOARD_STYLES.table.headerBgColor}
+                    headerTextColor={DASHBOARD_STYLES.table.headerTextColor}
+                    hoverColor={DASHBOARD_STYLES.table.hoverColor}
+                    borderColor={DASHBOARD_STYLES.table.borderColor}
                     emptyMessage="Không có phụ kiện"
-                    stickyHeader={false}
-                    size="medium"
+                    stickyHeader={DASHBOARD_STYLES.table.stickyHeader}
+                    size={DASHBOARD_STYLES.table.size}
                 />
             </Paper>
 

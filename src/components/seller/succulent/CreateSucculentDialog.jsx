@@ -18,7 +18,7 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {FENGSHUI, ZODIACS} from '../../constants.js';
+import {FENGSHUI, ZODIACS, DASHBOARD_STYLES} from '../../constants.js';
 import UploadImageField from './UploadImageField.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
@@ -68,34 +68,11 @@ const CreateSucculentDialog = ({
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 6,
-                        background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                        boxShadow: '0 25px 80px rgba(0, 0, 0, 0.12)',
-                        border: '2px solid rgba(76, 175, 80, 0.08)',
-                        overflow: 'hidden',
-                        minHeight: '600px'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
-            <DialogTitle sx={{
-                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: '1.4rem',
-                py: 3,
-                position: 'relative',
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
-                }
-            }}>
+            <DialogTitle sx={DASHBOARD_STYLES.dialogTitle}>
                 <Box sx={{textAlign: 'center'}}>
                     <Typography variant="h4" sx={{
                         fontWeight: 900,
@@ -156,14 +133,7 @@ const CreateSucculentDialog = ({
                     </Box>
                 </Box>
             </DialogTitle>
-            <DialogContent sx={{
-                p: 5,
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                minHeight: '450px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-start'
-            }}>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 <Box sx={{width: '100%', maxWidth: '800px', mx: 'auto'}}>
                     <Grid container spacing={4} mt={2}>
                         {currentStep === 1 && (
@@ -267,10 +237,10 @@ const CreateSucculentDialog = ({
                                         <Typography variant="h5" sx={{
                                             mb: 2,
                                             fontWeight: 800,
-                                            color: 'success.dark',
+                                            color: '#0b3f31',
                                             textAlign: 'center',
                                             pb: 1,
-                                            borderBottom: '3px solid rgba(76, 175, 80, 0.2)'
+                                            borderBottom: '3px solid rgba(11, 63, 49, 0.2)'
                                         }}>
                                             Chi Tiết Giá Bán
                                         </Typography>
@@ -287,9 +257,9 @@ const CreateSucculentDialog = ({
                                                         <Typography variant="h6" sx={{
                                                             mb: 2,
                                                             fontWeight: 700,
-                                                            color: 'success.dark',
+                                                            color: '#0b3f31',
                                                             pb: 1,
-                                                            borderBottom: '2px solid rgba(76, 175, 80, 0.2)'
+                                                            borderBottom: '2px solid rgba(11, 63, 49, 0.2)'
                                                         }}>
                                                             Kích thước #{index + 1}
                                                         </Typography>

@@ -3,6 +3,7 @@ import {Chip, Stack, Tooltip, Typography, IconButton} from '@mui/material';
 import {Edit as EditIcon, Visibility as VisibilityIcon} from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
     // Pagination hook
@@ -43,7 +44,7 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
             field: 'id',
             header: 'ID',
             render: (row) => (
-                <Typography sx={{fontWeight: 600, color: 'success.dark'}}>
+                <Typography sx={{fontWeight: 600, color: '#0b3f31'}}>
                     #{row.id}
                 </Typography>
             )
@@ -52,7 +53,7 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
             field: 'speciesName',
             header: 'Tên Sản Phẩm',
             render: (row) => (
-                <Typography sx={{fontWeight: 700, color: 'success.dark'}}>
+                <Typography sx={{fontWeight: 700, color: '#0b3f31'}}>
                     {row.speciesName}
                 </Typography>
             )
@@ -85,11 +86,14 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
             header: 'Trạng Thái',
             render: (row) => (
                 <Chip
-                    label={row.status}
-                    color={(row.status === 'ACTIVE' || row.status === 'AVAILABLE' || row.status === 'Còn hàng') ? 'success' : 'error'}
+                    label={row.status === 'ACTIVE' || row.status === 'AVAILABLE' ? 'Còn hàng' : 'Hết hàng'}
                     variant="filled"
                     size="small"
-                    sx={{fontWeight: 600}}
+                    sx={{
+                        fontWeight: 600,
+                        backgroundColor: (row.status === 'ACTIVE' || row.status === 'AVAILABLE') ? '#22c55e' : '#ef4444',
+                        color: 'white'
+                    }}
                 />
             )
         },
@@ -142,13 +146,13 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            headerBgColor="#4CAF50"
-            headerTextColor="white"
-            hoverColor="rgba(76, 175, 80, 0.05)"
-            borderColor="#e0e0e0"
+            headerBgColor={DASHBOARD_STYLES.table.headerBgColor}
+            headerTextColor={DASHBOARD_STYLES.table.headerTextColor}
+            hoverColor={DASHBOARD_STYLES.table.hoverColor}
+            borderColor={DASHBOARD_STYLES.table.borderColor}
             emptyMessage="Không có sản phẩm nào"
-            stickyHeader={false}
-            size="medium"
+            stickyHeader={DASHBOARD_STYLES.table.stickyHeader}
+            size={DASHBOARD_STYLES.table.size}
         />
     );
 };

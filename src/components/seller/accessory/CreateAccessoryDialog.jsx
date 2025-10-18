@@ -21,6 +21,7 @@ import UploadImageField from '../succulent/UploadImageField.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from '../../../services/ProductService.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 export default function CreateAccessoryDialog({open, onClose, onCreate, editItem = null, isEdit = false}) {
     const [form, setForm] = useState({
@@ -319,31 +320,18 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 8,
-                        boxShadow: '0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2)',
-                        overflow: 'hidden'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
-            <DialogTitle
-                sx={{
-                    background: 'linear-gradient(90deg, #43a047 0%, #66bb6a 100%)',
-                    color: 'white',
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    py: 3,
-                    textAlign: 'center'
-                }}
-            >
+            <DialogTitle sx={DASHBOARD_STYLES.dialogTitle}>
                 {isEdit ? 'Cập Nhật Phụ Kiện' : 'Tạo Phụ Kiện Mới'}
                 <Typography variant="body2" sx={{opacity: 0.9, mt: 0.5, fontWeight: 400}}>
                     {isEdit ? 'Chỉnh sửa thông tin phụ kiện' : 'Thiết lập thông tin và đăng bán nhanh chóng'}
                 </Typography>
             </DialogTitle>
             
-            <DialogContent sx={{p: 4, backgroundColor: '#f7faf7'}}>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 {message.text && (
                     <Alert
                         severity={message.type === 'error' ? 'error' : 'success'}
@@ -359,18 +347,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     </Alert>
                 )}
 
-                <Box sx={{
-                    p: 3,
-                    mb: 3,
-                    borderRadius: 2,
-                    backgroundColor: 'white',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    marginTop: 5
-                }}>
-                    <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Thông tin cơ bản</Typography>
+                <Box sx={DASHBOARD_STYLES.formSection}>
+                    <Typography variant="h6" sx={DASHBOARD_STYLES.sectionTitle}>Thông tin cơ bản</Typography>
                     <Divider sx={{mb: 2}}/>
 
                 {/* Danh mục - Đưa lên đầu */}
@@ -378,23 +356,8 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     fullWidth
                     error={!!errors.category}
                     sx={{
-                            mb: 2,
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            }
-                        },
-                        '& .MuiInputLabel-root': {
-                            fontWeight: 500,
-                            color: '#424242'
-                        }
+                        mb: 2,
+                        ...DASHBOARD_STYLES.formField
                     }}
                 >
                     <InputLabel>Danh mục sản phẩm</InputLabel>
@@ -423,24 +386,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
                     error={!!errors.name}
                     helperText={errors.name}
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#4caf50',
-                                borderWidth: 2
-                            }
-                        },
-                        '& .MuiInputLabel-root': {
-                            fontWeight: 500,
-                            color: '#424242'
-                        }
-                    }}
+                    sx={DASHBOARD_STYLES.formField}
                 />
                         </Box>
                         <Box>
@@ -612,7 +558,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                         backgroundColor: 'white',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.06)'
                     }}>
-                        <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Kích cỡ chậu</Typography>
+                        <Typography variant="h6" sx={DASHBOARD_STYLES.sectionTitle}>Kích cỡ chậu</Typography>
                         <Divider sx={{mb: 2}}/>
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
@@ -728,8 +674,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                             sx={{
                                 mb: 2,
                                 mt: 2,
-                                color: '#4caf50',
-                                fontWeight: 600,
+                                ...DASHBOARD_STYLES.sectionTitle,
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 1
@@ -865,7 +810,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     flexDirection: 'column',
                     justifyContent: 'space-between'
                 }}>
-                    <Typography variant="h6" sx={{fontWeight: 600, color: '#2e7d32', mb: 1}}>Hình ảnh sản phẩm</Typography>
+                    <Typography variant="h6" sx={DASHBOARD_STYLES.sectionTitle}>Hình ảnh sản phẩm</Typography>
                     <Divider sx={{mb: 2}}/>
                 <UploadImageField
                     image={form.image}
@@ -894,17 +839,9 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     disabled={isSubmitting}
                     variant="contained"
                     sx={{
-                        borderRadius: 2,
+                        ...DASHBOARD_STYLES.primaryButton,
                         px: 4,
                         py: 1.5,
-                        fontWeight: 600,
-                        background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
-                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                        '&:hover': {
-                            background: 'linear-gradient(90deg, #388e3c 0%, #4caf50 100%)',
-                            boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                            transform: 'translateY(-1px)'
-                        },
                         '&:disabled': {
                             background: '#e0e0e0',
                             color: '#9e9e9e',

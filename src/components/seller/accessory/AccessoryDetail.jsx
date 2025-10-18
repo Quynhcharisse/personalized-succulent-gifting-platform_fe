@@ -1,6 +1,7 @@
 import React from 'react';
 import {Dialog, DialogTitle, DialogContent, Box, Typography, Chip, Grid, Stack} from '@mui/material';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 export default function AccessoryDetail({ open, onClose, item }) {
     const val = item?.raw || {};
@@ -16,31 +17,32 @@ export default function AccessoryDetail({ open, onClose, item }) {
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 4,
-                        background: 'linear-gradient(135deg, #ffffff 0%, #f7fffb 100%)',
-                        boxShadow: '0 24px 64px rgba(0,0,0,0.15)'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
             <DialogTitle sx={{
-                fontWeight: 900,
-                color: 'success.dark',
-                background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontSize: '1.3rem',
-                px: 3,
-                pt: 3
-            }}>Chi tiết phụ kiện</DialogTitle>
-            <DialogContent sx={{
-                p: 0,
-                background: 'linear-gradient(135deg, #f2fff5 0%, #eef9ff 100%)',
-                '&::-webkit-scrollbar': { width: 8 },
-                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(76, 175, 80, 0.3)', borderRadius: 8 },
-                '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' }
+                ...DASHBOARD_STYLES.dialogTitle,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
             }}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Chi tiết phụ kiện
+                </Typography>
+
+                <ActionButton
+                    action="cancel"
+                    onClick={onClose}
+                    sx={{
+                        alignSelf: 'flex-end',
+                        minWidth: 'auto',
+                        px: 2,
+                        py: 0.5
+                    }}
+                />
+            </DialogTitle>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 <Box sx={{
                     m: { xs: 2, sm: 3 },
                     p: { xs: 2.5, sm: 4 },
@@ -60,10 +62,27 @@ export default function AccessoryDetail({ open, onClose, item }) {
                             background: 'linear-gradient(135deg, #ffffff 0%, #f0fff6 100%)',
                             border: '1px solid rgba(76,175,80,0.15)'
                         }}>
-                            <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: 'success.dark' }}>{item.name}</Typography>
+                            <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: '#0b3f31' }}>{item.name}</Typography>
                             <Stack direction="row" spacing={1} flexWrap="wrap">
-                                <Chip label={item.category} size="small" variant="outlined" color="success" sx={{ fontWeight: 700 }}/>
-                                <Chip label={item.status} color={item.status === 'ACTIVE' ? 'success' : 'default'} size="small" sx={{ fontWeight: 700 }}/>
+                                <Chip 
+                                    label={item.category} 
+                                    size="small" 
+                                    variant="outlined" 
+                                    sx={{ 
+                                        fontWeight: 700,
+                                        color: '#0b3f31',
+                                        borderColor: '#0b3f31'
+                                    }}
+                                />
+                                <Chip 
+                                    label={item.status === 'ACTIVE' ? 'Còn hàng' : 'Hết hàng'} 
+                                    size="small" 
+                                    sx={{ 
+                                        fontWeight: 700,
+                                        backgroundColor: item.status === 'ACTIVE' ? '#22c55e' : '#ef4444',
+                                        color: 'white'
+                                    }}
+                                />
                             </Stack>
                         </Box>
 
@@ -91,7 +110,7 @@ export default function AccessoryDetail({ open, onClose, item }) {
                         {/* By category */}
                         {item.category === 'pots' && (
                             <Box sx={{ p: 2, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #fdfcf7 100%)', border: '1px solid rgba(255,193,7,0.15)'}}>
-                                <Typography sx={{ fontWeight: 800, mb: 1, color: 'warning.dark' }}>Thuộc tính chậu</Typography>
+                                <Typography sx={{ fontWeight: 800, mb: 1, color: '#0b3f31' }}>Thuộc tính chậu</Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
                                     <Typography>Màu sắc:</Typography>
                                     {val.color ? (
@@ -111,7 +130,7 @@ export default function AccessoryDetail({ open, onClose, item }) {
                                         {(val.size || []).map((s, i) => (
                                             <Grid item xs={12} sm={6} md={4} key={i}>
                                                 <Box sx={{ p: 1.5, border: '1px solid rgba(76,175,80,0.18)', borderRadius: 2, background: 'rgba(76,175,80,0.03)'}}>
-                                                    <Typography sx={{ fontWeight: 800, color: 'success.dark', mb: 0.5 }}>{s.name}</Typography>
+                                                    <Typography sx={{ fontWeight: 800, color: '#0b3f31', mb: 0.5 }}>{s.name}</Typography>
                                                     <Typography>Giá: {s.price?.toLocaleString('vi-VN')} ₫</Typography>
                                                     <Typography>Kho: {s.availableQty}</Typography>
                                                     <Typography>Khối lượng đất tối đa: {s.maxSoilMassValue}</Typography>
@@ -127,7 +146,7 @@ export default function AccessoryDetail({ open, onClose, item }) {
 
                         {item.category === 'decorations' && (
                             <Box sx={{ p: 2, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f7fbff 100%)', border: '1px solid rgba(33,150,243,0.12)'}}>
-                                <Typography sx={{ fontWeight: 800, mb: 1, color: 'info.dark' }}>Thuộc tính trang trí</Typography>
+                                <Typography sx={{ fontWeight: 800, mb: 1, color: '#0b3f31' }}>Thuộc tính trang trí</Typography>
                                 <Typography>Mô tả: {val.description || '-'}</Typography>
                                 <Typography>Giá: {val.price?.toLocaleString('vi-VN')} ₫</Typography>
                                 <Typography>Kho: {val.availableQty}</Typography>
@@ -136,18 +155,12 @@ export default function AccessoryDetail({ open, onClose, item }) {
 
                         {item.category === 'soils' && (
                             <Box sx={{ p: 2, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #fff8f8 100%)', border: '1px solid rgba(244,67,54,0.12)'}}>
-                                <Typography sx={{ fontWeight: 800, mb: 1, color: 'error.dark' }}>Thuộc tính đất</Typography>
+                                <Typography sx={{ fontWeight: 800, mb: 1, color: '#0b3f31' }}>Thuộc tính đất</Typography>
                                 <Typography>Mô tả: {val.description || '-'}</Typography>
                                 <Typography>Kho khối lượng: {val.availableMassValue}</Typography>
                                 <Typography>Giá cơ sở: {val.basePricing?.price?.toLocaleString('vi-VN')} ₫ / {val.basePricing?.massValue} {val.basePricing?.massUnit}</Typography>
                             </Box>
                         )}
-
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                            <ActionButton action="close" onClick={onClose} sx={{ px: 3 }}>
-                                Đóng
-                            </ActionButton>
-                        </Box>
                     </Box>
                 )}
                 </Box>

@@ -35,9 +35,7 @@ import {
     LocalShipping as LocalShippingIcon,
     Logout as LogoutIcon,
     Menu as MenuIcon,
-    Settings as SettingsIcon,
     ShoppingCart as ShoppingCartIcon,
-    Store as StoreIcon,
     TrendingUp as TrendingUpIcon,
     Visibility as VisibilityIcon
 } from '@mui/icons-material';
@@ -54,12 +52,6 @@ const NAVIGATION = [
         title: 'Dashboard',
         icon: <DashboardIcon/>,
         path: '/seller/dashboard'
-    },
-    {
-        segment: 'store',
-        title: 'Cửa hàng của tôi',
-        icon: <StoreIcon/>,
-        path: '/seller/store'
     },
     {
         segment: 'succulent',
