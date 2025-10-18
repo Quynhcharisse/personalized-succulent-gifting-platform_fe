@@ -5,6 +5,7 @@ import PostTable from './PostTable.jsx';
 import PostDetailDialog from './PostDetailDialog.jsx';
 import PostDialog from './PostDialog.jsx';
 import { viewPostsBySeller } from '../../../services/PostService.jsx';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const PostsManager = () => {
     const [posts, setPosts] = useState([]);
@@ -31,40 +32,17 @@ const PostsManager = () => {
     }, []);
 
     return (
-        <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 5 } }}>
-            <Paper elevation={0} sx={{
-                p: { xs: 2.5, sm: 4, md: 5 },
-                borderRadius: 4,
-                background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.7)'
-            }}>
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: { xs: 'flex-start', sm: 'center' },
-                    justifyContent: 'space-between',
-                    gap: 2,
-                    mb: 4
-                }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <ArticleIcon sx={{
-                            fontSize: { xs: 38, sm: 44 },
-                            color: 'primary.main',
-                            mr: 2,
-                            filter: 'drop-shadow(0 4px 6px rgba(33, 150, 243, 0.2))'
-                        }} />
+        <Container sx={DASHBOARD_STYLES.container}>
+            <Paper sx={DASHBOARD_STYLES.paper}>
+                <Box sx={DASHBOARD_STYLES.headerSection}>
+                    <Box sx={DASHBOARD_STYLES.titleSection}>
+                        <ArticleIcon sx={DASHBOARD_STYLES.titleIcon} />
                         <Box>
-                            <Typography variant="h4" sx={{
-                                fontWeight: 900,
-                                color: 'primary.dark',
-                                letterSpacing: 1,
-                                fontSize: { xs: '1.7rem', sm: '2.2rem' }
-                            }}>
-                                Post Management
+                            <Typography sx={DASHBOARD_STYLES.mainTitle}>
+                                Quản Lý Bài Viết
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Manage your posts here
+                            <Typography sx={DASHBOARD_STYLES.subtitle}>
+                                Quản lý các bài viết của bạn tại đây
                             </Typography>
                         </Box>
                     </Box>
@@ -72,20 +50,9 @@ const PostsManager = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={() => setShowCreateDialog(true)}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            py: 1.2,
-                            px: 3,
-                            background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)',
-                            boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
-                            '&:hover': {
-                                background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)',
-                                boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)'
-                            }
-                        }}
+                        sx={DASHBOARD_STYLES.primaryButton}
                     >
-                        New Post
+                        Tạo Bài Viết
                     </Button>
                 </Box>
                 {submitMessage.text && (

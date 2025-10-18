@@ -8,8 +8,13 @@ import CreateSucculentDialog from './CreateSucculentDialog.jsx';
 import uploadToCloudinary from "../../cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
+import usePagination from '../../../hooks/usePagination.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const SucculentForm = () => {
+    // Pagination hook
+    const { resetPagination } = usePagination(0, 10);
+    
     // Form state
     const [formData, setFormData] = useState({
         species_name: '',
@@ -34,10 +39,8 @@ const SucculentForm = () => {
     const [selectedSucculent, setSelectedSucculent] = useState(null);
     const [currentStep, setCurrentStep] = useState(1);
     const [isValidating, setIsValidating] = useState(false);
-    const [uploadProgress] = useState(0);
-    const [isUploading] = useState(false);
-    useRef(null);
-    useRef(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
 
     async function handleFileSelect(event) {
         const file = event.target.files[0];
@@ -70,6 +73,7 @@ const SucculentForm = () => {
             const response = await getSucculents();
             if (response && response.data && Array.isArray(response.data.data)) {
                 setSucculentList(response.data.data);
+                resetPagination(); // Reset pagination when data changes
             } else {
                 setSucculentList([]);
                 console.warn('API response data is not an array:', response);
@@ -286,45 +290,17 @@ const SucculentForm = () => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{py: {xs: 3, sm: 5}}}>
-            <Paper elevation={0} sx={{
-                p: {xs: 2.5, sm: 4, md: 5},
-                borderRadius: 4,
-                background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.7)'
-            }}>
+        <Container maxWidth={DASHBOARD_STYLES.container.maxWidth} sx={DASHBOARD_STYLES.container}>
+            <Paper elevation={0} sx={DASHBOARD_STYLES.paper}>
                 {/* Header */}
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: {xs: 'column', sm: 'row'},
-                    alignItems: {xs: 'flex-start', sm: 'center'},
-                    justifyContent: 'space-between',
-                    gap: 2,
-                    mb: 4
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                        <LocalFloristIcon sx={{
-                            fontSize: {xs: 38, sm: 44},
-                            color: 'success.main',
-                            mr: 2,
-                            filter: 'drop-shadow(0 4px 6px rgba(46, 125, 50, 0.2))'
-                        }}/>
+                <Box sx={DASHBOARD_STYLES.headerSection}>
+                    <Box sx={DASHBOARD_STYLES.titleSection}>
+                        <LocalFloristIcon sx={DASHBOARD_STYLES.titleIcon}/>
                         <Box>
-                            <Typography
-                                variant="h4"
-                                component="h1"
-                                sx={{
-                                    fontWeight: 900,
-                                    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                                    color: 'success.dark',
-                                    letterSpacing: 1,
-                                    fontSize: {xs: '1.7rem', sm: '2.2rem'}
-                                }}
-                            >
+                            <Typography sx={DASHBOARD_STYLES.mainTitle}>
                                 Quản Lý Sản Phẩm Sen Đá
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography sx={DASHBOARD_STYLES.subtitle}>
                                 Quản lý danh sách sản phẩm sen đá của bạn
                             </Typography>
                         </Box>
@@ -333,18 +309,7 @@ const SucculentForm = () => {
                         variant="contained"
                         startIcon={<AddIcon/>}
                         onClick={handleOpenCreateDialog}
-                        sx={{
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            py: 1.2,
-                            px: 3,
-                            background: 'linear-gradient(90deg, #43a047 0%, #388e3c 100%)',
-                            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                            '&:hover': {
-                                background: 'linear-gradient(90deg, #388e3c 0%, #2e7d32 100%)',
-                                boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)'
-                            }
-                        }}
+                        sx={DASHBOARD_STYLES.primaryButton}
                     >
                         Tạo Sản Phẩm
                     </ActionButton>

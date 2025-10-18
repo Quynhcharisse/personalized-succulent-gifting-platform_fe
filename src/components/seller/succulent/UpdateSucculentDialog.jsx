@@ -3,7 +3,7 @@ import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, T
 import {updateSucculent} from '../../../services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
-import {FENGSHUI, ZODIACS} from '../../constants.js';
+import {FENGSHUI, ZODIACS, DASHBOARD_STYLES} from '../../constants.js';
 
 const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
     const [form, setForm] = useState({
@@ -173,22 +173,14 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 3,
-                        background: 'linear-gradient(120deg, #f8f9e9 0%, #e0f7fa 100%)'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
-            <DialogTitle sx={{
-                background: 'linear-gradient(90deg, #4caf50 0%, #66bb6a 100%)',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: '1.2rem'
-            }}>
+            <DialogTitle sx={DASHBOARD_STYLES.dialogTitle}>
                 Cập Nhật Sản Phẩm
             </DialogTitle>
-            <DialogContent sx={{p: 3, pt: 5}}>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 {message.text && (
                     <Alert severity={message.type === 'success' ? 'success' : 'error'} sx={{mb: 2}}>
                         {message.text}
@@ -251,7 +243,7 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                         </Select>
                     </FormControl>
 
-                    <Typography variant="h6" sx={{mt: 2, fontWeight: 700}}>Kích thước</Typography>
+                    <Typography variant="h6" sx={{mt: 2, fontWeight: 700, color: '#0b3f31'}}>Kích thước</Typography>
                     {form.sizeList.map((s, idx) => {
                         const usedKeys = new Set((form.sizeList || []).map((x, xIdx) => xIdx === idx ? null : String(x.sizeName || '').trim().toLowerCase()));
                         const options = Array.from(currentSizeKeys).filter((k) => !usedKeys.has(k));

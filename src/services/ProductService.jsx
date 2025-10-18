@@ -47,25 +47,43 @@ export const updateSucculent = async (succulentData) => {
 }
 
 //------------------- Accessories ------------------//
-export const createDecorationAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createDecorationAccessory = async (accessoryData, createAction = true) => {
+    const payload = {...accessoryData, createAction};
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
-export const createPotAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createPotAccessory = async (accessoryData, createAction = true) => {
+    const payload = {...accessoryData, createAction};
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
-export const createSoilAccessory = async (accessoryData) => {
-    const response = await axiosClient.post("/product/accessory", accessoryData);
+export const createSoilAccessory = async (accessoryData, createAction = true) => {
+    const payload = {...accessoryData, createAction};
+    const response = await axiosClient.post("/product/accessory", payload);
     return response || null
 }
 
 export const getAccessories = async (type = 'all') => {
-    const params = new URLSearchParams({ t: String(type || 'all') });
+    const params = new URLSearchParams({t: String(type || 'all')});
     const response = await axiosClient.get(`/product/accessories?${params.toString()}`);
     return response || null
 }
 
 //------------------- Product ------------------//
+export const createOrUpdateProduct = async (productData, createAction = true) => {
+    const payload = {...productData, createAction};
+    const response = await axiosClient.post("/product", payload);
+    return response || null
+}
+
+export const viewProduct = async () => {
+    const response = await axiosClient.get("/product");
+    return response || null;
+}
+
+export const deactiveProduct = async (id) => {
+    const response = await axiosClient.put(`/product/${id}`);
+    return response || null
+}

@@ -14,7 +14,7 @@ export default function useNotify() {
   const info = useCallback((message, options = {}) => notify(message, { variant: 'info', ...options }), [notify])
   const warning = useCallback((message, options = {}) => notify(message, { variant: 'warning', ...options }), [notify])
 
-  return { notify, success, error, info, warning }
+  return { notify, success, error, info, warning, showNotification: notify }
 }
 
 
