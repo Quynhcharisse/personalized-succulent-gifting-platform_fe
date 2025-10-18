@@ -5,18 +5,18 @@ import {
     Box,
     Button,
     Chip,
-    Typography,
+    Container,
+    IconButton,
+    Paper,
     Stack,
     Tooltip,
-    IconButton,
-    Container,
-    Paper
+    Typography
 } from '@mui/material';
 import {
     Add as AddIcon,
     Edit as EditIcon,
-    Visibility as ViewIcon,
-    Inventory as InventoryIcon
+    Inventory as InventoryIcon,
+    Visibility as ViewIcon
 } from '@mui/icons-material';
 import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
@@ -24,15 +24,15 @@ import ProductViewDialog from './ProductViewDialog.jsx';
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
-import { DASHBOARD_STYLES } from '../../constants.js';
+import {DASHBOARD_STYLES} from '../../constants.js';
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // Pagination hook
-    const { page, rowsPerPage, handleChangePage, handleChangeRowsPerPage } = usePagination(0, 10);
+    const {page, rowsPerPage, handleChangePage, handleChangeRowsPerPage} = usePagination(0, 10);
 
     // Dialog states
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -195,29 +195,29 @@ const ProductTable = () => {
                     <Tooltip title="Xem Chi Tiết">
                         <IconButton
                             onClick={() => handleViewProduct(row)}
-                            sx={{ 
+                            sx={{
                                 color: '#0b3f31',
-                                '&:hover': { 
+                                '&:hover': {
                                     backgroundColor: 'rgba(11, 63, 49, 0.1)',
                                     transform: 'scale(1.1)'
-                                } 
+                                }
                             }}
                         >
-                            <ViewIcon />
+                            <ViewIcon/>
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Chỉnh Sửa">
                         <IconButton
                             onClick={() => handleEditProduct(row)}
-                            sx={{ 
+                            sx={{
                                 color: '#0b3f31',
-                                '&:hover': { 
+                                '&:hover': {
                                     backgroundColor: 'rgba(11, 63, 49, 0.1)',
                                     transform: 'scale(1.1)'
-                                } 
+                                }
                             }}
                         >
-                            <EditIcon />
+                            <EditIcon/>
                         </IconButton>
                     </Tooltip>
                 </Stack>
@@ -272,7 +272,6 @@ const ProductTable = () => {
     };
 
 
-
     // Handle dialog close
     const handleDialogClose = () => {
         setDialogOpen(false);
@@ -288,7 +287,6 @@ const ProductTable = () => {
             'success'
         );
     };
-
 
 
     if (error) {
@@ -309,7 +307,7 @@ const ProductTable = () => {
             <Paper sx={DASHBOARD_STYLES.paper}>
                 <Box sx={DASHBOARD_STYLES.headerSection}>
                     <Box sx={DASHBOARD_STYLES.titleSection}>
-                        <InventoryIcon sx={DASHBOARD_STYLES.titleIcon} />
+                        <InventoryIcon sx={DASHBOARD_STYLES.titleIcon}/>
                         <Box>
                             <Typography sx={DASHBOARD_STYLES.mainTitle}>
                                 Quản Lý Sản Phẩm
