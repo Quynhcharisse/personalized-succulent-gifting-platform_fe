@@ -8,12 +8,15 @@ import {
     Typography,
     Stack,
     Tooltip,
-    IconButton
+    IconButton,
+    Container,
+    Paper
 } from '@mui/material';
 import {
     Add as AddIcon,
     Edit as EditIcon,
-    Visibility as ViewIcon
+    Visibility as ViewIcon,
+    Inventory as InventoryIcon
 } from '@mui/icons-material';
 import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
@@ -21,6 +24,7 @@ import ProductViewDialog from './ProductViewDialog.jsx';
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
@@ -123,24 +127,23 @@ const ProductTable = () => {
         },
         {
             field: 'name',
-            header: 'Tên',
+            header: 'Tên Sản Phẩm',
             render: (row) => (
-                <Typography variant="body1" sx={{fontWeight: 500, color: '#333'}}>
+                <Typography variant="body1" sx={{fontWeight: 500, color: '#0b3f31'}}>
                     {row.name}
                 </Typography>
             )
         },
         {
             field: 'category',
-            header: 'Danh mục',
+            header: 'Danh Mục',
             render: (row) => (
                 <Chip
                     label="SẢN PHẨM"
                     size="small"
                     sx={{
-                        backgroundColor: '#e8f5e9',
-                        color: '#388e3c',
-                        border: '1px solid #c8e6c9',
+                        backgroundColor: '#0b3f31',
+                        color: 'white',
                         fontWeight: 600,
                         fontSize: '0.75rem',
                         textTransform: 'uppercase'
@@ -150,31 +153,31 @@ const ProductTable = () => {
         },
         {
             field: 'size',
-            header: 'Size/Khối lượng',
+            header: 'Kích Thước',
             render: (row) => (
-                <Typography variant="body2" sx={{color: '#333'}}>
+                <Typography variant="body2" sx={{color: '#0b3f31', fontWeight: 500}}>
                     {row.sizes?.[0]?.name || 'N/A'}
                 </Typography>
             )
         },
         {
             field: 'price',
-            header: 'Giá',
+            header: 'Giá Bán',
             render: (row) => (
-                <Typography variant="body2" sx={{color: '#333'}}>
+                <Typography variant="body2" sx={{color: '#0b3f31', fontWeight: 600}}>
                     {row.sizes?.[0] ? new Intl.NumberFormat('vi-VN').format(calculateSizePrice(row.sizes[0])) + ' ₫' : 'N/A'}
                 </Typography>
             )
         },
         {
             field: 'status',
-            header: 'Trạng thái',
+            header: 'Trạng Thái',
             render: (row) => (
                 <Chip
                     label="ACTIVE"
                     size="small"
                     sx={{
-                        backgroundColor: '#4CAF50',
+                        backgroundColor: '#22c55e',
                         color: 'white',
                         fontWeight: 600,
                         fontSize: '0.75rem',
@@ -185,24 +188,34 @@ const ProductTable = () => {
         },
         {
             field: 'actions',
-            header: 'Thao tác',
+            header: 'Thao Tác',
             align: 'center',
             render: (row) => (
                 <Stack direction="row" spacing={1} justifyContent="center">
-                    <Tooltip title="Xem chi tiết">
+                    <Tooltip title="Xem Chi Tiết">
                         <IconButton
-                            color="primary"
                             onClick={() => handleViewProduct(row)}
-                            sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}
+                            sx={{ 
+                                color: '#0b3f31',
+                                '&:hover': { 
+                                    backgroundColor: 'rgba(11, 63, 49, 0.1)',
+                                    transform: 'scale(1.1)'
+                                } 
+                            }}
                         >
                             <ViewIcon />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
+                    <Tooltip title="Chỉnh Sửa">
                         <IconButton
-                            color="secondary"
                             onClick={() => handleEditProduct(row)}
-                            sx={{ '&:hover': { backgroundColor: 'rgba(156, 39, 176, 0.1)' } }}
+                            sx={{ 
+                                color: '#0b3f31',
+                                '&:hover': { 
+                                    backgroundColor: 'rgba(11, 63, 49, 0.1)',
+                                    transform: 'scale(1.1)'
+                                } 
+                            }}
                         >
                             <EditIcon />
                         </IconButton>
@@ -292,54 +305,51 @@ const ProductTable = () => {
     }
 
     return (
-        <Box sx={{p: 3}}>
-            {/* Header */}
-            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
-                <Typography variant="h4" sx={{fontWeight: 700, color: '#1a472a'}}>
-                    Danh sách sản phẩm
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon/>}
-                    onClick={handleCreateProduct}
-                    sx={{
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        borderRadius: 2,
-                        px: 3,
-                        py: 1.5,
-                        fontWeight: 600,
-                        '&:hover': {
-                            backgroundColor: '#45a049'
-                        }
-                    }}
-                >
-                    Tạo sản phẩm mới
-                </Button>
-            </Box>
+        <Container sx={DASHBOARD_STYLES.container}>
+            <Paper sx={DASHBOARD_STYLES.paper}>
+                <Box sx={DASHBOARD_STYLES.headerSection}>
+                    <Box sx={DASHBOARD_STYLES.titleSection}>
+                        <InventoryIcon sx={DASHBOARD_STYLES.titleIcon} />
+                        <Box>
+                            <Typography sx={DASHBOARD_STYLES.mainTitle}>
+                                Quản Lý Sản Phẩm
+                            </Typography>
+                            <Typography sx={DASHBOARD_STYLES.subtitle}>
+                                Quản lý các sản phẩm tổng hợp của bạn tại đây
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon/>}
+                        onClick={handleCreateProduct}
+                        sx={DASHBOARD_STYLES.primaryButton}
+                    >
+                        Tạo Sản Phẩm Mới
+                    </Button>
+                </Box>
 
-
-            {/* DataTable */}
-            <DataTable
-                data={products}
-                columns={columns}
-                loading={loading}
-                pagination={true}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                totalCount={products.length}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                headerBgColor="#4CAF50"
-                headerTextColor="white"
-                hoverColor="#f8f9fa"
-                borderColor="#e0e0e0"
-                emptyMessage="Không tìm thấy sản phẩm nào"
-                stickyHeader={false}
-                size="medium"
-            />
-
+                {/* DataTable */}
+                <DataTable
+                    data={products}
+                    columns={columns}
+                    loading={loading}
+                    pagination={true}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    totalCount={products.length}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    headerBgColor={DASHBOARD_STYLES.table.headerBgColor}
+                    headerTextColor={DASHBOARD_STYLES.table.headerTextColor}
+                    hoverColor={DASHBOARD_STYLES.table.hoverColor}
+                    borderColor={DASHBOARD_STYLES.table.borderColor}
+                    emptyMessage="Không tìm thấy sản phẩm nào"
+                    stickyHeader={DASHBOARD_STYLES.table.stickyHeader}
+                    size={DASHBOARD_STYLES.table.size}
+                />
+            </Paper>
 
             {/* Create/Edit Dialog */}
             <CreateOrUpdateProductDialog
@@ -360,8 +370,7 @@ const ProductTable = () => {
                 calculateSizePrice={calculateSizePrice}
                 handleEditProduct={handleEditProduct}
             />
-
-        </Box>
+        </Container>
     );
 };
 

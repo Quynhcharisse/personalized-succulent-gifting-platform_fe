@@ -72,16 +72,16 @@ const NAVIGATION = [
         path: '/seller/products'
     },
     {
-        segment: 'orders',
-        title: 'Đơn hàng',
-        icon: <ShoppingCartIcon/>,
-        path: '/seller/orders'
-    },
-    {
         segment: 'posts',
         title: 'Bài viết',
         icon: <AssessmentIcon/>,
         path: '/seller/posts'
+    },
+    {
+        segment: 'orders',
+        title: 'Đơn hàng',
+        icon: <ShoppingCartIcon/>,
+        path: '/seller/orders'
     },
     {
         segment: 'analytics',
@@ -614,9 +614,13 @@ export default function SellerDashboard() {
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.title}
-                                    primaryTypographyProps={{
-                                        fontWeight: isActiveRoute(item.path) ? 600 : 500,
-                                        fontSize: '0.9rem'
+                                    slotProps={{
+                                        primary: {
+                                            sx: {
+                                                fontWeight: isActiveRoute(item.path) ? 600 : 500,
+                                                fontSize: '0.9rem'
+                                            }
+                                        }
                                     }}
                                 />
                             </ListItemButton>

@@ -13,6 +13,7 @@ import {
 import {Delete as DeleteIcon, Warning as WarningIcon} from '@mui/icons-material';
 import {deactiveProduct} from '../../../services/ProductService.jsx';
 import useNotify from '../../../hooks/useNotify.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const DeactiveProduct = ({
                              open,
@@ -71,30 +72,16 @@ const DeactiveProduct = ({
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 3,
-                        boxShadow: '0 25px 80px rgba(0, 0, 0, 0.12)',
-                        border: '2px solid rgba(244, 67, 54, 0.1)'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
             <DialogTitle sx={{
+                ...DASHBOARD_STYLES.dialogTitle,
                 background: 'linear-gradient(135deg, #f44336 0%, #e57373 100%)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '1.3rem',
-                py: 3,
-                position: 'relative',
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
-                }
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
             }}>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <WarningIcon sx={{fontSize: '2rem'}}/>
@@ -109,7 +96,7 @@ const DeactiveProduct = ({
                 </Box>
             </DialogTitle>
 
-            <DialogContent sx={{p: 4}}>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 {error && (
                     <Alert severity="error" sx={{mb: 3, borderRadius: 2}}>
                         {error}
@@ -139,12 +126,12 @@ const DeactiveProduct = ({
                 {product && (
                     <Box sx={{
                         p: 3,
-                        borderRadius: 2,
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #e9ecef',
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #ffffff 0%, #f0fff6 100%)',
+                        border: '1px solid rgba(76,175,80,0.15)',
                         mb: 3
                     }}>
-                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1, color: 'text.primary'}}>
+                        <Typography variant="subtitle1" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
                             Thông tin sản phẩm:
                         </Typography>
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
@@ -181,15 +168,7 @@ const DeactiveProduct = ({
                 </Alert>
             </DialogContent>
 
-            <DialogActions sx={{
-                p: 4,
-                gap: 2,
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                borderTop: '2px solid rgba(244, 67, 54, 0.1)',
-                justifyContent: 'space-between',
-                minHeight: '80px',
-                borderRadius: '0 0 12px 12px'
-            }}>
+            <DialogActions sx={{p: 3, backgroundColor: '#f7faf7'}}>
                 <Button
                     onClick={handleClose}
                     disabled={isDeleting}

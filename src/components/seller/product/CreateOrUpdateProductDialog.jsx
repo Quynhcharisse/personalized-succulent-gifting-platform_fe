@@ -27,13 +27,15 @@ import {
     Add as AddIcon,
     Delete as DeleteIcon,
     ExpandMore as ExpandMoreIcon,
-    PhotoCamera as PhotoCameraIcon
+    PhotoCamera as PhotoCameraIcon,
+    Inventory as InventoryIcon
 } from '@mui/icons-material';
 import UploadImageField from '../succulent/UploadImageField.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import { createOrUpdateProduct } from '../../../services/ProductService.jsx';
 import { getSucculents, getAccessories } from '../../../services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const CreateOrUpdateProductDialog = ({
     open,
@@ -421,55 +423,45 @@ const CreateOrUpdateProductDialog = ({
             fullWidth
             slotProps={{
                 paper: {
-                    sx: {
-                        borderRadius: 6,
-                        background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                        boxShadow: '0 25px 80px rgba(0, 0, 0, 0.12)',
-                        border: '2px solid rgba(76, 175, 80, 0.08)',
-                        overflow: 'hidden',
-                        minHeight: '600px'
-                    }
+                    sx: DASHBOARD_STYLES.dialog
                 }
             }}
         >
             <DialogTitle sx={{
-                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: '1.4rem',
-                py: 3,
-                position: 'relative',
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)'
-                }
+                ...DASHBOARD_STYLES.dialogTitle,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
             }}>
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h4" sx={{
-                        fontWeight: 900,
-                        mb: 2,
-                        fontSize: '1.6rem'
-                    }}>
-                        {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
-                    </Typography>
-                    <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 400 }}>
-                        {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
-                    </Typography>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                    <InventoryIcon sx={{fontSize: '2rem'}}/>
+                    <Box>
+                        <Typography variant="h4" sx={{
+                            fontWeight: 900,
+                            mb: 0.5,
+                            fontSize: '1.6rem'
+                        }}>
+                            {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
+                        </Typography>
+                        <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 400 }}>
+                            {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
+                        </Typography>
+                    </Box>
                 </Box>
+
+                <ActionButton
+                    action="cancel"
+                    onClick={onClose}
+                    sx={{
+                        alignSelf: 'flex-end',
+                        minWidth: 'auto',
+                        px: 2,
+                        py: 0.5
+                    }}
+                />
             </DialogTitle>
 
-            <DialogContent sx={{
-                p: 4,
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                minHeight: '500px',
-                maxHeight: '70vh',
-                overflow: 'auto'
-            }}>
+            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 {message.text && (
                     <Alert severity={message.type === 'success' ? 'success' : 'error'} variant="filled"
                            sx={{ mb: 3, fontWeight: 600, borderRadius: 2 }}>
@@ -478,8 +470,8 @@ const CreateOrUpdateProductDialog = ({
                 )}
 
                 {/* Basic Information */}
-                <Card sx={{ p: 3, mb: 3, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.dark', mb: 2 }}>
+                <Box sx={DASHBOARD_STYLES.formSection}>
+                    <Typography sx={DASHBOARD_STYLES.sectionTitle}>
                         Thông tin cơ bản
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
@@ -495,6 +487,7 @@ const CreateOrUpdateProductDialog = ({
                                 helperText={errors.name}
                                 placeholder="Nhập tên sản phẩm"
                                 required
+                                sx={DASHBOARD_STYLES.formField}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -509,25 +502,23 @@ const CreateOrUpdateProductDialog = ({
                                 helperText={errors.description}
                                 placeholder="Mô tả chi tiết về sản phẩm..."
                                 required
+                                sx={DASHBOARD_STYLES.formField}
                             />
                         </Grid>
                     </Grid>
-                </Card>
+                </Box>
 
                 {/* Sizes Configuration */}
-                <Card sx={{ p: 3, mb: 3, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)' }}>
+                <Box sx={DASHBOARD_STYLES.formSection}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.dark' }}>
+                        <Typography sx={DASHBOARD_STYLES.sectionTitle}>
                             Cấu hình kích thước
                         </Typography>
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
                             onClick={addSize}
-                            sx={{
-                                background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
-                                borderRadius: 2
-                            }}
+                            sx={DASHBOARD_STYLES.primaryButton}
                         >
                             Thêm kích thước
                         </Button>
@@ -820,22 +811,19 @@ const CreateOrUpdateProductDialog = ({
                             </AccordionDetails>
                         </Accordion>
                     ))}
-                </Card>
+                </Box>
 
                 {/* Images */}
                 <Card sx={{ p: 3, mb: 3, borderRadius: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.dark' }}>
+                        <Typography sx={DASHBOARD_STYLES.sectionTitle}>
                             Hình ảnh sản phẩm
                         </Typography>
                         <Button
                             variant="contained"
                             startIcon={<PhotoCameraIcon />}
                             onClick={addImage}
-                            sx={{
-                                background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
-                                borderRadius: 2
-                            }}
+                            sx={DASHBOARD_STYLES.primaryButton}
                         >
                             Thêm hình ảnh
                         </Button>
@@ -936,7 +924,11 @@ const CreateOrUpdateProductDialog = ({
                                             type="number"
                                             value={image.displayOrder}
                                             onChange={(e) => updateImage(imageIndex, 'displayOrder', parseInt(e.target.value))}
-                                            inputProps={{ min: 1 }}
+                                            slotProps={{
+                                                input: {
+                                                    min: 1
+                                                }
+                                            }}  
                                             size="small"
                                             sx={{ width: 120 }}
                                         />
@@ -948,15 +940,7 @@ const CreateOrUpdateProductDialog = ({
                 </Card>
             </DialogContent>
 
-            <DialogActions sx={{
-                p: 4,
-                gap: 3,
-                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                borderTop: '2px solid rgba(76, 175, 80, 0.1)',
-                justifyContent: 'space-between',
-                minHeight: '90px',
-                borderRadius: '0 0 24px 24px'
-            }}>
+            <DialogActions sx={{p: 3, backgroundColor: '#f7faf7'}}>
                 <ActionButton
                     onClick={onClose}
                     type="button"

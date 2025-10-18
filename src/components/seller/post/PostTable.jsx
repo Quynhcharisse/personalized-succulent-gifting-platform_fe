@@ -3,6 +3,7 @@ import { IconButton, Tooltip, Typography, Chip, Stack } from '@mui/material';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
+import { DASHBOARD_STYLES } from '../../constants.js';
 
 const statusLabels = {
     DRAFT: 'Draft',
@@ -26,23 +27,23 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
             field: 'id',
             header: 'ID',
             render: (row) => (
-                <Typography sx={{fontWeight: 600, color: 'primary.dark'}}>
+                <Typography sx={{fontWeight: 600, color: '#0b3f31'}}>
                     #{row.id}
                 </Typography>
             )
         },
         {
             field: 'title',
-            header: 'Title',
+            header: 'Tiêu Đề',
             render: (row) => (
-                <Typography sx={{fontWeight: 500}}>
+                <Typography sx={{fontWeight: 500, color: '#0b3f31'}}>
                     {row.title}
                 </Typography>
             )
         },
         {
             field: 'product',
-            header: 'Product',
+            header: 'Sản Phẩm',
             render: (row) => (
                 <Typography>
                     {row.product?.name || '-'}
@@ -51,18 +52,23 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
         },
         {
             field: 'status',
-            header: 'Status',
+            header: 'Trạng Thái',
             render: (row) => (
                 <Chip
                     label={statusLabels[row.status] || row.status}
-                    color={statusColors[row.status] || 'default'}
+                    sx={{
+                        fontWeight: 600,
+                        backgroundColor: row.status === 'PUBLISHED' ? '#22c55e' : 
+                                       row.status === 'DRAFT' ? '#f59e0b' : '#ef4444',
+                        color: 'white'
+                    }}
                     size="small"
                 />
             )
         },
         {
             field: 'tags',
-            header: 'Tags',
+            header: 'Thẻ',
             render: (row) => (
                 <Stack direction="row" spacing={0.5} flexWrap="wrap">
                     {Array.isArray(row.tags) && row.tags.length > 0
@@ -76,7 +82,7 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
         },
         {
             field: 'createdAt',
-            header: 'Created At',
+            header: 'Ngày Tạo',
             render: (row) => (
                 <Typography>
                     {row.createdAt ? new Date(row.createdAt).toLocaleString('vi-VN') : '-'}
@@ -85,14 +91,19 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
         },
         {
             field: 'actions',
-            header: 'Actions',
+            header: 'Thao Tác',
             align: 'center',
             render: (row) => (
-                <Tooltip title="View Details">
+                <Tooltip title="Xem Chi Tiết">
                     <IconButton 
-                        color="primary" 
                         onClick={() => onViewDetail(row)}
-                        sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' } }}
+                        sx={{ 
+                            color: '#0b3f31',
+                            '&:hover': { 
+                                backgroundColor: 'rgba(11, 63, 49, 0.1)',
+                                transform: 'scale(1.1)'
+                            } 
+                        }}
                     >
                         <VisibilityIcon />
                     </IconButton>
@@ -113,13 +124,13 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            headerBgColor="#1976D2"
-            headerTextColor="white"
-            hoverColor="rgba(25, 118, 210, 0.05)"
-            borderColor="#e0e0e0"
-            emptyMessage="No posts found"
-            stickyHeader={false}
-            size="medium"
+            headerBgColor={DASHBOARD_STYLES.table.headerBgColor}
+            headerTextColor={DASHBOARD_STYLES.table.headerTextColor}
+            hoverColor={DASHBOARD_STYLES.table.hoverColor}
+            borderColor={DASHBOARD_STYLES.table.borderColor}
+            emptyMessage="Không tìm thấy bài viết nào"
+            stickyHeader={DASHBOARD_STYLES.table.stickyHeader}
+            size={DASHBOARD_STYLES.table.size}
         />
     );
 };
