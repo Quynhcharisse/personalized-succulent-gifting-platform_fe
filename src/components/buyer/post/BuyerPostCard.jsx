@@ -45,7 +45,6 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
         if (!trimmed || isSubmitting) return;
         setIsSubmitting(true);
         try {
-            // await parent handler if provided (BuyerPosts returns async handler)
             if (onSubmitComment) await onSubmitComment(p.id, trimmed);
             setCommentText('');
         } catch (err) {
@@ -129,11 +128,21 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
 
                 <Stack mt={2} spacing={1}>
                     <Typography variant="subtitle2">Comments ({p.comments?.count ?? commentsArray.length}):</Typography>
-                    {commentsArray.map(c => (
-                        <Typography key={c.id ?? c.createdAt} variant="body2" color="text.secondary">
-                            {c.content}
-                        </Typography>
-                    ))}
+                    {commentsArray.map(c => {
+                        const author = c.buyerName || c.buyer_name || c.userName || `User #${c.accountId ?? c.buyerId ?? '??'}`;
+                        const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : '';
+                        return (
+                            <Box key={c.id ?? c.createdAt} sx={{ mb: 1 }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="baseline">
+                                    <Typography variant="subtitle2">{author}</Typography>
+                                    {time && <Typography variant="caption" color="text.secondary">{time}</Typography>}
+                                </Stack>
+                                <Typography variant="body2" color="text.secondary">
+                                    {c.content}
+                                </Typography>
+                            </Box>
+                        );
+                    })}
                 </Stack>
 
                 {/* comment input */}

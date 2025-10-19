@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {
-    Box,
+    Box, Button,
     Chip,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
+    DialogTitle, IconButton, MenuItem,
     Stack,
     TextField,
     Typography
@@ -89,7 +89,21 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
     const removePostImage = (index) => setPostImages(prev => prev.filter((_, i) => i !== index));
 
     const handleSubmit = async () => {
-        const tagsArray = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+        // split, trim, filter empty
+        const rawTags = form.tags
+            ? form.tags.split(',').map(t => t.trim()).filter(Boolean)
+            : [];
+
+        // deduplicate case-insensitively while preserving first occurrence
+        const seen = new Set();
+        const tagNames = [];
+        for (const t of rawTags) {
+            const key = t.toLowerCase();
+            if (!seen.has(key)) {
+                seen.add(key);
+                tagNames.push(t);
+            }
+        }
 
         setIsSubmitting(true);
         try {
@@ -98,7 +112,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                 description: form.description,
                 productId: Number(form.productId),
                 status: form.status,
-                tagNames: tagsArray,
+                tagNames: tagNames,
                 // include id when present so backend can reconcile images
                 postImages: postImages.map(pi => ({
                     ...(pi.id ? { id: pi.id } : {}),

@@ -21,21 +21,6 @@ const fetchProductsByIds = async (ids = []) => {
     return map;
 };
 
-const fetchUsersByIds = async (ids = []) => {
-    const unique = Array.from(new Set(ids)).filter(Boolean);
-    if (unique.length === 0) return {};
-    const res = await Promise.all(unique.map(id =>
-        fetch(`/api/users/${id}`).then(r => r.json().catch(() => null))
-    ));
-    const map = {};
-    unique.forEach((id, idx) => {
-        const payload = res[idx];
-        const data = payload?.data ?? payload;
-        if (data) map[id] = { id: data.id ?? id, name: data.name ?? data.username ?? `User #${id}` };
-    });
-    return map;
-};
-
 const BuyerPosts = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -79,19 +64,13 @@ const BuyerPosts = () => {
                 const payload = res?.data?.data ?? res?.data ?? res;
                 const normalized = normalizePosts(payload);
 
-                // collect ids
+                // collect product ids
                 const productIds = normalized.map(p => p.product?.id ?? p.productId).filter(Boolean);
-                const sellerIds = normalized.map(p => p.sellerId).filter(Boolean);
-                const commenterIds = normalized.flatMap(p => (p.comments || []).map(c => c.buyerId)).filter(Boolean);
-                const userIds = Array.from(new Set([...sellerIds, ...commenterIds]));
 
-                // fetch products and users in parallel
-                const [productsMap, usersMap] = await Promise.all([
-                    fetchProductsByIds(productIds),
-                    fetchUsersByIds(userIds)
-                ]);
+                // fetch products
+                const productsMap = await fetchProductsByIds(productIds);
 
-                // inject names
+                // inject product names and use buyerName from response (no extra user fetch)
                 const enhanced = normalized.map(p => {
                     const prodId = p.product?.id ?? p.productId;
                     const productFromApi = prodId ? productsMap[prodId] : null;
@@ -100,15 +79,12 @@ const BuyerPosts = () => {
                         ...(productFromApi || {})
                     };
 
-                    const seller = usersMap[p.sellerId] ? usersMap[p.sellerId] : { id: p.sellerId, name: p.sellerName || `Seller #${p.sellerId}` };
+                    const seller = { id: p.sellerId, name: p.sellerName || `Seller #${p.sellerId}` };
 
-                    const comments = (p.comments || []).map(c => {
-                        const author = usersMap[c.buyerId] ?? {};
-                        return {
-                            ...c,
-                            buyerName: c.buyerName || author.name || c.buyerName || `User #${c.buyerId}`
-                        };
-                    });
+                    const comments = (p.comments || []).map(c => ({
+                        ...c,
+                        buyerName: c.buyerName || c.buyer_name || `User #${c.buyerId}`
+                    }));
 
                     return {
                         ...p,
