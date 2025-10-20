@@ -38,12 +38,12 @@ import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 
 const CreateOrUpdateProductDialog = ({
-                                         open,
-                                         onClose,
-                                         onCreate,
-                                         editProduct = null,
-                                         isEdit = false
-                                     }) => {
+    open,
+    onClose,
+    onCreate,
+    editProduct = null,
+    isEdit = false
+}) => {
     const [formData, setFormData] = useState({
         productId: null,
         name: '',
@@ -57,29 +57,36 @@ const CreateOrUpdateProductDialog = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-
+    
     // Data for dropdowns
     const [succulents, setSucculents] = useState([]);
     const [accessories, setAccessories] = useState([]);
 
     // Initialize form data
     useEffect(() => {
+        console.log('Initialize form data - isEdit:', isEdit);
+        console.log('Initialize form data - editProduct:', editProduct);
+        
         if (isEdit && editProduct) {
-            setFormData({
-                productId: editProduct.productId || null,
+            const initialData = {
+                productId: editProduct.productId || editProduct.id || null,
                 name: editProduct.name || '',
                 description: editProduct.description || '',
                 sizes: editProduct.sizes || [],
                 images: editProduct.images || []
-            });
+            };
+            console.log('Setting form data for edit:', initialData);
+            setFormData(initialData);
         } else {
-            setFormData({
+            const initialData = {
                 productId: null,
                 name: '',
                 description: '',
                 sizes: [],
                 images: []
-            });
+            };
+            console.log('Setting form data for create:', initialData);
+            setFormData(initialData);
         }
     }, [isEdit, editProduct, open]);
 
@@ -91,15 +98,80 @@ const CreateOrUpdateProductDialog = ({
                     getSucculents(),
                     getAccessories('all')
                 ]);
-
-                if (succulentsRes?.data) {
+                
+                console.log('Succulents response:', succulentsRes);
+                console.log('Accessories response:', accessoriesRes);
+                
+                // Handle succulents data
+                if (succulentsRes?.data?.data && Array.isArray(succulentsRes.data.data)) {
+                    setSucculents(succulentsRes.data.data);
+                } else if (succulentsRes?.data && Array.isArray(succulentsRes.data)) {
                     setSucculents(succulentsRes.data);
+                } else {
+                    console.warn('Succulents data is not an array:', succulentsRes);
+                    setSucculents([]);
                 }
-                if (accessoriesRes?.data) {
+                
+                // Handle accessories data - transform to expected format
+                if (accessoriesRes?.data?.data) {
+                    const accessoriesData = accessoriesRes.data.data;
+                    const transformedAccessories = [];
+                    
+                    // Transform pots data
+                    if (accessoriesData.pots && Array.isArray(accessoriesData.pots)) {
+                        accessoriesData.pots.forEach(pot => {
+                            transformedAccessories.push({
+                                id: `pot_${pot.name}`,
+                                name: pot.name,
+                                category: 'PLANT_POT',
+                                description: pot.description,
+                                material: pot.material,
+                                color: pot.color,
+                                size: pot.size || [],
+                                availableSizes: pot.size ? pot.size.map(s => s.name) : []
+                            });
+                        });
+                    }
+                    
+                    // Transform soils data
+                    if (accessoriesData.soils && Array.isArray(accessoriesData.soils)) {
+                        accessoriesData.soils.forEach(soil => {
+                            transformedAccessories.push({
+                                id: `soil_${soil.name}`,
+                                name: soil.name,
+                                category: 'SOIL',
+                                description: soil.description,
+                                basePricing: soil.basePricing,
+                                availableMassValue: soil.availableMassValue
+                            });
+                        });
+                    }
+                    
+                    // Transform decorations data
+                    if (accessoriesData.decorations && Array.isArray(accessoriesData.decorations)) {
+                        accessoriesData.decorations.forEach(decoration => {
+                            transformedAccessories.push({
+                                id: `decoration_${decoration.name}`,
+                                name: decoration.name,
+                                category: 'DECORATION',
+                                description: decoration.description,
+                                price: decoration.price,
+                                availableQty: decoration.availableQty
+                            });
+                        });
+                    }
+                    
+                    setAccessories(transformedAccessories);
+                } else if (accessoriesRes?.data && Array.isArray(accessoriesRes.data)) {
                     setAccessories(accessoriesRes.data);
+                } else {
+                    console.warn('Accessories data is not in expected format:', accessoriesRes);
+                    setAccessories([]);
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
+                setSucculents([]);
+                setAccessories([]);
             }
         };
 
@@ -137,7 +209,7 @@ const CreateOrUpdateProductDialog = ({
     const updateSize = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
+            sizes: prev.sizes.map((size, i) => 
                 i === index ? {...size, [field]: value} : size
             )
         }));
@@ -146,15 +218,15 @@ const CreateOrUpdateProductDialog = ({
     const addSucculentToSize = (sizeIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
                         succulents: [
                             ...size.succulents,
                             {id: '', name: '', size: '', quantity: ''}
                         ]
-                    }
+                    } 
                     : size
             )
         }));
@@ -163,12 +235,12 @@ const CreateOrUpdateProductDialog = ({
     const removeSucculentFromSize = (sizeIndex, succulentIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
                         succulents: size.succulents.filter((_, j) => j !== succulentIndex)
-                    }
+                    } 
                     : size
             )
         }));
@@ -177,14 +249,14 @@ const CreateOrUpdateProductDialog = ({
     const updateSucculentInSize = (sizeIndex, succulentIndex, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
-                        succulents: size.succulents.map((succulent, j) =>
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
+                        succulents: size.succulents.map((succulent, j) => 
                             j === succulentIndex ? {...succulent, [field]: value} : succulent
                         )
-                    }
+                    } 
                     : size
             )
         }));
@@ -193,18 +265,18 @@ const CreateOrUpdateProductDialog = ({
     const addDecorationDetail = (sizeIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
                         decoration: {
-                            ...size.decoration,
+                            ...(size.decoration || { included: false, details: [] }),
                             details: [
-                                ...size.decoration.details,
+                                ...(size.decoration?.details || []),
                                 {name: '', quantity: ''}
                             ]
                         }
-                    }
+                    } 
                     : size
             )
         }));
@@ -213,15 +285,15 @@ const CreateOrUpdateProductDialog = ({
     const removeDecorationDetail = (sizeIndex, detailIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
                         decoration: {
-                            ...size.decoration,
-                            details: size.decoration.details.filter((_, j) => j !== detailIndex)
+                            ...(size.decoration || { included: false, details: [] }),
+                            details: (size.decoration?.details || []).filter((_, j) => j !== detailIndex)
                         }
-                    }
+                    } 
                     : size
             )
         }));
@@ -230,17 +302,17 @@ const CreateOrUpdateProductDialog = ({
     const updateDecorationDetail = (sizeIndex, detailIndex, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) =>
-                i === sizeIndex
-                    ? {
-                        ...size,
+            sizes: prev.sizes.map((size, i) => 
+                i === sizeIndex 
+                    ? { 
+                        ...size, 
                         decoration: {
-                            ...size.decoration,
-                            details: size.decoration.details.map((detail, j) =>
+                            ...(size.decoration || { included: false, details: [] }),
+                            details: (size.decoration?.details || []).map((detail, j) =>
                                 j === detailIndex ? {...detail, [field]: value} : detail
                             )
                         }
-                    }
+                    } 
                     : size
             )
         }));
@@ -252,7 +324,7 @@ const CreateOrUpdateProductDialog = ({
             images: [
                 ...prev.images,
                 {
-                    imageUrl: '',
+                    url: '',
                     altText: '',
                     primary: false,
                     displayOrder: prev.images.length + 1
@@ -271,7 +343,7 @@ const CreateOrUpdateProductDialog = ({
     const updateImage = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            images: prev.images.map((image, i) =>
+            images: prev.images.map((image, i) => 
                 i === index ? {...image, [field]: value} : image
             )
         }));
@@ -280,14 +352,14 @@ const CreateOrUpdateProductDialog = ({
     const handleFileSelected = async (event, imageIndex) => {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
-
+        
         setIsUploading(true);
         setUploadProgress(0);
         setMessage({type: '', text: ''});
-
+        
         try {
             const imageUrl = await uploadToCloudinary(file, {onProgress: (p) => setUploadProgress(p)});
-            updateImage(imageIndex, 'imageUrl', imageUrl);
+            updateImage(imageIndex, 'url', imageUrl);
         } catch (error) {
             setMessage({type: 'error', text: 'Tải ảnh thất bại'});
         } finally {
@@ -332,7 +404,7 @@ const CreateOrUpdateProductDialog = ({
     };
 
     const transformDataForAPI = () => {
-        return {
+        const payload = {
             createAction: !isEdit,
             productId: isEdit ? formData.productId : null,
             name: formData.name.trim(),
@@ -348,8 +420,8 @@ const CreateOrUpdateProductDialog = ({
                     massAmount: parseFloat(size.soil.massAmount) || 0
                 },
                 decoration: {
-                    included: size.decoration.included,
-                    details: Array.isArray(size.decoration.details) ? size.decoration.details.map(detail => ({
+                    included: size.decoration?.included || false,
+                    details: Array.isArray(size.decoration?.details) ? size.decoration.details.map(detail => ({
                         name: detail.name.trim(),
                         quantity: parseInt(detail.quantity) || 0
                     })) : []
@@ -364,55 +436,72 @@ const CreateOrUpdateProductDialog = ({
                 })) : []
             })),
             images: Array.isArray(formData.images) ? formData.images.map(image => ({
-                url: image.imageUrl.trim()
+                url: image.url.trim()
             })) : []
         };
+        
+        console.log('TransformDataForAPI - isEdit:', isEdit);
+        console.log('TransformDataForAPI - productId:', payload.productId);
+        console.log('TransformDataForAPI - createAction:', payload.createAction);
+        
+        return payload;
     };
 
     const handleSubmit = async () => {
         setMessage({type: '', text: ''});
-
+        
         if (!validateForm()) {
             return;
         }
 
         setIsSubmitting(true);
-
+        
         try {
             const payload = transformDataForAPI();
             console.log('Product payload:', payload);
-
+            console.log('isEdit:', isEdit);
+            console.log('formData.productId:', formData.productId);
+            console.log('editProduct:', editProduct);
+            
             const response = await createOrUpdateProduct(payload);
-
+            
             if (response && response.data && response.data.message) {
-                setMessage({
-                    type: 'success',
+                setMessage({ 
+                    type: 'success', 
                     text: response.data.message
                 });
-
+                
                 setTimeout(() => {
                     onClose();
                     onCreate && onCreate();
                 }, 1500);
             } else {
-                setMessage({
-                    type: 'error',
-                    text: isEdit ? 'Cập nhật sản phẩm thất bại' : 'Tạo sản phẩm thất bại'
+                setMessage({ 
+                    type: 'error', 
+                    text: isEdit ? 'Cập nhật sản phẩm thất bại' : 'Tạo sản phẩm thất bại' 
                 });
             }
         } catch (error) {
             console.error('Error creating/updating product:', error);
-            const errorMessage = error.response?.data?.message ||
-                (isEdit ? 'Có lỗi xảy ra khi cập nhật sản phẩm' : 'Có lỗi xảy ra khi tạo sản phẩm');
+            const errorMessage = error.response?.data?.message || 
+                                (isEdit ? 'Có lỗi xảy ra khi cập nhật sản phẩm' : 'Có lỗi xảy ra khi tạo sản phẩm');
             setMessage({type: 'error', text: errorMessage});
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Get available pots and soils from accessories
+    // Get available pots, soils, and decorations from accessories
     const availablePots = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'PLANT_POT') : [];
     const availableSoils = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'SOIL') : [];
+    const availableDecorations = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'DECORATION') : [];
+    
+    // Debug logs
+    console.log('Current succulents state:', succulents);
+    console.log('Current accessories state:', accessories);
+    console.log('Available pots:', availablePots);
+    console.log('Available soils:', availableSoils);
+    console.log('Available decorations:', availableDecorations);
 
     return (
         <Dialog
@@ -435,17 +524,17 @@ const CreateOrUpdateProductDialog = ({
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <InventoryIcon sx={{fontSize: '2rem'}}/>
                     <Box>
-                        <Typography variant="h4" sx={{
-                            fontWeight: 900,
+                    <Typography variant="h4" sx={{
+                        fontWeight: 900,
                             mb: 0.5,
-                            fontSize: '1.6rem'
-                        }}>
-                            {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
-                        </Typography>
+                        fontSize: '1.6rem'
+                    }}>
+                        {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
+                    </Typography>
                         <Typography variant="body1" sx={{opacity: 0.9, fontWeight: 400}}>
-                            {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
-                        </Typography>
-                    </Box>
+                        {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
+                    </Typography>
+                </Box>
                 </Box>
 
                 <ActionButton
@@ -477,32 +566,32 @@ const CreateOrUpdateProductDialog = ({
                         Thông tin cơ bản
                     </Typography>
                     <Divider sx={{mb: 2}}/>
-
+                    
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                        <TextField
-                            fullWidth
-                            label="Tên sản phẩm"
-                            value={formData.name}
+                            <TextField
+                                fullWidth
+                                label="Tên sản phẩm"
+                                value={formData.name}
                             onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-                            error={!!errors.name}
-                            helperText={errors.name}
-                            placeholder="Nhập tên sản phẩm"
-                            required
+                                error={!!errors.name}
+                                helperText={errors.name}
+                                placeholder="Nhập tên sản phẩm"
+                                required
                             sx={DASHBOARD_STYLES.formField}
-                        />
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={4}
-                            label="Mô tả sản phẩm"
-                            value={formData.description}
+                            />
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                label="Mô tả sản phẩm"
+                                value={formData.description}
                             onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
-                            error={!!errors.description}
-                            helperText={errors.description}
-                            placeholder="Mô tả chi tiết về sản phẩm..."
-                            required
+                                error={!!errors.description}
+                                helperText={errors.description}
+                                placeholder="Mô tả chi tiết về sản phẩm..."
+                                required
                             sx={DASHBOARD_STYLES.formField}
-                        />
+                            />
                     </Box>
                 </Box>
 
@@ -530,25 +619,31 @@ const CreateOrUpdateProductDialog = ({
                     )}
 
                     {Array.isArray(formData.sizes) && formData.sizes.map((size, sizeIndex) => (
-                        <Accordion key={sizeIndex} sx={{mb: 2, borderRadius: 2}}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2, width: '100%'}}>
-                                    <Typography variant="h6" sx={{fontWeight: 600}}>
-                                        Kích thước: {size.name || `Kích thước ${sizeIndex + 1}`}
-                                    </Typography>
-                                    <IconButton
-                                        color="error"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeSize(sizeIndex);
-                                        }}
-                                        size="small"
-                                    >
-                                        <DeleteIcon/>
-                                    </IconButton>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
+                        <Box key={sizeIndex} sx={{mb: 2}}>
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1}}>
+                                <Accordion sx={{flex: 1, borderRadius: 2}}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                                        <Typography variant="h6" sx={{fontWeight: 600}}>
+                                            Kích thước: {size.name || `Kích thước ${sizeIndex + 1}`}
+                                        </Typography>
+                                    </AccordionSummary>
+                                </Accordion>
+                                <IconButton
+                                    color="error"
+                                    onClick={() => removeSize(sizeIndex)}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(239, 68, 68, 0.2)'
+                                        }
+                                    }}
+                                >
+                                    <DeleteIcon/>
+                                </IconButton>
+                            </Box>
+                            <Accordion sx={{borderRadius: 2}}>
+                                <AccordionDetails>
                                 <Box sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -568,16 +663,16 @@ const CreateOrUpdateProductDialog = ({
                                         <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2, color: '#0b3f31'}}>
                                             Tên kích thước
                                         </Typography>
-                                        <TextField
-                                            fullWidth
-                                            label="Tên kích thước"
-                                            value={size.name}
-                                            onChange={(e) => updateSize(sizeIndex, 'name', e.target.value)}
-                                            error={!!errors[`size_${sizeIndex}_name`]}
-                                            helperText={errors[`size_${sizeIndex}_name`]}
-                                            placeholder="medium, large, etc."
+                                    <TextField
+                                        fullWidth
+                                        label="Tên kích thước"
+                                        value={size.name}
+                                        onChange={(e) => updateSize(sizeIndex, 'name', e.target.value)}
+                                        error={!!errors[`size_${sizeIndex}_name`]}
+                                        helperText={errors[`size_${sizeIndex}_name`]}
+                                        placeholder="medium, large, etc."
                                             sx={DASHBOARD_STYLES.formField}
-                                        />
+                                    />
                                     </Card>
 
                                     {/* Succulents */}
@@ -613,7 +708,7 @@ const CreateOrUpdateProductDialog = ({
                                                 Thêm sen đá
                                             </Button>
                                         </Box>
-
+                                        
                                         {errors[`size_${sizeIndex}_succulents`] && (
                                             <Alert severity="error" sx={{mb: 2}}>
                                                 {errors[`size_${sizeIndex}_succulents`]}
@@ -639,10 +734,10 @@ const CreateOrUpdateProductDialog = ({
                                                                     sx={{fontWeight: 600, color: '#0b3f31'}}>
                                                             Sen đá #{succulentIndex + 1}
                                                         </Typography>
-                                                        <IconButton
-                                                            color="error"
-                                                            size="small"
-                                                            onClick={() => removeSucculentFromSize(sizeIndex, succulentIndex)}
+                                                    <IconButton
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() => removeSucculentFromSize(sizeIndex, succulentIndex)}
                                                             sx={{
                                                                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                                                                 '&:hover': {
@@ -651,9 +746,9 @@ const CreateOrUpdateProductDialog = ({
                                                             }}
                                                         >
                                                             <DeleteIcon/>
-                                                        </IconButton>
-                                                    </Box>
-
+                                                    </IconButton>
+                                                </Box>
+                                                
                                                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                                         <FormControl fullWidth>
                                                             <InputLabel>Chọn sen đá</InputLabel>
@@ -663,6 +758,8 @@ const CreateOrUpdateProductDialog = ({
                                                                     const selectedSucculent = succulents.find(s => s.id === e.target.value);
                                                                     updateSucculentInSize(sizeIndex, succulentIndex, 'id', e.target.value);
                                                                     updateSucculentInSize(sizeIndex, succulentIndex, 'name', selectedSucculent?.speciesName || '');
+                                                                    // Reset size khi chọn succulent mới
+                                                                    updateSucculentInSize(sizeIndex, succulentIndex, 'size', '');
                                                                 }}
                                                                 label="Chọn sen đá"
                                                                 sx={DASHBOARD_STYLES.formField}
@@ -676,34 +773,43 @@ const CreateOrUpdateProductDialog = ({
                                                         </FormControl>
 
                                                         <Box sx={{display: 'flex', gap: 2}}>
-                                                            <FormControl fullWidth>
-                                                                <InputLabel>Kích thước</InputLabel>
-                                                                <Select
-                                                                    value={succulent.size}
-                                                                    onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'size', e.target.value)}
-                                                                    label="Kích thước"
-                                                                    sx={DASHBOARD_STYLES.formField}
-                                                                >
-                                                                    <MenuItem value="small">Small</MenuItem>
-                                                                    <MenuItem value="medium">Medium</MenuItem>
-                                                                    <MenuItem value="large">Large</MenuItem>
-                                                                </Select>
-                                                            </FormControl>
+                                                        <FormControl fullWidth>
+                                                            <InputLabel>Kích thước</InputLabel>
+                                                            <Select
+                                                                value={succulent.size}
+                                                                onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'size', e.target.value)}
+                                                                label="Kích thước"
+                                                                disabled={!succulent.id}
+                                                                sx={DASHBOARD_STYLES.formField}
+                                                            >
+                                                                {(() => {
+                                                                    const selectedSucculent = succulents.find(s => s.id === succulent.id);
+                                                                    if (selectedSucculent?.size && typeof selectedSucculent.size === 'object') {
+                                                                        return Object.keys(selectedSucculent.size).map(sizeKey => (
+                                                                            <MenuItem key={sizeKey} value={sizeKey}>
+                                                                                {sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)}
+                                                                            </MenuItem>
+                                                                        ));
+                                                                    }
+                                                                    return null;
+                                                                })()}
+                                                            </Select>
+                                                        </FormControl>
 
-                                                            <TextField
-                                                                fullWidth
-                                                                label="Số lượng"
-                                                                type="number"
-                                                                value={succulent.quantity}
-                                                                onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'quantity', e.target.value)}
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Số lượng"
+                                                            type="number"
+                                                            value={succulent.quantity}
+                                                            onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'quantity', e.target.value)}
                                                                 inputProps={{min: 1}}
                                                                 sx={DASHBOARD_STYLES.formField}
-                                                            />
+                                                        />
                                                         </Box>
                                                     </Box>
-                                                </Card>
-                                            ))}
-                                        </Box>
+                                            </Card>
+                                        ))}
+                                    </Box>
                                     </Card>
 
                                     {/* Pot */}
@@ -722,41 +828,62 @@ const CreateOrUpdateProductDialog = ({
                                             </Alert>
                                         )}
                                         <Box sx={{display: 'flex', gap: 2}}>
-                                            <FormControl fullWidth>
-                                                <InputLabel>Chọn chậu</InputLabel>
-                                                <Select
-                                                    value={size.pot.name}
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Chọn chậu</InputLabel>
+                                                    <Select
+                                                        value={size.pot.name}
                                                     onChange={(e) => updateSize(sizeIndex, 'pot', {
                                                         ...size.pot,
-                                                        name: e.target.value
+                                                        name: e.target.value,
+                                                        size: '' // Reset size khi chọn pot mới
                                                     })}
-                                                    label="Chọn chậu"
+                                                        label="Chọn chậu"
                                                     sx={DASHBOARD_STYLES.formField}
-                                                >
-                                                    {availablePots.map((pot) => (
-                                                        <MenuItem key={pot.id} value={pot.name}>
-                                                            {pot.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                            <FormControl fullWidth>
-                                                <InputLabel>Kích thước chậu</InputLabel>
-                                                <Select
-                                                    value={size.pot.size}
+                                                    >
+                                                        {availablePots.map((pot) => (
+                                                            <MenuItem key={pot.id} value={pot.name}>
+                                                                {pot.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Kích thước chậu</InputLabel>
+                                                    <Select
+                                                        value={size.pot.size}
                                                     onChange={(e) => updateSize(sizeIndex, 'pot', {
                                                         ...size.pot,
                                                         size: e.target.value
                                                     })}
-                                                    label="Kích thước chậu"
+                                                        label="Kích thước chậu"
+                                                        disabled={!size.pot.name}
                                                     sx={DASHBOARD_STYLES.formField}
-                                                >
-                                                    <MenuItem value="small">Small</MenuItem>
-                                                    <MenuItem value="medium">Medium</MenuItem>
-                                                    <MenuItem value="large">Large</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Box>
+                                                    >
+                                                        {(() => {
+                                                            const selectedPot = availablePots.find(p => p.name === size.pot.name);
+                                                            if (selectedPot?.availableSizes && Array.isArray(selectedPot.availableSizes)) {
+                                                                return selectedPot.availableSizes.map(sizeName => (
+                                                                    <MenuItem key={sizeName} value={sizeName}>
+                                                                        {sizeName.charAt(0).toUpperCase() + sizeName.slice(1)}
+                                                                    </MenuItem>
+                                                                ));
+                                                            } else if (selectedPot?.size && Array.isArray(selectedPot.size)) {
+                                                                return selectedPot.size.map(sizeObj => (
+                                                                    <MenuItem key={sizeObj.name} value={sizeObj.name}>
+                                                                        {sizeObj.name.charAt(0).toUpperCase() + sizeObj.name.slice(1)}
+                                                                    </MenuItem>
+                                                                ));
+                                                            }
+                                                            // Fallback nếu không có size info
+                                                            return [
+                                                                <MenuItem key="small" value="small">Small</MenuItem>,
+                                                                <MenuItem key="medium" value="medium">Medium</MenuItem>,
+                                                                <MenuItem key="large" value="large">Large</MenuItem>
+                                                            ];
+                                                        })()}
+                                                    </Select>
+                                                </FormControl>
+                                    </Box>
                                     </Card>
 
                                     {/* Soil */}
@@ -775,40 +902,40 @@ const CreateOrUpdateProductDialog = ({
                                             </Alert>
                                         )}
                                         <Box sx={{display: 'flex', gap: 2}}>
-                                            <FormControl fullWidth>
-                                                <InputLabel>Chọn đất trồng</InputLabel>
-                                                <Select
-                                                    value={size.soil.name}
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Chọn đất trồng</InputLabel>
+                                                    <Select
+                                                        value={size.soil.name}
                                                     onChange={(e) => updateSize(sizeIndex, 'soil', {
                                                         ...size.soil,
                                                         name: e.target.value
                                                     })}
-                                                    label="Chọn đất trồng"
+                                                        label="Chọn đất trồng"
                                                     sx={DASHBOARD_STYLES.formField}
-                                                >
-                                                    {availableSoils.map((soil) => (
-                                                        <MenuItem key={soil.id} value={soil.name}>
-                                                            {soil.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                            <TextField
-                                                fullWidth
-                                                label="Khối lượng (gram)"
-                                                type="number"
-                                                value={size.soil.massAmount}
+                                                    >
+                                                        {availableSoils.map((soil) => (
+                                                            <MenuItem key={soil.id} value={soil.name}>
+                                                                {soil.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Khối lượng (gram)"
+                                                    type="number"
+                                                    value={size.soil.massAmount}
                                                 onChange={(e) => updateSize(sizeIndex, 'soil', {
                                                     ...size.soil,
                                                     massAmount: e.target.value
                                                 })}
                                                 inputProps={{min: 0, step: 0.1}}
-                                                InputProps={{
-                                                    endAdornment: <InputAdornment position="end">g</InputAdornment>
-                                                }}
+                                                    InputProps={{
+                                                        endAdornment: <InputAdornment position="end">g</InputAdornment>
+                                                    }}
                                                 sx={DASHBOARD_STYLES.formField}
-                                            />
-                                        </Box>
+                                                />
+                                    </Box>
                                     </Card>
 
                                     {/* Decoration */}
@@ -832,9 +959,9 @@ const CreateOrUpdateProductDialog = ({
                                                     trí:</Typography>
                                                 <FormControl size="small" sx={{minWidth: 80}}>
                                                     <Select
-                                                        value={size.decoration.included}
+                                                        value={size.decoration?.included || false}
                                                         onChange={(e) => updateSize(sizeIndex, 'decoration', {
-                                                            ...size.decoration,
+                                                            ...(size.decoration || { included: false, details: [] }),
                                                             included: e.target.value
                                                         })}
                                                         sx={{
@@ -851,7 +978,7 @@ const CreateOrUpdateProductDialog = ({
                                             </Box>
                                         </Box>
 
-                                        {size.decoration.included && (
+                                        {size.decoration?.included && (
                                             <Box>
                                                 <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 3}}>
                                                     <Button
@@ -873,7 +1000,7 @@ const CreateOrUpdateProductDialog = ({
                                                 </Box>
 
                                                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                                    {Array.isArray(size.decoration.details) && size.decoration.details.map((detail, detailIndex) => (
+                                                    {Array.isArray(size.decoration?.details) && size.decoration.details.map((detail, detailIndex) => (
                                                         <Card key={detailIndex} sx={{
                                                             p: 3,
                                                             backgroundColor: '#f8fffe',
@@ -891,10 +1018,10 @@ const CreateOrUpdateProductDialog = ({
                                                                             sx={{fontWeight: 600, color: '#0b3f31'}}>
                                                                     Chi tiết #{detailIndex + 1}
                                                                 </Typography>
-                                                                <IconButton
-                                                                    color="error"
-                                                                    size="small"
-                                                                    onClick={() => removeDecorationDetail(sizeIndex, detailIndex)}
+                                                            <IconButton
+                                                                color="error"
+                                                                size="small"
+                                                                onClick={() => removeDecorationDetail(sizeIndex, detailIndex)}
                                                                     sx={{
                                                                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                                                                         '&:hover': {
@@ -903,18 +1030,25 @@ const CreateOrUpdateProductDialog = ({
                                                                     }}
                                                                 >
                                                                     <DeleteIcon/>
-                                                                </IconButton>
-                                                            </Box>
-
+                                                            </IconButton>
+                                                        </Box>
+                                                        
                                                             <Box sx={{display: 'flex', gap: 2}}>
-                                                                <TextField
-                                                                    fullWidth
-                                                                    label="Tên chi tiết trang trí"
+                                                                <FormControl fullWidth>
+                                                                    <InputLabel>Tên chi tiết trang trí</InputLabel>
+                                                                    <Select
                                                                     value={detail.name}
                                                                     onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'name', e.target.value)}
-                                                                    placeholder="đèn cao, đá trang trí, etc."
-                                                                    sx={DASHBOARD_STYLES.formField}
-                                                                />
+                                                                        label="Tên chi tiết trang trí"
+                                                                        sx={DASHBOARD_STYLES.formField}
+                                                                    >
+                                                                        {availableDecorations.map((decoration) => (
+                                                                            <MenuItem key={decoration.id} value={decoration.name}>
+                                                                                {decoration.name}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                </FormControl>
                                                                 <TextField
                                                                     fullWidth
                                                                     label="Số lượng"
@@ -925,8 +1059,8 @@ const CreateOrUpdateProductDialog = ({
                                                                     sx={DASHBOARD_STYLES.formField}
                                                                 />
                                                             </Box>
-                                                        </Card>
-                                                    ))}
+                                                    </Card>
+                                                ))}
                                                 </Box>
                                             </Box>
                                         )}
@@ -934,6 +1068,7 @@ const CreateOrUpdateProductDialog = ({
                                 </Box>
                             </AccordionDetails>
                         </Accordion>
+                        </Box>
                     ))}
                 </Box>
 
@@ -984,20 +1119,20 @@ const CreateOrUpdateProductDialog = ({
                                     {/* Image Upload & Preview */}
                                     <Box sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
                                         <Box>
-                                            <input
-                                                accept="image/*"
+                                        <input
+                                            accept="image/*"
                                                 style={{display: 'none'}}
-                                                id={`image-upload-${imageIndex}`}
-                                                type="file"
-                                                onChange={(e) => handleFileSelected(e, imageIndex)}
-                                            />
-                                            <label htmlFor={`image-upload-${imageIndex}`}>
-                                                <Button
-                                                    variant="outlined"
-                                                    component="span"
+                                            id={`image-upload-${imageIndex}`}
+                                            type="file"
+                                            onChange={(e) => handleFileSelected(e, imageIndex)}
+                                        />
+                                        <label htmlFor={`image-upload-${imageIndex}`}>
+                                            <Button
+                                                variant="outlined"
+                                                component="span"
                                                     startIcon={<PhotoCameraIcon/>}
-                                                    fullWidth
-                                                    disabled={isUploading}
+                                                fullWidth
+                                                disabled={isUploading}
                                                     sx={{
                                                         borderColor: '#0b3f31',
                                                         color: '#0b3f31',
@@ -1007,77 +1142,37 @@ const CreateOrUpdateProductDialog = ({
                                                             backgroundColor: 'rgba(11, 63, 49, 0.1)'
                                                         }
                                                     }}
-                                                >
-                                                    {isUploading ? 'Đang tải...' : 'Chọn hình ảnh'}
-                                                </Button>
-                                            </label>
-                                            {isUploading && (
+                                            >
+                                                {isUploading ? 'Đang tải...' : 'Chọn hình ảnh'}
+                                            </Button>
+                                        </label>
+                                        {isUploading && (
                                                 <Typography variant="caption" color="text.secondary"
                                                             sx={{mt: 1, display: 'block'}}>
-                                                    Tiến độ: {uploadProgress}%
-                                                </Typography>
-                                            )}
-                                        </Box>
-
-                                        {image.imageUrl && (
+                                                Tiến độ: {uploadProgress}%
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    
+                                    {image.url && (
                                             <Box sx={{
                                                 border: '2px solid rgba(11, 63, 49, 0.2)',
                                                 borderRadius: 2,
                                                 overflow: 'hidden',
                                                 backgroundColor: '#f8fffe'
                                             }}>
-                                                <img
-                                                    src={image.imageUrl}
-                                                    alt="Preview"
-                                                    style={{
-                                                        width: '100%',
+                                            <img
+                                                src={image.url}
+                                                alt="Preview"
+                                                style={{
+                                                    width: '100%',
                                                         height: '200px',
-                                                        objectFit: 'cover',
+                                                    objectFit: 'cover',
                                                         display: 'block'
-                                                    }}
-                                                />
-                                            </Box>
-                                        )}
-                                    </Box>
-
-                                    {/* Image Details */}
-                                    <Box sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
-                                        <TextField
-                                            fullWidth
-                                            label="Alt text"
-                                            value={image.altText}
-                                            onChange={(e) => updateImage(imageIndex, 'altText', e.target.value)}
-                                            placeholder="Mô tả hình ảnh"
-                                            sx={DASHBOARD_STYLES.formField}
-                                        />
-
-                                        <Box sx={{display: 'flex', gap: 2}}>
-                                            <FormControl sx={{flex: 1}}>
-                                                <InputLabel>Ảnh chính</InputLabel>
-                                                <Select
-                                                    value={image.primary}
-                                                    onChange={(e) => updateImage(imageIndex, 'primary', e.target.value)}
-                                                    label="Ảnh chính"
-                                                    sx={DASHBOARD_STYLES.formField}
-                                                >
-                                                    <MenuItem value={true}>Có</MenuItem>
-                                                    <MenuItem value={false}>Không</MenuItem>
-                                                </Select>
-                                            </FormControl>
-
-                                            <TextField
-                                                label="Thứ tự hiển thị"
-                                                type="number"
-                                                value={image.displayOrder}
-                                                onChange={(e) => updateImage(imageIndex, 'displayOrder', parseInt(e.target.value))}
-                                                slotProps={{
-                                                    input: {
-                                                        min: 1
-                                                    }
                                                 }}
-                                                sx={{width: 140, ...DASHBOARD_STYLES.formField}}
                                             />
                                         </Box>
+                                    )}
                                     </Box>
                                 </Box>
                             </Box>

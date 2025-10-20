@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Chip, Dialog, DialogContent, DialogTitle, Grid, Paper, Typography} from '@mui/material';
+import {Box, Chip, Dialog, DialogContent, DialogTitle, Paper, Typography} from '@mui/material';
 import {Inventory as InventoryIcon} from '@mui/icons-material';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import {DASHBOARD_STYLES} from '../../constants.js';
@@ -73,123 +73,184 @@ const ProductViewDialog = ({
                         <Typography variant="h6" sx={{fontWeight: 800, mb: 2, color: '#0b3f31'}}>
                             Thông tin cơ bản
                         </Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="body2" color="text.secondary">Tên sản phẩm:</Typography>
-                                <Typography variant="body1"
-                                            sx={{fontWeight: 600, color: '#0b3f31'}}>{selectedProduct.name}</Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
-                                <Chip
-                                    label={getStatusLabel(selectedProduct.status)}
-                                    sx={{
-                                        fontWeight: 600,
-                                        backgroundColor: '#22c55e',
-                                        color: 'white'
-                                    }}
-                                    size="small"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography variant="body2" color="text.secondary">Mô tả:</Typography>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                            <Box sx={{display: 'flex', flexDirection: {xs: 'column', sm: 'row'}, gap: 3}}>
+                                <Box sx={{flex: 1}}>
+                                    <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>Tên sản phẩm:</Typography>
+                                    <Typography variant="body1"
+                                                sx={{fontWeight: 600, color: '#0b3f31'}}>{selectedProduct.name}</Typography>
+                                </Box>
+                                <Box sx={{flex: 1}}>
+                                    <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>Trạng thái:</Typography>
+                                    <Chip
+                                        label={getStatusLabel(selectedProduct.status)}
+                                        sx={{
+                                            fontWeight: 600,
+                                            backgroundColor: '#22c55e',
+                                            color: 'white'
+                                        }}
+                                        size="small"
+                                    />
+                                </Box>
+                            </Box>
+                            <Box>
+                                <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>Mô tả:</Typography>
                                 <Typography variant="body1">{selectedProduct.description}</Typography>
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </Box>
                     </Box>
 
                     {/* Sizes */}
                     <Box>
-                        <Typography variant="h6" sx={{fontWeight: 800, mb: 2, color: '#0b3f31'}}>
+                        <Typography variant="h6" sx={{fontWeight: 800, mb: 3, color: '#0b3f31'}}>
                             Cấu hình kích thước ({selectedProduct.sizes?.length || 0})
                         </Typography>
-                        {selectedProduct.sizes?.map((size, sizeIndex) => (
-                            <Paper key={sizeIndex} sx={{
-                                p: 2.5,
-                                mb: 2,
-                                borderRadius: 3,
-                                background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-                                border: '1px solid rgba(33,150,243,0.12)'
-                            }}>
-                                <Typography variant="subtitle1" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                    Kích
-                                    thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
-                                </Typography>
-
-                                {/* Succulents */}
-                                {size.succulents && size.succulents.length > 0 && (
-                                    <Box sx={{mb: 2}}>
-                                        <Typography variant="subtitle2" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                            Sen đá ({size.succulents.length})
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                            {selectedProduct.sizes?.map((size, sizeIndex) => (
+                                <Paper key={sizeIndex} sx={{
+                                    p: 3,
+                                    borderRadius: 3,
+                                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                                    border: '1px solid rgba(11, 63, 49, 0.15)',
+                                    boxShadow: '0 4px 12px rgba(11, 63, 49, 0.08)'
+                                }}>
+                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
+                                        <Typography variant="h6" sx={{fontWeight: 800, color: '#0b3f31'}}>
+                                            🌱 Kích thước: {size.name}
                                         </Typography>
-                                        {size.succulents.map((succulent, index) => (
-                                            <Box key={index} sx={{ml: 2, mb: 1}}>
-                                                <Typography variant="body2" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                    {succulent.name}
+                                        <Chip
+                                            label={`${new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫`}
+                                            sx={{
+                                                fontWeight: 700,
+                                                backgroundColor: '#0b3f31',
+                                                color: 'white',
+                                                fontSize: '0.9rem',
+                                                px: 2
+                                            }}
+                                        />
+                                    </Box>
+
+                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                                        {/* Succulents */}
+                                        {size.succulents && size.succulents.length > 0 && (
+                                            <Box sx={{
+                                                p: 2.5,
+                                                borderRadius: 2,
+                                                backgroundColor: '#f0fff6',
+                                                border: '1px solid rgba(34, 197, 94, 0.2)'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                                                    🌱 Sen đá ({size.succulents.length})
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {succulent.description}
-                                                </Typography>
+                                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5}}>
+                                                    {size.succulents.map((succulent, index) => (
+                                                        <Box key={index} sx={{
+                                                            p: 2,
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 2,
+                                                            border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                        }}>
+                                                            <Typography variant="body1" sx={{fontWeight: 600, color: '#0b3f31', mb: 0.5}}>
+                                                                {succulent.name}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {succulent.description}
+                                                            </Typography>
+                                                        </Box>
+                                                    ))}
+                                                </Box>
                                             </Box>
-                                        ))}
-                                    </Box>
-                                )}
+                                        )}
 
-                                {/* Pot */}
-                                {size.pot && (
-                                    <Box sx={{mb: 2}}>
-                                        <Typography variant="subtitle2" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                            Chậu
-                                        </Typography>
-                                        <Box sx={{ml: 2}}>
-                                            <Typography variant="body2" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                {size.pot.name}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {size.pot.description} - {size.pot.material} - {size.pot.color}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                )}
-
-                                {/* Soil */}
-                                {size.soil && (
-                                    <Box sx={{mb: 2}}>
-                                        <Typography variant="subtitle2" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                            Đất trồng
-                                        </Typography>
-                                        <Box sx={{ml: 2}}>
-                                            <Typography variant="body2" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                {size.soil.name}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {size.soil.description} - Khối lượng: {size.soil.massAmount}g
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                )}
-
-                                {/* Decorations */}
-                                {size.decorations && size.decorations.length > 0 && (
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                            Trang trí ({size.decorations.length})
-                                        </Typography>
-                                        {size.decorations.map((decoration, index) => (
-                                            <Box key={index} sx={{ml: 2, mb: 1}}>
-                                                <Typography variant="body2" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                    {decoration.name}
+                                        {/* Pot */}
+                                        {size.pot && (
+                                            <Box sx={{
+                                                p: 2.5,
+                                                borderRadius: 2,
+                                                backgroundColor: '#fef7f0',
+                                                border: '1px solid rgba(245, 158, 11, 0.2)'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                                                    🪴 Chậu
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {decoration.description} - Số lượng: {decoration.quantity} -
-                                                    Giá: {new Intl.NumberFormat('vi-VN').format(decoration.totalPrice)}₫
-                                                </Typography>
+                                                <Box sx={{
+                                                    p: 2,
+                                                    backgroundColor: 'white',
+                                                    borderRadius: 2,
+                                                    border: '1px solid rgba(245, 158, 11, 0.1)'
+                                                }}>
+                                                    <Typography variant="body1" sx={{fontWeight: 600, color: '#0b3f31', mb: 0.5}}>
+                                                        {size.pot.name}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {size.pot.description} - {size.pot.material} - {size.pot.color}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
-                                        ))}
+                                        )}
+
+                                        {/* Soil */}
+                                        {size.soil && (
+                                            <Box sx={{
+                                                p: 2.5,
+                                                borderRadius: 2,
+                                                backgroundColor: '#f0fdf4',
+                                                border: '1px solid rgba(34, 197, 94, 0.2)'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                                                    🌿 Đất trồng
+                                                </Typography>
+                                                <Box sx={{
+                                                    p: 2,
+                                                    backgroundColor: 'white',
+                                                    borderRadius: 2,
+                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                }}>
+                                                    <Typography variant="body1" sx={{fontWeight: 600, color: '#0b3f31', mb: 0.5}}>
+                                                        {size.soil.name}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {size.soil.description} - Khối lượng: {size.soil.massAmount}g
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        )}
+
+                                        {/* Decorations */}
+                                        {size.decorations && size.decorations.length > 0 && (
+                                            <Box sx={{
+                                                p: 2.5,
+                                                borderRadius: 2,
+                                                backgroundColor: '#fefce8',
+                                                border: '1px solid rgba(245, 158, 11, 0.2)'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                                                    ✨ Trang trí ({size.decorations.length})
+                                                </Typography>
+                                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5}}>
+                                                    {size.decorations.map((decoration, index) => (
+                                                        <Box key={index} sx={{
+                                                            p: 2,
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 2,
+                                                            border: '1px solid rgba(245, 158, 11, 0.1)'
+                                                        }}>
+                                                            <Typography variant="body1" sx={{fontWeight: 600, color: '#0b3f31', mb: 0.5}}>
+                                                                {decoration.name}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {decoration.description} - Số lượng: {decoration.quantity} -
+                                                                Giá: {new Intl.NumberFormat('vi-VN').format(decoration.totalPrice)}₫
+                                                            </Typography>
+                                                        </Box>
+                                                    ))}
+                                                </Box>
+                                            </Box>
+                                        )}
                                     </Box>
-                                )}
-                            </Paper>
-                        ))}
+                                </Paper>
+                            ))}
+                        </Box>
                     </Box>
                 </Box>
             </DialogContent>

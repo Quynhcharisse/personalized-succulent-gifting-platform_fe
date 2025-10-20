@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Stack, Alert, Box, Grid, FormControl, InputLabel, Select, MenuItem, Chip} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Stack, Alert, Box, FormControl, InputLabel, Select, MenuItem, Chip, Card, Divider} from '@mui/material';
 import {updateSucculent} from '../../../services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
@@ -21,17 +21,21 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
 
     useEffect(() => {
         if (open && succulent) {
-            const initialSizes = Array.isArray(succulent.sizeList)
-                ? succulent.sizeList.map(s => ({
-                    sizeName: s.sizeName || s.name || '',
-                    price: s.price ?? s.priceSell ?? '',
-                    quantity: s.quantity ?? ''
+            const initialSizes = (succulent.size && typeof succulent.size === 'object')
+                ? Object.entries(succulent.size).map(([key, val]) => ({
+                    sizeName: key,
+                    price: val?.price ?? '',
+                    quantity: val?.quantity ?? '',
+                    minArea: val?.minArea ?? '',
+                    maxArea: val?.maxArea ?? ''
                 }))
-                : (succulent.size && typeof succulent.size === 'object')
-                    ? Object.entries(succulent.size).map(([key, val]) => ({
-                        sizeName: key,
-                        price: val?.price ?? '',
-                        quantity: val?.quantity ?? ''
+                : Array.isArray(succulent.sizeList)
+                    ? succulent.sizeList.map(s => ({
+                        sizeName: s.sizeName || s.name || '',
+                        price: s.price ?? s.priceSell ?? '',
+                        quantity: s.quantity ?? '',
+                        minArea: s.minArea ?? '',
+                        maxArea: s.maxArea ?? ''
                     }))
                     : [];
 
@@ -39,8 +43,8 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                 speciesName: succulent.speciesName ?? '',
                 description: succulent.description ?? '',
                 imageUrl: succulent.imageUrl ?? '',
-                fengShuiList: succulent.fengShuiList || [],
-                zodiacList: succulent.zodiacList || [],
+                fengShuiList: succulent.fengShuiElements || [],
+                zodiacList: succulent.zodiacs || [],
                 sizeList: initialSizes.length > 0 ? initialSizes : [{ sizeName: '', price: '', quantity: '' }]
             });
             setMessage({type: '', text: ''});
@@ -120,7 +124,9 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
                 sizeList: (form.sizeList || []).map(s => ({
                     sizeName: String(s.sizeName).trim().toLowerCase(),
                     price: Number(s.price),
-                    quantity: Number(s.quantity)
+                    quantity: Number(s.quantity),
+                    minArea: Number(s.minArea) || 0,
+                    maxArea: Number(s.maxArea) || 0
                 }))
             };
 
@@ -182,159 +188,332 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
             </DialogTitle>
             <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 {message.text && (
-                    <Alert severity={message.type === 'success' ? 'success' : 'error'} sx={{mb: 2}}>
+                    <Alert severity={message.type === 'success' ? 'success' : 'error'} sx={{mb: 3, borderRadius: 2}}>
                         {message.text}
                     </Alert>
                 )}
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <TextField
-                        label="Tên loài"
-                        name="speciesName"
-                        value={form.speciesName}
-                        onChange={handleChange}
-                        sx={{mt: 2}}
-                    />
-                    <TextField
-                        label="Mô tả"
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                        multiline
-                        minRows={3}
-                    />
-                    <FormControl fullWidth>
-                        <InputLabel>Phong Thủy</InputLabel>
-                        <Select
-                            multiple
-                            label="Phong Thủy"
-                            value={form.fengShuiList}
-                            onChange={(e) => setForm(prev => ({...prev, fengShuiList: e.target.value}))}
-                            renderValue={(selected) => (
-                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
-                                    {selected.map((val) => (
-                                        <Chip key={val} label={FENGSHUI.find(opt => opt.value === val)?.label || val} size="small"/>
-                                    ))}
-                                </Box>
-                            )}
-                        >
-                            {FENGSHUI.map(opt => (
-                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <InputLabel>Cung Hoàng Đạo</InputLabel>
-                        <Select
-                            multiple
-                            label="Cung Hoàng Đạo"
-                            value={form.zodiacList}
-                            onChange={(e) => setForm(prev => ({...prev, zodiacList: e.target.value}))}
-                            renderValue={(selected) => (
-                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
-                                    {selected.map((val) => (
-                                        <Chip key={val} label={ZODIACS.find(opt => opt.value === val)?.label || val} size="small"/>
-                                    ))}
-                                </Box>
-                            )}
-                        >
-                            {ZODIACS.map(opt => (
-                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
 
-                    <Typography variant="h6" sx={{mt: 2, fontWeight: 700, color: '#0b3f31'}}>Kích thước</Typography>
-                    {form.sizeList.map((s, idx) => {
-                        const usedKeys = new Set((form.sizeList || []).map((x, xIdx) => xIdx === idx ? null : String(x.sizeName || '').trim().toLowerCase()));
-                        const options = Array.from(currentSizeKeys).filter((k) => !usedKeys.has(k));
-                        const currentValue = String(s.sizeName || '').trim().toLowerCase();
-                        if (currentValue && !options.includes(currentValue)) options.unshift(currentValue);
-                        return (
-                        <Grid key={idx} container spacing={2} alignItems="center">
-                            <Grid item xs={12} sm={4}>
-                                <FormControl fullWidth>
-                                    <InputLabel>Tên kích thước</InputLabel>
-                                    <Select
-                                        label="Tên kích thước"
-                                        value={s.sizeName || ''}
-                                        onChange={(e) => {
-                                            const list = [...form.sizeList];
-                                            list[idx] = {...list[idx], sizeName: e.target.value};
-                                            setForm(prev => ({...prev, sizeList: list}));
-                                        }}
-                                    >
-                                        {options.map((opt) => (
-                                            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="Giá bán"
-                                    type="number"
-                                    value={s.price}
-                                    onChange={(e) => {
-                                        const list = [...form.sizeList];
-                                        list[idx] = {...list[idx], price: e.target.value};
-                                        setForm(prev => ({...prev, sizeList: list}));
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3}>
-                                <TextField
-                                    fullWidth
-                                    label="Số lượng"
-                                    type="number"
-                                    value={s.quantity}
-                                    onChange={(e) => {
-                                        const list = [...form.sizeList];
-                                        list[idx] = {...list[idx], quantity: e.target.value};
-                                        setForm(prev => ({...prev, sizeList: list}));
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={1}>
-                                <Button color="error" onClick={() => {
-                                    const list = [...form.sizeList];
-                                    list.splice(idx, 1);
-                                    setForm(prev => ({...prev, sizeList: list.length ? list : [{ sizeName: '', price: '', quantity: '' }]}));
-                                }}>Xóa</Button>
-                            </Grid>
-                        </Grid>
-                        );
-                    })}
-                    <Box>
-                        <Button variant="outlined" onClick={() => setForm(prev => ({
-                            ...prev,
-                            sizeList: (prev.sizeList || []).length >= Math.min(5, currentSizeKeys.size)
-                                ? prev.sizeList
-                                : [...prev.sizeList, { sizeName: '', price: '', quantity: '' }]
-                        }))}>Thêm kích thước</Button>
+                {/* Basic Information */}
+                <Card sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                    border: '1px solid rgba(11, 63, 49, 0.15)'
+                }}>
+                    <Typography variant="h6" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                        Thông tin cơ bản
+                    </Typography>
+                    <Divider sx={{mb: 3}}/>
+                    
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                        <TextField
+                            label="Tên loài"
+                            name="speciesName"
+                            value={form.speciesName}
+                            onChange={handleChange}
+                            sx={DASHBOARD_STYLES.formField}
+                        />
+                        <TextField
+                            label="Mô tả"
+                            name="description"
+                            value={form.description}
+                            onChange={handleChange}
+                            multiline
+                            minRows={3}
+                            sx={DASHBOARD_STYLES.formField}
+                        />
                     </Box>
+                </Card>
 
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <input type="file" accept="image/*" onChange={handleFilePicked} style={{display: 'none'}} id="update-succulent-upload" />
-                        <label htmlFor="update-succulent-upload">
-                            <Button component="span" variant="outlined" disabled={isUploading} sx={{borderRadius: 2, fontWeight: 600}}>
-                                {isUploading ? `Đang tải... ${uploadProgress}%` : 'Tải ảnh lên'}
-                            </Button>
-                        </label>
+                {/* Attributes */}
+                <Card sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                    border: '1px solid rgba(11, 63, 49, 0.15)'
+                }}>
+                    <Typography variant="h6" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                        Thuộc tính đặc biệt
+                    </Typography>
+                    <Divider sx={{mb: 3}}/>
+                    
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                        <FormControl fullWidth>
+                            <InputLabel>Phong Thủy</InputLabel>
+                            <Select
+                                multiple
+                                label="Phong Thủy"
+                                value={form.fengShuiList}
+                                onChange={(e) => setForm(prev => ({...prev, fengShuiList: e.target.value}))}
+                                renderValue={(selected) => (
+                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
+                                        {selected.map((val) => (
+                                            <Chip key={val} label={FENGSHUI.find(opt => opt.value === val)?.label || val} size="small"/>
+                                        ))}
+                                    </Box>
+                                )}
+                                sx={DASHBOARD_STYLES.formField}
+                            >
+                                {FENGSHUI.map(opt => (
+                                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <InputLabel>Cung Hoàng Đạo</InputLabel>
+                            <Select
+                                multiple
+                                label="Cung Hoàng Đạo"
+                                value={form.zodiacList}
+                                onChange={(e) => setForm(prev => ({...prev, zodiacList: e.target.value}))}
+                                renderValue={(selected) => (
+                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
+                                        {selected.map((val) => (
+                                            <Chip key={val} label={ZODIACS.find(opt => opt.value === val)?.label || val} size="small"/>
+                                        ))}
+                                    </Box>
+                                )}
+                                sx={DASHBOARD_STYLES.formField}
+                            >
+                                {ZODIACS.map(opt => (
+                                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                </Card>
+
+                {/* Size Configuration */}
+                <Card sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                    border: '1px solid rgba(11, 63, 49, 0.15)'
+                }}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
+                        <Typography variant="h6" sx={{fontWeight: 700, color: '#0b3f31'}}>
+                            🌱 Cấu hình kích thước
+                        </Typography>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setForm(prev => ({
+                                ...prev,
+                                sizeList: (prev.sizeList || []).length >= Math.min(5, currentSizeKeys.size)
+                                    ? prev.sizeList
+                                    : [...prev.sizeList, { sizeName: '', price: '', quantity: '', minArea: '', maxArea: '' }]
+                            }))}
+                            sx={{
+                                borderColor: '#0b3f31',
+                                color: '#0b3f31',
+                                '&:hover': {
+                                    borderColor: '#0b3f31',
+                                    backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                                }
+                            }}
+                        >
+                            Thêm kích thước
+                        </Button>
+                    </Box>
+                    <Divider sx={{mb: 3}}/>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                        {form.sizeList.map((s, idx) => {
+                            const usedKeys = new Set((form.sizeList || []).map((x, xIdx) => xIdx === idx ? null : String(x.sizeName || '').trim().toLowerCase()));
+                            const options = Array.from(currentSizeKeys).filter((k) => !usedKeys.has(k));
+                            const currentValue = String(s.sizeName || '').trim().toLowerCase();
+                            if (currentValue && !options.includes(currentValue)) options.unshift(currentValue);
+                            
+                            return (
+                                <Card key={idx} sx={{
+                                    p: 3,
+                                    backgroundColor: '#f8fffe',
+                                    borderRadius: 2,
+                                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                                    position: 'relative'
+                                }}>
+                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
+                                        <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                            Kích thước #{idx + 1}
+                                        </Typography>
+                                        <Button
+                                            color="error"
+                                            size="small"
+                                            onClick={() => {
+                                                const list = [...form.sizeList];
+                                                list.splice(idx, 1);
+                                                setForm(prev => ({...prev, sizeList: list.length ? list : [{ sizeName: '', price: '', quantity: '', minArea: '', maxArea: '' }]}));
+                                            }}
+                                            sx={{
+                                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(239, 68, 68, 0.2)'
+                                                }
+                                            }}
+                                        >
+                                            Xóa
+                                        </Button>
+                                    </Box>
+
+                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Tên kích thước</InputLabel>
+                                            <Select
+                                                label="Tên kích thước"
+                                                value={s.sizeName || ''}
+                                                onChange={(e) => {
+                                                    const list = [...form.sizeList];
+                                                    list[idx] = {...list[idx], sizeName: e.target.value};
+                                                    setForm(prev => ({...prev, sizeList: list}));
+                                                }}
+                                                sx={DASHBOARD_STYLES.formField}
+                                            >
+                                                {options.map((opt) => (
+                                                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+
+                                        <Box sx={{display: 'flex', gap: 2}}>
+                                            <TextField
+                                                fullWidth
+                                                label="Giá bán (₫)"
+                                                type="number"
+                                                value={s.price}
+                                                onChange={(e) => {
+                                                    const list = [...form.sizeList];
+                                                    list[idx] = {...list[idx], price: e.target.value};
+                                                    setForm(prev => ({...prev, sizeList: list}));
+                                                }}
+                                                sx={DASHBOARD_STYLES.formField}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Số lượng"
+                                                type="number"
+                                                value={s.quantity}
+                                                onChange={(e) => {
+                                                    const list = [...form.sizeList];
+                                                    list[idx] = {...list[idx], quantity: e.target.value};
+                                                    setForm(prev => ({...prev, sizeList: list}));
+                                                }}
+                                                sx={DASHBOARD_STYLES.formField}
+                                            />
+                                        </Box>
+
+                                        <Box sx={{display: 'flex', gap: 2}}>
+                                            <TextField
+                                                fullWidth
+                                                label="Diện tích tối thiểu (m²)"
+                                                type="number"
+                                                value={s.minArea || ''}
+                                                onChange={(e) => {
+                                                    const list = [...form.sizeList];
+                                                    list[idx] = {...list[idx], minArea: e.target.value};
+                                                    setForm(prev => ({...prev, sizeList: list}));
+                                                }}
+                                                sx={DASHBOARD_STYLES.formField}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Diện tích tối đa (m²)"
+                                                type="number"
+                                                value={s.maxArea || ''}
+                                                onChange={(e) => {
+                                                    const list = [...form.sizeList];
+                                                    list[idx] = {...list[idx], maxArea: e.target.value};
+                                                    setForm(prev => ({...prev, sizeList: list}));
+                                                }}
+                                                sx={DASHBOARD_STYLES.formField}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Card>
+                            );
+                        })}
+                    </Box>
+                </Card>
+
+                {/* Image Upload */}
+                <Card sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+                    border: '1px solid rgba(11, 63, 49, 0.15)'
+                }}>
+                    <Typography variant="h6" sx={{fontWeight: 700, mb: 2, color: '#0b3f31'}}>
+                        📸 Hình ảnh sản phẩm
+                    </Typography>
+                    <Divider sx={{mb: 3}}/>
+                    
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <input type="file" accept="image/*" onChange={handleFilePicked} style={{display: 'none'}} id="update-succulent-upload" />
+                            <label htmlFor="update-succulent-upload">
+                                <Button 
+                                    component="span" 
+                                    variant="outlined" 
+                                    disabled={isUploading} 
+                                    sx={{
+                                        borderRadius: 2, 
+                                        fontWeight: 600,
+                                        borderColor: '#0b3f31',
+                                        color: '#0b3f31',
+                                        '&:hover': {
+                                            borderColor: '#0b3f31',
+                                            backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                                        }
+                                    }}
+                                >
+                                    {isUploading ? `Đang tải... ${uploadProgress}%` : 'Chọn hình ảnh'}
+                                </Button>
+                            </label>
+                            {isUploading && (
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    Tiến độ: {uploadProgress}%
+                                </Typography>
+                            )}
+                        </Box>
+
+                        {(form.imageUrl || succulent?.imageUrl) && (
+                            <Box sx={{
+                                border: '2px solid rgba(11, 63, 49, 0.2)',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                backgroundColor: '#f8fffe'
+                            }}>
+                                <img
+                                    src={form.imageUrl || succulent.imageUrl}
+                                    alt="preview"
+                                    style={{
+                                        width: '100%',
+                                        height: '300px',
+                                        objectFit: 'cover',
+                                        display: 'block'
+                                    }}
+                                />
+                            </Box>
+                        )}
+
                         {form.imageUrl && (
-                            <Typography variant="body2" sx={{ml: 1, wordBreak: 'break-all', color: 'text.secondary'}}>
-                                {form.imageUrl}
-                            </Typography>
+                            <Box sx={{
+                                p: 2,
+                                backgroundColor: '#f0fff6',
+                                borderRadius: 2,
+                                border: '1px solid rgba(34, 197, 94, 0.2)'
+                            }}>
+                                <Typography variant="body2" sx={{color: 'text.secondary', mb: 1}}>
+                                    URL hình ảnh:
+                                </Typography>
+                                <Typography variant="body2" sx={{wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.8rem'}}>
+                                    {form.imageUrl}
+                                </Typography>
+                            </Box>
                         )}
                     </Box>
-                    {succulent?.imageUrl && (
-                        <img
-                            src={form.imageUrl || succulent.imageUrl}
-                            alt="preview"
-                            style={{maxWidth: '100%', borderRadius: 8, border: '1px solid #eee'}}
-                        />
-                    )}
-                </Box>
+                </Card>
             </DialogContent>
             <DialogActions sx={{p: 3}}>
                 <ActionButton

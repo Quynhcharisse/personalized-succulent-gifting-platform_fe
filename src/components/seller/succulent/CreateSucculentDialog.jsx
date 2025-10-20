@@ -44,7 +44,7 @@ const CreateSucculentDialog = ({
             (item && String(item.name || '').trim())
         );
         const sizeList = nonEmpty.map((item) => ({
-            sizeName: (item.name || '').toLowerCase(),
+            sizeName: (item.name || '').toLowerCase().trim(),
             price: Number(item.price) || 0,
             maxArea: Number(item.maxArea) || 0,
             minArea: Number(item.minArea) || 0,
@@ -52,9 +52,9 @@ const CreateSucculentDialog = ({
         }));
 
         return {
-            speciesName: data.species_name,
-            description: data.description,
-            imageUrl: data.imageUrl,
+            speciesName: (data.species_name || '').trim(),
+            description: (data.description || '').trim(),
+            imageUrl: (data.imageUrl || '').trim(),
             fengShuiList: data.fengShuiList || [],
             zodiacList: data.zodiacList || [],
             sizeList

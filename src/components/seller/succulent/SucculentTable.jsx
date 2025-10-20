@@ -11,12 +11,12 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
 
     const renderSizeChips = (succulent) => {
         let labels = [];
-        if (Array.isArray(succulent?.sizeList)) {
+        if (succulent?.size && typeof succulent.size === 'object') {
+            labels = Object.keys(succulent.size);
+        } else if (Array.isArray(succulent?.sizeList)) {
             labels = succulent.sizeList.map((s) => (s.sizeName || s.name || s).toString());
         } else if (Array.isArray(succulent?.size)) {
             labels = succulent.size.map((s) => (s.sizeName || s.name || s).toString());
-        } else if (succulent?.size && typeof succulent.size === 'object') {
-            labels = Object.keys(succulent.size);
         } else if (typeof succulent?.size === 'string') {
             labels = [succulent.size];
         }
@@ -110,7 +110,16 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
             field: 'status',
             header: 'Trạng Thái',
             render: (row) => {
-                const isInStock = row.quantity > 0;
+                let totalQuantity = 0;
+                if (row?.size && typeof row.size === 'object') {
+                    totalQuantity = Object.values(row.size).reduce((sum, sizeInfo) => {
+                        return sum + (sizeInfo?.quantity || 0);
+                    }, 0);
+                } else if (row?.quantity) {
+                    totalQuantity = row.quantity;
+                }
+                
+                const isInStock = totalQuantity > 0;
                 const statusText = isInStock ? 'Đang còn hàng' : 'Hết hàng';
                 
                 return (
