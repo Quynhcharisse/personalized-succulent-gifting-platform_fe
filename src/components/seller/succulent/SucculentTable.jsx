@@ -1,5 +1,5 @@
 import React from 'react';
-import {Chip, Stack, Tooltip, Typography, IconButton} from '@mui/material';
+import {Chip, Stack, Tooltip, Typography, IconButton, Avatar, Box} from '@mui/material';
 import {Edit as EditIcon, Visibility as VisibilityIcon} from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
@@ -41,12 +41,37 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
     // Column configuration for DataTable
     const columns = [
         {
-            field: 'id',
-            header: 'ID',
+            field: 'image',
+            header: 'Hình ảnh',
+            width: 80,
+            align: 'center',
             render: (row) => (
-                <Typography sx={{fontWeight: 600, color: '#0b3f31'}}>
-                    #{row.id}
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    {row.imageUrl ? (
+                        <Avatar
+                            src={row.imageUrl}
+                            alt={row.speciesName}
+                            sx={{
+                                width: 50,
+                                height: 50,
+                                border: '2px solid rgba(11, 63, 49, 0.2)',
+                                borderRadius: '12px', 
+                                objectFit: 'cover'
+                            }}
+                        />
+                    ) : (
+                        <Avatar
+                            sx={{
+                                width: 50,
+                                height: 50,
+                                backgroundColor: 'rgba(11, 63, 49, 0.1)',
+                                border: '2px dashed rgba(11, 63, 49, 0.3)'
+                            }}
+                        >
+                            🌱
+                        </Avatar>
+                    )}
+                </Box>
             )
         },
         {
@@ -84,18 +109,23 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
         {
             field: 'status',
             header: 'Trạng Thái',
-            render: (row) => (
-                <Chip
-                    label={row.status === 'ACTIVE' || row.status === 'AVAILABLE' ? 'Còn hàng' : 'Hết hàng'}
-                    variant="filled"
-                    size="small"
-                    sx={{
-                        fontWeight: 600,
-                        backgroundColor: (row.status === 'ACTIVE' || row.status === 'AVAILABLE') ? '#22c55e' : '#ef4444',
-                        color: 'white'
-                    }}
-                />
-            )
+            render: (row) => {
+                const isInStock = row.quantity > 0;
+                const statusText = isInStock ? 'Đang còn hàng' : 'Hết hàng';
+                
+                return (
+                    <Chip
+                        label={statusText}
+                        variant="filled"
+                        size="small"
+                        sx={{
+                            fontWeight: 600,
+                            backgroundColor: isInStock ? '#22c55e' : '#ef4444',
+                            color: 'white'
+                        }}
+                    />
+                );
+            }
         },
         {
             field: 'actions',

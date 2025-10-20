@@ -249,7 +249,7 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     Trạng thái:
                                                 </Typography>
                                                 <Chip
-                                                    label={succulent.status}
+                                                    label={succulent.quantity > 0 ? 'Đang còn hàng' : 'Hết hàng'}
                                                     color={succulent.quantity > 0 ? 'success' : 'error'}
                                                     variant="filled"
                                                     size="small"

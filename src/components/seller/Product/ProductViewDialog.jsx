@@ -1,8 +1,8 @@
 import React from 'react';
-import {Box, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Paper, Typography} from '@mui/material';
-import {Edit as EditIcon, Visibility as ViewIcon, Inventory as InventoryIcon} from '@mui/icons-material';
+import {Box, Chip, Dialog, DialogContent, DialogTitle, Grid, Paper, Typography} from '@mui/material';
+import {Inventory as InventoryIcon} from '@mui/icons-material';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
-import { DASHBOARD_STYLES } from '../../constants.js';
+import {DASHBOARD_STYLES} from '../../constants.js';
 
 const ProductViewDialog = ({
                                open,
@@ -35,7 +35,7 @@ const ProductViewDialog = ({
             }}>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <InventoryIcon sx={{fontSize: '2rem'}}/>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{fontWeight: 600}}>
                         Chi Tiết Sản Phẩm: {selectedProduct.name}
                     </Typography>
                 </Box>
@@ -54,9 +54,9 @@ const ProductViewDialog = ({
 
             <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
                 <Box sx={{
-                    m: { xs: 2, sm: 3 },
-                    p: { xs: 2.5, sm: 4 },
-                    pt: { xs: 2, sm: 3 },
+                    m: {xs: 2, sm: 3},
+                    p: {xs: 2.5, sm: 4},
+                    pt: {xs: 2, sm: 3},
                     borderRadius: 3,
                     backgroundColor: 'white',
                     border: '1px solid rgba(76,175,80,0.12)',
@@ -76,7 +76,8 @@ const ProductViewDialog = ({
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <Typography variant="body2" color="text.secondary">Tên sản phẩm:</Typography>
-                                <Typography variant="body1" sx={{fontWeight: 600, color: '#0b3f31'}}>{selectedProduct.name}</Typography>
+                                <Typography variant="body1"
+                                            sx={{fontWeight: 600, color: '#0b3f31'}}>{selectedProduct.name}</Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <Typography variant="body2" color="text.secondary">Trạng thái:</Typography>
@@ -104,14 +105,15 @@ const ProductViewDialog = ({
                         </Typography>
                         {selectedProduct.sizes?.map((size, sizeIndex) => (
                             <Paper key={sizeIndex} sx={{
-                                p: 2.5, 
-                                mb: 2, 
+                                p: 2.5,
+                                mb: 2,
                                 borderRadius: 3,
                                 background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
                                 border: '1px solid rgba(33,150,243,0.12)'
                             }}>
                                 <Typography variant="subtitle1" sx={{fontWeight: 800, mb: 1, color: '#0b3f31'}}>
-                                    Kích thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
+                                    Kích
+                                    thước: {size.name} - {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
                                 </Typography>
 
                                 {/* Succulents */}
