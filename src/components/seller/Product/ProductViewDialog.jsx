@@ -5,8 +5,7 @@ import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import {DASHBOARD_STYLES} from '../../constants.js';
 
 const ProductViewDialog = ({
-                               open,
-                               onClose,
+                               open,onClose,
                                selectedProduct,
                                getStatusLabel,
                                getStatusColor,
