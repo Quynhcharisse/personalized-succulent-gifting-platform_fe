@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Alert, Box, Button, Container, Paper, Typography} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Alert, Box, Container, Paper, Typography} from '@mui/material';
 import {Add as AddIcon, LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
 import {createSucculent, getSucculents} from '../../../services/ProductService.jsx';
 import SucculentTable from './SucculentTable.jsx';
@@ -9,12 +9,12 @@ import uploadToCloudinary from "../../cloudinaryUpload.js";
 import UpdateSucculentDialog from "./UpdateSucculentDialog.jsx";
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import usePagination from '../../../hooks/usePagination.js';
-import { DASHBOARD_STYLES } from '../../constants.js';
+import {DASHBOARD_STYLES} from '../../constants.js';
 
 const SucculentForm = () => {
     // Pagination hook
-    const { resetPagination } = usePagination(0, 10);
-    
+    const {resetPagination} = usePagination(0, 10);
+
     // Form state
     const [formData, setFormData] = useState({
         species_name: '',

@@ -1,49 +1,45 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Alert,
     Box,
     Button,
     Card,
-    Chip,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    Divider,
     FormControl,
-    Grid,
+    IconButton,
     InputAdornment,
     InputLabel,
     MenuItem,
     Select,
     TextField,
-    Typography,
-    Divider,
-    IconButton,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails
+    Typography
 } from '@mui/material';
 import {
     Add as AddIcon,
     Delete as DeleteIcon,
     ExpandMore as ExpandMoreIcon,
-    PhotoCamera as PhotoCameraIcon,
-    Inventory as InventoryIcon
+    Inventory as InventoryIcon,
+    PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
-import UploadImageField from '../succulent/UploadImageField.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
-import {createOrUpdateProduct} from '../../../services/ProductService.jsx';
-import {getSucculents, getAccessories} from '../../../services/ProductService.jsx';
+import {createOrUpdateProduct, getAccessories, getSucculents} from '../../../services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 
 const CreateOrUpdateProductDialog = ({
-    open,
-    onClose,
-    onCreate,
-    editProduct = null,
-    isEdit = false
-}) => {
+                                         open,
+                                         onClose,
+                                         onCreate,
+                                         editProduct = null,
+                                         isEdit = false
+                                     }) => {
     const [formData, setFormData] = useState({
         productId: null,
         name: '',
@@ -57,7 +53,7 @@ const CreateOrUpdateProductDialog = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-    
+
     // Data for dropdowns
     const [succulents, setSucculents] = useState([]);
     const [accessories, setAccessories] = useState([]);
@@ -66,7 +62,7 @@ const CreateOrUpdateProductDialog = ({
     useEffect(() => {
         console.log('Initialize form data - isEdit:', isEdit);
         console.log('Initialize form data - editProduct:', editProduct);
-        
+
         if (isEdit && editProduct) {
             const initialData = {
                 productId: editProduct.productId || editProduct.id || null,
@@ -98,10 +94,10 @@ const CreateOrUpdateProductDialog = ({
                     getSucculents(),
                     getAccessories('all')
                 ]);
-                
+
                 console.log('Succulents response:', succulentsRes);
                 console.log('Accessories response:', accessoriesRes);
-                
+
                 // Handle succulents data
                 if (succulentsRes?.data?.data && Array.isArray(succulentsRes.data.data)) {
                     setSucculents(succulentsRes.data.data);
@@ -111,12 +107,12 @@ const CreateOrUpdateProductDialog = ({
                     console.warn('Succulents data is not an array:', succulentsRes);
                     setSucculents([]);
                 }
-                
+
                 // Handle accessories data - transform to expected format
                 if (accessoriesRes?.data?.data) {
                     const accessoriesData = accessoriesRes.data.data;
                     const transformedAccessories = [];
-                    
+
                     // Transform pots data
                     if (accessoriesData.pots && Array.isArray(accessoriesData.pots)) {
                         accessoriesData.pots.forEach(pot => {
@@ -132,7 +128,7 @@ const CreateOrUpdateProductDialog = ({
                             });
                         });
                     }
-                    
+
                     // Transform soils data
                     if (accessoriesData.soils && Array.isArray(accessoriesData.soils)) {
                         accessoriesData.soils.forEach(soil => {
@@ -146,7 +142,7 @@ const CreateOrUpdateProductDialog = ({
                             });
                         });
                     }
-                    
+
                     // Transform decorations data
                     if (accessoriesData.decorations && Array.isArray(accessoriesData.decorations)) {
                         accessoriesData.decorations.forEach(decoration => {
@@ -160,7 +156,7 @@ const CreateOrUpdateProductDialog = ({
                             });
                         });
                     }
-                    
+
                     setAccessories(transformedAccessories);
                 } else if (accessoriesRes?.data && Array.isArray(accessoriesRes.data)) {
                     setAccessories(accessoriesRes.data);
@@ -209,7 +205,7 @@ const CreateOrUpdateProductDialog = ({
     const updateSize = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
+            sizes: prev.sizes.map((size, i) =>
                 i === index ? {...size, [field]: value} : size
             )
         }));
@@ -218,15 +214,15 @@ const CreateOrUpdateProductDialog = ({
     const addSucculentToSize = (sizeIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
                         succulents: [
                             ...size.succulents,
                             {id: '', name: '', size: '', quantity: ''}
                         ]
-                    } 
+                    }
                     : size
             )
         }));
@@ -235,12 +231,12 @@ const CreateOrUpdateProductDialog = ({
     const removeSucculentFromSize = (sizeIndex, succulentIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
                         succulents: size.succulents.filter((_, j) => j !== succulentIndex)
-                    } 
+                    }
                     : size
             )
         }));
@@ -249,14 +245,14 @@ const CreateOrUpdateProductDialog = ({
     const updateSucculentInSize = (sizeIndex, succulentIndex, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
-                        succulents: size.succulents.map((succulent, j) => 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
+                        succulents: size.succulents.map((succulent, j) =>
                             j === succulentIndex ? {...succulent, [field]: value} : succulent
                         )
-                    } 
+                    }
                     : size
             )
         }));
@@ -265,18 +261,18 @@ const CreateOrUpdateProductDialog = ({
     const addDecorationDetail = (sizeIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
                         decoration: {
-                            ...(size.decoration || { included: false, details: [] }),
+                            ...(size.decoration || {included: false, details: []}),
                             details: [
                                 ...(size.decoration?.details || []),
                                 {name: '', quantity: ''}
                             ]
                         }
-                    } 
+                    }
                     : size
             )
         }));
@@ -285,15 +281,15 @@ const CreateOrUpdateProductDialog = ({
     const removeDecorationDetail = (sizeIndex, detailIndex) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
                         decoration: {
-                            ...(size.decoration || { included: false, details: [] }),
+                            ...(size.decoration || {included: false, details: []}),
                             details: (size.decoration?.details || []).filter((_, j) => j !== detailIndex)
                         }
-                    } 
+                    }
                     : size
             )
         }));
@@ -302,17 +298,17 @@ const CreateOrUpdateProductDialog = ({
     const updateDecorationDetail = (sizeIndex, detailIndex, field, value) => {
         setFormData(prev => ({
             ...prev,
-            sizes: prev.sizes.map((size, i) => 
-                i === sizeIndex 
-                    ? { 
-                        ...size, 
+            sizes: prev.sizes.map((size, i) =>
+                i === sizeIndex
+                    ? {
+                        ...size,
                         decoration: {
-                            ...(size.decoration || { included: false, details: [] }),
+                            ...(size.decoration || {included: false, details: []}),
                             details: (size.decoration?.details || []).map((detail, j) =>
                                 j === detailIndex ? {...detail, [field]: value} : detail
                             )
                         }
-                    } 
+                    }
                     : size
             )
         }));
@@ -343,7 +339,7 @@ const CreateOrUpdateProductDialog = ({
     const updateImage = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            images: prev.images.map((image, i) => 
+            images: prev.images.map((image, i) =>
                 i === index ? {...image, [field]: value} : image
             )
         }));
@@ -352,11 +348,11 @@ const CreateOrUpdateProductDialog = ({
     const handleFileSelected = async (event, imageIndex) => {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
-        
+
         setIsUploading(true);
         setUploadProgress(0);
         setMessage({type: '', text: ''});
-        
+
         try {
             const imageUrl = await uploadToCloudinary(file, {onProgress: (p) => setUploadProgress(p)});
             updateImage(imageIndex, 'url', imageUrl);
@@ -439,52 +435,52 @@ const CreateOrUpdateProductDialog = ({
                 url: image.url.trim()
             })) : []
         };
-        
+
         console.log('TransformDataForAPI - isEdit:', isEdit);
         console.log('TransformDataForAPI - productId:', payload.productId);
         console.log('TransformDataForAPI - createAction:', payload.createAction);
-        
+
         return payload;
     };
 
     const handleSubmit = async () => {
         setMessage({type: '', text: ''});
-        
+
         if (!validateForm()) {
             return;
         }
 
         setIsSubmitting(true);
-        
+
         try {
             const payload = transformDataForAPI();
             console.log('Product payload:', payload);
             console.log('isEdit:', isEdit);
             console.log('formData.productId:', formData.productId);
             console.log('editProduct:', editProduct);
-            
+
             const response = await createOrUpdateProduct(payload);
-            
+
             if (response && response.data && response.data.message) {
-                setMessage({ 
-                    type: 'success', 
+                setMessage({
+                    type: 'success',
                     text: response.data.message
                 });
-                
+
                 setTimeout(() => {
                     onClose();
                     onCreate && onCreate();
                 }, 1500);
             } else {
-                setMessage({ 
-                    type: 'error', 
-                    text: isEdit ? 'Cập nhật sản phẩm thất bại' : 'Tạo sản phẩm thất bại' 
+                setMessage({
+                    type: 'error',
+                    text: isEdit ? 'Cập nhật sản phẩm thất bại' : 'Tạo sản phẩm thất bại'
                 });
             }
         } catch (error) {
             console.error('Error creating/updating product:', error);
-            const errorMessage = error.response?.data?.message || 
-                                (isEdit ? 'Có lỗi xảy ra khi cập nhật sản phẩm' : 'Có lỗi xảy ra khi tạo sản phẩm');
+            const errorMessage = error.response?.data?.message ||
+                (isEdit ? 'Có lỗi xảy ra khi cập nhật sản phẩm' : 'Có lỗi xảy ra khi tạo sản phẩm');
             setMessage({type: 'error', text: errorMessage});
         } finally {
             setIsSubmitting(false);
@@ -495,7 +491,7 @@ const CreateOrUpdateProductDialog = ({
     const availablePots = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'PLANT_POT') : [];
     const availableSoils = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'SOIL') : [];
     const availableDecorations = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'DECORATION') : [];
-    
+
     // Debug logs
     console.log('Current succulents state:', succulents);
     console.log('Current accessories state:', accessories);
@@ -524,17 +520,17 @@ const CreateOrUpdateProductDialog = ({
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <InventoryIcon sx={{fontSize: '2rem'}}/>
                     <Box>
-                    <Typography variant="h4" sx={{
-                        fontWeight: 900,
+                        <Typography variant="h4" sx={{
+                            fontWeight: 900,
                             mb: 0.5,
-                        fontSize: '1.6rem'
-                    }}>
-                        {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
-                    </Typography>
+                            fontSize: '1.6rem'
+                        }}>
+                            {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
+                        </Typography>
                         <Typography variant="body1" sx={{opacity: 0.9, fontWeight: 400}}>
-                        {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
-                    </Typography>
-                </Box>
+                            {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
+                        </Typography>
+                    </Box>
                 </Box>
 
                 <ActionButton
@@ -566,32 +562,32 @@ const CreateOrUpdateProductDialog = ({
                         Thông tin cơ bản
                     </Typography>
                     <Divider sx={{mb: 2}}/>
-                    
+
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                            <TextField
-                                fullWidth
-                                label="Tên sản phẩm"
-                                value={formData.name}
+                        <TextField
+                            fullWidth
+                            label="Tên sản phẩm"
+                            value={formData.name}
                             onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-                                error={!!errors.name}
-                                helperText={errors.name}
-                                placeholder="Nhập tên sản phẩm"
-                                required
+                            error={!!errors.name}
+                            helperText={errors.name}
+                            placeholder="Nhập tên sản phẩm"
+                            required
                             sx={DASHBOARD_STYLES.formField}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={4}
-                                label="Mô tả sản phẩm"
-                                value={formData.description}
+                        />
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            label="Mô tả sản phẩm"
+                            value={formData.description}
                             onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
-                                error={!!errors.description}
-                                helperText={errors.description}
-                                placeholder="Mô tả chi tiết về sản phẩm..."
-                                required
+                            error={!!errors.description}
+                            helperText={errors.description}
+                            placeholder="Mô tả chi tiết về sản phẩm..."
+                            required
                             sx={DASHBOARD_STYLES.formField}
-                            />
+                        />
                     </Box>
                 </Box>
 
@@ -644,201 +640,205 @@ const CreateOrUpdateProductDialog = ({
                             </Box>
                             <Accordion sx={{borderRadius: 2}}>
                                 <AccordionDetails>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 3,
-                                    p: 2,
-                                    backgroundColor: '#f8fffe',
-                                    borderRadius: 2,
-                                    border: '1px solid rgba(11, 63, 49, 0.1)'
-                                }}>
-                                    {/* Size Name */}
-                                    <Card sx={{
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 3,
                                         p: 2,
-                                        backgroundColor: '#ffffff',
+                                        backgroundColor: '#f8fffe',
                                         borderRadius: 2,
-                                        border: '1px solid rgba(11, 63, 49, 0.15)'
+                                        border: '1px solid rgba(11, 63, 49, 0.1)'
                                     }}>
-                                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2, color: '#0b3f31'}}>
-                                            Tên kích thước
-                                        </Typography>
-                                    <TextField
-                                        fullWidth
-                                        label="Tên kích thước"
-                                        value={size.name}
-                                        onChange={(e) => updateSize(sizeIndex, 'name', e.target.value)}
-                                        error={!!errors[`size_${sizeIndex}_name`]}
-                                        helperText={errors[`size_${sizeIndex}_name`]}
-                                        placeholder="medium, large, etc."
-                                            sx={DASHBOARD_STYLES.formField}
-                                    />
-                                    </Card>
-
-                                    {/* Succulents */}
-                                    <Card sx={{
-                                        p: 3,
-                                        backgroundColor: '#ffffff',
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(11, 63, 49, 0.15)'
-                                    }}>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            mb: 3
+                                        {/* Size Name */}
+                                        <Card sx={{
+                                            p: 2,
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: 2,
+                                            border: '1px solid rgba(11, 63, 49, 0.15)'
                                         }}>
-                                            <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                🌱 Sen đá
+                                            <Typography variant="subtitle1"
+                                                        sx={{fontWeight: 600, mb: 2, color: '#0b3f31'}}>
+                                                Tên kích thước
                                             </Typography>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                startIcon={<AddIcon/>}
-                                                onClick={() => addSucculentToSize(sizeIndex)}
-                                                sx={{
-                                                    borderColor: '#0b3f31',
-                                                    color: '#0b3f31',
-                                                    '&:hover': {
+                                            <TextField
+                                                fullWidth
+                                                label="Tên kích thước"
+                                                value={size.name}
+                                                onChange={(e) => updateSize(sizeIndex, 'name', e.target.value)}
+                                                error={!!errors[`size_${sizeIndex}_name`]}
+                                                helperText={errors[`size_${sizeIndex}_name`]}
+                                                placeholder="medium, large, etc."
+                                                sx={DASHBOARD_STYLES.formField}
+                                            />
+                                        </Card>
+
+                                        {/* Succulents */}
+                                        <Card sx={{
+                                            p: 3,
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: 2,
+                                            border: '1px solid rgba(11, 63, 49, 0.15)'
+                                        }}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                mb: 3
+                                            }}>
+                                                <Typography variant="subtitle1"
+                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                    🌱 Sen đá
+                                                </Typography>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    startIcon={<AddIcon/>}
+                                                    onClick={() => addSucculentToSize(sizeIndex)}
+                                                    sx={{
                                                         borderColor: '#0b3f31',
-                                                        backgroundColor: 'rgba(11, 63, 49, 0.1)'
-                                                    }
-                                                }}
-                                            >
-                                                Thêm sen đá
-                                            </Button>
-                                        </Box>
-                                        
-                                        {errors[`size_${sizeIndex}_succulents`] && (
-                                            <Alert severity="error" sx={{mb: 2}}>
-                                                {errors[`size_${sizeIndex}_succulents`]}
-                                            </Alert>
-                                        )}
+                                                        color: '#0b3f31',
+                                                        '&:hover': {
+                                                            borderColor: '#0b3f31',
+                                                            backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                                                        }
+                                                    }}
+                                                >
+                                                    Thêm sen đá
+                                                </Button>
+                                            </Box>
 
-                                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                            {Array.isArray(size.succulents) && size.succulents.map((succulent, succulentIndex) => (
-                                                <Card key={succulentIndex} sx={{
-                                                    p: 3,
-                                                    backgroundColor: '#f8fffe',
-                                                    borderRadius: 2,
-                                                    border: '1px solid rgba(34, 197, 94, 0.2)',
-                                                    position: 'relative'
-                                                }}>
-                                                    <Box sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        mb: 3
+                                            {errors[`size_${sizeIndex}_succulents`] && (
+                                                <Alert severity="error" sx={{mb: 2}}>
+                                                    {errors[`size_${sizeIndex}_succulents`]}
+                                                </Alert>
+                                            )}
+
+                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                                {Array.isArray(size.succulents) && size.succulents.map((succulent, succulentIndex) => (
+                                                    <Card key={succulentIndex} sx={{
+                                                        p: 3,
+                                                        backgroundColor: '#f8fffe',
+                                                        borderRadius: 2,
+                                                        border: '1px solid rgba(34, 197, 94, 0.2)',
+                                                        position: 'relative'
                                                     }}>
-                                                        <Typography variant="subtitle2"
-                                                                    sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                            Sen đá #{succulentIndex + 1}
-                                                        </Typography>
-                                                    <IconButton
-                                                        color="error"
-                                                        size="small"
-                                                        onClick={() => removeSucculentFromSize(sizeIndex, succulentIndex)}
-                                                            sx={{
-                                                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'rgba(239, 68, 68, 0.2)'
-                                                                }
-                                                            }}
-                                                        >
-                                                            <DeleteIcon/>
-                                                    </IconButton>
-                                                </Box>
-                                                
-                                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                                        <FormControl fullWidth>
-                                                            <InputLabel>Chọn sen đá</InputLabel>
-                                                            <Select
-                                                                value={succulent.id}
-                                                                onChange={(e) => {
-                                                                    const selectedSucculent = succulents.find(s => s.id === e.target.value);
-                                                                    updateSucculentInSize(sizeIndex, succulentIndex, 'id', e.target.value);
-                                                                    updateSucculentInSize(sizeIndex, succulentIndex, 'name', selectedSucculent?.speciesName || '');
-                                                                    // Reset size khi chọn succulent mới
-                                                                    updateSucculentInSize(sizeIndex, succulentIndex, 'size', '');
-                                                                }}
-                                                                label="Chọn sen đá"
-                                                                sx={DASHBOARD_STYLES.formField}
-                                                            >
-                                                                {Array.isArray(succulents) && succulents.map((s) => (
-                                                                    <MenuItem key={s.id} value={s.id}>
-                                                                        {s.speciesName}
-                                                                    </MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        </FormControl>
-
-                                                        <Box sx={{display: 'flex', gap: 2}}>
-                                                        <FormControl fullWidth>
-                                                            <InputLabel>Kích thước</InputLabel>
-                                                            <Select
-                                                                value={succulent.size}
-                                                                onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'size', e.target.value)}
-                                                                label="Kích thước"
-                                                                disabled={!succulent.id}
-                                                                sx={DASHBOARD_STYLES.formField}
-                                                            >
-                                                                {(() => {
-                                                                    const selectedSucculent = succulents.find(s => s.id === succulent.id);
-                                                                    if (selectedSucculent?.size && typeof selectedSucculent.size === 'object') {
-                                                                        return Object.keys(selectedSucculent.size).map(sizeKey => (
-                                                                            <MenuItem key={sizeKey} value={sizeKey}>
-                                                                                {sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)}
-                                                                            </MenuItem>
-                                                                        ));
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            mb: 3
+                                                        }}>
+                                                            <Typography variant="subtitle2"
+                                                                        sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                                Sen đá #{succulentIndex + 1}
+                                                            </Typography>
+                                                            <IconButton
+                                                                color="error"
+                                                                size="small"
+                                                                onClick={() => removeSucculentFromSize(sizeIndex, succulentIndex)}
+                                                                sx={{
+                                                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                                    '&:hover': {
+                                                                        backgroundColor: 'rgba(239, 68, 68, 0.2)'
                                                                     }
-                                                                    return null;
-                                                                })()}
-                                                            </Select>
-                                                        </FormControl>
-
-                                                        <TextField
-                                                            fullWidth
-                                                            label="Số lượng"
-                                                            type="number"
-                                                            value={succulent.quantity}
-                                                            onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'quantity', e.target.value)}
-                                                                inputProps={{min: 1}}
-                                                                sx={DASHBOARD_STYLES.formField}
-                                                        />
+                                                                }}
+                                                            >
+                                                                <DeleteIcon/>
+                                                            </IconButton>
                                                         </Box>
-                                                    </Box>
-                                            </Card>
-                                        ))}
-                                    </Box>
-                                    </Card>
 
-                                    {/* Pot */}
-                                    <Card sx={{
-                                        p: 3,
-                                        backgroundColor: '#ffffff',
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(11, 63, 49, 0.15)'
-                                    }}>
-                                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 3, color: '#0b3f31'}}>
-                                            🪴 Chậu
-                                        </Typography>
-                                        {errors[`size_${sizeIndex}_pot`] && (
-                                            <Alert severity="error" sx={{mb: 2}}>
-                                                {errors[`size_${sizeIndex}_pot`]}
-                                            </Alert>
-                                        )}
-                                        <Box sx={{display: 'flex', gap: 2}}>
+                                                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                                            <FormControl fullWidth>
+                                                                <InputLabel>Chọn sen đá</InputLabel>
+                                                                <Select
+                                                                    value={succulent.id}
+                                                                    onChange={(e) => {
+                                                                        const selectedSucculent = succulents.find(s => s.id === e.target.value);
+                                                                        updateSucculentInSize(sizeIndex, succulentIndex, 'id', e.target.value);
+                                                                        updateSucculentInSize(sizeIndex, succulentIndex, 'name', selectedSucculent?.speciesName || '');
+                                                                        // Reset size khi chọn succulent mới
+                                                                        updateSucculentInSize(sizeIndex, succulentIndex, 'size', '');
+                                                                    }}
+                                                                    label="Chọn sen đá"
+                                                                    sx={DASHBOARD_STYLES.formField}
+                                                                >
+                                                                    {Array.isArray(succulents) && succulents.map((s) => (
+                                                                        <MenuItem key={s.id} value={s.id}>
+                                                                            {s.speciesName}
+                                                                        </MenuItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </FormControl>
+
+                                                            <Box sx={{display: 'flex', gap: 2}}>
+                                                                <FormControl fullWidth>
+                                                                    <InputLabel>Kích thước</InputLabel>
+                                                                    <Select
+                                                                        value={succulent.size}
+                                                                        onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'size', e.target.value)}
+                                                                        label="Kích thước"
+                                                                        disabled={!succulent.id}
+                                                                        sx={DASHBOARD_STYLES.formField}
+                                                                    >
+                                                                        {(() => {
+                                                                            const selectedSucculent = succulents.find(s => s.id === succulent.id);
+                                                                            if (selectedSucculent?.size && typeof selectedSucculent.size === 'object') {
+                                                                                return Object.keys(selectedSucculent.size).map(sizeKey => (
+                                                                                    <MenuItem key={sizeKey}
+                                                                                              value={sizeKey}>
+                                                                                        {sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)}
+                                                                                    </MenuItem>
+                                                                                ));
+                                                                            }
+                                                                            return null;
+                                                                        })()}
+                                                                    </Select>
+                                                                </FormControl>
+
+                                                                <TextField
+                                                                    fullWidth
+                                                                    label="Số lượng"
+                                                                    type="number"
+                                                                    value={succulent.quantity}
+                                                                    onChange={(e) => updateSucculentInSize(sizeIndex, succulentIndex, 'quantity', e.target.value)}
+                                                                    inputProps={{min: 1}}
+                                                                    sx={DASHBOARD_STYLES.formField}
+                                                                />
+                                                            </Box>
+                                                        </Box>
+                                                    </Card>
+                                                ))}
+                                            </Box>
+                                        </Card>
+
+                                        {/* Pot */}
+                                        <Card sx={{
+                                            p: 3,
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: 2,
+                                            border: '1px solid rgba(11, 63, 49, 0.15)'
+                                        }}>
+                                            <Typography variant="subtitle1"
+                                                        sx={{fontWeight: 600, mb: 3, color: '#0b3f31'}}>
+                                                🪴 Chậu
+                                            </Typography>
+                                            {errors[`size_${sizeIndex}_pot`] && (
+                                                <Alert severity="error" sx={{mb: 2}}>
+                                                    {errors[`size_${sizeIndex}_pot`]}
+                                                </Alert>
+                                            )}
+                                            <Box sx={{display: 'flex', gap: 2}}>
                                                 <FormControl fullWidth>
                                                     <InputLabel>Chọn chậu</InputLabel>
                                                     <Select
                                                         value={size.pot.name}
-                                                    onChange={(e) => updateSize(sizeIndex, 'pot', {
-                                                        ...size.pot,
-                                                        name: e.target.value,
-                                                        size: '' // Reset size khi chọn pot mới
-                                                    })}
+                                                        onChange={(e) => updateSize(sizeIndex, 'pot', {
+                                                            ...size.pot,
+                                                            name: e.target.value,
+                                                            size: '' // Reset size khi chọn pot mới
+                                                        })}
                                                         label="Chọn chậu"
-                                                    sx={DASHBOARD_STYLES.formField}
+                                                        sx={DASHBOARD_STYLES.formField}
                                                     >
                                                         {availablePots.map((pot) => (
                                                             <MenuItem key={pot.id} value={pot.name}>
@@ -851,13 +851,13 @@ const CreateOrUpdateProductDialog = ({
                                                     <InputLabel>Kích thước chậu</InputLabel>
                                                     <Select
                                                         value={size.pot.size}
-                                                    onChange={(e) => updateSize(sizeIndex, 'pot', {
-                                                        ...size.pot,
-                                                        size: e.target.value
-                                                    })}
+                                                        onChange={(e) => updateSize(sizeIndex, 'pot', {
+                                                            ...size.pot,
+                                                            size: e.target.value
+                                                        })}
                                                         label="Kích thước chậu"
                                                         disabled={!size.pot.name}
-                                                    sx={DASHBOARD_STYLES.formField}
+                                                        sx={DASHBOARD_STYLES.formField}
                                                     >
                                                         {(() => {
                                                             const selectedPot = availablePots.find(p => p.name === size.pot.name);
@@ -883,35 +883,36 @@ const CreateOrUpdateProductDialog = ({
                                                         })()}
                                                     </Select>
                                                 </FormControl>
-                                    </Box>
-                                    </Card>
+                                            </Box>
+                                        </Card>
 
-                                    {/* Soil */}
-                                    <Card sx={{
-                                        p: 3,
-                                        backgroundColor: '#ffffff',
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(11, 63, 49, 0.15)'
-                                    }}>
-                                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 3, color: '#0b3f31'}}>
-                                            🌿 Đất trồng
-                                        </Typography>
-                                        {errors[`size_${sizeIndex}_soil`] && (
-                                            <Alert severity="error" sx={{mb: 2}}>
-                                                {errors[`size_${sizeIndex}_soil`]}
-                                            </Alert>
-                                        )}
-                                        <Box sx={{display: 'flex', gap: 2}}>
+                                        {/* Soil */}
+                                        <Card sx={{
+                                            p: 3,
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: 2,
+                                            border: '1px solid rgba(11, 63, 49, 0.15)'
+                                        }}>
+                                            <Typography variant="subtitle1"
+                                                        sx={{fontWeight: 600, mb: 3, color: '#0b3f31'}}>
+                                                🌿 Đất trồng
+                                            </Typography>
+                                            {errors[`size_${sizeIndex}_soil`] && (
+                                                <Alert severity="error" sx={{mb: 2}}>
+                                                    {errors[`size_${sizeIndex}_soil`]}
+                                                </Alert>
+                                            )}
+                                            <Box sx={{display: 'flex', gap: 2}}>
                                                 <FormControl fullWidth>
                                                     <InputLabel>Chọn đất trồng</InputLabel>
                                                     <Select
                                                         value={size.soil.name}
-                                                    onChange={(e) => updateSize(sizeIndex, 'soil', {
-                                                        ...size.soil,
-                                                        name: e.target.value
-                                                    })}
+                                                        onChange={(e) => updateSize(sizeIndex, 'soil', {
+                                                            ...size.soil,
+                                                            name: e.target.value
+                                                        })}
                                                         label="Chọn đất trồng"
-                                                    sx={DASHBOARD_STYLES.formField}
+                                                        sx={DASHBOARD_STYLES.formField}
                                                     >
                                                         {availableSoils.map((soil) => (
                                                             <MenuItem key={soil.id} value={soil.name}>
@@ -925,149 +926,154 @@ const CreateOrUpdateProductDialog = ({
                                                     label="Khối lượng (gram)"
                                                     type="number"
                                                     value={size.soil.massAmount}
-                                                onChange={(e) => updateSize(sizeIndex, 'soil', {
-                                                    ...size.soil,
-                                                    massAmount: e.target.value
-                                                })}
-                                                inputProps={{min: 0, step: 0.1}}
+                                                    onChange={(e) => updateSize(sizeIndex, 'soil', {
+                                                        ...size.soil,
+                                                        massAmount: e.target.value
+                                                    })}
+                                                    inputProps={{min: 0, step: 0.1}}
                                                     InputProps={{
                                                         endAdornment: <InputAdornment position="end">g</InputAdornment>
                                                     }}
-                                                sx={DASHBOARD_STYLES.formField}
+                                                    sx={DASHBOARD_STYLES.formField}
                                                 />
-                                    </Box>
-                                    </Card>
+                                            </Box>
+                                        </Card>
 
-                                    {/* Decoration */}
-                                    <Card sx={{
-                                        p: 3,
-                                        backgroundColor: '#ffffff',
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(11, 63, 49, 0.15)'
-                                    }}>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            mb: 3
+                                        {/* Decoration */}
+                                        <Card sx={{
+                                            p: 3,
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: 2,
+                                            border: '1px solid rgba(11, 63, 49, 0.15)'
                                         }}>
-                                            <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                ✨ Trang trí
-                                            </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                                <Typography variant="body2" sx={{color: '#0b3f31'}}>Bao gồm trang
-                                                    trí:</Typography>
-                                                <FormControl size="small" sx={{minWidth: 80}}>
-                                                    <Select
-                                                        value={size.decoration?.included || false}
-                                                        onChange={(e) => updateSize(sizeIndex, 'decoration', {
-                                                            ...(size.decoration || { included: false, details: [] }),
-                                                            included: e.target.value
-                                                        })}
-                                                        sx={{
-                                                            '& .MuiSelect-select': {
-                                                                color: '#0b3f31',
-                                                                fontWeight: 600
-                                                            }
-                                                        }}
-                                                    >
-                                                        <MenuItem value={true}>Có</MenuItem>
-                                                        <MenuItem value={false}>Không</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                mb: 3
+                                            }}>
+                                                <Typography variant="subtitle1"
+                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                    ✨ Trang trí
+                                                </Typography>
+                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                                                    <Typography variant="body2" sx={{color: '#0b3f31'}}>Bao gồm trang
+                                                        trí:</Typography>
+                                                    <FormControl size="small" sx={{minWidth: 80}}>
+                                                        <Select
+                                                            value={size.decoration?.included || false}
+                                                            onChange={(e) => updateSize(sizeIndex, 'decoration', {
+                                                                ...(size.decoration || {included: false, details: []}),
+                                                                included: e.target.value
+                                                            })}
+                                                            sx={{
+                                                                '& .MuiSelect-select': {
+                                                                    color: '#0b3f31',
+                                                                    fontWeight: 600
+                                                                }
+                                                            }}
+                                                        >
+                                                            <MenuItem value={true}>Có</MenuItem>
+                                                            <MenuItem value={false}>Không</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Box>
                                             </Box>
-                                        </Box>
 
-                                        {size.decoration?.included && (
-                                            <Box>
-                                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 3}}>
-                                                    <Button
-                                                        variant="outlined"
-                                                        size="small"
-                                                        startIcon={<AddIcon/>}
-                                                        onClick={() => addDecorationDetail(sizeIndex)}
-                                                        sx={{
-                                                            borderColor: '#0b3f31',
-                                                            color: '#0b3f31',
-                                                            '&:hover': {
+                                            {size.decoration?.included && (
+                                                <Box>
+                                                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 3}}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            startIcon={<AddIcon/>}
+                                                            onClick={() => addDecorationDetail(sizeIndex)}
+                                                            sx={{
                                                                 borderColor: '#0b3f31',
-                                                                backgroundColor: 'rgba(11, 63, 49, 0.1)'
-                                                            }
-                                                        }}
-                                                    >
-                                                        Thêm chi tiết trang trí
-                                                    </Button>
-                                                </Box>
+                                                                color: '#0b3f31',
+                                                                '&:hover': {
+                                                                    borderColor: '#0b3f31',
+                                                                    backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                                                                }
+                                                            }}
+                                                        >
+                                                            Thêm chi tiết trang trí
+                                                        </Button>
+                                                    </Box>
 
-                                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                                    {Array.isArray(size.decoration?.details) && size.decoration.details.map((detail, detailIndex) => (
-                                                        <Card key={detailIndex} sx={{
-                                                            p: 3,
-                                                            backgroundColor: '#f8fffe',
-                                                            borderRadius: 2,
-                                                            border: '1px solid rgba(245, 158, 11, 0.2)',
-                                                            position: 'relative'
-                                                        }}>
-                                                            <Box sx={{
-                                                                display: 'flex',
-                                                                justifyContent: 'space-between',
-                                                                alignItems: 'center',
-                                                                mb: 3
+                                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                                        {Array.isArray(size.decoration?.details) && size.decoration.details.map((detail, detailIndex) => (
+                                                            <Card key={detailIndex} sx={{
+                                                                p: 3,
+                                                                backgroundColor: '#f8fffe',
+                                                                borderRadius: 2,
+                                                                border: '1px solid rgba(245, 158, 11, 0.2)',
+                                                                position: 'relative'
                                                             }}>
-                                                                <Typography variant="subtitle2"
-                                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
-                                                                    Chi tiết #{detailIndex + 1}
-                                                                </Typography>
-                                                            <IconButton
-                                                                color="error"
-                                                                size="small"
-                                                                onClick={() => removeDecorationDetail(sizeIndex, detailIndex)}
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                                                        '&:hover': {
-                                                                            backgroundColor: 'rgba(239, 68, 68, 0.2)'
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <DeleteIcon/>
-                                                            </IconButton>
-                                                        </Box>
-                                                        
-                                                            <Box sx={{display: 'flex', gap: 2}}>
-                                                                <FormControl fullWidth>
-                                                                    <InputLabel>Tên chi tiết trang trí</InputLabel>
-                                                                    <Select
-                                                                    value={detail.name}
-                                                                    onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'name', e.target.value)}
-                                                                        label="Tên chi tiết trang trí"
-                                                                        sx={DASHBOARD_STYLES.formField}
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
+                                                                    alignItems: 'center',
+                                                                    mb: 3
+                                                                }}>
+                                                                    <Typography variant="subtitle2"
+                                                                                sx={{
+                                                                                    fontWeight: 600,
+                                                                                    color: '#0b3f31'
+                                                                                }}>
+                                                                        Chi tiết #{detailIndex + 1}
+                                                                    </Typography>
+                                                                    <IconButton
+                                                                        color="error"
+                                                                        size="small"
+                                                                        onClick={() => removeDecorationDetail(sizeIndex, detailIndex)}
+                                                                        sx={{
+                                                                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                                            '&:hover': {
+                                                                                backgroundColor: 'rgba(239, 68, 68, 0.2)'
+                                                                            }
+                                                                        }}
                                                                     >
-                                                                        {availableDecorations.map((decoration) => (
-                                                                            <MenuItem key={decoration.id} value={decoration.name}>
-                                                                                {decoration.name}
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </FormControl>
-                                                                <TextField
-                                                                    fullWidth
-                                                                    label="Số lượng"
-                                                                    type="number"
-                                                                    value={detail.quantity}
-                                                                    onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'quantity', e.target.value)}
-                                                                    inputProps={{min: 1}}
-                                                                    sx={DASHBOARD_STYLES.formField}
-                                                                />
-                                                            </Box>
-                                                    </Card>
-                                                ))}
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </Box>
+
+                                                                <Box sx={{display: 'flex', gap: 2}}>
+                                                                    <FormControl fullWidth>
+                                                                        <InputLabel>Tên chi tiết trang trí</InputLabel>
+                                                                        <Select
+                                                                            value={detail.name}
+                                                                            onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'name', e.target.value)}
+                                                                            label="Tên chi tiết trang trí"
+                                                                            sx={DASHBOARD_STYLES.formField}
+                                                                        >
+                                                                            {availableDecorations.map((decoration) => (
+                                                                                <MenuItem key={decoration.id}
+                                                                                          value={decoration.name}>
+                                                                                    {decoration.name}
+                                                                                </MenuItem>
+                                                                            ))}
+                                                                        </Select>
+                                                                    </FormControl>
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        label="Số lượng"
+                                                                        type="number"
+                                                                        value={detail.quantity}
+                                                                        onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'quantity', e.target.value)}
+                                                                        inputProps={{min: 1}}
+                                                                        sx={DASHBOARD_STYLES.formField}
+                                                                    />
+                                                                </Box>
+                                                            </Card>
+                                                        ))}
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        )}
-                                    </Card>
-                                </Box>
-                            </AccordionDetails>
-                        </Accordion>
+                                            )}
+                                        </Card>
+                                    </Box>
+                                </AccordionDetails>
+                            </Accordion>
                         </Box>
                     ))}
                 </Box>
@@ -1119,20 +1125,20 @@ const CreateOrUpdateProductDialog = ({
                                     {/* Image Upload & Preview */}
                                     <Box sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
                                         <Box>
-                                        <input
-                                            accept="image/*"
+                                            <input
+                                                accept="image/*"
                                                 style={{display: 'none'}}
-                                            id={`image-upload-${imageIndex}`}
-                                            type="file"
-                                            onChange={(e) => handleFileSelected(e, imageIndex)}
-                                        />
-                                        <label htmlFor={`image-upload-${imageIndex}`}>
-                                            <Button
-                                                variant="outlined"
-                                                component="span"
+                                                id={`image-upload-${imageIndex}`}
+                                                type="file"
+                                                onChange={(e) => handleFileSelected(e, imageIndex)}
+                                            />
+                                            <label htmlFor={`image-upload-${imageIndex}`}>
+                                                <Button
+                                                    variant="outlined"
+                                                    component="span"
                                                     startIcon={<PhotoCameraIcon/>}
-                                                fullWidth
-                                                disabled={isUploading}
+                                                    fullWidth
+                                                    disabled={isUploading}
                                                     sx={{
                                                         borderColor: '#0b3f31',
                                                         color: '#0b3f31',
@@ -1142,37 +1148,37 @@ const CreateOrUpdateProductDialog = ({
                                                             backgroundColor: 'rgba(11, 63, 49, 0.1)'
                                                         }
                                                     }}
-                                            >
-                                                {isUploading ? 'Đang tải...' : 'Chọn hình ảnh'}
-                                            </Button>
-                                        </label>
-                                        {isUploading && (
+                                                >
+                                                    {isUploading ? 'Đang tải...' : 'Chọn hình ảnh'}
+                                                </Button>
+                                            </label>
+                                            {isUploading && (
                                                 <Typography variant="caption" color="text.secondary"
                                                             sx={{mt: 1, display: 'block'}}>
-                                                Tiến độ: {uploadProgress}%
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                    
-                                    {image.url && (
+                                                    Tiến độ: {uploadProgress}%
+                                                </Typography>
+                                            )}
+                                        </Box>
+
+                                        {image.url && (
                                             <Box sx={{
                                                 border: '2px solid rgba(11, 63, 49, 0.2)',
                                                 borderRadius: 2,
                                                 overflow: 'hidden',
                                                 backgroundColor: '#f8fffe'
                                             }}>
-                                            <img
-                                                src={image.url}
-                                                alt="Preview"
-                                                style={{
-                                                    width: '100%',
+                                                <img
+                                                    src={image.url}
+                                                    alt="Preview"
+                                                    style={{
+                                                        width: '100%',
                                                         height: '200px',
-                                                    objectFit: 'cover',
+                                                        objectFit: 'cover',
                                                         display: 'block'
-                                                }}
-                                            />
-                                        </Box>
-                                    )}
+                                                    }}
+                                                />
+                                            </Box>
+                                        )}
                                     </Box>
                                 </Box>
                             </Box>
