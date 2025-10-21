@@ -20,11 +20,11 @@ import {
 } from '@mui/icons-material';
 import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
-import ProductViewDialog from "./ProductViewDialog.jsx";
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
+import ProductViewDialog from "./ProductViewDialog.jsx";
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
