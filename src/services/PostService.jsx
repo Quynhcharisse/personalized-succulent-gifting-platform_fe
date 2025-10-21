@@ -14,8 +14,25 @@ export const viewPosts = async () => {
 
 // View all posts by a specific seller
 export const viewPostsBySeller = async (sellerId) => {
-    const response = await axiosClient.get(`/posts/seller`);
-    return response || null;
+    try {
+        if (sellerId) {
+            // try RESTful seller-specific path
+            try {
+                const response = await axiosClient.get(`/posts/seller/${sellerId}`);
+                return response || null;
+            } catch (err) {
+                // fallback to query param style
+                const response = await axiosClient.get(`/posts?sellerId=${encodeURIComponent(sellerId)}`);
+                return response || null;
+            }
+        } else {
+            const response = await axiosClient.get(`/posts/seller`);
+            return response || null;
+        }
+    } catch (error) {
+        // propagate error to caller
+        throw error;
+    }
 };
 
 // View a post by ID

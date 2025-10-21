@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {
-    Box,
-    Button,
+    Box, Button,
     Chip,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
-    MenuItem,
+    DialogTitle, IconButton, MenuItem,
     Stack,
     TextField,
     Typography
 } from '@mui/material';
-import { Article as ArticleIcon } from '@mui/icons-material';
+import { Article as ArticleIcon, Add as AddIcon, DeleteOutline as DeleteIcon } from '@mui/icons-material';
 import {viewProduct} from '../../../services/ProductService.jsx';
+import { createPost, updatePost } from '../../../services/PostService.jsx';
+import { enqueueSnackbar } from 'notistack';
 import { DASHBOARD_STYLES } from '../../constants.js';
 
 const STATUS_OPTIONS = [
@@ -22,7 +22,7 @@ const STATUS_OPTIONS = [
     {value: 'ARCHIVED', label: 'Archived'}
 ];
 
-const PostDialog = ({open, onClose, onCreated}) => {
+const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
     const [products, setProducts] = useState([]);
     const [form, setForm] = useState({
         title: '',
@@ -31,38 +31,120 @@ const PostDialog = ({open, onClose, onCreated}) => {
         status: 'DRAFT',
         tags: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    // now postImages: array of { id?, name, link }
+    const [postImages, setPostImages] = useState([]);
 
     useEffect(() => {
         if (open) {
             viewProduct().then(res => setProducts(res?.data?.data || []));
-            setForm({
-                title: '',
-                description: '',
-                productId: '',
-                status: 'DRAFT',
-                tags: ''
-            });
+            if (post) {
+                setForm({
+                    title: post.title ?? '',
+                    description: post.description ?? post.content ?? '',
+                    productId: post.productId ?? (post.product?.id ?? ''),
+                    status: post.status ?? 'DRAFT',
+                    tags: Array.isArray(post.tags) ? post.tags.join(', ') : (post.tags || '')
+                });
+                // Normalize existing images / postImages and preserve ids
+                const imgs = Array.isArray(post.postImages)
+                    ? post.postImages.map((i, idx) => ({
+                        id: i.id ?? i.name ?? `idx-${idx}`,
+                        name: i.name ?? '',
+                        link: i.link ?? ''
+                    }))
+                    : Array.isArray(post.images)
+                        ? post.images.map((i, idx) => {
+                            if (typeof i === 'string') return { id: `idx-${idx}`, name: '', link: i };
+                            return { id: i.id ?? i.name ?? `idx-${idx}`, name: i.name ?? '', link: i.url ?? i.path ?? i };
+                        })
+                        : [];
+                setPostImages(imgs);
+            } else {
+                setForm({
+                    title: '',
+                    description: '',
+                    productId: '',
+                    status: 'DRAFT',
+                    tags: ''
+                });
+                setPostImages([]);
+            }
+            setIsSubmitting(false);
+        } else {
+            // dialog closed: reset image entries
+            setPostImages([]);
         }
-    }, [open]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, post]);
 
     const handleChange = e => setForm({...form, [e.target.name]: e.target.value});
 
-    const handleSubmit = () => {
-        // Prepare tags as array
-        const submitData = {
-            ...form,
-            tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)
-        };
-        // Call createPost API here with submitData, then:
-        onCreated && onCreated();
-        onClose();
+    const updatePostImage = (index, key, value) => {
+        setPostImages(prev => prev.map((it, i) => i === index ? { ...it, [key]: value } : it));
+    };
+
+    const addPostImage = () => setPostImages(prev => [...prev, { name: '', link: '' }]);
+
+    const removePostImage = (index) => setPostImages(prev => prev.filter((_, i) => i !== index));
+
+    const handleSubmit = async () => {
+        // split, trim, filter empty
+        const rawTags = form.tags
+            ? form.tags.split(',').map(t => t.trim()).filter(Boolean)
+            : [];
+
+        // deduplicate case-insensitively while preserving first occurrence
+        const seen = new Set();
+        const tagNames = [];
+        for (const t of rawTags) {
+            const key = t.toLowerCase();
+            if (!seen.has(key)) {
+                seen.add(key);
+                tagNames.push(t);
+            }
+        }
+
+        setIsSubmitting(true);
+        try {
+            const payload = {
+                title: form.title,
+                description: form.description,
+                productId: Number(form.productId),
+                status: form.status,
+                tagNames: tagNames,
+                // include id when present so backend can reconcile images
+                postImages: postImages.map(pi => ({
+                    ...(pi.id ? { id: pi.id } : {}),
+                    name: pi.name ?? '',
+                    link: pi.link ?? ''
+                }))
+            };
+
+            if (post) {
+                await updatePost(post.id, payload);
+                enqueueSnackbar('Post updated successfully', { variant: 'success' });
+                onUpdated && onUpdated();
+            } else {
+                await createPost(payload);
+                enqueueSnackbar('Post created successfully', { variant: 'success' });
+                onCreated && onCreated();
+            }
+            onClose();
+        } catch (error) {
+            console.error('post submit error', error);
+            const serverMessage = error?.response?.data?.message || error?.response?.data || error?.message || 'Failed to submit post. Please try again.';
+            enqueueSnackbar(String(serverMessage), { variant: 'error' });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <Dialog 
-            open={open} 
-            onClose={onClose} 
-            maxWidth="sm" 
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
             fullWidth
             slotProps={{
                 paper: {
@@ -79,7 +161,7 @@ const PostDialog = ({open, onClose, onCreated}) => {
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <ArticleIcon sx={{fontSize: '2rem'}}/>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Tạo Bài Viết Mới
+                        {post ? 'Chỉnh Sửa Bài Viết' : 'Tạo Bài Viết Mới'}
                     </Typography>
                 </Box>
             </DialogTitle>
@@ -149,6 +231,45 @@ const PostDialog = ({open, onClose, onCreated}) => {
                                 </MenuItem>
                             ))}
                         </TextField>
+
+                        {/* Post images as name+link list */}
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Typography variant="subtitle2">Images</Typography>
+                                <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Add image</Button>
+                                <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
+                                    Provide name and link for each image
+                                </Typography>
+                            </Box>
+
+                            <Stack spacing={1}>
+                                {postImages.map((pi, idx) => (
+                                    <Box key={pi.id ?? `pi-${idx}`} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                        <TextField
+                                            label="Name"
+                                            value={pi.name}
+                                            onChange={e => updatePostImage(idx, 'name', e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Link"
+                                            value={pi.link}
+                                            onChange={e => updatePostImage(idx, 'link', e.target.value)}
+                                            size="small"
+                                            fullWidth
+                                        />
+                                        <IconButton size="small" onClick={() => removePostImage(idx)} aria-label={`remove-image-${idx}`}>
+                                            <DeleteIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                                {postImages.length === 0 && (
+                                    <Typography variant="caption" color="text.secondary">No images added</Typography>
+                                )}
+                            </Stack>
+                        </Box>
+
                         <TextField
                             label="Thẻ (phân cách bằng dấu phẩy)"
                             name="tags"
@@ -157,12 +278,19 @@ const PostDialog = ({open, onClose, onCreated}) => {
                             fullWidth
                             sx={DASHBOARD_STYLES.formField}
                         />
+                        {form.tags && (
+                            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                                {form.tags.split(',').map((tag, idx) => (
+                                    tag.trim() && <Chip key={idx} label={tag.trim()} size="small" variant="outlined" />
+                                ))}
+                            </Stack>
+                        )}
                     </Box>
                 </Box>
             </DialogContent>
             <DialogActions sx={{ p: 3, backgroundColor: '#f7faf7' }}>
-                <Button 
-                    onClick={onClose} 
+                <Button
+                    onClick={onClose}
                     variant="outlined"
                     sx={{
                         borderRadius: 2,
@@ -176,15 +304,15 @@ const PostDialog = ({open, onClose, onCreated}) => {
                             backgroundColor: 'rgba(11, 63, 49, 0.05)'
                         }
                     }}
-                >
-                    Hủy
+                    disabled={isSubmitting}>Huỷ
                 </Button>
-                <Button 
-                    onClick={handleSubmit} 
+                <Button
+                    onClick={handleSubmit}
                     variant="contained"
                     sx={DASHBOARD_STYLES.primaryButton}
+                    disabled={isSubmitting || !form.title || !form.description || !form.productId}
                 >
-                    Tạo Bài Viết
+                    {isSubmitting ? 'Đang lưu...' : (post ? 'Lưu' : 'Tạo bài viết')}
                 </Button>
             </DialogActions>
         </Dialog>

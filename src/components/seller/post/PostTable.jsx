@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, Tooltip, Typography, Chip, Stack } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Tooltip, CircularProgress, Box, Typography, Chip, Stack } from '@mui/material';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
@@ -58,7 +58,7 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
                     label={statusLabels[row.status] || row.status}
                     sx={{
                         fontWeight: 600,
-                        backgroundColor: row.status === 'PUBLISHED' ? '#22c55e' : 
+                        backgroundColor: row.status === 'PUBLISHED' ? '#22c55e' :
                                        row.status === 'DRAFT' ? '#f59e0b' : '#ef4444',
                         color: 'white'
                     }}
@@ -95,14 +95,14 @@ const PostTable = ({ postList, isLoading, onViewDetail }) => {
             align: 'center',
             render: (row) => (
                 <Tooltip title="Xem Chi Tiết">
-                    <IconButton 
+                    <IconButton
                         onClick={() => onViewDetail(row)}
-                        sx={{ 
+                        sx={{
                             color: '#0b3f31',
-                            '&:hover': { 
+                            '&:hover': {
                                 backgroundColor: 'rgba(11, 63, 49, 0.1)',
                                 transform: 'scale(1.1)'
-                            } 
+                            }
                         }}
                     >
                         <VisibilityIcon />
