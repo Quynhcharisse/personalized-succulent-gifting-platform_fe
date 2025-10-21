@@ -74,6 +74,10 @@ const SucculentForm = () => {
             if (response && response.data && Array.isArray(response.data.data)) {
                 setSucculentList(response.data.data);
                 resetPagination(); // Reset pagination when data changes
+            } else if (response && response.data && Array.isArray(response.data)) {
+                // Handle case where data is directly in response.data
+                setSucculentList(response.data);
+                resetPagination();
             } else {
                 setSucculentList([]);
                 console.warn('API response data is not an array:', response);
@@ -249,8 +253,8 @@ const SucculentForm = () => {
 
             try {
                 const response = await createSucculent(apiData);
-                if (response && response.data) {
-                    setSubmitMessage({text: 'Tạo sản phẩm thành công!', type: 'success'});
+                if (response && response.data && response.data.message) {
+                    setSubmitMessage({text: response.data.message, type: 'success'});
                     setTimeout(() => {
                         handleCloseCreateDialog();
                         loadSucculentList();
@@ -260,7 +264,8 @@ const SucculentForm = () => {
                 }
             } catch (error) {
                 console.error('Error creating succulent:', error);
-                setSubmitMessage({text: 'Có lỗi xảy ra khi tạo sản phẩm', type: 'error'});
+                const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tạo sản phẩm';
+                setSubmitMessage({text: errorMessage, type: 'error'});
             } finally {
                 setIsSubmitting(false);
             }

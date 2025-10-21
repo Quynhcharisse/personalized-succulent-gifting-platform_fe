@@ -1,7 +1,7 @@
 import React from 'react';
-import {Box, Button, Chip, Dialog, DialogContent, DialogTitle, Paper, Typography} from '@mui/material';
+import {Box, Chip, Dialog, DialogContent, DialogTitle, Paper, Typography} from '@mui/material';
 import {LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
-import {FENGSHUI, ZODIACS, DASHBOARD_STYLES} from '../../constants.js';
+import {DASHBOARD_STYLES, FENGSHUI, ZODIACS} from '../../constants.js';
 import ActionButton from '../../buttonCustom/ActionButton.jsx';
 
 const SucculentDetailDialog = ({open, onClose, succulent}) => {
@@ -67,7 +67,7 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                     }}>
                                         <img
                                             src={succulent.imageUrl}
-                                            alt={succulent.speciesName || succulent.name}
+                                            alt={succulent.speciesName}
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
@@ -86,7 +86,7 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                         mt: 1.5,
                                         px: 1
                                     }}>
-                                        {succulent.speciesName || succulent.speciesName}
+                                        {succulent.speciesName}
                                     </Typography>
                                 </>
                             ) : (
@@ -107,7 +107,7 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                         sx={{fontSize: '4rem', color: 'success.main', opacity: 0.7, mb: 1}}/>
                                     <Typography variant="h6"
                                                 sx={{color: '#0b3f31', fontWeight: 600, opacity: 0.8}}>
-                                        {succulent.speciesName || succulent.name}
+                                        {succulent.speciesName}
                                     </Typography>
                                 </Box>
                             )}
@@ -159,6 +159,85 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                         </Box>
                                     </Box>
 
+                                    {/* Size Details */}
+                                    {succulent.size && typeof succulent.size === 'object' && Object.keys(succulent.size).length > 0 && (
+                                        <Box>
+                                            <Typography variant="h6" sx={{
+                                                fontWeight: 700,
+                                                color: '#0b3f31',
+                                                mb: 1.5,
+                                                pb: 0.5,
+                                                borderBottom: '2px solid rgba(11, 63, 49, 0.2)'
+                                            }}>
+                                                Chi Tiết Kích Thước
+                                            </Typography>
+                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                                {Object.entries(succulent.size).map(([sizeName, sizeInfo]) => (
+                                                    <Box key={sizeName} sx={{
+                                                        p: 2,
+                                                        backgroundColor: '#f8fffe',
+                                                        borderRadius: 2,
+                                                        border: '1px solid rgba(34, 197, 94, 0.2)'
+                                                    }}>
+                                                        <Typography variant="subtitle1"
+                                                                    sx={{fontWeight: 600, mb: 1.5, color: '#0b3f31'}}>
+                                                            {sizeName.toUpperCase()}
+                                                        </Typography>
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            flexDirection: {xs: 'column', sm: 'row'},
+                                                            gap: 2
+                                                        }}>
+                                                            <Box sx={{flex: 1}}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{mb: 0.5}}>
+                                                                    Giá bán:
+                                                                </Typography>
+                                                                <Typography variant="body1"
+                                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                                    {sizeInfo.price?.toLocaleString('vi-VN')} ₫
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{flex: 1}}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{mb: 0.5}}>
+                                                                    Số lượng:
+                                                                </Typography>
+                                                                <Typography variant="body1"
+                                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                                    {sizeInfo.quantity}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{flex: 1}}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{mb: 0.5}}>
+                                                                    Diện tích:
+                                                                </Typography>
+                                                                <Typography variant="body1"
+                                                                            sx={{fontWeight: 600, color: '#0b3f31'}}>
+                                                                    {sizeInfo.minArea} - {sizeInfo.maxArea} m²
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{flex: 1}}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{mb: 0.5}}>
+                                                                    Trạng thái:
+                                                                </Typography>
+                                                                <Chip
+                                                                    label={sizeInfo.status || 'Đang còn hàng'}
+                                                                    color={sizeInfo.quantity > 0 ? 'success' : 'error'}
+                                                                    variant="filled"
+                                                                    size="small"
+                                                                    sx={{fontWeight: 600}}
+                                                                />
+                                                            </Box>
+                                                        </Box>
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        </Box>
+                                    )}
+
                                     <Box>
                                         <Typography variant="h6" sx={{
                                             fontWeight: 700,
@@ -197,7 +276,10 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                         fontSize: '1.1rem',
                                                         wordBreak: 'break-word'
                                                     }}>
-                                                        {succulent.priceSell?.toLocaleString('vi-VN')} ₫
+                                                        {succulent.size && typeof succulent.size === 'object'
+                                                            ? `${Math.min(...Object.values(succulent.size).map(s => s.price || 0)).toLocaleString('vi-VN')} - ${Math.max(...Object.values(succulent.size).map(s => s.price || 0)).toLocaleString('vi-VN')}`
+                                                            : (succulent.priceSell?.toLocaleString('vi-VN') || '0')
+                                                        } ₫
                                                     </Typography>
                                                 </Box>
                                                 <Box sx={{
@@ -225,15 +307,28 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                         color: 'purple.main',
                                                         fontSize: '1.1rem'
                                                     }}>
-                                                        {succulent.quantity}
+                                                        {succulent.size && typeof succulent.size === 'object'
+                                                            ? Object.values(succulent.size).reduce((sum, sizeInfo) => sum + (sizeInfo?.quantity || 0), 0)
+                                                            : (succulent.quantity || 0)
+                                                        }
                                                     </Typography>
                                                 </Box>
                                             </Box>
                                             <Box sx={{
                                                 p: 1.5,
-                                                background: succulent.quantity > 0 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+                                                background: (() => {
+                                                    const totalQuantity = succulent.size && typeof succulent.size === 'object'
+                                                        ? Object.values(succulent.size).reduce((sum, sizeInfo) => sum + (sizeInfo?.quantity || 0), 0)
+                                                        : (succulent.quantity || 0);
+                                                    return totalQuantity > 0 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)';
+                                                })(),
                                                 borderRadius: 2,
-                                                border: succulent.quantity > 0 ? '1px solid rgba(76, 175, 80, 0.2)' : '1px solid rgba(244, 67, 54, 0.2)',
+                                                border: (() => {
+                                                    const totalQuantity = succulent.size && typeof succulent.size === 'object'
+                                                        ? Object.values(succulent.size).reduce((sum, sizeInfo) => sum + (sizeInfo?.quantity || 0), 0)
+                                                        : (succulent.quantity || 0);
+                                                    return totalQuantity > 0 ? '1px solid rgba(76, 175, 80, 0.2)' : '1px solid rgba(244, 67, 54, 0.2)';
+                                                })(),
                                                 textAlign: 'center',
                                                 minHeight: '50px',
                                                 display: 'flex',
@@ -249,8 +344,18 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     Trạng thái:
                                                 </Typography>
                                                 <Chip
-                                                    label={succulent.status}
-                                                    color={succulent.quantity > 0 ? 'success' : 'error'}
+                                                    label={(() => {
+                                                        const totalQuantity = succulent.size && typeof succulent.size === 'object'
+                                                            ? Object.values(succulent.size).reduce((sum, sizeInfo) => sum + (sizeInfo?.quantity || 0), 0)
+                                                            : (succulent.quantity || 0);
+                                                        return totalQuantity > 0 ? 'Đang còn hàng' : 'Hết hàng';
+                                                    })()}
+                                                    color={(() => {
+                                                        const totalQuantity = succulent.size && typeof succulent.size === 'object'
+                                                            ? Object.values(succulent.size).reduce((sum, sizeInfo) => sum + (sizeInfo?.quantity || 0), 0)
+                                                            : (succulent.quantity || 0);
+                                                        return totalQuantity > 0 ? 'success' : 'error';
+                                                    })()}
                                                     variant="filled"
                                                     size="small"
                                                     sx={{
@@ -301,16 +406,30 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     gap: 0.5,
                                                     justifyContent: 'flex-start'
                                                 }}>
-                                                    {succulent.fengShuiElements?.map((element, index) => (
-                                                        <Chip
-                                                            key={index}
-                                                            label={FENGSHUI.find(opt => opt.value === element)?.label || element}
-                                                            color="success"
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{fontWeight: 600, fontSize: '0.7rem', px: 1, py: 0.25}}
-                                                        />
-                                                    ))}
+                                                    {succulent.fengShuiElements && succulent.fengShuiElements.length > 0 ?
+                                                        succulent.fengShuiElements.map((element, index) => (
+                                                            <Chip
+                                                                key={index}
+                                                                label={FENGSHUI.find(opt => opt.value === element)?.label || element}
+                                                                color="success"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    fontWeight: 600,
+                                                                    fontSize: '0.7rem',
+                                                                    px: 1,
+                                                                    py: 0.25
+                                                                }}
+                                                            />
+                                                        )) : (
+                                                            <Typography variant="body2" sx={{
+                                                                color: 'text.secondary',
+                                                                fontStyle: 'italic'
+                                                            }}>
+                                                                Chưa có thông tin phong thủy
+                                                            </Typography>
+                                                        )
+                                                    }
                                                 </Box>
                                             </Box>
 
@@ -338,16 +457,30 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     gap: 0.5,
                                                     justifyContent: 'flex-start'
                                                 }}>
-                                                    {succulent.zodiacs?.map((zodiac, index) => (
-                                                        <Chip
-                                                            key={index}
-                                                            label={ZODIACS.find(opt => opt.value === zodiac)?.label || zodiac}
-                                                            color="info"
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{fontWeight: 600, fontSize: '0.7rem', px: 1, py: 0.25}}
-                                                        />
-                                                    ))}
+                                                    {succulent.zodiacs && succulent.zodiacs.length > 0 ?
+                                                        succulent.zodiacs.map((zodiac, index) => (
+                                                            <Chip
+                                                                key={index}
+                                                                label={ZODIACS.find(opt => opt.value === zodiac)?.label || zodiac}
+                                                                color="info"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    fontWeight: 600,
+                                                                    fontSize: '0.7rem',
+                                                                    px: 1,
+                                                                    py: 0.25
+                                                                }}
+                                                            />
+                                                        )) : (
+                                                            <Typography variant="body2" sx={{
+                                                                color: 'text.secondary',
+                                                                fontStyle: 'italic'
+                                                            }}>
+                                                                Chưa có thông tin cung hoàng đạo
+                                                            </Typography>
+                                                        )
+                                                    }
                                                 </Box>
                                             </Box>
                                         </Box>
