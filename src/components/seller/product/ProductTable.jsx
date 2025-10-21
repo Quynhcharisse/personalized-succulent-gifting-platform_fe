@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import {viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
-import ProductViewDialog from './ProductViewDialog.jsx';
+import ProductViewDialog from "./ProductViewDialog.jsx";
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
