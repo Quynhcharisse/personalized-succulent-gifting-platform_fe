@@ -35,7 +35,12 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                         alignSelf: 'flex-end',
                         minWidth: 'auto',
                         px: 2,
-                        py: 0.5
+                        py: 0.5,
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        backdropFilter: 'blur(10px)',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255,255,255,0.25)'
+                        }
                     }}
                 />
             </DialogTitle>
