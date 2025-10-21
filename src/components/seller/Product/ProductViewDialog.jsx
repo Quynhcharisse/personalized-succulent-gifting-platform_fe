@@ -1,6 +1,13 @@
 import React from 'react';
-import {Box, Chip, Dialog, DialogContent, DialogTitle, Typography, Card, CardContent, Avatar} from '@mui/material';
-import {Inventory as InventoryIcon, Spa as SucculentIcon, LocalFlorist as PotIcon, Park as SoilIcon, AutoAwesome as DecorationIcon, Image as ImageIcon} from '@mui/icons-material';
+import {Avatar, Box, Card, CardContent, Chip, Dialog, DialogContent, DialogTitle, Typography} from '@mui/material';
+import {
+    AutoAwesome as DecorationIcon,
+    Image as ImageIcon,
+    Inventory as InventoryIcon,
+    LocalFlorist as PotIcon,
+    Park as SoilIcon,
+    Spa as SucculentIcon
+} from '@mui/icons-material';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import {DASHBOARD_STYLES} from '../../constants.js';
 
@@ -57,7 +64,7 @@ const ProductViewDialog = ({
                         </Typography>
                         <Typography variant="h6" sx={{fontWeight: 500, opacity: 0.9}}>
                             {typeof selectedProduct.name === 'object' ? JSON.stringify(selectedProduct.name) : selectedProduct.name}
-                    </Typography>
+                        </Typography>
                     </Box>
                 </Box>
 
@@ -110,16 +117,16 @@ const ProductViewDialog = ({
                                     p: 1.5,
                                     borderRadius: 2,
                                     background: 'linear-gradient(135deg, #0b3f31 0%, #1e5a4a 100%)',
-                                            color: 'white'
+                                    color: 'white'
                                 }}>
                                     <InventoryIcon sx={{fontSize: '1.5rem'}}/>
                                 </Box>
                                 <Typography variant="h5" sx={{fontWeight: 800, color: '#0b3f31'}}>
                                     Thông tin cơ bản
                                 </Typography>
-                    </Box>
+                            </Box>
 
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
                                 {/* Product Images */}
                                 {selectedProduct.images && selectedProduct.images.length > 0 && (
                                     <Box sx={{
@@ -169,7 +176,7 @@ const ProductViewDialog = ({
                                         </Box>
                                     </Box>
                                 )}
-                                
+
                                 <Box sx={{
                                     display: 'flex',
                                     flexDirection: {xs: 'column', md: 'row'},
@@ -288,7 +295,7 @@ const ProductViewDialog = ({
                                     Cấu hình kích thước ({selectedProduct.sizes?.length || 0})
                                 </Typography>
                             </Box>
-                            
+
                             <Box sx={{display: 'flex', flexDirection: 'column', gap: 4}}>
                                 {selectedProduct.sizes?.map((size, sizeIndex) => (
                                     <Card key={sizeIndex} sx={{
@@ -326,8 +333,9 @@ const ProductViewDialog = ({
                                                         color: '#0b3f31',
                                                         fontSize: '1.2rem'
                                                     }}>
-                                                        Kích thước: {typeof size.name === 'object' ? JSON.stringify(size.name) : size.name}
-                                                </Typography>
+                                                        Kích
+                                                        thước: {typeof size.name === 'object' ? JSON.stringify(size.name) : size.name}
+                                                    </Typography>
                                                 </Box>
                                                 <Box sx={{
                                                     display: 'flex',
@@ -359,12 +367,12 @@ const ProductViewDialog = ({
                                                             {new Intl.NumberFormat('vi-VN').format(calculateSizePrice(size))}₫
                                                         </Typography>
                                                     </Box>
-                                                    
+
                                                     {/* Components Count */}
                                                     <Box sx={{
                                                         p: 1.5,
                                                         backgroundColor: 'rgba(11, 63, 49, 0.05)',
-                                                            borderRadius: 2,
+                                                        borderRadius: 2,
                                                         border: '1px solid rgba(11, 63, 49, 0.1)',
                                                         textAlign: 'center'
                                                     }}>
@@ -376,14 +384,14 @@ const ProductViewDialog = ({
                                                             mb: 0.5
                                                         }}>
                                                             Thành phần:
-                                                            </Typography>
+                                                        </Typography>
                                                         <Typography variant="body2" sx={{
                                                             fontWeight: 700,
                                                             color: '#0b3f31'
                                                         }}>
                                                             {(size.succulents?.length || 0) + (size.pot ? 1 : 0) + (size.soil ? 1 : 0) + (size.decorations?.length || 0)}
-                                                            </Typography>
-                                                        </Box>
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
                                             </Box>
 
@@ -424,191 +432,197 @@ const ProductViewDialog = ({
                                                                 flexWrap: 'wrap',
                                                                 gap: 2
                                                             }}>
-                                                                    {size.succulents.map((succulent, index) => (
-                                                                        <Box key={index} sx={{
-                                                                            flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 8px)'},
-                                                                            p: 2.5,
-                                                                            borderRadius: 2,
-                                                                            backgroundColor: 'rgba(255,255,255,0.8)',
-                                                                            border: '1px solid rgba(34, 197, 94, 0.15)',
-                                                                            transition: 'all 0.2s ease',
-                                                                            '&:hover': {
-                                                                                backgroundColor: 'rgba(255,255,255,1)',
-                                                                                transform: 'translateY(-1px)'
-                                                                            }
+                                                                {size.succulents.map((succulent, index) => (
+                                                                    <Box key={index} sx={{
+                                                                        flex: {
+                                                                            xs: '1 1 100%',
+                                                                            sm: '1 1 calc(50% - 8px)'
+                                                                        },
+                                                                        p: 2.5,
+                                                                        borderRadius: 2,
+                                                                        backgroundColor: 'rgba(255,255,255,0.8)',
+                                                                        border: '1px solid rgba(34, 197, 94, 0.15)',
+                                                                        transition: 'all 0.2s ease',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(255,255,255,1)',
+                                                                            transform: 'translateY(-1px)'
+                                                                        }
+                                                                    }}>
+                                                                        <Box sx={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: 2,
+                                                                            mb: 2
                                                                         }}>
-                                                                            <Box sx={{
-                                                                                display: 'flex',
-                                                                                alignItems: 'center',
-                                                                                gap: 2,
-                                                                                mb: 2
-                                                                            }}>
-                                                                                {/* Succulent Image */}
-                                                                                {succulent.image ? (
-                                                                                    <Avatar
-                                                                                        src={succulent.image}
-                                                                                        alt={succulent.name}
-                                                                                        sx={{
-                                                                                            width: 60,
-                                                                                            height: 60,
-                                                                                            borderRadius: 2,
-                                                                                            border: '2px solid rgba(34, 197, 94, 0.2)',
-                                                                                            boxShadow: '0 2px 8px rgba(34, 197, 94, 0.1)'
-                                                                                        }}
-                                                                                    />
-                                                                                ) : (
-                                                                                    <Box sx={{
+                                                                            {/* Succulent Image */}
+                                                                            {succulent.image ? (
+                                                                                <Avatar
+                                                                                    src={succulent.image}
+                                                                                    alt={succulent.name}
+                                                                                    sx={{
                                                                                         width: 60,
                                                                                         height: 60,
                                                                                         borderRadius: 2,
-                                                                                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                                                                        display: 'flex',
-                                                                                        alignItems: 'center',
-                                                                                        justifyContent: 'center',
-                                                                                        border: '2px solid rgba(34, 197, 94, 0.2)'
-                                                                                    }}>
-                                                                                        <SucculentIcon sx={{fontSize: '1.5rem', color: '#22c55e'}}/>
-                                                                                    </Box>
-                                                                                )}
-                                                                                
-                                                                                <Box sx={{flex: 1}}>
-                                                                                    <Typography variant="subtitle1" sx={{
-                                                                                        fontWeight: 700,
-                                                                                        color: '#0b3f31',
-                                                                                        fontSize: '1rem',
-                                                                                        mb: 0.5
-                                                                                    }}>
-                                                                                        {succulent.name}
-                                                                                    </Typography>
-                                                                                    <Typography variant="caption" sx={{
-                                                                                        color: '#0b3f31',
-                                                                                        opacity: 0.7,
-                                                                                        fontSize: '0.75rem'
-                                                                                    }}>
-                                                                                        ID: {succulent.id}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                            </Box>
-                                                                            
-                                                                            {/* Succulent Details */}
-                                                                            <Box sx={{
-                                                                                display: 'flex',
-                                                                                flexDirection: 'column',
-                                                                                gap: 1
-                                                                            }}>
-                                                                                {/* Size and Quantity */}
+                                                                                        border: '2px solid rgba(34, 197, 94, 0.2)',
+                                                                                        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.1)'
+                                                                                    }}
+                                                                                />
+                                                                            ) : (
                                                                                 <Box sx={{
+                                                                                    width: 60,
+                                                                                    height: 60,
+                                                                                    borderRadius: 2,
+                                                                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
                                                                                     display: 'flex',
-                                                                                    justifyContent: 'space-between',
                                                                                     alignItems: 'center',
-                                                                                    p: 1,
-                                                                                    backgroundColor: 'rgba(34, 197, 94, 0.05)',
-                                                                                    borderRadius: 1,
-                                                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                                    justifyContent: 'center',
+                                                                                    border: '2px solid rgba(34, 197, 94, 0.2)'
                                                                                 }}>
-                                                                                    <Typography variant="caption" sx={{
-                                                                                        fontWeight: 600,
-                                                                                        color: '#0b3f31',
-                                                                                        opacity: 0.8
-                                                                                    }}>
-                                                                                        Kích thước:
-                                                                                    </Typography>
-                                                                                    <Typography variant="body2" sx={{
-                                                                                        fontWeight: 700,
-                                                                                        color: '#0b3f31'
-                                                                                    }}>
-                                                                                        {Array.isArray(succulent.size) && succulent.size.length > 0 ? 
-                                                                                            `${succulent.size[0].name} (${succulent.size[0].area?.min}-${succulent.size[0].area?.max}cm²)` : 
-                                                                                            (succulent.size || 'N/A')}
-                                                                                    </Typography>
+                                                                                    <SucculentIcon sx={{
+                                                                                        fontSize: '1.5rem',
+                                                                                        color: '#22c55e'
+                                                                                    }}/>
                                                                                 </Box>
-                                                                                
-                                                                                {/* Quantity */}
-                                                                                <Box sx={{
-                                                                                    display: 'flex',
-                                                                                    justifyContent: 'space-between',
-                                                                                    alignItems: 'center',
-                                                                                    p: 1,
-                                                                                    backgroundColor: 'rgba(34, 197, 94, 0.05)',
-                                                                                    borderRadius: 1,
-                                                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                            )}
+
+                                                                            <Box sx={{flex: 1}}>
+                                                                                <Typography variant="subtitle1" sx={{
+                                                                                    fontWeight: 700,
+                                                                                    color: '#0b3f31',
+                                                                                    fontSize: '1rem',
+                                                                                    mb: 0.5
                                                                                 }}>
-                                                                                    <Typography variant="caption" sx={{
-                                                                                        fontWeight: 600,
-                                                                                        color: '#0b3f31',
-                                                                                        opacity: 0.8
-                                                                                    }}>
-                                                                                        Số lượng:
-                                                                                    </Typography>
-                                                                                    <Typography variant="body2" sx={{
-                                                                                        fontWeight: 700,
-                                                                                        color: '#0b3f31'
-                                                                                    }}>
-                                                                                        {Array.isArray(succulent.size) && succulent.size.length > 0 ? 
-                                                                                            succulent.size[0].quantity : 
-                                                                                            (succulent.quantity || 1)}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                                
-                                                                                {/* Price */}
-                                                                                {Array.isArray(succulent.size) && succulent.size.length > 0 && (
-                                                                                    <Box sx={{
-                                                                                        display: 'flex',
-                                                                                        justifyContent: 'space-between',
-                                                                                        alignItems: 'center',
-                                                                                        p: 1,
-                                                                                        backgroundColor: 'rgba(34, 197, 94, 0.05)',
-                                                                                        borderRadius: 1,
-                                                                                        border: '1px solid rgba(34, 197, 94, 0.1)'
-                                                                                    }}>
-                                                                                        <Typography variant="caption" sx={{
-                                                                                            fontWeight: 600,
-                                                                                            color: '#0b3f31',
-                                                                                            opacity: 0.8
-                                                                                        }}>
-                                                                                            Giá:
-                                                                                        </Typography>
-                                                                                        <Typography variant="body2" sx={{
-                                                                                            fontWeight: 700,
-                                                                                            color: '#0b3f31'
-                                                                                        }}>
-                                                                                            {new Intl.NumberFormat('vi-VN').format(succulent.size[0].price)}₫
-                                                                                        </Typography>
-                                                                                    </Box>
-                                                                                )}
-                                                                                
-                                                                                {/* Description */}
-                                                                                <Box sx={{
-                                                                                    p: 1,
-                                                                                    backgroundColor: 'rgba(34, 197, 94, 0.05)',
-                                                                                    borderRadius: 1,
-                                                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                                    {succulent.name}
+                                                                                </Typography>
+                                                                                <Typography variant="caption" sx={{
+                                                                                    color: '#0b3f31',
+                                                                                    opacity: 0.7,
+                                                                                    fontSize: '0.75rem'
                                                                                 }}>
-                                                                                    <Typography variant="caption" sx={{
-                                                                                        fontWeight: 600,
-                                                                                        color: '#0b3f31',
-                                                                                        opacity: 0.8,
-                                                                                        display: 'block',
-                                                                                        mb: 0.5
-                                                                                    }}>
-                                                                                        Mô tả:
-                                                                                    </Typography>
-                                                                                    <Typography variant="body2" sx={{
-                                                                                        fontWeight: 500,
-                                                                                        color: '#0b3f31',
-                                                                                        lineHeight: 1.4,
-                                                                                        fontSize: '0.85rem'
-                                                                                    }}>
-                                                                                        {typeof succulent.description === 'object' ? JSON.stringify(succulent.description) : (succulent.description || 'Không có mô tả')}
-                                                                                    </Typography>
-                                                                                </Box>
+                                                                                    ID: {succulent.id}
+                                                                                </Typography>
                                                                             </Box>
                                                                         </Box>
-                                                                    ))}
-                                                </Box>
+
+                                                                        {/* Succulent Details */}
+                                                                        <Box sx={{
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: 1
+                                                                        }}>
+                                                                            {/* Size and Quantity */}
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                justifyContent: 'space-between',
+                                                                                alignItems: 'center',
+                                                                                p: 1,
+                                                                                backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                                                                                borderRadius: 1,
+                                                                                border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                            }}>
+                                                                                <Typography variant="caption" sx={{
+                                                                                    fontWeight: 600,
+                                                                                    color: '#0b3f31',
+                                                                                    opacity: 0.8
+                                                                                }}>
+                                                                                    Kích thước:
+                                                                                </Typography>
+                                                                                <Typography variant="body2" sx={{
+                                                                                    fontWeight: 700,
+                                                                                    color: '#0b3f31'
+                                                                                }}>
+                                                                                    {Array.isArray(succulent.size) && succulent.size.length > 0 ?
+                                                                                        `${succulent.size[0].name} (${succulent.size[0].area?.min}-${succulent.size[0].area?.max}cm²)` :
+                                                                                        (succulent.size || 'N/A')}
+                                                                                </Typography>
+                                                                            </Box>
+
+                                                                            {/* Quantity */}
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                justifyContent: 'space-between',
+                                                                                alignItems: 'center',
+                                                                                p: 1,
+                                                                                backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                                                                                borderRadius: 1,
+                                                                                border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                            }}>
+                                                                                <Typography variant="caption" sx={{
+                                                                                    fontWeight: 600,
+                                                                                    color: '#0b3f31',
+                                                                                    opacity: 0.8
+                                                                                }}>
+                                                                                    Số lượng:
+                                                                                </Typography>
+                                                                                <Typography variant="body2" sx={{
+                                                                                    fontWeight: 700,
+                                                                                    color: '#0b3f31'
+                                                                                }}>
+                                                                                    {Array.isArray(succulent.size) && succulent.size.length > 0 ?
+                                                                                        succulent.size[0].quantity :
+                                                                                        (succulent.quantity || 1)}
+                                                                                </Typography>
+                                                                            </Box>
+
+                                                                            {/* Price */}
+                                                                            {Array.isArray(succulent.size) && succulent.size.length > 0 && (
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    justifyContent: 'space-between',
+                                                                                    alignItems: 'center',
+                                                                                    p: 1,
+                                                                                    backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                                                                                    borderRadius: 1,
+                                                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                                }}>
+                                                                                    <Typography variant="caption" sx={{
+                                                                                        fontWeight: 600,
+                                                                                        color: '#0b3f31',
+                                                                                        opacity: 0.8
+                                                                                    }}>
+                                                                                        Giá:
+                                                                                    </Typography>
+                                                                                    <Typography variant="body2" sx={{
+                                                                                        fontWeight: 700,
+                                                                                        color: '#0b3f31'
+                                                                                    }}>
+                                                                                        {new Intl.NumberFormat('vi-VN').format(succulent.size[0].price)}₫
+                                                                                    </Typography>
+                                                                                </Box>
+                                                                            )}
+
+                                                                            {/* Description */}
+                                                                            <Box sx={{
+                                                                                p: 1,
+                                                                                backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                                                                                borderRadius: 1,
+                                                                                border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                            }}>
+                                                                                <Typography variant="caption" sx={{
+                                                                                    fontWeight: 600,
+                                                                                    color: '#0b3f31',
+                                                                                    opacity: 0.8,
+                                                                                    display: 'block',
+                                                                                    mb: 0.5
+                                                                                }}>
+                                                                                    Mô tả:
+                                                                                </Typography>
+                                                                                <Typography variant="body2" sx={{
+                                                                                    fontWeight: 500,
+                                                                                    color: '#0b3f31',
+                                                                                    lineHeight: 1.4,
+                                                                                    fontSize: '0.85rem'
+                                                                                }}>
+                                                                                    {typeof succulent.description === 'object' ? JSON.stringify(succulent.description) : (succulent.description || 'Không có mô tả')}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        </Box>
+                                                                    </Box>
+                                                                ))}
+                                                            </Box>
                                                         </CardContent>
                                                     </Card>
-                                        )}
+                                                )}
 
                                                 {/* Pot and Soil Row */}
                                                 {(size.pot || size.soil) && (
@@ -617,8 +631,8 @@ const ProductViewDialog = ({
                                                         flexDirection: {xs: 'column', sm: 'row'},
                                                         gap: 3
                                                     }}>
-                                        {/* Pot */}
-                                        {size.pot && (
+                                                        {/* Pot */}
+                                                        {size.pot && (
                                                             <Card sx={{
                                                                 borderRadius: 3,
                                                                 background: 'linear-gradient(135deg, #fef7f0 0%, #ffffff 100%)',
@@ -663,9 +677,9 @@ const ProductViewDialog = ({
                                                                             Chậu
                                                                         </Typography>
                                                                     </Box>
-                                            <Box sx={{
-                                                p: 2.5,
-                                                borderRadius: 2,
+                                                                    <Box sx={{
+                                                                        p: 2.5,
+                                                                        borderRadius: 2,
                                                                         backgroundColor: 'rgba(255,255,255,0.8)',
                                                                         border: '1px solid rgba(245, 158, 11, 0.15)'
                                                                     }}>
@@ -677,7 +691,7 @@ const ProductViewDialog = ({
                                                                         }}>
                                                                             {size.pot.name}
                                                                         </Typography>
-                                                                        
+
                                                                         {/* Pot Details Grid */}
                                                                         <Box sx={{
                                                                             display: 'flex',
@@ -696,21 +710,23 @@ const ProductViewDialog = ({
                                                                                         borderRadius: 1,
                                                                                         border: '1px solid rgba(245, 158, 11, 0.1)'
                                                                                     }}>
-                                                                                        <Typography variant="caption" sx={{
-                                                                                            fontWeight: 600,
-                                                                                            color: '#0b3f31',
-                                                                                            opacity: 0.8
-                                                                                        }}>
+                                                                                        <Typography variant="caption"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 600,
+                                                                                                        color: '#0b3f31',
+                                                                                                        opacity: 0.8
+                                                                                                    }}>
                                                                                             Kích thước:
                                                                                         </Typography>
-                                                                                        <Typography variant="body2" sx={{
-                                                                                            fontWeight: 700,
-                                                                                            color: '#0b3f31'
-                                                                                        }}>
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 700,
+                                                                                                        color: '#0b3f31'
+                                                                                                    }}>
                                                                                             {size.pot.size[0].name}
                                                                                         </Typography>
                                                                                     </Box>
-                                                                                    
+
                                                                                     <Box sx={{
                                                                                         display: 'flex',
                                                                                         justifyContent: 'space-between',
@@ -720,21 +736,23 @@ const ProductViewDialog = ({
                                                                                         borderRadius: 1,
                                                                                         border: '1px solid rgba(245, 158, 11, 0.1)'
                                                                                     }}>
-                                                                                        <Typography variant="caption" sx={{
-                                                                                            fontWeight: 600,
-                                                                                            color: '#0b3f31',
-                                                                                            opacity: 0.8
-                                                                                        }}>
+                                                                                        <Typography variant="caption"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 600,
+                                                                                                        color: '#0b3f31',
+                                                                                                        opacity: 0.8
+                                                                                                    }}>
                                                                                             Chiều cao:
                                                                                         </Typography>
-                                                                                        <Typography variant="body2" sx={{
-                                                                                            fontWeight: 700,
-                                                                                            color: '#0b3f31'
-                                                                                        }}>
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 700,
+                                                                                                        color: '#0b3f31'
+                                                                                                    }}>
                                                                                             {size.pot.size[0].height}cm
                                                                                         </Typography>
                                                                                     </Box>
-                                                                                    
+
                                                                                     <Box sx={{
                                                                                         display: 'flex',
                                                                                         justifyContent: 'space-between',
@@ -744,21 +762,23 @@ const ProductViewDialog = ({
                                                                                         borderRadius: 1,
                                                                                         border: '1px solid rgba(245, 158, 11, 0.1)'
                                                                                     }}>
-                                                                                        <Typography variant="caption" sx={{
-                                                                                            fontWeight: 600,
-                                                                                            color: '#0b3f31',
-                                                                                            opacity: 0.8
-                                                                                        }}>
+                                                                                        <Typography variant="caption"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 600,
+                                                                                                        color: '#0b3f31',
+                                                                                                        opacity: 0.8
+                                                                                                    }}>
                                                                                             Diện tích mặt cắt:
                                                                                         </Typography>
-                                                                                        <Typography variant="body2" sx={{
-                                                                                            fontWeight: 700,
-                                                                                            color: '#0b3f31'
-                                                                                        }}>
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 700,
+                                                                                                        color: '#0b3f31'
+                                                                                                    }}>
                                                                                             {size.pot.size[0].upperCrossSectionArea}cm²
                                                                                         </Typography>
                                                                                     </Box>
-                                                                                    
+
                                                                                     <Box sx={{
                                                                                         display: 'flex',
                                                                                         justifyContent: 'space-between',
@@ -768,17 +788,19 @@ const ProductViewDialog = ({
                                                                                         borderRadius: 1,
                                                                                         border: '1px solid rgba(245, 158, 11, 0.1)'
                                                                                     }}>
-                                                                                        <Typography variant="caption" sx={{
-                                                                                            fontWeight: 600,
-                                                                                            color: '#0b3f31',
-                                                                                            opacity: 0.8
-                                                                                        }}>
+                                                                                        <Typography variant="caption"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 600,
+                                                                                                        color: '#0b3f31',
+                                                                                                        opacity: 0.8
+                                                                                                    }}>
                                                                                             Giá chậu:
                                                                                         </Typography>
-                                                                                        <Typography variant="body2" sx={{
-                                                                                            fontWeight: 700,
-                                                                                            color: '#0b3f31'
-                                                                                        }}>
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 700,
+                                                                                                        color: '#0b3f31'
+                                                                                                    }}>
                                                                                             {new Intl.NumberFormat('vi-VN').format(size.pot.size[0].price)}₫
                                                                                         </Typography>
                                                                                     </Box>
@@ -808,7 +830,7 @@ const ProductViewDialog = ({
                                                                                     </Typography>
                                                                                 </Box>
                                                                             )}
-                                                                            
+
                                                                             <Box sx={{
                                                                                 display: 'flex',
                                                                                 justifyContent: 'space-between',
@@ -832,7 +854,7 @@ const ProductViewDialog = ({
                                                                                     {typeof size.pot.material === 'object' ? JSON.stringify(size.pot.material) : (size.pot.material || 'N/A')}
                                                                                 </Typography>
                                                                             </Box>
-                                                                            
+
                                                                             <Box sx={{
                                                                                 display: 'flex',
                                                                                 justifyContent: 'space-between',
@@ -849,7 +871,11 @@ const ProductViewDialog = ({
                                                                                 }}>
                                                                                     Màu sắc:
                                                                                 </Typography>
-                                                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    gap: 1
+                                                                                }}>
                                                                                     {size.pot.color && typeof size.pot.color === 'string' && (
                                                                                         <Box sx={{
                                                                                             width: 16,
@@ -857,23 +883,23 @@ const ProductViewDialog = ({
                                                                                             borderRadius: '50%',
                                                                                             backgroundColor: size.pot.color,
                                                                                             border: '1px solid rgba(0,0,0,0.2)'
-                                                                                        }} />
+                                                                                        }}/>
                                                                                     )}
                                                                                     <Typography variant="body2" sx={{
                                                                                         fontWeight: 700,
                                                                                         color: '#0b3f31'
                                                                                     }}>
                                                                                         {typeof size.pot.color === 'object' ? JSON.stringify(size.pot.color) : (size.pot.color || 'N/A')}
-                                                </Typography>
+                                                                                    </Typography>
                                                                                 </Box>
                                                                             </Box>
-                                                                            
-                                                <Box sx={{
+
+                                                                            <Box sx={{
                                                                                 p: 1.5,
                                                                                 backgroundColor: 'rgba(245, 158, 11, 0.05)',
                                                                                 borderRadius: 1,
-                                                    border: '1px solid rgba(245, 158, 11, 0.1)'
-                                                }}>
+                                                                                border: '1px solid rgba(245, 158, 11, 0.1)'
+                                                                            }}>
                                                                                 <Typography variant="caption" sx={{
                                                                                     fontWeight: 600,
                                                                                     color: '#0b3f31',
@@ -882,23 +908,23 @@ const ProductViewDialog = ({
                                                                                     mb: 0.5
                                                                                 }}>
                                                                                     Mô tả:
-                                                    </Typography>
+                                                                                </Typography>
                                                                                 <Typography variant="body2" sx={{
                                                                                     fontWeight: 500,
                                                                                     color: '#0b3f31',
                                                                                     lineHeight: 1.4
                                                                                 }}>
                                                                                     {typeof size.pot.description === 'object' ? JSON.stringify(size.pot.description) : (size.pot.description || 'Không có mô tả')}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        </Box>
                                                                     </Box>
                                                                 </CardContent>
                                                             </Card>
-                                        )}
+                                                        )}
 
-                                        {/* Soil */}
-                                        {size.soil && (
+                                                        {/* Soil */}
+                                                        {size.soil && (
                                                             <Card sx={{
                                                                 borderRadius: 3,
                                                                 background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
@@ -943,9 +969,9 @@ const ProductViewDialog = ({
                                                                             Đất trồng
                                                                         </Typography>
                                                                     </Box>
-                                            <Box sx={{
-                                                p: 2.5,
-                                                borderRadius: 2,
+                                                                    <Box sx={{
+                                                                        p: 2.5,
+                                                                        borderRadius: 2,
                                                                         backgroundColor: 'rgba(255,255,255,0.8)',
                                                                         border: '1px solid rgba(34, 197, 94, 0.15)'
                                                                     }}>
@@ -956,8 +982,8 @@ const ProductViewDialog = ({
                                                                             fontSize: '1rem'
                                                                         }}>
                                                                             {typeof size.soil.name === 'object' ? JSON.stringify(size.soil.name) : size.soil.name}
-                                                </Typography>
-                                                                        
+                                                                        </Typography>
+
                                                                         {/* Soil Details Grid */}
                                                                         <Box sx={{
                                                                             display: 'flex',
@@ -965,10 +991,10 @@ const ProductViewDialog = ({
                                                                             gap: 1.5
                                                                         }}>
                                                                             {/* Highlighted Mass Amount */}
-                                                <Box sx={{
-                                                    p: 2,
+                                                                            <Box sx={{
+                                                                                p: 2,
                                                                                 backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                                    borderRadius: 2,
+                                                                                borderRadius: 2,
                                                                                 border: '2px solid rgba(34, 197, 94, 0.2)',
                                                                                 textAlign: 'center'
                                                                             }}>
@@ -989,7 +1015,7 @@ const ProductViewDialog = ({
                                                                                     {size.soil.massAmount}g
                                                                                 </Typography>
                                                                             </Box>
-                                                                            
+
                                                                             <Box sx={{
                                                                                 p: 1.5,
                                                                                 backgroundColor: 'rgba(34, 197, 94, 0.05)',
@@ -1013,7 +1039,7 @@ const ProductViewDialog = ({
                                                                                     {typeof size.soil.description === 'object' ? JSON.stringify(size.soil.description) : (size.soil.description || 'Không có mô tả')}
                                                                                 </Typography>
                                                                             </Box>
-                                                                            
+
                                                                             {/* Additional Soil Properties */}
                                                                             {size.soil.type && (
                                                                                 <Box sx={{
@@ -1040,7 +1066,7 @@ const ProductViewDialog = ({
                                                                                     </Typography>
                                                                                 </Box>
                                                                             )}
-                                                                            
+
                                                                             {size.soil.pH && (
                                                                                 <Box sx={{
                                                                                     display: 'flex',
@@ -1049,33 +1075,33 @@ const ProductViewDialog = ({
                                                                                     p: 1.5,
                                                                                     backgroundColor: 'rgba(34, 197, 94, 0.05)',
                                                                                     borderRadius: 1,
-                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
-                                                }}>
+                                                                                    border: '1px solid rgba(34, 197, 94, 0.1)'
+                                                                                }}>
                                                                                     <Typography variant="caption" sx={{
                                                                                         fontWeight: 600,
                                                                                         color: '#0b3f31',
                                                                                         opacity: 0.8
                                                                                     }}>
                                                                                         Độ pH:
-                                                    </Typography>
+                                                                                    </Typography>
                                                                                     <Typography variant="body2" sx={{
                                                                                         fontWeight: 700,
                                                                                         color: '#0b3f31'
                                                                                     }}>
                                                                                         {typeof size.soil.pH === 'object' ? JSON.stringify(size.soil.pH) : size.soil.pH}
-                                                    </Typography>
-                                                </Box>
+                                                                                    </Typography>
+                                                                                </Box>
                                                                             )}
                                                                         </Box>
                                                                     </Box>
                                                                 </CardContent>
                                                             </Card>
                                                         )}
-                                            </Box>
-                                        )}
+                                                    </Box>
+                                                )}
 
-                                        {/* Decorations */}
-                                        {size.decorations && size.decorations.length > 0 && (
+                                                {/* Decorations */}
+                                                {size.decorations && size.decorations.length > 0 && (
                                                     <Card sx={{
                                                         borderRadius: 3,
                                                         background: 'linear-gradient(135deg, #fefce8 0%, #ffffff 100%)',
@@ -1111,11 +1137,15 @@ const ProductViewDialog = ({
                                                                 flexWrap: 'wrap',
                                                                 gap: 2
                                                             }}>
-                                                    {size.decorations.map((decoration, index) => (
-                                                        <Box key={index} sx={{
-                                                                        flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 8px)', md: '1 1 calc(33.333% - 11px)'},
+                                                                {size.decorations.map((decoration, index) => (
+                                                                    <Box key={index} sx={{
+                                                                        flex: {
+                                                                            xs: '1 1 100%',
+                                                                            sm: '1 1 calc(50% - 8px)',
+                                                                            md: '1 1 calc(33.333% - 11px)'
+                                                                        },
                                                                         p: 2.5,
-                                                            borderRadius: 2,
+                                                                        borderRadius: 2,
                                                                         backgroundColor: 'rgba(255,255,255,0.8)',
                                                                         border: '1px solid rgba(245, 158, 11, 0.15)',
                                                                         transition: 'all 0.2s ease',
@@ -1154,10 +1184,13 @@ const ProductViewDialog = ({
                                                                                     justifyContent: 'center',
                                                                                     border: '2px solid rgba(245, 158, 11, 0.2)'
                                                                                 }}>
-                                                                                    <DecorationIcon sx={{fontSize: '1.2rem', color: '#f59e0b'}}/>
+                                                                                    <DecorationIcon sx={{
+                                                                                        fontSize: '1.2rem',
+                                                                                        color: '#f59e0b'
+                                                                                    }}/>
                                                                                 </Box>
                                                                             )}
-                                                                            
+
                                                                             <Box sx={{flex: 1}}>
                                                                                 <Typography variant="subtitle1" sx={{
                                                                                     fontWeight: 700,
@@ -1172,7 +1205,8 @@ const ProductViewDialog = ({
                                                                                     opacity: 0.7,
                                                                                     fontSize: '0.75rem'
                                                                                 }}>
-                                                                                    Đơn giá: {new Intl.NumberFormat('vi-VN').format(decoration.unitPrice)}₫
+                                                                                    Đơn
+                                                                                    giá: {new Intl.NumberFormat('vi-VN').format(decoration.unitPrice)}₫
                                                                                 </Typography>
                                                                             </Box>
                                                                         </Box>
@@ -1206,19 +1240,19 @@ const ProductViewDialog = ({
                                                                                 borderRadius: 1
                                                                             }}>
                                                                                 {new Intl.NumberFormat('vi-VN').format(decoration.totalPrice)}₫
-                                                            </Typography>
+                                                                            </Typography>
                                                                         </Box>
-                                                        </Box>
-                                                    ))}
-                                                </Box>
+                                                                    </Box>
+                                                                ))}
+                                                            </Box>
                                                         </CardContent>
                                                     </Card>
                                                 )}
                                             </Box>
                                         </CardContent>
                                     </Card>
-                            ))}
-                        </Box>
+                                ))}
+                            </Box>
                         </CardContent>
                     </Card>
                 </Box>
