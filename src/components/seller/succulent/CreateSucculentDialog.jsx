@@ -18,7 +18,7 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {FENGSHUI, ZODIACS, DASHBOARD_STYLES} from '../../constants.js';
+import {DASHBOARD_STYLES, FENGSHUI, ZODIACS} from '../../constants.js';
 import UploadImageField from './UploadImageField.jsx';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 
@@ -228,7 +228,13 @@ const CreateSucculentDialog = ({
                                     if (!Array.isArray(formData.sizeDetailRequests) || formData.sizeDetailRequests.length === 0) {
                                         setFormData(prev => ({
                                             ...prev,
-                                            sizeDetailRequests: [{ name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                            sizeDetailRequests: [{
+                                                name: '',
+                                                price: '',
+                                                minArea: '',
+                                                maxArea: '',
+                                                quantity: ''
+                                            }]
                                         }))
                                     }
                                 }, [formData.sizeDetailRequests?.length])}
@@ -253,7 +259,11 @@ const CreateSucculentDialog = ({
                                                     border: '2px solid rgba(76, 175, 80, 0.1)',
                                                     mt: 2
                                                 }}>
-                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center'
+                                                    }}>
                                                         <Typography variant="h6" sx={{
                                                             mb: 2,
                                                             fontWeight: 700,
@@ -266,7 +276,10 @@ const CreateSucculentDialog = ({
                                                         <Button color="error" onClick={() => {
                                                             const updated = [...formData.sizeDetailRequests];
                                                             updated.splice(index, 1);
-                                                            setFormData(prev => ({...prev, sizeDetailRequests: updated}));
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                sizeDetailRequests: updated
+                                                            }));
                                                         }}>Xóa</Button>
                                                     </Box>
                                                     <TextField
@@ -284,7 +297,13 @@ const CreateSucculentDialog = ({
                                                             const isNonEmpty = String(e.target.value || '').trim().length > 0;
                                                             const canAdd = updatedSizes.length < 5;
                                                             const nextList = isLast && isNonEmpty && canAdd
-                                                                ? [...updatedSizes, { name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                                                ? [...updatedSizes, {
+                                                                    name: '',
+                                                                    price: '',
+                                                                    minArea: '',
+                                                                    maxArea: '',
+                                                                    quantity: ''
+                                                                }]
                                                                 : updatedSizes;
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -323,7 +342,13 @@ const CreateSucculentDialog = ({
                                                             const isNonEmpty = String(e.target.value || '').trim().length > 0;
                                                             const canAdd = updatedSizes.length < 5;
                                                             const nextList = isLast && isNonEmpty && canAdd
-                                                                ? [...updatedSizes, { name: '', price: '', minArea: '', maxArea: '', quantity: '' }]
+                                                                ? [...updatedSizes, {
+                                                                    name: '',
+                                                                    price: '',
+                                                                    minArea: '',
+                                                                    maxArea: '',
+                                                                    quantity: ''
+                                                                }]
                                                                 : updatedSizes;
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -489,7 +514,8 @@ const CreateSucculentDialog = ({
                             </Box>
                         </Button>
                     ) : (
-                <ActionButton onClick={() => onSubmit && onSubmit(buildCreateSucculentPayload(formData))} disabled={isSubmitting || isValidating} action={"create"} type={"submit"}>
+                        <ActionButton onClick={() => onSubmit && onSubmit(buildCreateSucculentPayload(formData))}
+                                      disabled={isSubmitting || isValidating} action={"create"} type={"submit"}>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 {isSubmitting ? <Box sx={{
                                     width: 18,

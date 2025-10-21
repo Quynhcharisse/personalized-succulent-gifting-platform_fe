@@ -13,7 +13,7 @@ import {
 import {Delete as DeleteIcon, Warning as WarningIcon} from '@mui/icons-material';
 import {deactiveProduct} from '../../../services/ProductService.jsx';
 import useNotify from '../../../hooks/useNotify.js';
-import { DASHBOARD_STYLES } from '../../constants.js';
+import {DASHBOARD_STYLES} from '../../constants.js';
 
 const DeactiveProduct = ({
                              open,
