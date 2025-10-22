@@ -2,7 +2,7 @@ import axios from "axios"
 import {refreshToken} from "../services/AuthService.jsx";
 
 const axiosClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "https://api.nquangit.io.vn/api/v1",
+    baseURL:  "https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io/api/v1",
     headers: {
         "Content-Type": "application/json",
     },

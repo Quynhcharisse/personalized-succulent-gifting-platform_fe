@@ -12,6 +12,8 @@ export default function Home() {
     const [showContactDropdown, setShowContactDropdown] = useState(false)
     const videoRef = useRef(null)
     const bannerVideoSrc = '/videoBanner.mp4'
+    const [products, setProducts] = useState([]);
+    const [catalogProducts, setCatalogProducts] = useState([]);
 
     useEffect(() => {
         const el = videoRef.current
@@ -140,81 +142,7 @@ export default function Home() {
         },
     ]
 
-    const catalogProducts = [
-        {
-            id: 'succ-01',
-            name: 'Sen đá Bông Hồng',
-            priceVnd: 69000,
-            salePriceVnd: null,
-            badge: 'Mới',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-02',
-            name: 'Sen đá Giva',
-            priceVnd: 79000,
-            salePriceVnd: 59000,
-            badge: 'Giảm 25%',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-03',
-            name: 'Sen đá Thạch Ngọc',
-            priceVnd: 99000,
-            salePriceVnd: 82000,
-            badge: 'Bán chạy',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-04',
-            name: 'Sen đá Cẩm Thạch',
-            priceVnd: 89000,
-            salePriceVnd: null,
-            badge: null,
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-05',
-            name: 'Xương rồng Nhỏ',
-            priceVnd: 49000,
-            salePriceVnd: null,
-            badge: 'Mới',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-06',
-            name: 'Sen đá Bọ Cạp',
-            priceVnd: 76000,
-            salePriceVnd: 65000,
-            badge: 'Giảm 15%',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-07',
-            name: 'Sen đá Trắng',
-            priceVnd: 89000,
-            salePriceVnd: null,
-            badge: null,
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-        {
-            id: 'succ-08',
-            name: 'Sen đá Ruby',
-            priceVnd: 99000,
-            salePriceVnd: 83000,
-            badge: 'Bán chạy',
-            image:
-                'https://i.pinimg.com/1200x/29/98/4f/29984fc6f66deffd71d93e96c813a85a.jpg',
-        },
-    ]
-
+    
     const testimonials = [
         {
             id: 'rv-01',
@@ -472,12 +400,6 @@ export default function Home() {
                 <section id="catalog" className="catalog">
                     <div className="container">
                         <h2 className="section-title">Sản phẩm</h2>
-                        <div className="catalog__subnav">
-                            <button className="chip chip--active">Mới nhất</button>
-                            <button className="chip">Bán chạy</button>
-                            <button className="chip">Giảm giá</button>
-                            <button className="chip">Phù hợp nơi sáng</button>
-                        </div>
                         <div className="card-grid">
                             {catalogProducts.map((p) => (
                                 <article key={p.id} className="product-card">

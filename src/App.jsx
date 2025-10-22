@@ -37,6 +37,14 @@ const ProductTable = lazy(() => import('./components/seller/product/ProductTable
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
+
+// // Buyer components
+// const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
+// const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
+// const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
+// const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
+const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
+
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
     <div style={{
@@ -274,7 +282,15 @@ const router = createBrowserRouter([
                         <SignIn/>
                     </Suspense>
                 )
-            }
+            },
+              {
+                path: 'checkout',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CheckoutPage/>
+                    </Suspense>
+                )
+            },
         ],
     },
     {
