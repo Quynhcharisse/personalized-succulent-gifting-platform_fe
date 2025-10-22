@@ -1,24 +1,22 @@
-import React from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import '../styles/ui/SiteHeader.css'
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
-import {useEffect, useMemo, useState} from 'react'
 import {Avatar, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
 import {
+    AccountCircle as AccountCircleIcon,
     Dashboard as DashboardIcon,
+    FavoriteBorder as FavoriteBorderIcon,
     Home as HomeIcon,
+    LocalGroceryStore as LocalGroceryStoreIcon,
     Logout as LogoutIcon,
     Person as PersonIcon,
-    Storefront as StorefrontIcon,
-    AccountCircle as AccountCircleIcon,
-    FavoriteBorder as FavoriteBorderIcon,
-    LocalGroceryStore as LocalGroceryStoreIcon,
-    NotificationsActive as NotificationsActiveIcon
+    Storefront as StorefrontIcon
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
-import {getCookie} from '../utils/CookieUtil.jsx'
+import {getAccessToken} from '../utils/CookieUtil.jsx'
 import {jwtDecode} from 'jwt-decode'
 import {signOut} from '../services/AccountService.jsx'
-import { NotificationDisplay } from '../services/NotificationService.jsx';
+import {NotificationDisplay} from '../services/NotificationService.jsx';
 
 export default function SiteHeader() {
     const navigate = useNavigate()
@@ -46,7 +44,7 @@ export default function SiteHeader() {
 
     const role = useMemo(() => {
         try {
-            const access = getCookie('access')
+            const access = getAccessToken()
             if (!access) return null
             const decoded = jwtDecode(access)
             return decoded?.role || null
@@ -57,7 +55,7 @@ export default function SiteHeader() {
 
     const displayName = currentUser?.name || currentUser?.fullName || currentUser?.displayName || 'Tài khoản'
     const avatarUrl = currentUser?.avatar || currentUser?.avatarUrl || currentUser?.photoURL || currentUser?.picture || ''
-    
+
     const handleOpenMenu = (event) => setAnchorEl(event.currentTarget)
     const handleCloseMenu = () => setAnchorEl(null)
 
@@ -100,7 +98,7 @@ export default function SiteHeader() {
                     </div>
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
                         <Link className="header__icon" title="Yêu thích" to="#">
-                            <FavoriteBorderIcon 
+                            <FavoriteBorderIcon
                                 sx={{
                                     width: 22,
                                     height: 22,
@@ -109,7 +107,7 @@ export default function SiteHeader() {
                             />
                         </Link>
                         <Link className="header__icon" title="Giỏ hàng" to="#">
-                            <LocalGroceryStoreIcon 
+                            <LocalGroceryStoreIcon
                                 sx={{
                                     width: 22,
                                     height: 22,
@@ -122,9 +120,9 @@ export default function SiteHeader() {
                         </Link>
 
                         {!currentUser ? (
-                            <Link 
+                            <Link
                                 to="/login"
-                                className="header__icon" 
+                                className="header__icon"
                                 title="Đăng nhập"
                                 style={{
                                     display: 'flex',
@@ -139,7 +137,7 @@ export default function SiteHeader() {
                                     }
                                 }}
                             >
-                                <PersonIcon 
+                                <PersonIcon
                                     sx={{
                                         width: 22,
                                         height: 22,
@@ -157,18 +155,18 @@ export default function SiteHeader() {
                                     sx={{p: 0}}
                                 >
                                     {avatarUrl ? (
-                                        <Avatar 
-                                            src={avatarUrl} 
+                                        <Avatar
+                                            src={avatarUrl}
                                             sx={{
-                                                width: 44, 
-                                                height: 44, 
+                                                width: 44,
+                                                height: 44,
                                                 borderRadius: '50%',
                                                 border: '1px solid #e0e0e0',
                                                 backgroundColor: '#fff'
                                             }}
                                         />
                                     ) : (
-                                        <AccountCircleIcon 
+                                        <AccountCircleIcon
                                             sx={{
                                                 width: 44,
                                                 height: 44,
