@@ -35,7 +35,7 @@ export default function SignIn() {
                 // Wait a bit for cookie to be set
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                const access = getAccessToken;
+                const access = getAccessToken();
                 console.log('Access token:', access, 'Type:', typeof access);
                 console.log('All cookies:', document.cookie);
 
