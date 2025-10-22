@@ -33,8 +33,32 @@ export default function SignIn() {
                 
                 localStorage.setItem('user', JSON.stringify(userDataToStore));
                 
+                // Wait a bit for cookie to be set
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
                 const access = getCookie('access');
-                const role = jwtDecode(access)?.role;
+                console.log('Access token:', access, 'Type:', typeof access);
+                console.log('All cookies:', document.cookie);
+                
+                let role = null;
+                
+                if (access && typeof access === 'string' && access.trim() !== '') {
+                    try {
+                        const decoded = jwtDecode(access);
+                        role = decoded?.role;
+                        console.log('Decoded role:', role);
+                    } catch (error) {
+                        console.error('JWT decode error:', error);
+                        console.error('Access token value:', access);
+                        enqueueSnackbar("Token không hợp lệ", {variant: "error"});
+                        return;
+                    }
+                } else {
+                    console.error('No access token found or invalid token type');
+                    console.error('Access token value:', access);
+                    enqueueSnackbar("Không tìm thấy token truy cập", {variant: "error"});
+                    return;
+                }
 
                 enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
 
