@@ -1,13 +1,12 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Button, Link, Paper, Typography} from "@mui/material";
 import {useGoogleLogin} from "@react-oauth/google";
 import GoogleIcon from '@mui/icons-material/Google';
 import {signIn} from "../../services/AuthService.jsx";
-import {getCookie} from "../../utils/CookieUtil.jsx";
+import {getAccessToken} from "../../utils/CookieUtil.jsx";
 import {jwtDecode} from "jwt-decode";
 import {enqueueSnackbar} from "notistack";
 import axios from "axios";
-import {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 
 export default function SignIn() {
@@ -22,26 +21,26 @@ export default function SignIn() {
 
             const loginResponse = await signIn(userInfo.data.email, userInfo.data.name, userInfo.data.picture);
 
+
             if (loginResponse && loginResponse.status === 200) {
                 const userDataToStore = loginResponse.data.data;
-                
+
                 // Đảm bảo avatar từ Google được lưu
                 if (userInfo.data.picture && !userDataToStore.avatar && !userDataToStore.avatarUrl) {
                     userDataToStore.avatar = userInfo.data.picture;
-                    userDataToStore.avatarUrl = userInfo.data.picture;
                 }
-                
+
                 localStorage.setItem('user', JSON.stringify(userDataToStore));
-                
+
                 // Wait a bit for cookie to be set
                 await new Promise(resolve => setTimeout(resolve, 100));
-                
-                const access = getCookie('access');
+
+                const access = getAccessToken;
                 console.log('Access token:', access, 'Type:', typeof access);
                 console.log('All cookies:', document.cookie);
-                
+
                 let role = null;
-                
+
                 if (access && typeof access === 'string' && access.trim() !== '') {
                     try {
                         const decoded = jwtDecode(access);
@@ -134,7 +133,7 @@ export default function SignIn() {
     // Check if already logged in
     useEffect(() => {
         try {
-            const access = getCookie('access')
+            const access = getAccessToken()
             if (access) {
                 const role = jwtDecode(access)?.role
                 switch (role) {

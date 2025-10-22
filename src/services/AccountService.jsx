@@ -5,10 +5,10 @@ export const signOut = async () => {
     return response || null
 }
 
-// export const getAccess = async () => {
-//     const response = await axiosClient.post("/account/access")
-//     return response || null;
-// }
+export const getAccess = async () => {
+    const response = await axiosClient.post("/account/access")
+    return response || null;
+}
 
 export const viewProfile = async () => {
     const response = await axiosClient.post("/account/profile");
