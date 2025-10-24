@@ -1,15 +1,22 @@
-import axios from "axios"
+
 import {refreshToken} from "../services/AuthService.jsx";
+import axios from "axios";
+
+const url = import.meta.env.VITE_API_URL || 'http://localhost:5173'
+
+axios.defaults.baseURL = `${url}/api/v1`
 
 const axiosClient = axios.create({
-    baseURL:  "https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io/api/v1",
+    baseURL:  axios.defaults.baseURL,
     headers: {
         "Content-Type": "application/json",
     },
     withCredentials: true,
 });
 
-axiosClient.interceptors.response.use(response => response, async error => {
+axiosClient.interceptors.response.use(
+    response => response,
+    async error => {
     const originalRequest = error.config;
 
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
