@@ -1,15 +1,16 @@
 import React, {useEffect, useState} from "react";
 import {refreshToken} from "../services/AuthService.jsx";
 import {signOut} from "../services/AccountService.jsx";
+import {getAccessToken} from "../utils/CookieUtil.jsx";
 
-// async function GetAccessData() {
-//     const response = await getAccess()
-//     if (response && response.status === 200) {
-//         return response.data.body
-//     } else {
-//         return null
-//     }
-// }
+async function GetAccessData() {
+    const response = await getAccessToken()
+    if (response && response.status === 200) {
+        return response.data.body
+    } else {
+        return null
+    }
+}
 
 async function Logout() {
     signOut().then(res => {
@@ -27,102 +28,86 @@ async function Logout() {
     })
 }
 
-// async function CheckIfRoleValid(allowRoles, role) {
-//     return !!allowRoles.includes(role);
-// }
+async function CheckIfRoleValid(allowRoles, role) {
+    return !!allowRoles.includes(role);
+}
 
 export default function ProtectedRoute({children, allowRoles = []}) {
-    // const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasValidRole, setHasValidRole] = useState(false);
-
+    const [hasAttemptedAuth, setHasAttemptedAuth] = useState(false);
+    const {setAuthLoading} = useLoading();
 
     useEffect(() => {
         const checkAuthentication = async () => {
+            if (hasAttemptedAuth) {
+                return;
+            }
+
             try {
                 setIsLoading(true);
-                // const data = await GetAccessData();
-                //
-                // if (data != null) {
-                //     const isValidRole = await CheckIfRoleValid(allowRoles, data.role);
-                //     if (isValidRole) {
-                //         setIsAuthenticated(true);
-                //         setHasValidRole(true);
-                //         setIsLoading(false);
-                //         return;
-                //     } else {
-                //         // Role không hợp lệ
-                //         await Logout();
-                //         return;
-                //     }
-                // }
+                setAuthLoading(true);
+                setHasAttemptedAuth(true);
 
-                // Nếu không có data, thử refresh token
-                try {
-                    const refreshResponse = await refreshToken();
-                    if (refreshResponse && (refreshResponse.status === 401 || refreshResponse.status === 403)) {
-                        await Logout()
+                const data = await GetAccessData();
+
+                if (data != null) {
+                    const isValidRole = await CheckIfRoleValid(allowRoles, data.role);
+                    if (isValidRole) {
+                        setIsAuthenticated(true);
+                        setHasValidRole(true);
+                        setIsLoading(false);
+                        return;
+                    } else {
+                        await Logout();
                         return;
                     }
-                } catch (refreshError) {
-                    console.log("Refresh token failed, allowing access for testing:", refreshError);
-                    // Bypass authentication for testing
                 }
 
-                // Thử lấy data lại sau khi refresh
-                // const retryData = await GetAccessData();
-                // if (retryData != null) {
-                //     const isValidRole = await CheckIfRoleValid(allowRoles, retryData.role);
-                //     if (isValidRole) {
-                //         setIsAuthenticated(true);
-                //         setHasValidRole(true);
-                //         setIsLoading(false);
-                //         return;
-                //     } else {
-                //         await Logout();
-                //         return;
-                //     }
-                // }
+                const refreshResponse = await refreshToken();
+                if (refreshResponse.status === 401 || refreshResponse.status === 403) {
+                    await Logout();
+                    return;
+                }
 
-                // Nếu vẫn không có data hợp lệ
-                // await Logout();
+                const retryData = await GetAccessData();
+                if (retryData != null) {
+                    const isValidRole = await CheckIfRoleValid(allowRoles, retryData.role);
+                    if (isValidRole) {
+                        setIsAuthenticated(true);
+                        setHasValidRole(true);
+                        setIsLoading(false);
+                        return;
+                    } else {
+                        await Logout();
+                        return;
+                    }
+                } else {
+                    await Logout();
+                    return;
+                }
 
-                setHasValidRole(true);
             } catch (error) {
                 console.error("Authentication error:", error);
-                // Don't redirect to login for testing, just allow access
-                console.log("Allowing access despite authentication error for testing");
-                setHasValidRole(true);
+                await Logout();
             } finally {
                 setIsLoading(false);
+                setAuthLoading(false);
             }
         };
 
-        checkAuthentication()
-    }, [allowRoles])
+        checkAuthentication();
+    }, [allowRoles]);
 
-    // Loading state
     if (isLoading) {
-        return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                fontSize: '18px',
-                color: '#666'
-            }}>
-                Authentication...
-            </div>
-        )
+        // Không hiển thị loading UI ở đây nữa, sẽ dùng GlobalLoadingOverlay
+        return null;
     }
 
-    // // Nếu đã xác thực và có role hợp lệ, render children
-    // if (isAuthenticated && hasValidRole) {
-    //     return children;
-    // }
+    if (isAuthenticated && hasValidRole) {
+        return children;
+    }
 
-    // Nếu không xác thực, không render gì (sẽ redirect)
-    return hasValidRole ? (children ?? null) : null
-    // return null;
+    return null;
 }

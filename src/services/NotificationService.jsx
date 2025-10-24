@@ -17,7 +17,7 @@ export function NotificationDisplay() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        const socket = new SockJS(import.meta.env.VITE_API_URL + '/ws-endpoint');
+        const socket = new SockJS('http://localhost:5173/ws-endpoint');
         const stompClient = Stomp.over(socket);
         let isConnected = false;
 
