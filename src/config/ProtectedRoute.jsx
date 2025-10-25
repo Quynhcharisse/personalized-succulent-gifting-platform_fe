@@ -6,7 +6,7 @@ import {getAccessToken} from "../utils/CookieUtil.jsx";
 async function GetAccessData() {
     const response = await getAccessToken()
     if (response && response.status === 200) {
-        return response.data.body
+        return response.data.data
     } else {
         return null
     }
