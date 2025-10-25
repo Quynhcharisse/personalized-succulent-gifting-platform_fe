@@ -26,6 +26,12 @@ axiosClient.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        if (originalRequest.url === "/account/access") {
+            console.error("Get access token failed, redirecting to login.");
+            window.location.href = "/login";
+            return Promise.reject(error);
+        }
+
         try {
             const refreshRes = await refreshToken();
             if (refreshRes.status === 200) {
