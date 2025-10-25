@@ -1,0 +1,3 @@
+VITE_API_URL=https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io
+# Google OAuth Configuration
+VITE_GOOGLE_CLIENT_ID=488054196852-v23t5kiuau1p72j7u79fmcamircifjfj.apps.googleusercontent.com
