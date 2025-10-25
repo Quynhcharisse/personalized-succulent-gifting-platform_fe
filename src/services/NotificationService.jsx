@@ -17,7 +17,7 @@ export function NotificationDisplay() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        const socket = new SockJS('http://localhost:5173/ws-endpoint');
+        const socket = new SockJS('wss://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io/api/v1/ws-endpoint/105/cyrc34yk/websocket');
         const stompClient = Stomp.over(socket);
         let isConnected = false;
 
