@@ -42,15 +42,29 @@ export default function SiteHeader() {
         }
     }, [location.pathname])
 
-    const role = useMemo(() => {
-        try {
-            const access = getAccessToken()
-            if (!access) return null
-            const decoded = jwtDecode(access)
-            return decoded?.role || null
-        } catch (error) {
-            return null
-        }
+    const [role, setRole] = useState(null);
+    
+    useEffect(() => {
+        const fetchRole = async () => {
+            try {
+                // Only fetch role if we have a user in localStorage
+                if (!currentUser) {
+                    setRole(null)
+                    return
+                }
+                const access = await getAccessToken()
+                if (access) {
+                    const decoded = jwtDecode(access)
+                    setRole(decoded?.role || null)
+                } else {
+                    setRole(null)
+                }
+            } catch (error) {
+                // Silently fail - user is not logged in
+                setRole(null)
+            }
+        };
+        fetchRole()
     }, [currentUser])
 
     const displayName = currentUser?.name || currentUser?.fullName || currentUser?.displayName || 'Tài khoản'
@@ -80,7 +94,6 @@ export default function SiteHeader() {
           <span className="brand__logo" aria-hidden>
             <img src="/senda.png" alt="Lá Nhỏ Bên Thềm"/>
           </span>
-                    <span className="brand__name">Lá Nhỏ Bên Thềm</span>
                 </Link>
                 <nav className="main-nav" aria-label="Điều hướng chính">
                     <NavLink to="/" end> Sản phẩm </NavLink>

@@ -35,7 +35,7 @@ export default function SignIn() {
                 // Wait a bit for cookie to be set
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                const access = getAccessToken();
+                const access = await getAccessToken();
                 console.log('Access token:', access, 'Type:', typeof access);
                 console.log('All cookies:', document.cookie);
 
@@ -132,27 +132,30 @@ export default function SignIn() {
 
     // Check if already logged in
     useEffect(() => {
-        try {
-            const access = getAccessToken()
-            if (access) {
-                const role = jwtDecode(access)?.role
-                switch (role) {
-                    case 'ADMIN':
-                        navigate('/admin/dashboard', {replace: true})
-                        break
-                    case 'SELLER':
-                        navigate('/seller/dashboard', {replace: true})
-                        break
-                    case 'BUYER':
-                        navigate('/login', {replace: true})
-                        break
-                    default:
-                        navigate('/', {replace: true})
+        const checkAccess = async () => {
+            try {
+                const access = await getAccessToken();
+                if (access) {
+                    const role = jwtDecode(access)?.role
+                    switch (role) {
+                        case 'ADMIN':
+                            navigate('/admin/dashboard', {replace: true})
+                            break
+                        case 'SELLER':
+                            navigate('/seller/dashboard', {replace: true})
+                            break
+                        case 'BUYER':
+                            navigate('/login', {replace: true})
+                            break
+                        default:
+                            navigate('/', {replace: true})
+                    }
                 }
+            } catch (error) {
+                localStorage.clear()
             }
-        } catch (error) {
-            localStorage.clear()
-        }
+        };
+        checkAccess();
     }, [navigate]);
 
     document.title = "Đăng nhập | Lá Nhỏ Bên Thềm"

@@ -2,11 +2,18 @@ import React, {useEffect, useState} from "react";
 import {refreshToken} from "../services/AuthService.jsx";
 import {signOut} from "../services/AccountService.jsx";
 import {getAccessToken} from "../utils/CookieUtil.jsx";
+import {jwtDecode} from "jwt-decode";
 
 async function GetAccessData() {
-    const response = await getAccessToken()
-    if (response && response.status === 200) {
-        return response.data.data
+    const accessToken = await getAccessToken()
+    if (accessToken) {
+        try {
+            const decoded = jwtDecode(accessToken)
+            return decoded
+        } catch (error) {
+            console.error('JWT decode error:', error)
+            return null
+        }
     } else {
         return null
     }
@@ -37,7 +44,6 @@ export default function ProtectedRoute({children, allowRoles = []}) {
     const [isLoading, setIsLoading] = useState(true);
     const [hasValidRole, setHasValidRole] = useState(false);
     const [hasAttemptedAuth, setHasAttemptedAuth] = useState(false);
-    const {setAuthLoading} = useLoading();
 
     useEffect(() => {
         const checkAuthentication = async () => {
@@ -47,7 +53,6 @@ export default function ProtectedRoute({children, allowRoles = []}) {
 
             try {
                 setIsLoading(true);
-                setAuthLoading(true);
                 setHasAttemptedAuth(true);
 
                 const data = await GetAccessData();
@@ -93,7 +98,6 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 await Logout();
             } finally {
                 setIsLoading(false);
-                setAuthLoading(false);
             }
         };
 

@@ -11,6 +11,7 @@ export default defineConfig({
         target: 'https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io',
         changeOrigin: true,
         secure: true,
+        rewrite: (path) => path,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('proxy error', err);
