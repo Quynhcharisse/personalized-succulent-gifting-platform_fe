@@ -97,7 +97,10 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                 {
                     name: '',
                     price: '',
-                    availableQty: ''
+                    availableQty: '',
+                    potHeight: '',
+                    potUpperCrossSectionArea: '',
+                    maxSoilMassValue: ''
                 }
             ]
         }));
@@ -145,11 +148,14 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     e.sizes = 'Thêm ít nhất 1 size có tên hợp lệ';
                 } else {
                     const invalid = validSizes.some(s =>
-                        !s.sizeName?.trim() ||
+                        !s.name?.trim() ||
                         !s.price || Number(s.price) <= 0 ||
-                        s.availableQty === '' || Number(s.availableQty) < 0
+                        s.availableQty === '' || Number(s.availableQty) < 0 ||
+                        !s.potHeight || Number(s.potHeight) <= 0 ||
+                        !s.potUpperCrossSectionArea || Number(s.potUpperCrossSectionArea) <= 0 ||
+                        !s.maxSoilMassValue || Number(s.maxSoilMassValue) <= 0
                     );
-                    if (invalid) e.sizes = 'Điền đầy đủ tên size, giá và số lượng';
+                    if (invalid) e.sizes = 'Điền đầy đủ tất cả thông tin size';
                 }
             }
         }
@@ -178,12 +184,18 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                 description: form.description.trim(),
                 price: Number(form.priceSell),
                 availableQty: Number(form.quantity),
-                image: form.image ? [{image: form.image.trim()}] : [{image: ''}]
+                images: form.image && form.image.trim() ? [{image: form.image.trim()}] : []
             }
         };
     }
 
     const createPotData = () => {
+        // Ensure we have a valid image URL
+        const imageUrl = form.image && form.image.trim();
+        if (!imageUrl) {
+            throw new Error('Hình ảnh là bắt buộc');
+        }
+        
         return {
             createPot: true,
             potData: {
@@ -191,14 +203,17 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                 description: form.description.trim(),
                 material: form.material.trim(),
                 color: form.color,
-                image: form.image ? [{image: form.image.trim()}] : [{image: ''}],
+                images: [{image: imageUrl}],
                 sizes: (form.sizes || [])
                     .filter(s => s.name?.trim()) // Lọc bỏ size có tên rỗng
                     .map(s => ({
                         name: s.name.trim(),
                         sizeName: s.name.trim(), // Thêm cả hai field
                         price: Number(s.price),
-                        quantity: Number(s.availableQty)
+                        availableQty: Number(s.availableQty),
+                        potHeight: Number(s.potHeight),
+                        potUpperCrossSectionArea: Number(s.potUpperCrossSectionArea),
+                        maxSoilMassValue: Number(s.maxSoilMassValue)
                     }))
             },
             createSoil: false,
@@ -222,7 +237,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     massUnit: form.basePricing.massUnit,
                     price: Number(form.basePricing.price)
                 },
-                image: form.image ? [{image: form.image.trim()}] : [{image: ''}]
+                images: form.image && form.image.trim() ? [{image: form.image.trim()}] : []
             },
             createDecoration: false,
             decorationData: null
@@ -232,6 +247,13 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     const handleCreate = async () => {
         setMessage({type: '', text: ''});
         if (!validate()) return;
+        
+        // Ensure image exists
+        if (!form.image || !form.image.trim()) {
+            setMessage({type: 'error', text: 'Vui lòng tải lên hình ảnh'});
+            return;
+        }
+        
         setIsSubmitting(true);
         try {
             let response;
@@ -240,22 +262,19 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
             switch (form.category) {
                 case 'DECOR_ACCESSORY':
                     accessoryData = createDecorationData();
-                    console.log('Decoration payload:', accessoryData, 'createAction:', !isEdit);
+                    console.log('Decoration payload:', JSON.stringify(accessoryData, null, 2), 'createAction:', !isEdit);
                     response = await createDecorationAccessory(accessoryData, !isEdit);
                     break;
                 case 'PLANT_POT':
                     accessoryData = createPotData();
-                    console.log('Pot payload:', accessoryData, 'createAction:', !isEdit);
-                    console.log('Pot sizes:', accessoryData.potData.sizes);
-                    console.log('Form sizes before mapping:', form.sizes);
-                    accessoryData.potData.sizes.forEach((size, index) => {
-                        console.log(`Size ${index}:`, size);
-                    });
+                    console.log('Pot payload:', JSON.stringify(accessoryData, null, 2));
+                    console.log('Image URL:', form.image);
+                    console.log('Images array:', accessoryData.potData.images);
                     response = await createPotAccessory(accessoryData, !isEdit);
                     break;
                 case 'SOIL':
                     accessoryData = createSoilData();
-                    console.log('Soil payload:', accessoryData, 'createAction:', !isEdit);
+                    console.log('Soil payload:', JSON.stringify(accessoryData, null, 2), 'createAction:', !isEdit);
                     response = await createSoilAccessory(accessoryData, !isEdit);
                     break;
                 default:
@@ -584,6 +603,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                                     label="Tên size"
                                     value={size.name}
                                     onChange={(e) => handleUpdateSizeField(index, 'name', e.target.value)}
+                                    fullWidth
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 2,
@@ -591,7 +611,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                                         }
                                     }}
                                 />
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', gap: 2 }}>
                                     <TextField
                                         label="Giá (VNĐ)"
                                         type="number"
@@ -621,11 +641,60 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                                             }
                                         }}
                                     />
+                                </Box>
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    <TextField
+                                        label="Chiều cao chậu (cm)"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        value={size.potHeight}
+                                        onChange={(e) => handleUpdateSizeField(index, 'potHeight', e.target.value)}
+                                        InputProps={{ endAdornment: <InputAdornment position="end">cm</InputAdornment> }}
+                                        sx={{ 
+                                            flex: 1,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                backgroundColor: 'white'
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        label="Diện tích miệng chậu (cm²)"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        value={size.potUpperCrossSectionArea}
+                                        onChange={(e) => handleUpdateSizeField(index, 'potUpperCrossSectionArea', e.target.value)}
+                                        InputProps={{ endAdornment: <InputAdornment position="end">cm²</InputAdornment> }}
+                                        sx={{ 
+                                            flex: 1,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                backgroundColor: 'white'
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    <TextField
+                                        label="Khối lượng đất tối đa (gram)"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        value={size.maxSoilMassValue}
+                                        onChange={(e) => handleUpdateSizeField(index, 'maxSoilMassValue', e.target.value)}
+                                        InputProps={{ endAdornment: <InputAdornment position="end">g</InputAdornment> }}
+                                        sx={{ 
+                                            flex: 1,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                backgroundColor: 'white'
+                                            }
+                                        }}
+                                    />
                                     <Button 
                                         color="error" 
                                         variant="outlined" 
                                         onClick={() => handleRemoveSize(index)}
-                                        sx={{ minWidth: 'auto', px: 2 }}
+                                        sx={{ minWidth: 'auto', px: 2, height: '56px' }}
                                     >
                                         Xóa
                                     </Button>
@@ -813,7 +882,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     <Typography variant="h6" sx={DASHBOARD_STYLES.sectionTitle}>Hình ảnh sản phẩm</Typography>
                     <Divider sx={{mb: 2}}/>
                 <UploadImageField
-                    image={form.image}
+                    imageUrl={form.image}
                     isUploading={isUploading}
                     uploadProgress={uploadProgress}
                     onFileSelected={handleFileSelected}

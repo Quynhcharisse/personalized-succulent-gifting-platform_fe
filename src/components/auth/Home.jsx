@@ -1,9 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
+import {Button} from '@mui/material'
 import '../../styles/auth/Home.css'
 import ChatBot from './ChatBot.jsx'
 import ContactWidget from './ContactWidget.jsx'
+import {viewProduct} from '../../services/ProductService.jsx'
 
 export default function Home() {
+    const navigate = useNavigate()
     const [bannerVideoReady, setBannerVideoReady] = useState(false)
     const [isMuted, setIsMuted] = useState(true)
     const [isPlaying, setIsPlaying] = useState(true)
@@ -14,6 +18,23 @@ export default function Home() {
     const bannerVideoSrc = '/videoBanner.mp4'
     const [products, setProducts] = useState([]);
     const [catalogProducts, setCatalogProducts] = useState([]);
+
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await viewProduct();
+                if (response && response.data) {
+                    setProducts(response.data.data || []);
+                    // Use products for best sellers
+                    setCatalogProducts(response.data.data || []);
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     useEffect(() => {
         const el = videoRef.current
@@ -167,6 +188,40 @@ export default function Home() {
 
     const formatPrice = (vnd) =>
         new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(vnd)
+
+    const calculateProductPrice = (size) => {
+        if (!size) return 0;
+        let totalPrice = 0;
+
+        // Add succulent prices
+        size.succulents?.forEach(succulent => {
+            if (succulent.size && Array.isArray(succulent.size)) {
+                succulent.size.forEach(sizeItem => {
+                    totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
+                });
+            } else if (succulent.size?.price) {
+                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+            }
+        });
+
+        // Add pot price
+        if (size.pot?.size && size.pot.size.length > 0) {
+            totalPrice += size.pot.size[0].price || 0;
+        }
+
+        // Add soil price
+        if (size.soil?.basePricing) {
+            const soilPrice = (size.soil.basePricing.price / size.soil.basePricing.massValue) * size.soil.massAmount;
+            totalPrice += soilPrice;
+        }
+
+        // Add decoration prices
+        size.decorations?.forEach(decoration => {
+            totalPrice += decoration.totalPrice || 0;
+        });
+
+        return totalPrice;
+    };
 
     // Highlight only sections on Home (exclude /cham-soc which is a separate page)
     useEffect(() => {
@@ -349,31 +404,84 @@ export default function Home() {
 
                 <section id="san-pham" className="bestsellers">
                     <div className="container">
-                        <h2 className="section-title">Sản phẩm bán chạy</h2>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+                            <h2 className="section-title">Sản phẩm bán chạy</h2>
+                            <Button 
+                                variant="outlined"
+                                onClick={() => navigate('/product')}
+                                sx={{
+                                    borderColor: '#0D3B2E',
+                                    color: '#0D3B2E',
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: '#0D3B2E',
+                                        color: '#fff',
+                                        borderColor: '#0D3B2E',
+                                    }
+                                }}
+                            >
+                                Xem tất cả sản phẩm →
+                            </Button>
+                        </div>
                         <div className="bestsellers__grid">
                             <aside className="promo-card">
                                 <div className="promo-card__content">
-                                    <h3>Đặt cây</h3>
+                                    <h3>Điện Cây</h3>
                                     <p>
                                         Chọn mẫu, đặt lịch giao, chúng tôi trồng phối cảnh theo yêu cầu. Thiết kế tối
                                         giản
                                         cho bàn làm việc.
                                     </p>
-                                    <a className="btn btn--primary" href="#catalog">Mua ngay</a>
+                                    <Button 
+                                        variant="contained" 
+                                        onClick={() => navigate('/login')}
+                                        sx={{
+                                            backgroundColor: '#0D3B2E',
+                                            color: '#fff',
+                                            fontWeight: 700,
+                                            fontSize: '1rem',
+                                            padding: '12px 32px',
+                                            borderRadius: '12px',
+                                            width: '50%',
+                                            border: '2px solid rgba(255, 255, 255, 0.5)',
+                                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+                                            '&:hover': {
+                                                backgroundColor: '#1e5a4a',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 12px 36px rgba(0, 0, 0, 0.4)',
+                                            }
+                                        }}
+                                    >
+                                        Điện Cây
+                                    </Button>
                                 </div>
                             </aside>
-                            {bestSellerTeasers.map((t) => (
-                                <article key={t.id} className="teaser">
-                                    <div className="teaser__media">
-                                        <img loading="lazy" src={t.image} alt={t.name}/>
-                                    </div>
-                                    <div className="teaser__body">
-                                        <h3>{t.name}</h3>
-                                        <div className="price">{formatPrice(t.priceVnd)}</div>
-                                        <button className="btn btn--sm">Thêm vào giỏ</button>
-                                    </div>
-                                </article>
-                            ))}
+                            {(catalogProducts.length > 0 ? catalogProducts.slice(0, 3) : bestSellerTeasers).map((t) => {
+                                const isRealProduct = t.id && catalogProducts.some(p => p.id === t.id);
+                                const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
+                                const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
+                                const productPrice = isRealProduct && t.sizes?.[0] 
+                                    ? calculateProductPrice(t.sizes[0]) 
+                                    : (t.price || t.priceVnd || 0);
+                                
+                                return (
+                                    <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
+                                        <div className="teaser__media">
+                                            <img loading="lazy" src={productImage} alt={productName}/>
+                                        </div>
+                                        <div className="teaser__body">
+                                            <h3>{productName}</h3>
+                                            <div className="price">{new Intl.NumberFormat('vi-VN').format(productPrice)} ₫</div>
+                                            <button 
+                                                className="btn btn--sm"
+                                                onClick={() => window.location.href = `/product/${t.id}`}
+                                            >
+                                                Xem chi tiết
+                                            </button>
+                                        </div>
+                                    </article>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
@@ -393,43 +501,6 @@ export default function Home() {
                                     <p className="review__text">{r.text}</p>
                                 </article>
                             ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section id="catalog" className="catalog">
-                    <div className="container">
-                        <h2 className="section-title">Sản phẩm</h2>
-                        <div className="card-grid">
-                            {catalogProducts.map((p) => (
-                                <article key={p.id} className="product-card">
-                                    {p.badge && <span className="badge">{p.badge}</span>}
-                                    <div className="product-card__media">
-                                        <img loading="lazy" src={p.image} alt={p.name}/>
-                                    </div>
-                                    <div className="product-card__body">
-                                        <h3>{p.name}</h3>
-                                        <div className="product-card__meta">
-                                            <div>
-                                                {p.salePriceVnd ? (
-                                                    <>
-                                                        <span
-                                                            className="price price--sale">{formatPrice(p.salePriceVnd)}</span>
-                                                        <span
-                                                            className="price price--old">{formatPrice(p.priceVnd)}</span>
-                                                    </>
-                                                ) : (
-                                                    <span className="price">{formatPrice(p.priceVnd)}</span>
-                                                )}
-                                            </div>
-                                            <button className="btn btn--sm">Thêm vào giỏ</button>
-                                        </div>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                        <div className="center mt-16">
-                            <a className="btn" href="#">Xem thêm</a>
                         </div>
                     </div>
                 </section>

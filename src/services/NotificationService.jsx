@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import useNotify from '../hooks/useNotify';
-import {
-    Badge,
-    Menu,
-    MenuItem,
-    Typography,
-} from '@mui/material';
-import { Notifications as NotificationsIcon } from '@mui/icons-material';
+import {Badge, Menu, MenuItem, Typography,} from '@mui/material';
+import {Notifications as NotificationsIcon} from '@mui/icons-material';
 import axiosClient from "../config/APIConfig.jsx";
 
+
 export function NotificationDisplay() {
-    const { info } = useNotify();
+    const {info} = useNotify();
     const [notifications, setNotifications] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        const socket = new SockJS('wss://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io/api/v1/ws-endpoint/105/cyrc34yk/websocket');
+        // Determine WS endpoint based on environment
+        const isDevelopment = import.meta.env.MODE === 'development';
+        const wsEndpoint = isDevelopment 
+            ? 'http://localhost:5173/ws-endpoint'  // Use localhost proxy in dev
+            : `${import.meta.env.VITE_API_URL}/ws-endpoint`;  // Direct to server in prod
+        
+        const socket = new SockJS(wsEndpoint);
         const stompClient = Stomp.over(socket);
         let isConnected = false;
 
@@ -50,7 +52,8 @@ export function NotificationDisplay() {
 
     const handleIconClick = (event) => {
         setAnchorEl(event.currentTarget);
-        fetchNotifications().then(() => {});
+        fetchNotifications().then(() => {
+        });
     };
 
     const handleClose = () => {
@@ -60,7 +63,7 @@ export function NotificationDisplay() {
     return (
         <>
             <Badge badgeContent={notifications.length} color="error" onClick={handleIconClick}>
-                <NotificationsIcon />
+                <NotificationsIcon/>
             </Badge>
             <Menu
                 anchorEl={anchorEl}

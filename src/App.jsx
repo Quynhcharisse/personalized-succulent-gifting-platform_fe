@@ -11,6 +11,8 @@ import SucculentList from './components/buyer/SucculentList.jsx';
 import SucculentDetail from './components/buyer/SucculentDetail.jsx';
 import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
 import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
+import ProductList from './components/buyer/ProductList.jsx';
+import ProductDetail from './components/buyer/ProductDetail.jsx';
 
 
 // Lazy imports for layouts and frequently used components
@@ -290,6 +292,14 @@ const router = createBrowserRouter([
                         <CheckoutPage/>
                     </Suspense>
                 )
+            },
+            {
+                path: 'product',
+                element: <ProductList/>
+            },
+            {
+                path: 'product/:id',
+                element: <ProductDetail/>
             },
         ],
     },

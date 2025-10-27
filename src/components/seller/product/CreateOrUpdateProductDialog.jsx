@@ -532,17 +532,6 @@ const CreateOrUpdateProductDialog = ({
                         </Typography>
                     </Box>
                 </Box>
-
-                <ActionButton
-                    action="cancel"
-                    onClick={onClose}
-                    sx={{
-                        alignSelf: 'flex-end',
-                        minWidth: 'auto',
-                        px: 2,
-                        py: 0.5
-                    }}
-                />
             </DialogTitle>
 
             <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
