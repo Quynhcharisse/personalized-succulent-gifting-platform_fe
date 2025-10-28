@@ -78,7 +78,7 @@ export const createOrUpdateProduct = async (productData) => {
 }
 
 export const viewProduct = async () => {
-    const response = await axiosClient.get("/product");
+    const response = await axiosClient.get("/product/list");
     return response || null
 }
 
