@@ -54,6 +54,7 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 setIsLoading(true);
                 setHasAttemptedAuth(true);
 
+                console.log("I am here")
                 const data = await GetAccessData();
                 console.log("First data: ", data)
 
