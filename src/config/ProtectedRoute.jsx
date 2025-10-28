@@ -68,7 +68,7 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                         return;
                     } else {
                         console.log("Invalid role")
-                        await Logout();
+                        // await Logout();
                         return;
                     }
                 }
@@ -77,7 +77,7 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 console.log("Data is null")
                 if (refreshResponse.status === 401 || refreshResponse.status === 403) {
                     console.log("Refresh error 401 / 403")
-                    await Logout();
+                    // await Logout();
                     return;
                 }
 
@@ -94,18 +94,18 @@ export default function ProtectedRoute({children, allowRoles = []}) {
 
                     } else {
                         console.log("Invalid role")
-                        await Logout();
+                        // await Logout();
 
                     }
                 } else {
                     console.log("Retry data is null")
-                    await Logout();
+                    // await Logout();
 
                 }
 
             } catch (error) {
                 console.error("Authentication error:", error);
-                await Logout();
+                // await Logout();
             } finally {
                 setIsLoading(false);
             }
