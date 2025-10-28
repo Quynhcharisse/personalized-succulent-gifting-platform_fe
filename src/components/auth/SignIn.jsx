@@ -3,8 +3,6 @@ import {Box, Button, Link, Paper, Typography} from "@mui/material";
 import {useGoogleLogin} from "@react-oauth/google";
 import GoogleIcon from '@mui/icons-material/Google';
 import {signIn} from "../../services/AuthService.jsx";
-import {getAccessToken} from "../../utils/CookieUtil.jsx";
-import {jwtDecode} from "jwt-decode";
 import {enqueueSnackbar} from "notistack";
 import axios from "axios";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -30,23 +28,10 @@ export default function SignIn() {
                     userDataToStore.avatar = userInfo.data.picture;
                 }
 
-                // Wait a bit for cookie to be set
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                const access = await getAccessToken();
-
-                let role = null;
-
-                if (access && typeof access === 'string' && access.trim() !== '') {
-                    try {
-                        const decoded = jwtDecode(access);
-                        role = decoded?.role;
-                    } catch (error) {
-                        enqueueSnackbar("Token không hợp lệ", {variant: "error"});
-                        return;
-                    }
-                } else {
-                    enqueueSnackbar("Không tìm thấy token truy cập", {variant: "error"});
+                const role = userDataToStore?.role || null;
+                
+                if (!role) {
+                    enqueueSnackbar("Không tìm thấy role người dùng", {variant: "error"});
                     return;
                 }
 
