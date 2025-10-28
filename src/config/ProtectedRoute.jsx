@@ -5,11 +5,15 @@ import {getAccessToken} from "../utils/CookieUtil.jsx";
 import {jwtDecode} from "jwt-decode";
 
 async function GetAccessData() {
+    console.log("I am here")
     const accessToken = await getAccessToken()
+    console.log("I am here 2")
     if (accessToken) {
         try {
+            console.log("I am here 7")
             return jwtDecode(accessToken)
         } catch (error) {
+            console.log("I am here 8")
             console.error('JWT decode error:', error)
             return null
         }
@@ -54,7 +58,6 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 setIsLoading(true);
                 setHasAttemptedAuth(true);
 
-                console.log("I am here")
                 const data = await GetAccessData();
                 console.log("First data: ", data)
 
