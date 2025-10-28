@@ -13,11 +13,11 @@ export function NotificationDisplay() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        // Determine WS endpoint based on environment
-        const isDevelopment = import.meta.env.MODE === 'development';
-        const wsEndpoint = isDevelopment 
-            ? 'http://localhost:5173/ws-endpoint'  // Use localhost proxy in dev
-            : `${import.meta.env.VITE_API_URL}/ws-endpoint`;  // Direct to server in prod
+        const wsEndpoint = import.meta.env.MODE === 'development'
+            ? '/ws-endpoint'
+            : `${import.meta.env.VITE_API_URL}/ws-endpoint`;
+        
+        console.log('NotificationService: Connecting to WebSocket at', wsEndpoint);
         
         const socket = new SockJS(wsEndpoint);
         const stompClient = Stomp.over(socket);
@@ -25,13 +25,27 @@ export function NotificationDisplay() {
 
         stompClient.connect({}, () => {
             isConnected = true;
+            console.log('NotificationService: WebSocket connected successfully');
             stompClient.subscribe('/topic/notifications', (message) => {
                 const notification = JSON.parse(message.body);
                 setNotifications((prev) => [notification, ...prev]);
             });
         }, (error) => {
-            console.error('WebSocket connection error:', error);
+            console.error('NotificationService: WebSocket connection error:', error);
         });
+        
+        // Handle socket errors
+        socket.onerror = (error) => {
+            console.error('NotificationService: Socket error:', error);
+        };
+        
+        socket.onopen = () => {
+            console.log('NotificationService: Socket opened');
+        };
+        
+        socket.onclose = (event) => {
+            console.log('NotificationService: Socket closed', event);
+        };
 
         return () => {
             if (isConnected && stompClient.connected) {

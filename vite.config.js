@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Get backend URL from environment variable, default to localhost:8080
+const BACKEND_URL = process.env.VITE_BACKEND_URL || 'http://localhost:8080';
+
+console.log('Vite config: Using backend at', BACKEND_URL);
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -8,9 +13,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io',
+        target: BACKEND_URL,
         changeOrigin: true,
-        secure: true,
+        secure: false,
         rewrite: (path) => path,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
@@ -25,13 +30,19 @@ export default defineConfig({
         },
       },
       '/ws-endpoint': {
-        target: 'https://succulentapp.orangeglacier-1e02abb7.southeastasia.azurecontainerapps.io',
+        target: BACKEND_URL,
         changeOrigin: true,
-        secure: true,
+        secure: false,
         ws: true,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('WebSocket proxy error', err);
+          });
+          proxy.on('open', () => {
+            console.log('WebSocket connection opened');
+          });
+          proxy.on('close', () => {
+            console.log('WebSocket connection closed');
           });
         },
       }
