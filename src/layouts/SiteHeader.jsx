@@ -13,10 +13,10 @@ import {
     Storefront as StorefrontIcon
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
-import {getAccessToken} from '../utils/CookieUtil.jsx'
-import {jwtDecode} from 'jwt-decode'
 import {signOut} from '../services/AccountService.jsx'
 import {NotificationDisplay} from '../services/NotificationService.jsx';
+import {getAccessToken} from '../utils/CookieUtil.jsx';
+import {jwtDecode} from 'jwt-decode';
 
 export default function SiteHeader() {
     const navigate = useNavigate()
@@ -45,27 +45,51 @@ export default function SiteHeader() {
     const [role, setRole] = useState(null);
     
     useEffect(() => {
-        const fetchRole = async () => {
+        // Strategy: Dùng localStorage với verification định kỳ
+        if (!currentUser) {
+            setRole(null)
+            return
+        }
+        
+        // Lấy role từ localStorage (performance)
+        const localRole = currentUser?.role || null
+        
+        // Verify với JWT ngay lần đầu, sau đó cache trong 5 phút
+        const lastVerified = sessionStorage.getItem('role_verified_at')
+        const now = Date.now()
+        const FIVE_MINUTES = 5 * 60 * 1000
+        
+        const verifyRole = async () => {
             try {
-                // Only fetch role if we have a user in localStorage
-                if (!currentUser) {
-                    setRole(null)
-                    return
-                }
                 const access = await getAccessToken()
                 if (access) {
                     const decoded = jwtDecode(access)
-                    setRole(decoded?.role || null)
+                    const jwtRole = decoded?.role || null
+                    
+                    if (localRole !== jwtRole) {
+                        // Role bị fake, dùng JWT role
+                        setRole(jwtRole)
+                        sessionStorage.setItem('role_verified_at', now.toString())
+                    } else {
+                        setRole(localRole)
+                        sessionStorage.setItem('role_verified_at', now.toString())
+                    }
                 } else {
-                    setRole(null)
+                    setRole(localRole)
                 }
             } catch (error) {
-                // Silently fail - user is not logged in
-                setRole(null)
+                setRole(localRole)
             }
-        };
-        fetchRole()
-    }, [currentUser])
+        }
+        
+        // Verify lần đầu hoặc sau 5 phút
+        if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
+            verifyRole()
+        } else {
+            // Trong thời gian cache, dùng localStorage (nhanh)
+            setRole(localRole)
+        }
+    }, [currentUser, location.pathname])
 
     const displayName = currentUser?.name || currentUser?.fullName || currentUser?.displayName || 'Tài khoản'
     const avatarUrl = currentUser?.avatar || currentUser?.avatarUrl || currentUser?.photoURL || currentUser?.picture || ''
