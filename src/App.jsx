@@ -1,19 +1,17 @@
-import React from 'react'
+import React, {lazy, Suspense} from 'react'
 import './styles/App.css'
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom'
-import {lazy, Suspense} from 'react'
 import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
 // Buyer components
-import SucculentList from './components/buyer/SucculentList.jsx';
-import SucculentDetail from './components/buyer/SucculentDetail.jsx';
-import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
-import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
-import ProductList from './components/buyer/ProductList.jsx';
-import ProductDetail from './components/buyer/ProductDetail.jsx';
-
+const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
+const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
+const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
+const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
+const ProductList = lazy(() => import('./components/buyer/ProductList.jsx'))
+const ProductDetail = lazy(() => import('./components/buyer/ProductDetail.jsx'))
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -285,7 +283,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-              {
+            {
                 path: 'checkout',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
@@ -412,7 +410,7 @@ const router = createBrowserRouter([
             },
             {
                 path: '/seller/posts',
-                element: <PostsManager />
+                element: <PostsManager/>
             }
         ]
     },
@@ -459,7 +457,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'posts',
-                element: <BuyerPosts />
+                element: <BuyerPosts/>
             },
         ]
     },
