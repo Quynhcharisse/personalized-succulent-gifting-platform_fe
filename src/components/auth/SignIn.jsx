@@ -30,8 +30,6 @@ export default function SignIn() {
                     userDataToStore.avatar = userInfo.data.picture;
                 }
 
-                localStorage.setItem('user', JSON.stringify(userDataToStore));
-
                 // Wait a bit for cookie to be set
                 await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -51,6 +49,12 @@ export default function SignIn() {
                     enqueueSnackbar("Không tìm thấy token truy cập", {variant: "error"});
                     return;
                 }
+
+                // Lưu user data kèm role vào localStorage để không cần gọi API mỗi lần
+                localStorage.setItem('user', JSON.stringify({
+                    ...userDataToStore,
+                    role: role
+                }));
 
                 enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
 
