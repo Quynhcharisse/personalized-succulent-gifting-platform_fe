@@ -130,34 +130,6 @@ export default function SignIn() {
         scope: 'openid email profile'
     });
 
-    // Check if already logged in
-    useEffect(() => {
-        const checkAccess = async () => {
-            try {
-                const access = await getAccessToken();
-                if (access) {
-                    const role = jwtDecode(access)?.role
-                    switch (role) {
-                        case 'ADMIN':
-                            navigate('/admin/dashboard', {replace: true})
-                            break
-                        case 'SELLER':
-                            navigate('/seller/dashboard', {replace: true})
-                            break
-                        case 'BUYER':
-                            navigate('/login', {replace: true})
-                            break
-                        default:
-                            navigate('/', {replace: true})
-                    }
-                }
-            } catch (error) {
-                localStorage.clear()
-            }
-        };
-        checkAccess();
-    }, [navigate]);
-
     document.title = "Đăng nhập | Lá Nhỏ Bên Thềm"
 
     return (
