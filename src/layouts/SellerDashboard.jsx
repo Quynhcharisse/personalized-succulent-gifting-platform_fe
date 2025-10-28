@@ -223,8 +223,13 @@ function SellerDashboardContent({session}) {
             </Box>
 
             {/* Stats Cards */}
-            <Grid container spacing={3} sx={{mb: 4}}>
-                <Grid item xs={12} sm={6} lg={3}>
+            <Box sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 3,
+                mb: 4
+            }}>
+                <Box sx={{flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 12px)', lg: '1 1 calc(25% - 18px)'}, minWidth: 0}}>
                     <StatCard
                         title="Đơn hàng hôm nay"
                         value={stats.todayOrders}
@@ -232,8 +237,8 @@ function SellerDashboardContent({session}) {
                         color={COLORS.primary}
                         trend="+15%"
                     />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
+                </Box>
+                <Box sx={{flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 12px)', lg: '1 1 calc(25% - 18px)'}, minWidth: 0}}>
                     <StatCard
                         title="Doanh thu hôm nay"
                         value={formatCurrencyVnd(stats.revenueVnd)}
@@ -241,8 +246,8 @@ function SellerDashboardContent({session}) {
                         color={COLORS.success}
                         trend="+12%"
                     />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
+                </Box>
+                <Box sx={{flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 12px)', lg: '1 1 calc(25% - 18px)'}, minWidth: 0}}>
                     <StatCard
                         title="Sản phẩm đang bán"
                         value={stats.totalProducts}
@@ -250,8 +255,8 @@ function SellerDashboardContent({session}) {
                         color={COLORS.info}
                         trend="+3"
                     />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
+                </Box>
+                <Box sx={{flex: {xs: '1 1 100%', sm: '1 1 calc(50% - 12px)', lg: '1 1 calc(25% - 18px)'}, minWidth: 0}}>
                     <StatCard
                         title="Sắp hết hàng"
                         value={stats.lowStock}
@@ -259,13 +264,17 @@ function SellerDashboardContent({session}) {
                         color={stats.lowStock > 0 ? COLORS.warning : COLORS.success}
                         suffix={stats.lowStock > 0 ? 'Kiểm tra' : 'Ổn định'}
                     />
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
 
-            {/* Main Content Grid */}
-            <Grid container spacing={3}>
+            {/* Main Content */}
+            <Box sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 3
+            }}>
                 {/* Quick Actions */}
-                <Grid item xs={12} lg={8}>
+                <Box sx={{flex: {xs: '1 1 100%', lg: '1 1 calc(66.666% - 12px)'}, minWidth: 0}}>
                     <Card sx={{
                         borderRadius: 4,
                         border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
@@ -349,10 +358,10 @@ function SellerDashboardContent({session}) {
                             </Stack>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Box>
 
                 {/* Recent Orders */}
-                <Grid item xs={12} lg={4}>
+                <Box sx={{flex: {xs: '1 1 100%', lg: '1 1 calc(33.333% - 12px)'}, minWidth: 0}}>
                     <Card sx={{
                         borderRadius: 4,
                         border: `1px solid ${alpha(COLORS.primary, 0.1)}`,
@@ -415,8 +424,8 @@ function SellerDashboardContent({session}) {
                             </Stack>
                         </CardContent>
                     </Card>
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
         </Box>
     );
 }
@@ -429,6 +438,7 @@ export default function SellerDashboard() {
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [avatarError, setAvatarError] = useState(false);
     const [session, setSession] = useState({
         user: {
             name: '',
@@ -715,7 +725,10 @@ export default function SellerDashboard() {
                                     fontWeight: 600,
                                     boxShadow: `0 4px 12px ${alpha(COLORS.primary, 0.3)}`
                                 }}
-                                src={session.user.image}
+                                src={session.user.image && !avatarError ? session.user.image : null}
+                                imgProps={{
+                                    onError: () => setAvatarError(true)
+                                }}
                             >
                                 {session.user.name.charAt(0)}
                             </Avatar>
@@ -777,7 +790,10 @@ export default function SellerDashboard() {
                                 height: 40,
                                 background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
                             }}
-                            src={session.user.image}
+                            src={session.user.image && !avatarError ? session.user.image : null}
+                            imgProps={{
+                                onError: () => setAvatarError(true)
+                            }}
                         >
                             {session.user.name.charAt(0)}
                         </Avatar>

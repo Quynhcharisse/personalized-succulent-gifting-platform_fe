@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {Box, Button, Link, Paper, Typography} from "@mui/material";
 import {useGoogleLogin} from "@react-oauth/google";
 import GoogleIcon from '@mui/icons-material/Google';
@@ -36,8 +36,6 @@ export default function SignIn() {
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 const access = await getAccessToken();
-                console.log('Access token:', access, 'Type:', typeof access);
-                console.log('All cookies:', document.cookie);
 
                 let role = null;
 
@@ -45,16 +43,11 @@ export default function SignIn() {
                     try {
                         const decoded = jwtDecode(access);
                         role = decoded?.role;
-                        console.log('Decoded role:', role);
                     } catch (error) {
-                        console.error('JWT decode error:', error);
-                        console.error('Access token value:', access);
                         enqueueSnackbar("Token không hợp lệ", {variant: "error"});
                         return;
                     }
                 } else {
-                    console.error('No access token found or invalid token type');
-                    console.error('Access token value:', access);
                     enqueueSnackbar("Không tìm thấy token truy cập", {variant: "error"});
                     return;
                 }
@@ -83,13 +76,10 @@ export default function SignIn() {
         } catch (error) {
             console.error('HandleLogin error:', error);
             if (error.response) {
-                console.error('Error response:', error.response);
                 enqueueSnackbar(error.response.data.message || "Đăng nhập thất bại", {variant: "error"});
             } else if (error.request) {
-                console.error('Network error:', error.request);
                 enqueueSnackbar("Không thể kết nối đến máy chủ", {variant: "error"});
             } else {
-                console.error('Other error:', error);
                 enqueueSnackbar("Đăng nhập thất bại", {variant: "error"});
             }
         } finally {
