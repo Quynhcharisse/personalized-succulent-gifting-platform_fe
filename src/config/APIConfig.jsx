@@ -1,8 +1,6 @@
 import {refreshToken} from "../services/AuthService.jsx";
 import axios from "axios";
 
-// For development: use relative URL to leverage Vite proxy
-// For production: use actual API URL
 const baseURL = import.meta.env.VITE_API_URL + '/api/v1'
 
 axios.defaults.baseURL = baseURL;

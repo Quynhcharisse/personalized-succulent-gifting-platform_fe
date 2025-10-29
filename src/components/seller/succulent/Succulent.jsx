@@ -17,7 +17,7 @@ const SucculentForm = () => {
 
     // Form state
     const [formData, setFormData] = useState({
-        species_name: '',
+        speciesName: '',
         description: '',
         imageUrl: '',
         fengShuiList: [],
@@ -111,7 +111,7 @@ const SucculentForm = () => {
     const handleCloseCreateDialog = () => {
         setShowCreateDialog(false);
         setFormData({
-            species_name: '',
+            speciesName: '',
             description: '',
             imageUrl: '',
             fengShuiList: [],
@@ -128,14 +128,14 @@ const SucculentForm = () => {
     // Step validation functions
     const validateStep1 = () => {
         const newErrors = {};
-        const species = (formData.species_name || '').trim();
+        const species = (formData.speciesName || '').trim();
         const description = (formData.description || '').trim();
         const imageUrl = (formData.imageUrl || '').trim();
 
         if (!species) {
-            newErrors.species_name = 'Tên loài là bắt buộc';
+            newErrors.speciesName = 'Tên loài là bắt buộc';
         } else if (species.length > 100) {
-            newErrors.species_name = 'Tên loài không được vượt quá 100 ký tự';
+            newErrors.speciesName = 'Tên loài không được vượt quá 100 ký tự';
         }
 
         if (!description) {
@@ -235,13 +235,13 @@ const SucculentForm = () => {
         if (Object.keys(allErrors).length === 0) {
             setIsSubmitting(true);
             const apiData = {
-                speciesName: formData.species_name.trim(),
+                speciesName: formData.speciesName.trim(),
                 description: formData.description.trim(),
                 imageUrl: formData.imageUrl.trim(),
                 fengShuiList: formData.fengShuiList,
                 zodiacList: formData.zodiacList,
                 sizeList: formData.sizeDetailRequests.map(size => ({
-                    sizeName: String(size.name).trim().toLowerCase(),
+                    sizeName: String(size.sizeName || size.name).trim().toLowerCase(),
                     price: Number(size.price),
                     minArea: Number(size.minArea) || 0,
                     maxArea: Number(size.maxArea) || 0,

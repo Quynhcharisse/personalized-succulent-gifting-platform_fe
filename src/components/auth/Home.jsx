@@ -19,14 +19,12 @@ export default function Home() {
     const [products, setProducts] = useState([]);
     const [catalogProducts, setCatalogProducts] = useState([]);
 
-    // Fetch products from API
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const response = await viewProduct();
                 if (response && response.data) {
                     setProducts(response.data.data || []);
-                    // Use products for best sellers
                     setCatalogProducts(response.data.data || []);
                 }
             } catch (error) {
@@ -53,22 +51,18 @@ export default function Home() {
         }
     }, [isMuted, isPlaying, volume])
 
-    // Handle video play/pause
     const togglePlay = () => {
         setIsPlaying(prev => !prev)
     }
 
-    // Handle mute/unmute
     const toggleMute = () => {
         setIsMuted(prev => !prev)
     }
 
-    // Handle volume change with enhanced granular control
     const handleVolumeChange = (event) => {
         const newVolume = parseFloat(event.target.value)
         setVolume(newVolume)
 
-        // Auto mute/unmute based on volume level
         if (newVolume === 0) {
             setIsMuted(true)
         } else if (isMuted && newVolume > 0) {
@@ -76,7 +70,6 @@ export default function Home() {
         }
     }
 
-    // Handle keyboard volume control
     const handleVolumeKeyDown = (event) => {
         event.preventDefault()
         const step = 0.1
@@ -101,7 +94,7 @@ export default function Home() {
                 return
         }
 
-        setVolume(Math.round(newVolume * 10) / 10) // Round to 1 decimal place
+        setVolume(Math.round(newVolume * 10) / 10)
 
         if (newVolume === 0) {
             setIsMuted(true)
@@ -110,10 +103,9 @@ export default function Home() {
         }
     }
 
-    // Handle volume wheel control for fine adjustment
     const handleVolumeWheel = (event) => {
         event.preventDefault()
-        const step = 0.05 // Smaller step for wheel control
+        const step = 0.05
         const delta = event.deltaY > 0 ? -step : step
         const newVolume = Math.max(0, Math.min(1, volume + delta))
 
