@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Card, CardContent, CardMedia, Grid, Typography, Button, Box, Container, CircularProgress, Alert, TextField, InputAdornment, IconButton} from '@mui/material';
-import {Search, Clear} from '@mui/icons-material';
+import {Card, CardContent, CardMedia, Typography, Button, Box, Container, CircularProgress, Alert, TextField, InputAdornment, IconButton, Grid, Chip, Paper} from '@mui/material';
+import {Search, Clear, LocalFlorist, ShoppingCart} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '../../services/ProductService.jsx';
 
@@ -91,6 +91,24 @@ export default function ProductList() {
         return totalPrice;
     };
 
+    const getPriceInfo = (product) => {
+        if (!product.sizes || product.sizes.length === 0) {
+            return { currentPrice: 0, originalPrice: null, discount: null };
+        }
+
+        const prices = product.sizes.map(size => calculateProductPrice(size));
+        const minPrice = Math.min(...prices);
+        const currentPrice = minPrice;
+
+        // Discount can be calculated or from API (for now, assume no discount)
+        const discount = product.discountPercentage || null;
+        const originalPrice = discount && discount > 0 
+            ? Math.round(currentPrice / (1 - discount / 100))
+            : null;
+        
+        return { currentPrice, originalPrice, discount };
+    };
+
     const handleProductClick = (productId) => {
         navigate(`/product/${productId}`);
     };
@@ -117,89 +135,404 @@ export default function ProductList() {
 
     if (loading) {
         return (
-            <Container sx={{py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <CircularProgress />
-            </Container>
+            <Box sx={{
+                minHeight: '60vh',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: 'linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%)'
+            }}>
+                <CircularProgress sx={{color: '#0D3B2E'}} />
+            </Box>
         );
     }
 
     return (
-        <Container sx={{py: 4}}>
-            <Box sx={{mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2}}>
-                <Typography variant="h4">
-                    Sản phẩm
+        <Box sx={{minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%)', py: 6}}>
+            <Container maxWidth="xl">
+                {/* Header Section with Gradient */}
+                <Paper 
+                    elevation={0}
+                    sx={{
+                        background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
+                        borderRadius: 4,
+                        p: 4,
+                        mb: 5,
+                        color: 'white',
+                        boxShadow: '0 8px 32px rgba(13, 59, 46, 0.2)'
+                    }}
+                >
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 3}}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Box
+                                sx={{
+                                    width: 64,
+                                    height: 64,
+                                    borderRadius: '50%',
+                                    background: 'rgba(255, 255, 255, 0.15)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '2px solid rgba(255, 255, 255, 0.2)'
+                                }}
+                            >
+                                <LocalFlorist sx={{fontSize: '2.5rem', color: 'white'}}/>
+                            </Box>
+                            <Box>
+                                <Typography variant="h4" sx={{fontWeight: 800, mb: 0.5, fontSize: {xs: '1.75rem', md: '2.125rem'}}}>
+                                    Sản Phẩm
+                                </Typography>
+                                <Typography variant="body2" sx={{opacity: 0.95, fontSize: '0.95rem'}}>
+                                    Khám phá bộ sưu tập sen đá độc đáo của chúng tôi
                 </Typography>
+                            </Box>
+                        </Box>
                 <TextField
                     variant="outlined"
                     placeholder="Tìm kiếm sản phẩm..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    size="small"
-                    sx={{minWidth: '300px'}}
-                    InputProps={{
+                            size="medium"
+                            sx={{
+                                minWidth: {xs: '100%', sm: '380px'},
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                borderRadius: 2,
+                                backdropFilter: 'blur(10px)',
+                                '& .MuiOutlinedInput-root': {
+                                    color: 'white',
+                                    '& fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                                        borderWidth: 2
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                                    },
+                                },
+                                '& .MuiInputBase-input::placeholder': {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    opacity: 1
+                                }
+                            }}
+                            slotProps={{
+                                input: {
                         startAdornment: (
                             <InputAdornment position="start">
-                                <Search />
+                                            <Search sx={{color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.5rem'}}/>
                             </InputAdornment>
                         ),
                         endAdornment: searchTerm && (
                             <InputAdornment position="end">
-                                <IconButton size="small" onClick={handleClearSearch}>
+                                            <IconButton 
+                                                size="small" 
+                                                onClick={handleClearSearch}
+                                                sx={{color: 'rgba(255, 255, 255, 0.9)'}}
+                                            >
                                     <Clear />
                                 </IconButton>
                             </InputAdornment>
                         )
+                                }
                     }}
                 />
             </Box>
+                </Paper>
 
+                {/* Empty State */}
             {filteredProducts.length === 0 && !loading && (
-                <Alert severity="info" sx={{mb: 3}}>
-                    {searchTerm ? `Không tìm thấy sản phẩm nào cho "${searchTerm}"` : 'Chưa có sản phẩm nào'}
-                </Alert>
-            )}
+                    <Paper 
+                        elevation={0}
+                        sx={{
+                            p: 8,
+                            textAlign: 'center',
+                            background: 'white',
+                            borderRadius: 4,
+                            mb: 4,
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+                        }}
+                    >
+                        <LocalFlorist sx={{fontSize: '5rem', color: '#0D3B2E', opacity: 0.2, mb: 2}}/>
+                        <Typography variant="h5" sx={{color: '#0D3B2E', fontWeight: 700, mb: 1}}>
+                            {searchTerm ? `Không tìm thấy sản phẩm` : 'Chưa có sản phẩm nào'}
+                        </Typography>
+                        <Typography variant="body1" sx={{color: 'text.secondary'}}>
+                            {searchTerm ? `Không có sản phẩm nào phù hợp với "${searchTerm}"` : 'Vui lòng quay lại sau'}
+                        </Typography>
+                    </Paper>
+                )}
 
-            <Grid container spacing={3}>
-                {filteredProducts.map((product) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+                {/* Products Grid */}
+                <Grid container spacing={4} sx={{justifyContent: {xs: 'flex-start', sm: 'center'}}}>
+                    {filteredProducts.map((product) => {
+                        const { currentPrice, originalPrice, discount } = getPriceInfo(product);
+                        const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
+                        const productImage = product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg';
+                        
+                        return (
+                            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={product.id} sx={{maxWidth: {xs: '100%', sm: '320px', md: '300px', lg: '280px', xl: '270px'}}}>
                         <Card
+                                    elevation={0}
                             sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
                                 cursor: 'pointer',
-                                transition: 'transform 0.2s',
+                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        position: 'relative',
+                                        maxWidth: '100%',
+                                        margin: '0 auto',
+                                        borderRadius: 3,
+                                        overflow: 'hidden',
+                                        border: '1px solid rgba(13, 59, 46, 0.08)',
+                                        background: 'white',
+                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
                                 '&:hover': {
-                                    transform: 'translateY(-8px)',
-                                    boxShadow: 6
-                                }
-                            }}
+                                            transform: 'translateY(-12px) scale(1.02)',
+                                            boxShadow: '0 20px 40px rgba(13, 59, 46, 0.2)',
+                                            borderColor: '#0D3B2E',
+                                            '& .product-image': {
+                                                transform: 'scale(1.1)'
+                                            },
+                                            '& .product-overlay': {
+                                                opacity: 1
+                                            },
+                                            '& .quick-add-button': {
+                                                opacity: 1,
+                                                transform: 'translateX(-50%) translateY(0)',
+                                                pointerEvents: 'auto'
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {/* Discount Badge */}
+                                    {discount && discount > 0 && (
+                                        <Chip
+                                            label={`-${discount}%`}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 12,
+                                                left: 12,
+                                                zIndex: 2,
+                                                background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+                                                color: 'white',
+                                                fontWeight: 800,
+                                                fontSize: '0.875rem',
+                                                height: '38px',
+                                                px: 2,
+                                                boxShadow: '0 4px 12px rgba(255, 107, 107, 0.5)',
+                                                '& .MuiChip-label': {
+                                                    px: 1.5
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Image Container with Overlay */}
+                                    <Box 
                             onClick={() => handleProductClick(product.id)}
-                        >
+                                        sx={{ 
+                                            flexGrow: 1,
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            backgroundColor: '#f8f9fa',
+                                            height: '280px'
+                                        }}
+                                    >
+                                        <Box
+                                            className="product-overlay"
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                right: 0,
+                                                bottom: 0,
+                                                background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(13,59,46,0.15) 100%)',
+                                                zIndex: 1,
+                                                opacity: 0,
+                                                transition: 'opacity 0.3s ease'
+                                            }}
+                                        />
                             <CardMedia
                                 component="img"
-                                height="200"
-                                image={product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg'}
-                                alt={typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
-                            />
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom noWrap>
-                                    {typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
+                                            className="product-image"
+                                            image={productImage}
+                                            alt={productName}
+                                            sx={{
+                                                objectFit: 'cover',
+                                                width: '100%',
+                                                height: '100%',
+                                                transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                                            }}
+                                        />
+                                        {/* Quick Add Button on Image Hover */}
+                                        <Box
+                                            className="quick-add-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAddToCart(e, product);
+                                            }}
+                                            sx={{
+                                                position: 'absolute',
+                                                bottom: 16,
+                                                left: '50%',
+                                                transform: 'translateX(-50%) translateY(20px)',
+                                                opacity: 0,
+                                                transition: 'all 0.3s ease',
+                                                zIndex: 2,
+                                                pointerEvents: 'none'
+                                            }}
+                                        >
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<ShoppingCart />}
+                                                sx={{
+                                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
+                                                    color: 'white',
+                                                    fontWeight: 700,
+                                                    px: 3,
+                                                    py: 1,
+                                                    borderRadius: 3,
+                                                    fontSize: '0.95rem',
+                                                    textTransform: 'none',
+                                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.5)',
+                                                    whiteSpace: 'nowrap',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(135deg, #1e5a4a 0%, #0D3B2E 100%)',
+                                                        boxShadow: '0 6px 20px rgba(13, 59, 46, 0.7)',
+                                                        transform: 'scale(1.05)'
+                                                    },
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                Thêm vào giỏ hàng
+                                            </Button>
+                                        </Box>
+                                    </Box>
+
+                                    <CardContent sx={{ 
+                                        flexGrow: 1, 
+                                        display: 'flex', 
+                                        flexDirection: 'column',
+                                        p: 3,
+                                        '&:last-child': {
+                                            pb: 3
+                                        }
+                                    }}>
+                                        {/* Product Name */}
+                                        <Typography 
+                                            variant="h6" 
+                                            gutterBottom 
+                                            sx={{
+                                                minHeight: '3.5rem',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                fontWeight: 700,
+                                                color: '#0D3B2E',
+                                                mb: 2.5,
+                                                fontSize: '1.1rem',
+                                                lineHeight: 1.5
+                                            }}
+                                        >
+                                            {productName}
+                                        </Typography>
+                                        
+                                        <Box sx={{ mt: 'auto' }}>
+                                            {/* Price Section */}
+                                            <Box sx={{ 
+                                                mb: 2.5,
+                                                p: 2,
+                                                background: 'linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%)',
+                                                borderRadius: 2.5,
+                                                border: '1px solid rgba(13, 59, 46, 0.1)'
+                                            }}>
+                                                {originalPrice ? (
+                                                    <Box>
+                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
+                                                            <Typography 
+                                                                variant="body2" 
+                                                                sx={{ 
+                                                                    textDecoration: 'line-through',
+                                                                    color: '#757575',
+                                                                    fontSize: '0.875rem'
+                                                                }}
+                                                            >
+                                                                {new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫
+                                                            </Typography>
+                                                            <Chip 
+                                                                label="Giảm giá" 
+                                                                size="small"
+                                                                sx={{
+                                                                    height: '22px',
+                                                                    fontSize: '0.7rem',
+                                                                    background: '#ff6b6b',
+                                                                    color: 'white',
+                                                                    fontWeight: 700
+                                                                }}
+                                                            />
+                                                        </Box>
+                                                        <Typography 
+                                                            variant="h5" 
+                                                            sx={{ 
+                                                                fontWeight: 800, 
+                                                                color: '#0D3B2E',
+                                                                fontSize: '1.6rem'
+                                                            }}
+                                                        >
+                                                            {new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫
                                 </Typography>
-                                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <Typography variant="h6" color="primary">
-                                        {product.sizes?.[0] ? new Intl.NumberFormat('vi-VN').format(calculateProductPrice(product.sizes[0])) + ' ₫' : 'N/A'}
+                                                    </Box>
+                                                ) : (
+                                                    <Typography 
+                                                        variant="h5" 
+                                                        sx={{ 
+                                                            fontWeight: 800, 
+                                                            color: '#0D3B2E',
+                                                            fontSize: '1.6rem'
+                                                        }}
+                                                    >
+                                                        {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
                                     </Typography>
+                                                )}
+                                            </Box>
+                                            
+                                            {/* Add to Cart Button */}
                                     <Button 
                                         variant="contained" 
-                                        size="small"
+                                                fullWidth
+                                                startIcon={<ShoppingCart sx={{fontSize: '1.2rem'}}/>}
                                         onClick={(e) => handleAddToCart(e, product)}
-                                    >
-                                        Thêm giỏ
+                                                sx={{
+                                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
+                                                    color: 'white',
+                                                    fontWeight: 700,
+                                                    py: 1.5,
+                                                    borderRadius: 2.5,
+                                                    fontSize: '1rem',
+                                                    textTransform: 'none',
+                                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.35)',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(135deg, #1e5a4a 0%, #0D3B2E 100%)',
+                                                        boxShadow: '0 8px 24px rgba(13, 59, 46, 0.5)',
+                                                        transform: 'translateY(-2px)'
+                                                    },
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                Thêm vào giỏ hàng
                                     </Button>
                                 </Box>
                             </CardContent>
                         </Card>
                     </Grid>
-                ))}
+                        );
+                    })}
             </Grid>
         </Container>
+        </Box>
     );
 }
