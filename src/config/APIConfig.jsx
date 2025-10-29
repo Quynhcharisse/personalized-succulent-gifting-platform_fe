@@ -3,8 +3,7 @@ import axios from "axios";
 
 // For development: use relative URL to leverage Vite proxy
 // For production: use actual API URL
-const isDevelopment = import.meta.env.MODE === 'development';
-const baseURL = isDevelopment ? '/api/v1' : `${import.meta.env.VITE_API_URL}/api/v1`;
+const baseURL = import.meta.env.VITE_API_URL + '/api/v1'
 
 axios.defaults.baseURL = baseURL;
 
