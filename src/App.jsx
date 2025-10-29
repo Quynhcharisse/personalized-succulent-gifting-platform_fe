@@ -309,11 +309,12 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Navigate to={'/admin/dashboard'}/>
+                element: <Navigate to={'/admin/dashboard'} replace/>
             },
             {
                 path: 'dashboard',
-                element: <h1>Dashboard Pannel</h1>
+                // AdminDashboard component tự xử lý nội dung khi pathname === '/admin/dashboard'
+                element: null
             },
             {
                 path: 'users',
