@@ -140,9 +140,7 @@ const SucculentForm = () => {
 
         if (!description) {
             newErrors.description = 'Mô tả là bắt buộc';
-        } else if (description.length > 300) {
-            newErrors.description = 'Mô tả không được vượt quá 300 ký tự';
-        } 
+        }
         
         if (!imageUrl) {
             newErrors.imageUrl = 'Image URL is required';
