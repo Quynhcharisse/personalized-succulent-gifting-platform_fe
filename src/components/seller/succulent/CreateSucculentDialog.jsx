@@ -141,10 +141,10 @@ const CreateSucculentDialog = ({
                                 <TextField
                                     fullWidth
                                     label="Tên loài sen đá"
-                                    value={formData.species_name}
-                                    onChange={(e) => setFormData(prev => ({...prev, species_name: e.target.value}))}
-                                    error={!!errors.species_name}
-                                    helperText={errors.species_name}
+                                    value={formData.speciesName}
+                                    onChange={(e) => setFormData(prev => ({...prev, speciesName: e.target.value}))}
+                                    error={!!errors.speciesName}
+                                    helperText={errors.speciesName}
                                     placeholder="Tên loài sen đá *"
                                     required
                                     sx={{mt: 5}}

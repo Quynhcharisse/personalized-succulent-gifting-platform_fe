@@ -86,7 +86,6 @@ export default function SiteHeader() {
         if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
             verifyRole()
         } else {
-            // Trong thời gian cache, dùng localStorage (nhanh)
             setRole(localRole)
         }
     }, [currentUser, location.pathname])

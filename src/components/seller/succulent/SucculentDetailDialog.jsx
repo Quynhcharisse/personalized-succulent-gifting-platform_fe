@@ -411,8 +411,8 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     gap: 0.5,
                                                     justifyContent: 'flex-start'
                                                 }}>
-                                                    {succulent.fengShuiElements && succulent.fengShuiElements.length > 0 ?
-                                                        succulent.fengShuiElements.map((element, index) => (
+                                                    {(succulent.fengShuiElements || succulent.fengShuiList) && (succulent.fengShuiElements || succulent.fengShuiList).length > 0 ?
+                                                        (succulent.fengShuiElements || succulent.fengShuiList).map((element, index) => (
                                                             <Chip
                                                                 key={index}
                                                                 label={FENGSHUI.find(opt => opt.value === element)?.label || element}
@@ -462,8 +462,8 @@ const SucculentDetailDialog = ({open, onClose, succulent}) => {
                                                     gap: 0.5,
                                                     justifyContent: 'flex-start'
                                                 }}>
-                                                    {succulent.zodiacs && succulent.zodiacs.length > 0 ?
-                                                        succulent.zodiacs.map((zodiac, index) => (
+                                                    {(succulent.zodiacs || succulent.zodiacList) && (succulent.zodiacs || succulent.zodiacList).length > 0 ?
+                                                        (succulent.zodiacs || succulent.zodiacList).map((zodiac, index) => (
                                                             <Chip
                                                                 key={index}
                                                                 label={ZODIACS.find(opt => opt.value === zodiac)?.label || zodiac}

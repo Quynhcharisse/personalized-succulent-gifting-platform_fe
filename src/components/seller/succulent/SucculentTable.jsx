@@ -11,13 +11,21 @@ const SucculentTable = ({succulentList, isLoading, onViewDetail, onUpdate}) => {
 
     const renderSizeChips = (succulent) => {
         let labels = [];
+        
+        // Handle size object (from API response)
         if (succulent?.size && typeof succulent.size === 'object') {
             labels = Object.keys(succulent.size);
-        } else if (Array.isArray(succulent?.sizeList)) {
+        } 
+        // Handle sizeList array (from form data)
+        else if (Array.isArray(succulent?.sizeList)) {
             labels = succulent.sizeList.map((s) => (s.sizeName || s.name || s).toString());
-        } else if (Array.isArray(succulent?.size)) {
+        } 
+        // Handle size array (fallback)
+        else if (Array.isArray(succulent?.size)) {
             labels = succulent.size.map((s) => (s.sizeName || s.name || s).toString());
-        } else if (typeof succulent?.size === 'string') {
+        } 
+        // Handle size string (fallback)
+        else if (typeof succulent?.size === 'string') {
             labels = [succulent.size];
         }
 

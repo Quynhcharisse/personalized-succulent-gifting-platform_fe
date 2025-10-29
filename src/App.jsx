@@ -323,15 +323,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             }
-            ,
-            // {
-            //     path: 'suppliers',
-            //     element: (
-            //         <Suspense fallback={<LoadingFallback/>}>
-            //             <Supplier/>
-            //         </Suspense>
-            //     )
-            // }
         ]
     },
     {
@@ -436,7 +427,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-            // --- Buyer Succulent Pages ---
             {
                 path: 'succulent',
                 element: <SucculentList/>
