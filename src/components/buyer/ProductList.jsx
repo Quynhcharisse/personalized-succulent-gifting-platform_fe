@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {Card, CardContent, CardMedia, Grid, Typography, Button, Box, Container, CircularProgress, Alert, TextField, InputAdornment, IconButton} from '@mui/material';
 import {Search, Clear} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import axiosClient from '../../config/APIConfig.jsx';
+import {viewProduct} from '../../services/ProductService.jsx';
 
 export default function ProductList() {
     const [products, setProducts] = useState([]);
@@ -39,7 +39,7 @@ export default function ProductList() {
     const fetchProducts = async () => {
         try {
             // Try to get all products (accessible without auth)
-            const response = await axiosClient.get('/product');
+            const response = await viewProduct();
             setProducts(response.data.data || []);
             setFilteredProducts(response.data.data || []);
         } catch (error) {

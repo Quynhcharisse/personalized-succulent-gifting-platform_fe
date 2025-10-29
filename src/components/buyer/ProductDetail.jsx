@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import {ShoppingCart, FavoriteBorder, Share, ArrowBack} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import axiosClient from '../../config/APIConfig.jsx';
+import {viewProduct} from '../../services/ProductService.jsx';
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -41,9 +41,19 @@ export default function ProductDetail() {
 
     const fetchProductDetail = async () => {
         try {
-            const response = await axiosClient.get(`/product/${id}`);
-            setProduct(response.data.data);
-            setError(null);
+            // Get all products and filter by id
+            const response = await viewProduct();
+            if (response && response.data && response.data.data) {
+                const product = response.data.data.find(p => p.id === parseInt(id));
+                if (product) {
+                    setProduct(product);
+                    setError(null);
+                } else {
+                    setError('Không tìm thấy sản phẩm');
+                }
+            } else {
+                setError('Không thể tải thông tin sản phẩm');
+            }
         } catch (error) {
             console.error('Error fetching product detail:', error);
             setError('Không thể tải thông tin sản phẩm');
