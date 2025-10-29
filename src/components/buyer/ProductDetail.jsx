@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {
     Container,
-    Grid,
     Typography,
     Button,
     Box,
@@ -15,7 +14,7 @@ import {
     Card,
     CardMedia
 } from '@mui/material';
-import {ShoppingCart, FavoriteBorder, Share, ArrowBack} from '@mui/icons-material';
+import {ShoppingCart, FavoriteBorder, Share, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '../../services/ProductService.jsx';
 
@@ -28,6 +27,7 @@ export default function ProductDetail() {
     const [error, setError] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [imageError, setImageError] = useState(false);
+    const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
     
     // Check if user is logged in
     const isLoggedIn = () => {
@@ -106,13 +106,13 @@ export default function ProductDetail() {
             return;
         }
         // TODO: Implement add to cart functionality
-        console.log('Add to cart:', product.id, quantity);
+        console.log('Add to cart:', product.id, quantity, product.sizes?.[selectedSizeIndex]);
         enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
     };
     
     const handleAddToWishlist = () => {
         if (!isLoggedIn()) {
-            enqueueSnackbar('Vui lòng đăng nhập để thêm vào yêu thích', {variant: 'info'});
+                enqueueSnackbar('Vui lòng đăng nhập để thêm vào yêu thích', {variant: 'info'});
             navigate('/login', {state: {from: `/product/${id}`}});
             return;
         }
@@ -155,27 +155,34 @@ export default function ProductDetail() {
         );
     }
 
+    const selectedSize = product.sizes?.[selectedSizeIndex];
+    const currentPrice = selectedSize ? calculateProductPrice(selectedSize) : 0;
+    const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
+
     return (
-        <Container sx={{py: 4}}>
+        <Container maxWidth="lg" sx={{py: 4}}>
             <Button startIcon={<ArrowBack/>} sx={{mb: 2}} onClick={() => navigate(-1)}>
                 Quay lại
             </Button>
             
-            <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 4}}>
+                {/* Product Images */}
+                <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 16px)'}}}>
                     <Card
                         sx={{
                             height: '100%',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            minHeight: '400px'
+                            minHeight: '500px',
+                            position: 'sticky',
+                            top: 20
                         }}
                     >
                         {imageError ? (
                             <Box sx={{
                                 width: '100%',
-                                height: '400px',
+                                height: '500px',
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
@@ -187,77 +194,100 @@ export default function ProductDetail() {
                             <CardMedia
                                 component="img"
                                 image={product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg'}
-                                alt={typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
+                                alt={productName}
                                 onError={() => setImageError(true)}
                                 sx={{
-                                    maxHeight: '500px',
+                                    maxHeight: '600px',
+                                    width: '100%',
                                     objectFit: 'contain'
                                 }}
                             />
                         )}
                     </Card>
-                </Grid>
+                </Box>
                 
-                <Grid item xs={12} md={6}>
+                {/* Product Info */}
+                <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 16px)'}}}>
                     <Box>
-                        <Box sx={{display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap'}}>
-                            {product.badge && <Chip label={typeof product.badge === 'object' ? JSON.stringify(product.badge) : product.badge} color="primary" size="small"/>}
-                            {product.category && <Chip label={typeof product.category === 'object' ? JSON.stringify(product.category) : product.category} variant="outlined" size="small"/>}
-                        </Box>
+                        {/* Status Chip */}
+                        {product.status && (
+                            <Chip 
+                                label={product.status} 
+                                color={product.status.includes('còn hàng') ? 'success' : 'error'}
+                                sx={{mb: 2}}
+                            />
+                        )}
                         
-                        <Typography variant="h4" gutterBottom>
-                            {typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
+                        <Typography variant="h4" gutterBottom sx={{fontWeight: 700, color: '#0D3B2E', mb: 2}}>
+                            {productName}
                         </Typography>
-                        
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                            <Rating value={product.rating || 4.5} readOnly precision={0.5}/>
-                            <Typography variant="body2" color="text.secondary">
-                                ({product.reviewCount || 0} đánh giá)
-                            </Typography>
-                        </Box>
                         
                         <Divider sx={{my: 2}}/>
                         
+                        {/* Price */}
                         <Box sx={{mb: 3}}>
-                            {product.sizes?.[0] ? (
-                                <Typography variant="h4" color="primary" sx={{fontWeight: 'bold'}}>
-                                    {new Intl.NumberFormat('vi-VN').format(calculateProductPrice(product.sizes[0]))} ₫
-                                </Typography>
-                            ) : (
-                                <Typography variant="h4" color="primary" sx={{fontWeight: 'bold'}}>
-                                    N/A
-                                </Typography>
-                            )}
+                            <Typography variant="h3" color="primary" sx={{fontWeight: 'bold', color: '#0D3B2E'}}>
+                                {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
+                            </Typography>
                         </Box>
                         
-                        <Typography variant="body1" paragraph>
-                            {typeof product.description === 'object' ? JSON.stringify(product.description) : product.description}
-                        </Typography>
+                        {/* Size Selection */}
+                        {product.sizes && product.sizes.length > 1 && (
+                            <Box sx={{mb: 3}}>
+                                <Typography variant="subtitle1" sx={{mb: 1, fontWeight: 600}}>
+                                    Chọn kích thước:
+                                </Typography>
+                                <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
+                                    {product.sizes.map((size, index) => (
+                                        <Button
+                                            key={index}
+                                            variant={selectedSizeIndex === index ? 'contained' : 'outlined'}
+                                            onClick={() => setSelectedSizeIndex(index)}
+                                            sx={{
+                                                borderColor: '#0D3B2E',
+                                                color: selectedSizeIndex === index ? 'white' : '#0D3B2E',
+                                                backgroundColor: selectedSizeIndex === index ? '#0D3B2E' : 'transparent',
+                                                '&:hover': {
+                                                    borderColor: '#0D3B2E',
+                                                    backgroundColor: selectedSizeIndex === index ? '#1e5a4a' : 'rgba(13, 59, 46, 0.1)',
+                                                }
+                                            }}
+                                        >
+                                            {size.name || `Kích thước ${index + 1}`}
+                                        </Button>
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
                         
                         <Divider sx={{my: 3}}/>
                         
-                        <Box sx={{display: 'flex', gap: 2, mb: 2}}>
-                            <Typography variant="subtitle1">Số lượng:</Typography>
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        {/* Quantity */}
+                        <Box sx={{display: 'flex', gap: 2, mb: 3, alignItems: 'center'}}>
+                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>Số lượng:</Typography>
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, border: '1px solid #ddd', borderRadius: 1}}>
                                 <Button
                                     variant="outlined"
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    sx={{minWidth: '40px'}}
                                 >
                                     -
                                 </Button>
-                                <Typography sx={{minWidth: '40px', textAlign: 'center'}}>
+                                <Typography sx={{minWidth: '50px', textAlign: 'center', px: 2}}>
                                     {quantity}
                                 </Typography>
                                 <Button
                                     variant="outlined"
                                     onClick={() => setQuantity(quantity + 1)}
+                                    sx={{minWidth: '40px'}}
                                 >
                                     +
                                 </Button>
                             </Box>
                         </Box>
                         
-                        <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap'}}>
+                        {/* Action Buttons */}
+                        <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4}}>
                             <Button
                                 variant="contained"
                                 size="large"
@@ -267,12 +297,15 @@ export default function ProductDetail() {
                                     flex: 1,
                                     minWidth: '200px',
                                     backgroundColor: '#0D3B2E',
+                                    py: 1.5,
+                                    fontSize: '1rem',
+                                    fontWeight: 600,
                                     '&:hover': {
                                         backgroundColor: '#1e5a4a',
                                     }
                                 }}
                             >
-                                Thêm vào giỏ
+                                Thêm vào giỏ hàng
                             </Button>
                             <Button
                                 variant="outlined"
@@ -291,19 +324,173 @@ export default function ProductDetail() {
                             </Button>
                         </Box>
                         
-                        <Divider sx={{my: 3}}/>
+                        <Divider sx={{my: 4}}/>
                         
-                        <Box>
-                            <Typography variant="subtitle2" gutterBottom>
-                                Thông tin sản phẩm:
+                        {/* Description */}
+                        <Box sx={{mb: 4}}>
+                            <Typography variant="h6" gutterBottom sx={{fontWeight: 700, mb: 2}}>
+                                Mô tả sản phẩm
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Kích thước: {product.sizes?.[0]?.name || 'N/A'} • Trạng thái: {product.status || 'Còn hàng'}
+                            <Typography variant="body1" sx={{whiteSpace: 'pre-line', lineHeight: 1.8}}>
+                                {typeof product.description === 'object' ? JSON.stringify(product.description) : product.description}
                             </Typography>
                         </Box>
                     </Box>
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
+
+            {/* Detailed Product Information */}
+            {selectedSize && (
+                <Box sx={{mt: 6}}>
+                    <Typography variant="h5" gutterBottom sx={{fontWeight: 700, mb: 3, color: '#0D3B2E'}}>
+                        Chi tiết sản phẩm - {selectedSize.name}
+                    </Typography>
+                    
+                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 3}}>
+                        {/* Succulents */}
+                        {selectedSize.succulents && selectedSize.succulents.length > 0 && (
+                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
+                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                        <LocalFlorist sx={{mr: 1, color: '#4caf50'}}/>
+                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                            Sen Đá
+                                        </Typography>
+                                    </Box>
+                                    {selectedSize.succulents.map((succulent, idx) => (
+                                        <Box key={idx} sx={{mb: 2, pb: 2, borderBottom: idx < selectedSize.succulents.length - 1 ? '1px solid #eee' : 'none'}}>
+                                            <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                                {succulent.name}
+                                            </Typography>
+                                            {succulent.description && (
+                                                <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                    {succulent.description}
+                                                </Typography>
+                                            )}
+                                            {succulent.size && Array.isArray(succulent.size) && (
+                                                <Box sx={{mt: 1}}>
+                                                    {succulent.size.map((sizeItem, sizeIdx) => (
+                                                        <Chip
+                                                            key={sizeIdx}
+                                                            label={`${sizeItem.name}: ${new Intl.NumberFormat('vi-VN').format(sizeItem.price)} ₫ (SL: ${sizeItem.quantity})`}
+                                                            size="small"
+                                                            sx={{mr: 1, mb: 0.5}}
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Paper>
+                            </Box>
+                        )}
+
+                        {/* Pot */}
+                        {selectedSize.pot && (
+                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
+                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                        <SquareFoot sx={{mr: 1, color: '#ff9800'}}/>
+                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                            Chậu
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                        {selectedSize.pot.name}
+                                    </Typography>
+                                    {selectedSize.pot.description && (
+                                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                                            {selectedSize.pot.description}
+                                        </Typography>
+                                    )}
+                                    <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
+                                        <Chip label={`Chất liệu: ${selectedSize.pot.material}`} size="small"/>
+                                        {selectedSize.pot.color && (
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                <Typography variant="caption">Màu:</Typography>
+                                                <Box sx={{width: 24, height: 24, backgroundColor: selectedSize.pot.color, borderRadius: '50%', border: '1px solid #ddd'}}/>
+                                            </Box>
+                                        )}
+                                    </Box>
+                                    {selectedSize.pot.size && selectedSize.pot.size.length > 0 && (
+                                        <Box sx={{mt: 2}}>
+                                            {selectedSize.pot.size.map((potSize, idx) => (
+                                                <Box key={idx} sx={{mb: 1}}>
+                                                    <Typography variant="body2">
+                                                        <strong>{potSize.name}:</strong> {new Intl.NumberFormat('vi-VN').format(potSize.price)} ₫
+                                                        {potSize.upperCrossSectionArea && ` • Diện tích: ${potSize.upperCrossSectionArea}m²`}
+                                                        {potSize.height && ` • Chiều cao: ${potSize.height}cm`}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Box>
+                        )}
+
+                        {/* Soil */}
+                        {selectedSize.soil && (
+                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
+                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                        <WaterDrop sx={{mr: 1, color: '#2196f3'}}/>
+                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                            Đất/Đá
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                        {selectedSize.soil.name}
+                                    </Typography>
+                                    {selectedSize.soil.description && (
+                                        <Typography variant="body2" color="text.secondary" sx={{mb: 2, whiteSpace: 'pre-line'}}>
+                                            {selectedSize.soil.description}
+                                        </Typography>
+                                    )}
+                                    {selectedSize.soil.basePricing && (
+                                        <Box>
+                                            <Typography variant="body2">
+                                                <strong>Khối lượng:</strong> {selectedSize.soil.massAmount} {selectedSize.soil.basePricing.massUnit || 'gram'}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                <strong>Giá:</strong> {new Intl.NumberFormat('vi-VN').format(
+                                                    (selectedSize.soil.basePricing.price / selectedSize.soil.basePricing.massValue) * selectedSize.soil.massAmount
+                                                )} ₫
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Box>
+                        )}
+
+                        {/* Decorations */}
+                        {selectedSize.decorations && selectedSize.decorations.length > 0 && (
+                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
+                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                        <Brush sx={{mr: 1, color: '#9c27b0'}}/>
+                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                            Trang trí
+                                        </Typography>
+                                    </Box>
+                                    {selectedSize.decorations.map((decoration, idx) => (
+                                        <Box key={idx} sx={{mb: 2}}>
+                                            <Typography variant="subtitle2" sx={{fontWeight: 600}}>
+                                                {decoration.name || `Phụ kiện ${idx + 1}`}
+                                            </Typography>
+                                            {decoration.totalPrice && (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Giá: {new Intl.NumberFormat('vi-VN').format(decoration.totalPrice)} ₫
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Paper>
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+            )}
         </Container>
     );
 }
