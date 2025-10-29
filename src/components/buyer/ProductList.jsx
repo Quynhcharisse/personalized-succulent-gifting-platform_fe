@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Card, CardContent, CardMedia, Typography, Button, Box, Container, CircularProgress, Alert, TextField, InputAdornment, IconButton, Grid, Chip, Paper} from '@mui/material';
-import {Search, Clear, LocalFlorist, ShoppingCart} from '@mui/icons-material';
+import {Search, Clear, LocalFlorist, ShoppingCart, Visibility, Build} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '../../services/ProductService.jsx';
 
@@ -123,6 +123,22 @@ export default function ProductList() {
         // TODO: Implement add to cart functionality
         console.log('Add to cart:', product.id);
         enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
+    };
+
+    const handleViewDetail = (e, productId) => {
+        e.stopPropagation();
+        navigate(`/product/${productId}`);
+    };
+
+    const handleCustomRequest = (e, product) => {
+        e.stopPropagation();
+        if (!isLoggedIn()) {
+            enqueueSnackbar('Vui lòng đăng nhập để đặt hàng tùy chỉnh', {variant: 'info'});
+            navigate('/login');
+            return;
+        }
+        // TODO: Navigate to custom request page or open dialog
+        enqueueSnackbar('Tính năng đặt hàng tùy chỉnh đang phát triển', {variant: 'info'});
     };
 
     const handleSearchChange = (e) => {
@@ -289,7 +305,7 @@ export default function ProductList() {
                                         border: '1px solid rgba(13, 59, 46, 0.08)',
                                         background: 'white',
                                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-                                '&:hover': {
+                                        '&:hover': {
                                             transform: 'translateY(-12px) scale(1.02)',
                                             boxShadow: '0 20px 40px rgba(13, 59, 46, 0.2)',
                                             borderColor: '#0D3B2E',
@@ -299,10 +315,8 @@ export default function ProductList() {
                                             '& .product-overlay': {
                                                 opacity: 1
                                             },
-                                            '& .quick-add-button': {
-                                                opacity: 1,
-                                                transform: 'translateX(-50%) translateY(0)',
-                                                pointerEvents: 'auto'
+                                            '& .action-icons': {
+                                                opacity: 1
                                             }
                                         }
                                     }}
@@ -315,7 +329,7 @@ export default function ProductList() {
                                                 position: 'absolute',
                                                 top: 12,
                                                 left: 12,
-                                                zIndex: 2,
+                                                zIndex: 3,
                                                 background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
                                                 color: 'white',
                                                 fontWeight: 800,
@@ -329,6 +343,60 @@ export default function ProductList() {
                                             }}
                                         />
                                     )}
+
+                                    {/* Action Icons - View and Custom Request */}
+                                    <Box
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 12,
+                                            right: 12,
+                                            zIndex: 3,
+                                            display: 'flex',
+                                            gap: 1,
+                                            opacity: 0,
+                                            transition: 'opacity 0.3s ease',
+                                            '& .MuiIconButton-root': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                                backdropFilter: 'blur(10px)',
+                                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                '&:hover': {
+                                                    backgroundColor: 'white',
+                                                    transform: 'scale(1.1)',
+                                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
+                                                },
+                                                transition: 'all 0.2s ease'
+                                            }
+                                        }}
+                                        className="action-icons"
+                                    >
+                                        {/* View Detail Icon */}
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleViewDetail(e, product.id)}
+                                            sx={{
+                                                width: 40,
+                                                height: 40,
+                                                color: '#0D3B2E'
+                                            }}
+                                            title="Xem chi tiết"
+                                        >
+                                            <Visibility sx={{fontSize: '1.2rem'}}/>
+                                        </IconButton>
+                                        
+                                        {/* Custom Request Icon (Điện cây) */}
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleCustomRequest(e, product)}
+                                            sx={{
+                                                width: 40,
+                                                height: 40,
+                                                color: '#0D3B2E'
+                                            }}
+                                            title="Đặt hàng tùy chỉnh (Điện cây)"
+                                        >
+                                            <Build sx={{fontSize: '1.2rem'}}/>
+                                        </IconButton>
+                                    </Box>
                                     
                                     {/* Image Container with Overlay */}
                                     <Box 
@@ -367,49 +435,6 @@ export default function ProductList() {
                                                 transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
                                             }}
                                         />
-                                        {/* Quick Add Button on Image Hover */}
-                                        <Box
-                                            className="quick-add-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleAddToCart(e, product);
-                                            }}
-                                            sx={{
-                                                position: 'absolute',
-                                                bottom: 16,
-                                                left: '50%',
-                                                transform: 'translateX(-50%) translateY(20px)',
-                                                opacity: 0,
-                                                transition: 'all 0.3s ease',
-                                                zIndex: 2,
-                                                pointerEvents: 'none'
-                                            }}
-                                        >
-                                            <Button
-                                                variant="contained"
-                                                startIcon={<ShoppingCart />}
-                                                sx={{
-                                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
-                                                    color: 'white',
-                                                    fontWeight: 700,
-                                                    px: 3,
-                                                    py: 1,
-                                                    borderRadius: 3,
-                                                    fontSize: '0.95rem',
-                                                    textTransform: 'none',
-                                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.5)',
-                                                    whiteSpace: 'nowrap',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(135deg, #1e5a4a 0%, #0D3B2E 100%)',
-                                                        boxShadow: '0 6px 20px rgba(13, 59, 46, 0.7)',
-                                                        transform: 'scale(1.05)'
-                                                    },
-                                                    transition: 'all 0.3s ease'
-                                                }}
-                                            >
-                                                Thêm vào giỏ hàng
-                                            </Button>
-                                        </Box>
                                     </Box>
 
                                     <CardContent sx={{ 
