@@ -158,17 +158,21 @@ const CreateSucculentDialog = ({
                                     value={formData.description}
                                     onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                                     error={!!errors.description}
-                                    helperText={errors.description || `Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc... (${formData.description.length}/300 ký tự)`}
-                                    placeholder="Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc..."
+                                    helperText={errors.description || `Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc`}
+                                    placeholder="Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc"
                                     required
-                                    inputProps={{ 
-                                        maxLength: 300,
-                                        style: { 
-                                            resize: 'vertical',
-                                            minHeight: '120px',
-                                            lineHeight: '1.5'
+                                    slotProps={
+                                        {
+                                            input: {
+                                                maxLength: 300,
+                                                style: {
+                                                    resize: 'vertical',
+                                                    minHeight: '120px',
+                                                    lineHeight: '1.5'
+                                                }
+                                            }
                                         }
-                                    }}
+                                    }
                                     sx={{
                                         '& .MuiInputBase-root': {
                                             alignItems: 'flex-start'
@@ -438,7 +442,11 @@ const CreateSucculentDialog = ({
                                                         fullWidth
                                                         label="Số lượng"
                                                         type="number"
-                                                        inputProps={{min: 1}}
+                                                        slotProps={{
+                                                            input: {
+                                                                min: 1
+                                                            }
+                                                        }}
                                                         value={size.quantity || ''}
                                                         onChange={(e) => {
                                                             const updatedSizes = [...formData.sizeDetailRequests];

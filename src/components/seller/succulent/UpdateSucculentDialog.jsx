@@ -69,7 +69,6 @@ const UpdateSucculentDialog = ({open, onClose, succulent, onUpdated}) => {
         if (!name) errors.speciesName = 'Tên loài là bắt buộc';
         else if (name.length > 100) errors.speciesName = 'Tên loài không được vượt quá 100 ký tự';
         if (!desc) errors.description = 'Mô tả là bắt buộc';
-        else if (desc.length > 300) errors.description = 'Mô tả không được vượt quá 300 ký tự';
         if (!url) errors.imageUrl = 'Image URL is required';
         else if (!/^(http|https):\/\//i.test(url)) errors.imageUrl = 'Invalid Image URL format';
         else if (!/\.(jpg|jpeg|png|gif)$/i.test(url)) errors.imageUrl = 'Image URL must end with a valid image file extension (jpg, jpeg, png, gif)';
