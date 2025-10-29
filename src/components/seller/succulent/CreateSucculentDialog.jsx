@@ -153,14 +153,32 @@ const CreateSucculentDialog = ({
                                 <TextField
                                     fullWidth
                                     multiline
-                                    rows={4}
+                                    rows={6}
                                     label="Mô tả sản phẩm"
                                     value={formData.description}
                                     onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                                     error={!!errors.description}
-                                    helperText={errors.description || 'Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc...'}
+                                    helperText={errors.description || `Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc... (${formData.description.length}/300 ký tự)`}
                                     placeholder="Mô tả chi tiết về loài sen đá, đặc điểm, cách chăm sóc..."
                                     required
+                                    inputProps={{ 
+                                        maxLength: 300,
+                                        style: { 
+                                            resize: 'vertical',
+                                            minHeight: '120px',
+                                            lineHeight: '1.5'
+                                        }
+                                    }}
+                                    sx={{
+                                        '& .MuiInputBase-root': {
+                                            alignItems: 'flex-start'
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            padding: '12px 14px',
+                                            fontSize: '0.95rem',
+                                            lineHeight: '1.5'
+                                        }
+                                    }}
                                 />
 
                                 <FormControl fullWidth error={!!errors.fengShuiList} required>
