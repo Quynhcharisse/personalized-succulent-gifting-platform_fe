@@ -1,44 +1,163 @@
 import { RoomServiceRounded, LocalActivityOutlined, ShoppingCartOutlined, PaymentOutlined } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Divider, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItemButton, ListItemText, Radio, RadioGroup, FormControlLabel } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
-import ShippingAddressDialog from "./ShippingAddressDialog";
+import ShippingAddressDialog from "./ShippingAddressDialog.jsx";
 import { COLORS, DASHBOARD_STYLES } from "../../constants.js";
+import { useSelector } from "react-redux";
+import axiosClient from "../../../config/APIConfig.jsx";
+import { getDefaultShippingAddress } from "../../../services/ShippingAddressService.jsx";
 
 export default function CheckoutPage() {
 
+  const items = useSelector(state => state?.cart?.items || []);
+  const [priceMap, setPriceMap] = useState({});
   const [showDialog, setShowDialog] = useState(false);
 
   // Shipping address (mock)
-  const [selectedAddress, setSelectedAddress] = useState({
-    name: "Trần Văn Hứa Trí",
-    phone: "0886 122 578",
-    address: "Ký túc xá ĐHQG TP.HCM, Khu B, P. Đông Hòa, TP. Dĩ An, Bình Dương",
-  });
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [loadingAddress, setLoadingAddress] = useState(true);
 
+  useEffect(() => {
+    const loadDefaultAddress = async () => {
+      setLoadingAddress(true);
+      try {
+        const res = await getDefaultShippingAddress();
+        const data = res?.data?.data;
+        console.log(data);
+        if (data) {
+          setSelectedAddress({
+            shippingAddress: data.shippingAddress || "",
+            address: data.address || "",
+            districtId : data.districtId || 0,
+            wardCode : data.wardCode || ""
+          });
+          if (data && data.districtId && data.wardCode) {
+            const resFee = await axiosClient.post("/ghn/calculate/fee", {
+              toDistrictId: data.districtId,
+              wardCode: data.wardCode,
+              itemNames: items.map(i => i.name) // mỗi item name mặc định 200g như backend
+            });
+            setShippingFee(resFee?.data?.data || 0);
+          }          
+        }
+      } catch (err) {
+        console.error("Load default address error", err);
+      } finally {
+        setLoadingAddress(false);
+      }
+    };
+  
+    loadDefaultAddress();
+  }, []);
+  
   // Mock data: danh sách sản phẩm
-  const items = [
-    {
-      id: 1,
-      name: "Combo Nhện Sen Đá - Size S",
-      price: 89000,
-      quantity: 2,
-      image:
-        "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=800&auto=format&fit=crop",
-      shop: "PSGP Garden",
-    },
-    {
-      id: 3,
-      name: "Đất trồng mix hữu cơ 1kg",
-      price: 39000,
-      quantity: 3,
-      image:
-        "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=800&auto=format&fit=crop",
-      shop: "PSGP Garden",
-    },
-  ];
+  // const items = [
+  //   {
+  //     id: 1,
+  //     name: "Combo Nhện Sen Đá - Size S",
+  //     price: 89000,
+  //     quantity: 2,
+  //     image:
+  //       "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=800&auto=format&fit=crop",
+  //     shop: "PSGP Garden",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Đất trồng mix hữu cơ 1kg",
+  //     price: 39000,
+  //     quantity: 3,
+  //     image:
+  //       "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=800&auto=format&fit=crop",
+  //     shop: "PSGP Garden",
+  //   },
+  // ];
 
-  const shippingFee = 32800;
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const calculateProductPrice = (size) => {
+    if (!size) return 0
+    let total = 0
+    // succulents
+    if (Array.isArray(size.succulents)) {
+        size.succulents.forEach(sc => {
+            if (Array.isArray(sc.size)) {
+                sc.size.forEach(sz => {
+                    const unit = Number(sz?.price) || 0
+                    const q = Number(sz?.quantity) || 1
+                    total += unit * q
+                })
+            } else if (sc.size?.price) {
+                const unit = Number(sc.size.price) || 0
+                const q = Number(sc.quantity) || 1
+                total += unit * q
+            }
+        })
+    }
+    // pot price: take first size price if exists
+    if (Array.isArray(size.pot?.size) && size.pot.size.length > 0) {
+        total += Number(size.pot.size[0]?.price) || 0
+    }
+    // soil price
+    if (size.soil?.basePricing) {
+        const unitPrice = Number(size.soil.basePricing.price) || 0
+        const massValue = Number(size.soil.basePricing.massValue) || 1
+        const massAmount = Number(size.soil.massAmount) || 0
+        total += (unitPrice / massValue) * massAmount
+    }
+    // decorations
+    if (Array.isArray(size.decorations)) {
+        size.decorations.forEach(d => {
+            total += Number(d?.totalPrice) || 0
+        })
+    }
+    return total
+}
+
+  useEffect(() => {
+    const loadPrices = async () => {
+        const entries = await Promise.all(items.map(async (it) => {
+            const key = `${it.id}-${it.size || 'default'}`
+            if (priceMap[key] != null) return [key, priceMap[key]]
+            try {
+                const res = await axiosClient.get(`/product/${it.id}`)
+                const data = res?.data?.data
+                const size = Array.isArray(data?.sizes) ? (data.sizes.find(s => s.name === it.size) || data.sizes[0]) : null
+                const price = calculateProductPrice(size)
+                return [key, price]
+            } catch (e) {
+                return [key, 0]
+            }
+        }))
+        const next = { ...priceMap }
+        entries.forEach(([k, v]) => { next[k] = v })
+        setPriceMap(next)
+    }
+    if (items.length) loadPrices()
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [items]);
+useEffect(() => {
+  console.log("✅ priceMap updated:", priceMap);
+}, [priceMap]);
+
+const [shippingFee, setShippingFee] = useState(0);
+  const subtotal = items.reduce((sum, i) => {
+  const key = `${i.id}-${i.size || 'default'}`;
+  const price = priceMap[key] || 0;
+  return sum + price * (i.quantity || 1);
+  }, 0);
+
+  useEffect(() => {
+    const updateFee = async () => {
+      if (selectedAddress && items.length > 0) {
+        const resFee = await axiosClient.post("/ghn/calculate/fee", {
+          toDistrictId: selectedAddress.districtId,
+          wardCode: selectedAddress.wardCode,
+          itemNames: items.map(i => i.name),
+        });
+        setShippingFee(resFee?.data?.data || 0);
+      }
+    };
+  
+    updateFee();
+  }, [selectedAddress, items]);
 
   // Mock vouchers
   const vouchers = [
@@ -153,8 +272,21 @@ export default function CheckoutPage() {
             gap: { xs: 1, sm: 0 }
           }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ color: COLORS.primary }}>{selectedAddress.name} - {selectedAddress.phone}</Typography>
-              <Typography variant="body2" sx={{ mt: 0.5, color: COLORS.primaryLight }}>{selectedAddress.address}</Typography>
+            {loadingAddress ? (
+  <Typography variant="subtitle2" fontWeight={600} sx={{ color: COLORS.primary }}>
+    Đang tải địa chỉ...
+  </Typography>
+) : (
+  <>
+    <Typography variant="subtitle2" fontWeight={600} sx={{ color: COLORS.primary }}>
+      {selectedAddress?.shippingAddress || "Chưa có địa chỉ"}
+    </Typography>
+
+    <Typography variant="body2" sx={{ mt: 0.5, color: COLORS.primaryLight }}>
+      {selectedAddress?.address || ""}
+    </Typography>
+  </>
+)}
             </Box>
         <Button
           size="small"
@@ -177,7 +309,7 @@ export default function CheckoutPage() {
             <Box
               sx={{
                 display: { xs: "none", md: "grid" },
-                gridTemplateColumns: "1fr 140px 120px 160px",
+                gridTemplateColumns: "1fr 200px 1fr 160px",
                 gap: 2,
                 px: 2,
                 py: 1.5,
@@ -192,8 +324,7 @@ export default function CheckoutPage() {
                 <ShoppingCartOutlined sx={{ color: 'white', fontSize: 16 }} />
                 <Typography variant="body2" fontWeight={700}>SẢN PHẨM</Typography>
         </Stack>
-              <Typography variant="body2" fontWeight={700} textAlign="right">Đơn giá</Typography>
-              <Typography variant="body2" fontWeight={700} textAlign="center">Số lượng</Typography>
+              <Typography variant="body2" fontWeight={700} textAlign="right">Size</Typography>
               <Typography variant="body2" fontWeight={700} textAlign="right">Thành tiền</Typography>
             </Box>
         
@@ -203,10 +334,10 @@ export default function CheckoutPage() {
           <Stack direction="column" spacing={1}>
             {items.map((item) => (
               <Box
-                key={item.id}
-                sx={{
+              key={`${item.id}-${item.size}`}
+              sx={{
                   display: { xs: "block", sm: "block", md: "grid" },
-                  gridTemplateColumns: { sm: "1fr 140px 120px 160px" },
+                  gridTemplateColumns: "1fr 200px 1fr 160px",
                   gap: 2,
                   alignItems: "center",
                   px: { xs: 1.5, sm: 2 },
@@ -232,22 +363,18 @@ export default function CheckoutPage() {
                     />
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" sx={{ lineHeight: 1.3, color: COLORS.primary, fontWeight: 600 }}>{item.name}</Typography>
-                      <Typography variant="caption" sx={{ color: COLORS.primaryLight }}>{item.shop}</Typography>
                     </Box>
                   </Stack>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Đơn giá</Typography>
-                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{formatCurrency(item.price)}</Typography>
+                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Size</Typography>
+                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.size}</Typography>
                     </Box>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Số lượng</Typography>
-                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.quantity}</Typography>
-                    </Box>
+                  
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Thành tiền</Typography>
                       <Typography variant="subtitle2" fontWeight={700} sx={{ color: COLORS.primary }}>
-                        {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(priceMap[`${item.id}-${item.size || 'default'}`] || 0)}
                       </Typography>
                     </Box>
                   </Box>
@@ -269,14 +396,11 @@ export default function CheckoutPage() {
         </Stack>
 
                   {/* Unit price */}
-                  <Typography variant="body2" textAlign="right" sx={{ color: COLORS.primary, fontWeight: 600 }}>{formatCurrency(item.price)}</Typography>
-
-                  {/* Quantity */}
-                  <Typography variant="body2" textAlign="center" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.quantity}</Typography>
-
+                  <Typography variant="body2" textAlign="right" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.size}</Typography>
+                
                   {/* Line total */}
                   <Typography variant="subtitle2" textAlign="right" fontWeight={700} sx={{ color: COLORS.primary }}>
-                    {formatCurrency(item.price * item.quantity)}
+                  {formatCurrency(priceMap[`${item.id}-${item.size || 'default'}`] || 0)}
                   </Typography>
                 </Box>
               </Box>

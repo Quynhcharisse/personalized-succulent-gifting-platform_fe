@@ -5,13 +5,16 @@ import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
-// Buyer components
-const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
-const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
-const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
-const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
-const ProductList = lazy(() => import('./components/buyer/ProductList.jsx'))
-const ProductDetail = lazy(() => import('./components/buyer/ProductDetail.jsx'))
+
+import SucculentList from './components/buyer/SucculentList.jsx';
+import SucculentDetail from './components/buyer/SucculentDetail.jsx';
+import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
+import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
+import ProductList from './components/buyer/ProductList.jsx';
+import ProductDetail from './components/buyer/ProductDetail.jsx';
+import Cart from './components/buyer/Cart.jsx';
+
+
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -37,7 +40,8 @@ const ProductTable = lazy(() => import('./components/seller/product/ProductTable
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
-const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
+const CheckoutPage = lazy(() => import('./components/buyer/checkout/CheckoutPage.jsx'))
+const PaymentConfirmation = lazy(() => import('./components/buyer/checkout/PaymentConfirmation.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -276,15 +280,7 @@ const router = createBrowserRouter([
                         <SignIn/>
                     </Suspense>
                 )
-            },
-            {
-                path: 'checkout',
-                element: (
-                    <Suspense fallback={<LoadingFallback/>}>
-                        <CheckoutPage/>
-                    </Suspense>
-                )
-            },
+            },    
             {
                 path: 'product',
                 element: <ProductList/>
@@ -417,6 +413,22 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <Home/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'checkout',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CheckoutPage/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'checkout/confirm',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <PaymentConfirmation/>
                     </Suspense>
                 )
             },

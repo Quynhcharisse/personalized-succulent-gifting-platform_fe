@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react'
 import '../styles/ui/SiteHeader.css'
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
-import {Avatar, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
+import {Avatar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
 import {
     AccountCircle as AccountCircleIcon,
     Dashboard as DashboardIcon,
@@ -15,8 +15,12 @@ import {
 import {enqueueSnackbar} from 'notistack'
 import {signOut} from '../services/AccountService.jsx'
 import {NotificationDisplay} from '../services/NotificationService.jsx';
+
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
+
+import { useSelector } from 'react-redux';
+
 
 export default function SiteHeader() {
     const navigate = useNavigate()
@@ -24,6 +28,7 @@ export default function SiteHeader() {
     const [anchorEl, setAnchorEl] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
     const menuOpen = Boolean(anchorEl)
+    const cartCount = useSelector(state => state?.cart?.items?.length || 0)
 
     useEffect(() => {
         const raw = localStorage.getItem('user')
@@ -142,14 +147,16 @@ export default function SiteHeader() {
                                 }}
                             />
                         </Link>
-                        <Link className="header__icon" title="Giỏ hàng" to="#">
-                            <LocalGroceryStoreIcon
-                                sx={{
-                                    width: 22,
-                                    height: 22,
-                                    color: '#0D3B2E'
-                                }}
-                            />
+                        <Link className="header__icon" title="Giỏ hàng" to="/buyer/checkout">
+                            <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
+                                <LocalGroceryStoreIcon
+                                    sx={{
+                                        width: 22,
+                                        height: 22,
+                                        color: '#0D3B2E'
+                                    }}
+                                />
+                            </Badge>
                         </Link>
                         <Link className="header__icon" title="Thông báo" to="#">
                             <NotificationDisplay/>
