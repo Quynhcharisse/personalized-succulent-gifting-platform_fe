@@ -466,7 +466,7 @@ export default function Home() {
                                             <div className="price">{new Intl.NumberFormat('vi-VN').format(productPrice)} ₫</div>
                                             <button 
                                                 className="btn btn--sm"
-                                                onClick={() => window.location.href = `/product/${t.id}`}
+                                                onClick={() => navigate(`/product/${t.id}`)}
                                             >
                                                 Xem chi tiết
                                             </button>

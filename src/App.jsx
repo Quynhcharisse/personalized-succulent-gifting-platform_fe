@@ -10,8 +10,9 @@ const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
 const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
 const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
 const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
-const ProductList = lazy(() => import('./components/buyer/ProductList.jsx'))
-const ProductDetail = lazy(() => import('./components/buyer/ProductDetail.jsx'))
+const ProductList = lazy(() => import('./components/buyer/product/ProductList.jsx'))
+const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetail.jsx'))
+const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest.jsx'))
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -292,6 +293,14 @@ const router = createBrowserRouter([
             {
                 path: 'product/:id',
                 element: <ProductDetail/>
+            },
+            {
+                path: 'custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequest/>
+                    </Suspense>
+                )
             },
         ],
     },
