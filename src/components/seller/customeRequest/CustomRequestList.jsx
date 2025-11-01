@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Button, Paper, Typography} from '@mui/material';
+import {Box, Button, Container, Paper, Typography} from '@mui/material';
+import {Build as BuildIcon} from '@mui/icons-material';
 import CustomRequestTable from './CustomRequestTable.jsx';
 import CustomRequestDetailDialog from './CustomRequestDetailDialog.jsx';
 import {viewRequestBySeller} from '../../../services/CustomeRequestService.jsx';
 import usePagination from '../../../hooks/usePagination.js';
+import {DASHBOARD_STYLES} from '../../constants.js';
 
 export default function CustomRequestList() {
     const {page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, resetPagination} = usePagination(0, 10);
@@ -47,13 +49,47 @@ export default function CustomRequestList() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, rowsPerPage]);
 
-    return (
-        <Box sx={{p: 3}}>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
-                <Typography variant="h5" sx={{fontWeight: 700}}>Yêu cầu đặt hàng tùy chỉnh</Typography>
-                <Button variant="outlined" onClick={() => { resetPagination(); loadData(); }}>Tải lại</Button>
+    if (error) {
+        return (
+            <Box sx={{p: 3}}>
+                <Typography color="error" sx={{mb: 2}}>{error}</Typography>
+                <Button variant="contained" onClick={loadData}>Thử lại</Button>
             </Box>
-            <Paper sx={{p: 2}}>
+        );
+    }
+
+    return (
+        <Container sx={DASHBOARD_STYLES.container}>
+            <Paper sx={DASHBOARD_STYLES.paper}>
+                <Box sx={DASHBOARD_STYLES.headerSection}>
+                    <Box sx={DASHBOARD_STYLES.titleSection}>
+                        <BuildIcon sx={DASHBOARD_STYLES.titleIcon}/>
+                        <Box>
+                            <Typography sx={DASHBOARD_STYLES.mainTitle}>
+                                Quản Lý Yêu Cầu Tùy Chỉnh
+                            </Typography>
+                            <Typography sx={DASHBOARD_STYLES.subtitle}>
+                                Quản lý các yêu cầu đặt hàng tùy chỉnh từ khách hàng
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Button
+                        variant="outlined"
+                        onClick={() => { resetPagination(); loadData(); }}
+                        sx={{
+                            fontWeight: 600,
+                            borderColor: DASHBOARD_STYLES.table.headerBgColor,
+                            color: DASHBOARD_STYLES.table.headerBgColor,
+                            '&:hover': {
+                                backgroundColor: 'rgba(11, 63, 49, 0.1)',
+                                borderColor: DASHBOARD_STYLES.table.headerBgColor
+                            }
+                        }}
+                    >
+                        Tải lại
+                    </Button>
+                </Box>
+
                 <CustomRequestTable
                     data={rows}
                     loading={loading}
@@ -72,6 +108,6 @@ export default function CustomRequestList() {
                 onClose={handleCloseDetailDialog}
                 requestId={selectedRequestId}
             />
-        </Box>
+        </Container>
     );
 }

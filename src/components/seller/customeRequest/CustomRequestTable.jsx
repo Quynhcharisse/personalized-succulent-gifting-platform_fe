@@ -39,9 +39,6 @@ export default function CustomRequestTable({
                         <Typography variant="subtitle2" sx={{fontWeight: 600}}>
                             {row.buyer?.name || '—'}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {row.buyer?.phone || '—'}
-                        </Typography>
                     </Box>
                 </Box>
             )
@@ -126,6 +123,7 @@ export default function CustomRequestTable({
             headerTextColor={'white'}
             hoverColor={'#f8f9fa'}
             borderColor={'#e0e0e0'}
+            emptyMessage="Không có yêu cầu nào"
             stickyHeader={false}
             size={'medium'}
         />
