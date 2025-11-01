@@ -13,6 +13,8 @@ const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
 const ProductList = lazy(() => import('./components/buyer/product/ProductList.jsx'))
 const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetail.jsx'))
 const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest.jsx'))
+const ViewCustomRequest = lazy(() => import('./components/buyer/custom/ViewCustomRequest.jsx'))
+const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomRequestDetail.jsx'))
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -298,7 +300,23 @@ const router = createBrowserRouter([
                 path: 'custom-request',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
+                        <ViewCustomRequest/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'create-custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
                         <CustomRequest/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'custom-request/:id',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestDetail/>
                     </Suspense>
                 )
             },

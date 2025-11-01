@@ -4,6 +4,7 @@ import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
 import {Avatar, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
 import {
     AccountCircle as AccountCircleIcon,
+    Build as BuildIcon,
     Dashboard as DashboardIcon,
     FavoriteBorder as FavoriteBorderIcon,
     Home as HomeIcon,
@@ -52,7 +53,7 @@ export default function SiteHeader() {
         }
         
         // Lấy role từ localStorage (performance)
-        const localRole = currentUser?.role || null
+        const localRole = (currentUser?.role || null)
         
         // Verify với JWT ngay lần đầu, sau đó cache trong 5 phút
         const lastVerified = sessionStorage.getItem('role_verified_at')
@@ -64,21 +65,21 @@ export default function SiteHeader() {
                 const access = await getAccessToken()
                 if (access) {
                     const decoded = jwtDecode(access)
-                    const jwtRole = decoded?.role || null
+                    const jwtRole = (decoded?.role || null)
                     
                     if (localRole !== jwtRole) {
                         // Role bị fake, dùng JWT role
-                        setRole(jwtRole)
+                        setRole(jwtRole ? jwtRole.toUpperCase() : null)
                         sessionStorage.setItem('role_verified_at', now.toString())
                     } else {
-                        setRole(localRole)
+                        setRole(localRole ? localRole.toUpperCase() : null)
                         sessionStorage.setItem('role_verified_at', now.toString())
                     }
                 } else {
-                    setRole(localRole)
+                    setRole(localRole ? localRole.toUpperCase() : null)
                 }
             } catch (error) {
-                setRole(localRole)
+                setRole(localRole ? localRole.toUpperCase() : null)
             }
         }
         
@@ -86,7 +87,7 @@ export default function SiteHeader() {
         if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
             verifyRole()
         } else {
-            setRole(localRole)
+            setRole(localRole ? localRole.toUpperCase() : null)
         }
     }, [currentUser, location.pathname])
 
@@ -249,10 +250,16 @@ export default function SiteHeader() {
                                         Hồ sơ của tôi
                                     </MenuItem>
                                     {role === 'BUYER' && (
-                                        <MenuItem onClick={() => navigate('/')}>
-                                            <ListItemIcon><HomeIcon fontSize="small"/></ListItemIcon>
-                                            Trang sản phẩm
-                                        </MenuItem>
+                                        <>
+                                            <MenuItem onClick={() => navigate('/')}>
+                                                <ListItemIcon><HomeIcon fontSize="small"/></ListItemIcon>
+                                                Trang sản phẩm
+                                            </MenuItem>
+                                            <MenuItem onClick={() => navigate('/custom-request')}>
+                                                <ListItemIcon><BuildIcon fontSize="small"/></ListItemIcon>
+                                                Yêu cầu tùy chỉnh
+                                            </MenuItem>
+                                        </>
                                     )}
                                     {role === 'ADMIN' && (
                                         <MenuItem onClick={() => navigate('/admin/dashboard')}>
