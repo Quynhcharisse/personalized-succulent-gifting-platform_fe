@@ -2,11 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {
     Avatar,
     Box,
+    Button,
     Card,
     CardContent,
     Chip,
     CircularProgress,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
@@ -17,19 +19,22 @@ import {
 } from '@mui/material';
 import {
     Build as BuildIcon,
-    Close as CloseIcon,
     ExpandMore as ExpandMoreIcon,
     Spa as SucculentIcon,
     LocalFlorist as PotIcon,
     Park as SoilIcon,
     AutoAwesome as DecorationIcon,
-    Schedule as ScheduleIcon
+    Schedule as ScheduleIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
-import {viewRequestDetailBySeller} from '../../../services/CustomeRequestService.jsx';
+import {viewRequestDetailBySeller, processCustomRequest} from '../../../services/CustomeRequestService.jsx';
+import {useSnackbar} from 'notistack';
 import {FENGSHUI, ZODIACS, GENDERS, DASHBOARD_STYLES} from '../../constants.js';
 import ActionButton from '../../buttonCustom/ActionButton.jsx';
+import ProcessRequestDialog from './ProcessRequestDialog.jsx';
 
-export default function CustomRequestDetailDialog({open, onClose, requestId}) {
+export default function CustomRequestDetailDialog({open, onClose, requestId, onSuccess}) {
+    const {enqueueSnackbar} = useSnackbar();
     const [loading, setLoading] = useState(false);
     const [request, setRequest] = useState(null);
     const [expandedSections, setExpandedSections] = useState({
@@ -38,6 +43,8 @@ export default function CustomRequestDetailDialog({open, onClose, requestId}) {
         soil: true,
         decorations: true
     });
+    const [processDialogOpen, setProcessDialogOpen] = useState(false);
+    const [rejecting, setRejecting] = useState(false);
 
     useEffect(() => {
         if (open && requestId) {
@@ -51,12 +58,44 @@ export default function CustomRequestDetailDialog({open, onClose, requestId}) {
             const response = await viewRequestDetailBySeller(requestId);
             // Handle nested data structure
             const data = response?.data?.data || response?.data || response;
+            console.log("Request detail data:", data);
+            console.log("designImage:", data?.designImage);
             setRequest(data);
         } catch (error) {
             console.error("Error fetching custom request detail:", error);
             setRequest(null);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleProcessSuccess = () => {
+        // Refresh the request detail after successful processing
+        fetchRequestDetail();
+    };
+
+    const handleRejectRequest = async () => {
+        if (!request?.id) return;
+
+        try {
+            setRejecting(true);
+            const requestData = {
+                id: request.id,
+                images: []
+            };
+
+            const response = await processCustomRequest(requestData, "false");
+            if (response) {
+                enqueueSnackbar('Từ chối yêu cầu thành công', {variant: 'success'});
+                if (onSuccess) onSuccess(); // Refresh list data
+                onClose();
+            }
+        } catch (error) {
+            console.error('Error rejecting request:', error);
+            const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
+            enqueueSnackbar(errorMsg, {variant: 'error'});
+        } finally {
+            setRejecting(false);
         }
     };
 
@@ -124,6 +163,23 @@ export default function CustomRequestDetailDialog({open, onClose, requestId}) {
             'large': 'Lớn'
         };
         return sizeMap[size] || size;
+    };
+
+    const formatDateArray = (dateArray) => {
+        try {
+            // Format: [year, month, day, hour, minute, second, nanoseconds]
+            const [year, month, day, hour, minute, second] = dateArray;
+            const date = new Date(year, month - 1, day, hour, minute, second || 0);
+            return date.toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'N/A';
+        }
     };
 
     if (!open) return null;
@@ -574,9 +630,131 @@ export default function CustomRequestDetailDialog({open, onClose, requestId}) {
                                 ))}
                             </>
                         )}
+
+                        {/* Versions */}
+                        {request.versions && request.versions.length > 0 && (
+                            <>
+                                <Divider sx={{my: 2}}/>
+                                <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E', mb: 3}}>
+                                    Lịch sử phiên bản thiết kế
+                                </Typography>
+                                {request.versions.map((version, idx) => (
+                                    <Paper key={idx} sx={{border: '1px solid #E6F1ED', backgroundColor: '#FAFFFD', borderRadius: 2, overflow: 'hidden', mb: 2}}>
+                                        <Box sx={{p: 2}}>
+                                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
+                                                <Box>
+                                                    <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                        {version.version}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Loại: {version.type === 'design' ? 'Thiết kế' : version.type}
+                                                    </Typography>
+                                                </Box>
+                                                <Chip
+                                                    label={version.status === 'pending' ? 'Đang chờ' : version.status}
+                                                    color={version.status === 'pending' ? 'warning' : 'success'}
+                                                    size="small"
+                                                    sx={{fontWeight: 600}}
+                                                />
+                                            </Box>
+                                            {version.revisionContent && (
+                                                <Box sx={{mb: 2}}>
+                                                    <Typography variant="body2" color="text.secondary">Nội dung chỉnh sửa:</Typography>
+                                                    <Typography variant="body1" sx={{fontWeight: 500, mt: 0.5}}>
+                                                        {version.revisionContent}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                            {version.images && version.images.length > 0 && (
+                                                <Box>
+                                                    <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                        Ảnh thiết kế ({version.images.length}):
+                                                    </Typography>
+                                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2}}>
+                                                        {version.images.map((image, imgIdx) => (
+                                                            <Avatar
+                                                                key={imgIdx}
+                                                                src={image}
+                                                                variant="rounded"
+                                                                sx={{
+                                                                    width: 120,
+                                                                    height: 120,
+                                                                    border: '2px solid #E6F1ED',
+                                                                    cursor: 'pointer',
+                                                                    '&:hover': {
+                                                                        borderColor: '#0D3B2E',
+                                                                        transform: 'scale(1.05)',
+                                                                        transition: 'all 0.2s'
+                                                                    }
+                                                                }}
+                                                                onClick={() => window.open(image, '_blank')}
+                                                            />
+                                                        ))}
+                                                    </Box>
+                                                </Box>
+                                            )}
+                                            <Box sx={{display: 'flex', gap: 3, mt: 2, fontSize: '0.875rem', color: 'text.secondary'}}>
+                                                {version.revisionDate && (
+                                                    <Typography variant="body2">
+                                                        Ngày chỉnh sửa: {formatDateArray(version.revisionDate)}
+                                                    </Typography>
+                                                )}
+                                                {version.createDate && (
+                                                    <Typography variant="body2">
+                                                        Ngày tạo: {formatDateArray(version.createDate)}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Paper>
+                                ))}
+                            </>
+                        )}
                     </Box>
                 )}
             </DialogContent>
+
+            {request && request.status === 'Đang chờ duyệt' && (
+                <DialogActions sx={{p: 3, pt: 2, justifyContent: 'flex-end', gap: 2}}>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleRejectRequest()}
+                        disabled={rejecting}
+                        sx={{
+                            fontWeight: 600,
+                            px: 3,
+                            py: 1,
+                        }}
+                    >
+                        {rejecting ? 'Đang xử lý...' : 'Từ Chối'}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<EditIcon/>}
+                        onClick={() => setProcessDialogOpen(true)}
+                        sx={{
+                            backgroundColor: '#0D3B2E',
+                            color: 'white',
+                            fontWeight: 600,
+                            px: 3,
+                            py: 1,
+                            '&:hover': {
+                                backgroundColor: '#0a2e22'
+                            }
+                        }}
+                    >
+                        Xem Xét & Cập Nhật Thiết Kế
+                    </Button>
+                </DialogActions>
+            )}
+
+            <ProcessRequestDialog
+                open={processDialogOpen}
+                onClose={() => setProcessDialogOpen(false)}
+                requestId={request?.id}
+                onSuccess={handleProcessSuccess}
+            />
         </Dialog>
     );
 }

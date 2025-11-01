@@ -12,6 +12,11 @@ export const viewRequestDetailBySeller = async (id) => {
     return response || null
 }
 
+export const processCustomRequest = async (requestData, approved = "true") => {
+    const response = await axiosClient.put(`/custom/custom-request/design-image?a=${approved}`, requestData);
+    return response || null
+}
+
 //------------------- Custom Request For Buyer ------------------//
 export const createCustomProductRequest = async (customRequestData) => {
     const response = await axiosClient.post("/custom/custom-request", customRequestData);

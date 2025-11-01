@@ -107,6 +107,7 @@ export default function CustomRequestList() {
                 open={detailDialogOpen}
                 onClose={handleCloseDetailDialog}
                 requestId={selectedRequestId}
+                onSuccess={loadData}
             />
         </Container>
     );
