@@ -118,7 +118,10 @@ export default function SignIn() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "linear-gradient(135deg, #2D6A4F 0%, #1B4332 100%)",
+                backgroundImage: "url('/header.jpg')",
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
                 position: "relative",
                 overflow: "hidden",
                 "&::before": {

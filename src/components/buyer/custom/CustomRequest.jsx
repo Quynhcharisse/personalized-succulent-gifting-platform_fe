@@ -230,7 +230,14 @@ export default function CustomRequest() {
     const selectedPotForSize = availablePots.find(p => p.name === formData.pot);
 
     return (
-        <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
+        <Box sx={{
+            minHeight: '100vh',
+            py: 4,
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover'
+        }}>
             <Container maxWidth="lg">
                 <Box sx={{display: 'flex', alignItems: 'center', mb: 3}}>
                     <Button

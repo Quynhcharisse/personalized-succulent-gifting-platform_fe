@@ -1,21 +1,13 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {Button} from '@mui/material'
 import '../../styles/auth/Home.css'
 import ChatBot from './ChatBot.jsx'
-import ContactWidget from './ContactWidget.jsx'
 import {viewProduct} from '../../services/ProductService.jsx'
 
 export default function Home() {
     const navigate = useNavigate()
-    const [bannerVideoReady, setBannerVideoReady] = useState(false)
-    const [isMuted, setIsMuted] = useState(true)
-    const [isPlaying, setIsPlaying] = useState(true)
-    const [volume, setVolume] = useState(0.5)
-    const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const [showContactDropdown, setShowContactDropdown] = useState(false)
-    const videoRef = useRef(null)
-    const bannerVideoSrc = '/videoBanner.mp4'
     const [products, setProducts] = useState([]);
     const [catalogProducts, setCatalogProducts] = useState([]);
 
@@ -34,89 +26,7 @@ export default function Home() {
         fetchProducts();
     }, []);
 
-    useEffect(() => {
-        const el = videoRef.current
-        if (!el) return
-        try {
-            el.muted = isMuted
-            el.volume = isMuted ? 0 : volume
-            if (isPlaying && el.paused) {
-                el.play().catch(() => {
-                })
-            } else if (!isPlaying && !el.paused) {
-                el.pause()
-            }
-        } catch (error) {
-            console.error('Error setting video state:', error)
-        }
-    }, [isMuted, isPlaying, volume])
-
-    const togglePlay = () => {
-        setIsPlaying(prev => !prev)
-    }
-
-    const toggleMute = () => {
-        setIsMuted(prev => !prev)
-    }
-
-    const handleVolumeChange = (event) => {
-        const newVolume = parseFloat(event.target.value)
-        setVolume(newVolume)
-
-        if (newVolume === 0) {
-            setIsMuted(true)
-        } else if (isMuted && newVolume > 0) {
-            setIsMuted(false)
-        }
-    }
-
-    const handleVolumeKeyDown = (event) => {
-        event.preventDefault()
-        const step = 0.1
-        let newVolume = volume
-
-        switch (event.key) {
-            case 'ArrowUp':
-            case 'ArrowRight':
-                newVolume = Math.min(1, volume + step)
-                break
-            case 'ArrowDown':
-            case 'ArrowLeft':
-                newVolume = Math.max(0, volume - step)
-                break
-            case 'Home':
-                newVolume = 1
-                break
-            case 'End':
-                newVolume = 0
-                break
-            default:
-                return
-        }
-
-        setVolume(Math.round(newVolume * 10) / 10)
-
-        if (newVolume === 0) {
-            setIsMuted(true)
-        } else if (isMuted && newVolume > 0) {
-            setIsMuted(false)
-        }
-    }
-
-    const handleVolumeWheel = (event) => {
-        event.preventDefault()
-        const step = 0.05
-        const delta = event.deltaY > 0 ? -step : step
-        const newVolume = Math.max(0, Math.min(1, volume + delta))
-
-        setVolume(Math.round(newVolume * 20) / 20) // Round to 0.05 increments
-
-        if (newVolume === 0) {
-            setIsMuted(true)
-        } else if (isMuted && newVolume > 0) {
-            setIsMuted(false)
-        }
-    }
+    // Removed video control effect (no video in hero now)
 
     // Compact header shadow on scroll
     useEffect(() => {
@@ -155,7 +65,7 @@ export default function Home() {
         },
     ]
 
-    
+
     const testimonials = [
         {
             id: 'rv-01',
@@ -177,9 +87,6 @@ export default function Home() {
             rating: 4,
         },
     ]
-
-    const formatPrice = (vnd) =>
-        new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(vnd)
 
     const calculateProductPrice = (size) => {
         if (!size) return 0;
@@ -251,154 +158,86 @@ export default function Home() {
         <>
             <div className="home">
                 <header className="hero">
-                    <div className="container hero__content">
-                        <div className="hero__panel">
-                            <p className="hero__poem">
-                                Chăm một lá nhỏ, gieo ngàn cung bậc<br/>
-                                Bên thềm xanh mát, dệt mộng bình yên<br/>
-                                Sen đá lung linh, từng nhánh dịu hiền<br/>
-                                Mỗi chậu bé xinh, kể chuyện kiêu hãnh.<br/>
-                                Cỏ cây quyện gió, hơi thở vỗ về<br/>
-                                Không gian thầm lặng, vang vọng yêu thương<br/>
-                                Lá ngắn, lá dài, nụ hoa hé nụ<br/>
-                                Lá Nhỏ Bên Thềm – đong đầy cảm xúc
-                            </p>
-                            <div className="hero__actions">
-                                <a className="btn btn--primary" href="#san-pham">Mua ngay</a>
-                                <a className="btn btn--ghost" href="#ly-do">Vì sao chọn chúng tôi</a>
-                            </div>
-                        </div>
-                    </div>
+                    <h2 className="elementor-heading-title elementor-size-default">Kết tinh kì diệu cho đời sống tinh thần</h2>
+                    <p className="hero__poem">
+                        Sen đá biểu tượng của sự bền bỉ, sức sống mạnh mẽ và ý chí kiên cương vươn lên trong cuộc sống.
+                    </p>
                 </header>
 
-                <section className="features">
-                    <div className="container features__grid features__grid--3">
-                        <div className="feature feature--card">
-                            <div className="feature__icon-bubble">
-                                <img src="/ButtonCar.png" alt="Điện cây"/>
+                {/* About Section - Elementor-like layout */}
+                <div
+                    className="elementor-element elementor-element-60fcf008 e-flex e-con-boxed e-con e-parent e-lazyloaded"
+                    id="about">
+                    <div className="e-con-inner">
+                        <div className="elementor-element elementor-element-5d8340c e-con-full e-flex e-con e-child">
+                            <div
+                                className="elementor-element elementor-element-575f7dda elementor-widget elementor-widget-heading">
+                                <h2 className="elementor-heading-title elementor-size-default">Về chúng tôi</h2>
                             </div>
-                            <div>
-                                <h3>Điện cây</h3>
+                            <div
+                                className="elementor-element elementor-element-6156fef5 elementor-widget elementor-widget-text-editor">
                                 <p>
-                                    Dịch vụ nhắc lịch đặt cây và gửi quà thân tặng vào dịp sinh nhật, kỷ niệm… Chúng tôi
-                                    chuẩn bị chậu cây xinh và giao đúng hẹn.
+                                    <strong>Sứ mệnh Lá Nhỏ Bên Thềm</strong>   mang không gian xanh và tái định nghĩa trải nghiệm sen đá bằng sự kết hợp giữa Nghệ thuật Thiết kế Thủ công và Dịch vụ "Điện Cây" cá nhân hóa,
+                                     hướng tới trở thành thương hiệu sen đá tiên phong về chất lượng, sự độc đáo, và giải pháp chăm sóc hỗ trợ.
                                 </p>
                             </div>
                         </div>
-                        <div className="feature feature--card">
-                            <div className="feature__icon-bubble">
-                                <img src="/ButtonCommunity.png" alt="Tích hợp cộng đồng yêu cây"/>
+
+                        <div className="elementor-element elementor-element-1bc7c3c2 e-con-full e-flex e-con e-child">
+                            <div
+                                className="elementor-element elementor-element-166b09a9 elementor-widget elementor-widget-image">
+                                <img decoding="async" width="380" height="782" 
+                                     src="/vien.jpg" alt=""/>
                             </div>
-                            <div>
-                                <h3>Tích hợp cộng đồng yêu cây</h3>
+                        </div>
+
+                        <div className="elementor-element elementor-element-4c7cb06b e-con-full e-flex e-con e-child">
+                            <div
+                                className="elementor-element elementor-element-4219b4f7 elementor-widget elementor-widget-text-editor">
                                 <p>
-                                    Không gian thân thiện để bạn khoe cây, chia sẻ kinh nghiệm, hỏi – đáp và lan tỏa cảm
-                                    hứng mỗi ngày.
+                                    <strong>Lá Nhỏ Bên Thềm</strong> là thương hiệu tiên phong xây dựng Hệ sinh thái Sen đá Kỹ thuật số (Digital Succulent Ecosystem) trong lĩnh vực sen đá online, đặt mục tiêu trở thành thương hiệu dẫn đầu về thiết kế nghệ thuật, cá nhân hóa, và giải pháp chăm sóc hỗ trợ.
+                                    <strong>Lá Nhỏ Bên Thềm</strong> tượng trưng cho sự bình an, vĩnh cửu, ý chí kiên cường, phấn đấu vươn lên
+                                    trong cuộc sống, không khuất phục trước nghịch cảnh.
                                 </p>
                             </div>
                         </div>
-                        <div className="feature feature--card">
-                            <div className="feature__icon-bubble">
-                                <img src="/ButtonMoney.png" alt="Chất lượng trong tầm giá"/>
-                            </div>
-                            <div>
-                                <h3>Chất lượng trong tầm giá</h3>
-                                <p>
-                                    Chọn tận vườn, đóng gói cẩn thận và tư vấn tận tâm để mỗi món quà xanh luôn xứng
-                                    đáng
-                                    với niềm tin bạn gửi gắm.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <div className="banner banner--bleed">
-                    <div className="banner__inner">
-                        <video
-                            className="banner__video"
-                            autoPlay
-                            loop
-                            muted={isMuted}
-                            playsInline
-                            preload="metadata"
-                            poster="/nen.jpg"
-                            onCanPlay={() => setBannerVideoReady(true)}
-                            ref={videoRef}
-                        >
-                            <source src={bannerVideoSrc} type="video/mp4"/>
-                        </video>
-
-                        {/* Video Controls */}
-                        <div className="banner__controls">
-                            {/* Play/Pause Button */}
-                            <button
-                                className="banner__control-btn banner__play-btn"
-                                title={isPlaying ? 'Tạm dừng video' : 'Phát video'}
-                                aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}
-                                onClick={togglePlay}
-                            >
-                                {isPlaying ? '⏸️' : '▶️'}
-                            </button>
-
-                            {/* Volume Controls */}
-                            <div className="banner__volume-controls">
-                                <button
-                                    className="banner__control-btn banner__volume-btn"
-                                    title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                                    aria-label={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
-                                    onClick={toggleMute}
-                                    onMouseEnter={() => setShowVolumeSlider(true)}
-                                    onMouseLeave={() => setShowVolumeSlider(false)}
-                                >
-                                    {isMuted ? '🔇' : volume > 0.5 ? '🔊' : volume > 0 ? '🔉' : '🔈'}
-                                </button>
-
-                                {/* Volume Slider */}
-                                {showVolumeSlider && (
-                                    <div
-                                        className="banner__volume-slider"
-                                        onMouseEnter={() => setShowVolumeSlider(true)}
-                                        onMouseLeave={() => setShowVolumeSlider(false)}
-                                    >
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="1"
-                                            step="0.1"
-                                            value={isMuted ? 0 : volume}
-                                            onChange={handleVolumeChange}
-                                            onKeyDown={handleVolumeKeyDown}
-                                            onWheel={handleVolumeWheel}
-                                            className="banner__volume-input"
-                                            title="Điều chỉnh âm lượng"
-                                        />
-                                        <div className="banner__volume-percentage">
-                                            {Math.round((isMuted ? 0 : volume) * 100)}%
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {!bannerVideoReady && (
-                            <img
-                                className="banner__img"
-                                src="/nen.jpg"
-                                alt="Bộ sưu tập sen đá"
-                                loading="lazy"
-                                decoding="async"
-                                fetchPriority="low"
-                            />
-                        )}
                     </div>
                 </div>
 
                 <section id="san-pham" className="bestsellers">
                     <div className="container">
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginBottom: '2rem'
+                        }}>
                             <h2 className="section-title">Sản phẩm bán chạy</h2>
-                            <Button 
+                        </div>
+                        <div className="bestsellers__grid">
+                            {(catalogProducts.length > 0 ? catalogProducts.slice(0, 3) : bestSellerTeasers).map((t) => {
+                                const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
+                                const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
+                                return (
+                                    <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
+                                        <div className="teaser__media">
+                                            <img loading="lazy" src={productImage} alt={productName}/>
+                                        </div>
+                                        <div className="teaser__body">
+                                            <h3>{productName}</h3>
+                                            <button
+                                                className="btn btn--sm"
+                                                onClick={() => navigate(`/product/${t.id}`)}
+                                            >
+                                                Xem chi tiết
+                                            </button>
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'center', marginTop: '2rem'}}>
+                            <Button
                                 variant="outlined"
                                 onClick={() => navigate('/product')}
                                 sx={{
@@ -414,66 +253,6 @@ export default function Home() {
                             >
                                 Xem tất cả sản phẩm →
                             </Button>
-                        </div>
-                        <div className="bestsellers__grid">
-                            <aside className="promo-card">
-                                <div className="promo-card__content">
-                                    <h3>Điện Cây</h3>
-                                    <p>
-                                        Chọn mẫu, đặt lịch giao, chúng tôi trồng phối cảnh theo yêu cầu. Thiết kế tối
-                                        giản
-                                        cho bàn làm việc.
-                                    </p>
-                                    <Button 
-                                        variant="contained" 
-                                        onClick={() => navigate('/login')}
-                                        sx={{
-                                            backgroundColor: '#0D3B2E',
-                                            color: '#fff',
-                                            fontWeight: 700,
-                                            fontSize: '1rem',
-                                            padding: '12px 32px',
-                                            borderRadius: '12px',
-                                            width: '50%',
-                                            border: '2px solid rgba(255, 255, 255, 0.5)',
-                                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-                                            '&:hover': {
-                                                backgroundColor: '#1e5a4a',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 12px 36px rgba(0, 0, 0, 0.4)',
-                                            }
-                                        }}
-                                    >
-                                        Điện Cây
-                                    </Button>
-                                </div>
-                            </aside>
-                            {(catalogProducts.length > 0 ? catalogProducts.slice(0, 3) : bestSellerTeasers).map((t) => {
-                                const isRealProduct = t.id && catalogProducts.some(p => p.id === t.id);
-                                const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
-                                const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
-                                const productPrice = isRealProduct && t.sizes?.[0] 
-                                    ? calculateProductPrice(t.sizes[0]) 
-                                    : (t.price || t.priceVnd || 0);
-                                
-                                return (
-                                    <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
-                                        <div className="teaser__media">
-                                            <img loading="lazy" src={productImage} alt={productName}/>
-                                        </div>
-                                        <div className="teaser__body">
-                                            <h3>{productName}</h3>
-                                            <div className="price">{new Intl.NumberFormat('vi-VN').format(productPrice)} ₫</div>
-                                            <button 
-                                                className="btn btn--sm"
-                                                onClick={() => navigate(`/product/${t.id}`)}
-                                            >
-                                                Xem chi tiết
-                                            </button>
-                                        </div>
-                                    </article>
-                                );
-                            })}
                         </div>
                     </div>
                 </section>
@@ -500,100 +279,96 @@ export default function Home() {
 
                 <section id="ly-do" className="reasons">
                     <div className="container">
-                        <div className="section-title-card">
-                            <h2 className="section-title">Điều gì giúp chúng tôi trở thành lựa chọn hàng đầu giúp bạn sở
-                                hữu
-                                sen đá ưng ý</h2>
+                        <div className="elementor-element elementor-element-6d252b79 e-flex e-con-boxed e-con e-parent">
+                            <div className="e-con-inner">
+                                <div
+                                    className="elementor-element elementor-element-7b84a565 elementor-widget elementor-widget-heading">
+                                    <h2 className="elementor-heading-title elementor-size-default">Cam kết</h2>
+                                </div>
+                                <div
+                                    className="elementor-element elementor-element-5a73d3b1 e-grid e-con-full e-con e-child">
+                                    {/* Item 1 */}
+                                    <div
+                                        className="elementor-element elementor-element-22eb2061 e-con-full e-flex e-con e-child">
+                                        <div
+                                            className="elementor-element elementor-element-40c811af elementor-widget elementor-widget-image">
+                                            <img loading="lazy" decoding="async" width="600" height="600"
+                                                 src="/bantay.png" alt=""/>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-26b9fae3 elementor-widget elementor-widget-heading">
+                                            <h2 className="elementor-heading-title elementor-size-default">Dịch vụ tận
+                                                tâm</h2>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-6b266173 elementor-widget elementor-widget-text-editor">
+                                            <p>Chúng tôi luôn lắng nghe và phục vụ khách hàng bằng sự chu đáo, tận tình
+                                                trong từng chi tiết.</p>
+                                        </div>
+                                    </div>
+                                    {/* Item 2 */}
+                                    <div
+                                        className="elementor-element elementor-element-7755ab64 e-con-full e-flex e-con e-child">
+                                        <div
+                                            className="elementor-element elementor-element-252d3d08 elementor-widget elementor-widget-image">
+                                            <img loading="lazy" decoding="async" width="600" height="600"
+                                                 src="/bantay2.png" alt=""/>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-32183c64 elementor-widget elementor-widget-heading">
+                                            <h2 className="elementor-heading-title elementor-size-default">Cam kết giao
+                                                hàng</h2>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-714e591a elementor-widget elementor-widget-text-editor">
+                                            <p>Chúng tôi cam kết giao hàng đúng hẹn, đúng địa điểm, đảm bảo giữ trọn vẹn
+                                                cảm xúc người nhận.</p>
+                                        </div>
+                                    </div>
+                                    {/* Item 3 */}
+                                    <div
+                                        className="elementor-element elementor-element-3dc346e4 e-con-full e-flex e-con e-child">
+                                        <div
+                                            className="elementor-element elementor-element-573d98eb elementor-widget elementor-widget-image">
+                                            <img loading="lazy" decoding="async" width="600" height="600"
+                                                 src="/bantay3.png" alt=""/>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-78f96308 elementor-widget elementor-widget-heading">
+                                            <h2 className="elementor-heading-title elementor-size-default">Cam kết chất
+                                                lượng</h2>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-4a62d908 elementor-widget elementor-widget-text-editor">
+                                            <p>Chúng tôi cam kết cung cấp sản phẩm chất lượng cao, đảm bảo độ tươi lâu
+                                                và hình thức đẹp nhất khi đến tay bạn.</p>
+                                        </div>
+                                    </div>
+                                    {/* Item 4 */}
+                                    <div
+                                        className="elementor-element elementor-element-11a263ab e-con-full e-flex e-con e-child">
+                                        <div
+                                            className="elementor-element elementor-element-70cbeb47 elementor-widget elementor-widget-image">
+                                            <img loading="lazy" decoding="async" width="600" height="600"
+                                                 src="/bantay4.png" alt=""/>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-415a9d02 elementor-widget elementor-widget-heading">
+                                            <h2 className="elementor-heading-title elementor-size-default">Sản phẩm đa
+                                                dạng</h2>
+                                        </div>
+                                        <div
+                                            className="elementor-element elementor-element-5ac501 elementor-widget elementor-widget-text-editor">
+                                            <p>Từ sen đá mẫu mã đến điện cây, chúng tôi có đủ sản phẩm phù hợp mọi dịp
+                                                tặng quà, cá nhân hóa từ mệnh và cùng hoàng đạo theo yêu cầu.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="reasons__grid">
-                            <article className="reason-card">
-                                <div className="reason-card__icon">
-                                    <img src="/IconChatBox.png" alt="Chat box AI"/>
-                                </div>
-                                <h3>Chat box AI</h3>
-                                <p>
-                                    Bất cứ khi nào bạn cần tư vấn chọn cây, hỏi cách chăm sóc, nhờ gợi ý quà tặng hay
-                                    đóng
-                                    góp ý kiến, chatbot thông minh của Lá Nhỏ Bên Thềm luôn sẵn sàng lắng nghe và phản
-                                    hồi.
-                                </p>
-                            </article>
-
-                            <article className="reason-card">
-                                <div className="reason-card__icon">
-                                    <img src="/IconMem.png" alt="Cộng đồng yêu cây"/>
-                                </div>
-                                <h3>Cộng đồng yêu cây</h3>
-                                <p>
-                                    Chúng tôi xây dựng một không gian thân thiện để bạn có thể đăng bài chia sẻ kinh
-                                    nghiệm
-                                    chăm cây, khoe chậu cây xinh, hỏi – đáp các vấn đề thường gặp hay đơn giản là cùng
-                                    nhau
-                                    ngắm lá mỗi ngày.
-                                </p>
-                            </article>
-
-                            <article className="reason-card">
-                                <div className="reason-card__icon">
-                                    <img src="/IconDiamon.png" alt="Chất lượng trong tầm giá"/>
-                                </div>
-                                <h3>Chất lượng trong tầm giá</h3>
-                                <p>
-                                    Từng sản phẩm đều được tuyển chọn kỹ lưỡng và chăm chút tỉ mỉ, đi kèm dịch vụ tư vấn
-                                    –
-                                    bảo hành đầy đủ để bạn yên tâm gắn bó lâu dài cùng Lá Nhỏ Bên Thềm.
-                                </p>
-                            </article>
-
-                            <article className="reason-card">
-                                <div className="reason-card__icon">
-                                    <img src="/IconTree.png" alt="Thiết bị IoT đo độ ẩm đất"/>
-                                </div>
-                                <h3>Thiết bị IOT đo độ ẩm đất</h3>
-                                <p>
-                                    Theo dõi độ ẩm trong đất và nhắc tưới nước đúng lúc qua điện thoại. Không còn lo cây
-                                    thiếu
-                                    nước hay úng rễ, bạn chăm cây như một người làm vườn chuyên nghiệp.
-                                </p>
-                            </article>
-
-                            <article className="reason-card">
-                                <div className="reason-card__icon">
-                                    <img src="/IconCar.png" alt="Điện cây"/>
-                                </div>
-                                <h3>Điện cây</h3>
-                                <p>
-                                    Dịch vụ “Điện cây” sẽ gọi điện hoặc nhắn tin nhắc bạn đặt cây vào các dịp lễ, sinh
-                                    nhật,
-                                    kỷ niệm… để kịp trao quà cho người thân yêu. Chỉ cần để lại danh sách ngày quan
-                                    trọng,
-                                    chúng
-                                    tôi sẽ chuẩn bị và nhắc đúng lúc.
-                                </p>
-                            </article>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="newsletter newsletter--bleed">
-                    <div className="container newsletter__inner">
-                        <div>
-                            <span className="eyebrow">Ưu đãi đặc biệt</span>
-                            <h2 className="newsletter__title">
-                                🎁 Giảm giá 20% cho đơn đặt hàng đầu tiên của bạn
-                            </h2>
-                            <p className="muted">Nhận tin cây hằng tuần và ưu đãi hấp dẫn của chúng tôi.</p>
-                        </div>
-                        <form className="newsletter__form" onSubmit={(e) => e.preventDefault()}>
-                            <input type="email" placeholder="Email" required/>
-                            <button className="btn btn--primary" type="submit">Nhận thông tin</button>
-                        </form>
                     </div>
                 </section>
             </div>
-
-            <ContactWidget/>
-
             <ChatBot/>
         </>
     )
