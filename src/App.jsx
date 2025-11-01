@@ -36,6 +36,7 @@ const SucculentForm = lazy(() => import('./components/seller/succulent/Succulent
 const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx'))
 const PostsManager = lazy(() => import('./components/seller/post/PostsManager.jsx'))
 const ProductTable = lazy(() => import('./components/seller/product/ProductTable.jsx'))
+const CustomRequestList = lazy(() => import('./components/seller/customeRequest/CustomRequestList.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
@@ -402,6 +403,14 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <ProductTable/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestList/>
                     </Suspense>
                 )
             },

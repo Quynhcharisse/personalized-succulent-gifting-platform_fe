@@ -1,9 +1,9 @@
 import axiosClient from "../config/APIConfig.jsx";
 
 //------------------- Custom Request Seller ------------------//
-export const viewRequestBySeller = async (requestData = {}) => {
+export const viewRequestBySeller = async () => {
     // Support pagination/sorting via query params
-    const response = await axiosClient.get("/custom/custom-request/list", {requestData});
+    const response = await axiosClient.get("/custom/custom-request/list");
     return response || null
 }
 
@@ -23,8 +23,8 @@ export const viewCustomProductRequestByBuyer = async () => {
     return response || null
 }
 
-export const createRevision = async (id) => {
-    const response = await axiosClient.put(`/custom/custom-request/${id}`);
+export const createRevision = async (requireData) => {
+    const response = await axiosClient.put("/custom/custom-request/revision", requireData);
     return response || null
 }
 

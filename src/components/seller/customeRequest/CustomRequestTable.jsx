@@ -1,7 +1,8 @@
 import React from 'react';
-import {Chip, Avatar, Box, Typography} from '@mui/material';
+import {Chip, Avatar, Box, Typography, IconButton} from '@mui/material';
+import {Visibility as VisibilityIcon} from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
-import {COLORS} from '../../constants.js';
+import {COLORS, FENGSHUI, ZODIACS} from '../../constants.js';
 
 export default function CustomRequestTable({
     data = [],
@@ -11,8 +12,19 @@ export default function CustomRequestTable({
     rowsPerPage,
     totalCount,
     onPageChange,
-    onRowsPerPageChange
+    onRowsPerPageChange,
+    onViewDetail
 }) {
+    const getFengShuiLabel = (value) => {
+        const item = FENGSHUI.find(f => f.value === value);
+        return item ? item.label : value;
+    };
+
+    const getZodiacLabel = (value) => {
+        const item = ZODIACS.find(z => z.value === value);
+        return item ? item.label : value;
+    };
+
     const columns = [
         {header: 'ID', field: 'id', align: 'left'},
         {
@@ -49,10 +61,10 @@ export default function CustomRequestTable({
             render: (row) => (
                 <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
                     {row.buyer?.fengShui && (
-                        <Chip size="small" label={row.buyer.fengShui} sx={{borderColor: COLORS.primary, color: COLORS.primary}} variant="outlined"/>
+                        <Chip size="small" label={`Mệnh: ${getFengShuiLabel(row.buyer.fengShui)}`} sx={{borderColor: COLORS.primary, color: COLORS.primary}} variant="outlined"/>
                     )}
                     {row.buyer?.zodiac && (
-                        <Chip size="small" label={row.buyer.zodiac} sx={{borderColor: COLORS.info, color: COLORS.info}} variant="outlined"/>
+                        <Chip size="small" label={getZodiacLabel(row.buyer.zodiac)} sx={{borderColor: COLORS.info, color: COLORS.info}} variant="outlined"/>
                     )}
                 </Box>
             )
@@ -77,6 +89,24 @@ export default function CustomRequestTable({
             header: 'Ngày tạo',
             field: 'createdAt',
             render: (row) => new Date(row.createdAt).toLocaleString('vi-VN')
+        },
+        {
+            header: 'Hành động',
+            field: 'action',
+            align: 'center',
+            render: (row) => (
+                <IconButton
+                    color="primary"
+                    onClick={() => onViewDetail?.(row)}
+                    sx={{
+                        '&:hover': {
+                            backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                        }
+                    }}
+                >
+                    <VisibilityIcon/>
+                </IconButton>
+            )
         }
     ];
 

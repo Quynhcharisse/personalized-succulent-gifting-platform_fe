@@ -13,7 +13,12 @@ import {
     Divider,
     Stack,
     Collapse,
-    IconButton
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField
 } from '@mui/material';
 import {
     ArrowBack,
@@ -23,11 +28,12 @@ import {
     LocalFlorist as PotIcon,
     Park as SoilIcon,
     AutoAwesome as DecorationIcon,
-    ExpandMore as ExpandMoreIcon
+    ExpandMore as ExpandMoreIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
-import {viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
+import {viewCustomProductRequestByBuyer, createRevision} from '../../../services/CustomeRequestService.jsx';
 import {FENGSHUI, ZODIACS, GENDERS} from '../../constants.js';
 
 export default function CustomRequestDetail() {
@@ -43,6 +49,9 @@ export default function CustomRequestDetail() {
         soil: true,
         decorations: true
     });
+    const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
+    const [revisionComment, setRevisionComment] = useState('');
+    const [submittingRevision, setSubmittingRevision] = useState(false);
 
     useEffect(() => {
         if (localStorage.getItem("user") == null) {
@@ -141,6 +150,34 @@ export default function CustomRequestDetail() {
         }));
     };
 
+    const handleSubmitRevision = async () => {
+        if (!revisionComment.trim()) {
+            enqueueSnackbar("Vui lòng nhập lý do chỉnh sửa", {variant: 'warning'});
+            return;
+        }
+
+        try {
+            setSubmittingRevision(true);
+            const response = await createRevision({
+                id: request.id,
+                comment: revisionComment
+            });
+
+            if (response) {
+                enqueueSnackbar("Yêu cầu chỉnh sửa đã được gửi thành công", {variant: 'success'});
+                setRevisionDialogOpen(false);
+                setRevisionComment('');
+                // Refresh the request details
+                fetchCustomRequestDetail();
+            }
+        } catch (error) {
+            console.error("Error submitting revision:", error);
+            enqueueSnackbar("Không thể gửi yêu cầu chỉnh sửa", {variant: 'error'});
+        } finally {
+            setSubmittingRevision(false);
+        }
+    };
+
     if (loading) {
         return (
             <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
@@ -173,18 +210,30 @@ export default function CustomRequestDetail() {
     return (
         <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
             <Container maxWidth="lg">
-                <Box sx={{display: 'flex', alignItems: 'center', mb: 3}}>
-                    <Button
-                        startIcon={<ArrowBack/>}
-                        onClick={() => navigate('/custom-request')}
-                        sx={{mr: 2, color: '#0D3B2E'}}
-                    >
-                        Quay lại
-                    </Button>
-                    <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E'}}>
-                        <Build sx={{verticalAlign: 'middle', mr: 1}}/>
-                        Chi Tiết Yêu Cầu #{request.id}
-                    </Typography>
+                <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3}}>
+                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                        <Button
+                            startIcon={<ArrowBack/>}
+                            onClick={() => navigate('/custom-request')}
+                            sx={{mr: 2, color: '#0D3B2E'}}
+                        >
+                            Quay lại
+                        </Button>
+                        <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E'}}>
+                            <Build sx={{verticalAlign: 'middle', mr: 1}}/>
+                            Chi Tiết Yêu Cầu #{request.id}
+                        </Typography>
+                    </Box>
+                    {request.status === 'Đã duyệt' && (
+                        <Button
+                            variant="contained"
+                            color="warning"
+                            startIcon={<EditIcon/>}
+                            onClick={() => setRevisionDialogOpen(true)}
+                        >
+                            Yêu Cầu Chỉnh Sửa
+                        </Button>
+                    )}
                 </Box>
 
                 <Paper elevation={0} sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
@@ -570,6 +619,56 @@ export default function CustomRequestDetail() {
                     </Box>
                 </Paper>
             </Container>
+
+            {/* Revision Dialog */}
+            <Dialog
+                open={revisionDialogOpen}
+                onClose={() => {
+                    setRevisionDialogOpen(false);
+                    setRevisionComment('');
+                }}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                    Yêu Cầu Chỉnh Sửa
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                        Vui lòng mô tả chi tiết những thay đổi bạn muốn thực hiện với yêu cầu này.
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={6}
+                        label="Lý do chỉnh sửa"
+                        placeholder="Ví dụ: Yêu cầu chỉnh sửa: thay Sen ngọc Bích size large thành size medium"
+                        value={revisionComment}
+                        onChange={(e) => setRevisionComment(e.target.value)}
+                        variant="outlined"
+                        sx={{mt: 1}}
+                    />
+                </DialogContent>
+                <DialogActions sx={{p: 2}}>
+                    <Button
+                        onClick={() => {
+                            setRevisionDialogOpen(false);
+                            setRevisionComment('');
+                        }}
+                        variant="outlined"
+                    >
+                        Hủy
+                    </Button>
+                    <Button
+                        onClick={handleSubmitRevision}
+                        variant="contained"
+                        color="warning"
+                        disabled={submittingRevision || !revisionComment.trim()}
+                    >
+                        {submittingRevision ? 'Đang gửi...' : 'Gửi Yêu Cầu'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

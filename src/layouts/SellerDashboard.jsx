@@ -10,7 +10,6 @@ import {
     Chip,
     Divider,
     Drawer,
-    Grid,
     IconButton,
     List,
     ListItem,
@@ -29,6 +28,7 @@ import {
     AccountCircle as AccountCircleIcon,
     Add as AddIcon,
     Assessment as AssessmentIcon,
+    Build as BuildIcon,
     Dashboard as DashboardIcon,
     Extension as AccessoryIcon,
     Inventory as InventoryIcon,
@@ -70,6 +70,12 @@ const NAVIGATION = [
         title: 'Quản lý sản phẩm',
         icon: <InventoryIcon/>,
         path: '/seller/products'
+    },  
+    {
+        segment: 'custom-request',
+        title: 'Quản lý yêu cầu tùy chỉnh',
+        icon: <BuildIcon/>,
+        path: '/seller/custom-request'
     },
     {
         segment: 'posts',
