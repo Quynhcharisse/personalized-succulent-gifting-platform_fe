@@ -6,7 +6,6 @@ import {
     Button,
     Box,
     Chip,
-    Rating,
     Divider,
     Paper,
     CircularProgress,
@@ -14,9 +13,9 @@ import {
     Card,
     CardMedia
 } from '@mui/material';
-import {ShoppingCart, FavoriteBorder, Share, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
+import {ShoppingCart, FavoriteBorder, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import {viewProduct} from '../../services/ProductService.jsx';
+import {viewProduct} from '../../../services/ProductService.jsx';
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -120,6 +119,8 @@ export default function ProductDetail() {
         console.log('Add to wishlist:', product.id);
         enqueueSnackbar('Đã thêm vào yêu thích', {variant: 'success'});
     };
+
+    // Removed custom request entry from product detail
 
     if (loading) {
         return (
@@ -315,14 +316,9 @@ export default function ProductDetail() {
                             >
                                 Yêu thích
                             </Button>
-                            <Button
-                                variant="outlined"
-                                size="large"
-                                startIcon={<Share/>}
-                            >
-                                Chia sẻ
-                            </Button>
+                           
                         </Box>
+                        {/* Custom request button removed from product detail */}
                         
                         <Divider sx={{my: 4}}/>
                         

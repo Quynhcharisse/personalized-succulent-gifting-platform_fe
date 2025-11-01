@@ -39,7 +39,8 @@ export default function ActionButton({
         update: { bg: COLORS.warning, text: COLORS.surface },
         create: { bg: COLORS.success, text: COLORS.surface },
         primary:{ bg: COLORS.primary, text: COLORS.surface },
-    }[action];
+        submit: { bg: COLORS.primary, text: COLORS.surface },
+    }[action] || { bg: COLORS.primary, text: COLORS.surface };
 
     // label mặc định theo action (có thể override bằng children)
     const defaultLabel = {
@@ -48,6 +49,7 @@ export default function ActionButton({
         update: 'Cập nhật',
         create: 'Tạo mới',
         primary: 'Xác nhận',
+        submit: 'Gửi',
     }[action];
 
     // đảm bảo không submit form ngoài ý muốn khi là nút đóng

@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Card, CardContent, CardMedia, Typography, Button, Box, Container, CircularProgress, Alert, TextField, InputAdornment, IconButton, Grid, Chip, Paper} from '@mui/material';
-import {Search, Clear, LocalFlorist, ShoppingCart, Visibility, Build} from '@mui/icons-material';
+import {Card, CardContent, CardMedia, Typography, Button, Box, Container, CircularProgress, TextField, InputAdornment, IconButton, Grid, Chip, Paper} from '@mui/material';
+import {Search, Clear, LocalFlorist, ShoppingCart, Visibility} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import {viewProduct} from '../../services/ProductService.jsx';
+import {viewProduct} from '../../../services/ProductService.jsx';
 
 export default function ProductList() {
     const [products, setProducts] = useState([]);
@@ -130,16 +130,7 @@ export default function ProductList() {
         navigate(`/product/${productId}`);
     };
 
-    const handleCustomRequest = (e, product) => {
-        e.stopPropagation();
-        if (!isLoggedIn()) {
-            enqueueSnackbar('Vui lòng đăng nhập để đặt hàng tùy chỉnh', {variant: 'info'});
-            navigate('/login');
-            return;
-        }
-        // TODO: Navigate to custom request page or open dialog
-        enqueueSnackbar('Tính năng đặt hàng tùy chỉnh đang phát triển', {variant: 'info'});
-    };
+    // Removed custom request on product card
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -383,19 +374,7 @@ export default function ProductList() {
                                             <Visibility sx={{fontSize: '1.2rem'}}/>
                                         </IconButton>
                                         
-                                        {/* Custom Request Icon (Điện cây) */}
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) => handleCustomRequest(e, product)}
-                                            sx={{
-                                                width: 40,
-                                                height: 40,
-                                                color: '#0D3B2E'
-                                            }}
-                                            title="Đặt hàng tùy chỉnh (Điện cây)"
-                                        >
-                                            <Build sx={{fontSize: '1.2rem'}}/>
-                                        </IconButton>
+                                        {/* Custom request entry removed from product list */}
                                     </Box>
                                     
                                     {/* Image Container with Overlay */}
