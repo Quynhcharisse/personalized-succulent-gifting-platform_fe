@@ -1,47 +1,507 @@
+:root {
+    --font-primary: 'Vanilla Ravioli', sans-serif !important;
+    --font-heading: 'Vanilla Ravioli', sans-serif !important;
+}
+
 .footer {
-    background: #0d3b2e;
+    background-image: url('/background_footer.png');
     color: #e6f1ed;
-    padding-top: 32px;
+    font-family: var(--font-primary) !important;
+    position: relative;
+    overflow: hidden;
+    position: relative;
+    background-color: #111815; 
+    background-image: url('https://vsenda.net/wp-content/uploads/2025/02/b4.png');
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Blurred background image for VSenda aesthetic */
+.footer::before {
+    /* Disable extra blur layer so photo stays sharp */
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Dark overlay on top of blurred image */
+.footer::after {
+    /* Subtle neutral dark overlay to improve text contrast (no green tint) */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(80% 80% at 50% 20%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%);
+    z-index: 0;
 }
 
 .footer .container {
-    width: min(1080px, 92%);
+    width: min(1200px, 92%);
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+#lien-he {
+    position: relative;
+    background-color: #111815; 
+    background-image: url('https://vsenda.net/wp-content/uploads/2025/02/b4.png');
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+    /* Localize Elementor global typography variables for the contact heading */
+    --e-global-typography-primary-font-family: 'Vanilla Ravioli', sans-serif !important;
+    --e-global-typography-primary-font-size: 5rem;
+    --e-global-typography-primary-font-weight: 400 !important;
+    --e-global-typography-primary-text-transform: uppercase !important;
+    --e-global-typography-secondary-font-family: 'Vanilla Ravioli', sans-serif !important;
+    --e-global-typography-text-font-family: 'Vanilla Ravioli', sans-serif !important;
+}
+
+#lien-he::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(80% 80% at 50% 20%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%);
+    z-index: 0;
+}
+
+#lien-he .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Elementor-like submit wrapper styles requested */
+.e-form__buttons {
+    display: flex;
+    position: relative;
+    width: 4%;
+    height: 4%;
+    padding: 0;
+    margin: 0 0 18px;
+    border: 0 none #111815;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0);
+    color: #111815;
+    font-size: 12px;
+    font-family: 'Vanilla Ravioli', sans-serif !important;
+    font-weight: 400;
+    line-height: 18px;
+    text-align: left;
+    border-radius: 0;
+    outline: #111815 none 0;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: crosshair;
+}
+
+.e-form__buttons .footer__submit-btn {
+    flex: 1 1 auto;
+}
+
+/* Map Elementor-like button styles to our footer submit button */
+.e-form__buttons .elementor-button[type="submit"] {
+    background-color: #02010100 !important;
+    color: var(--e-global-color-text, #e6f1ed);
+    border-color: var(--e-global-color-primary, rgba(230,241,237,0.6));
+}
+
+.e-form__buttons .elementor-button {
+    font-family: 'Vanilla Ravioli', sans-serif !important;
+    font-size: 1.5vw;
+    font-weight: 400;
+    text-transform: uppercase;
+    text-decoration: underline;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+}
+
+.elementor-button.elementor-size-md {
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 15px 30px;
+}
+
+.elementor-form .elementor-button.elementor-size-md {
+    min-height: 47px;
+}
+
+.elementor-animation-grow {
+    transition-duration: .3s;
+    transition-property: transform;
+}
+
+.elementor-button {
+    background-color: #69727d; 
+    border-radius: 3px;
+    color: #fff;
+    display: inline-block;
+    font-size: 15px;
+    line-height: 1;
+    padding: 12px 24px;
+    text-align: center;
+    transition: all .3s;
+}
+
+/* ===== TOP SECTION: Brand, Tagline, Social Media ===== */
+.footer__top {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer__top-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+}
+
+.footer__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.footer__logo-large {
+    height: 80px;
+    width: 80px;
+    object-fit: contain;
+    filter: brightness(1.1) drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1));
+}
+
+.footer__brand-name {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: #F2E8D9;
+    letter-spacing: 0.02em;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.footer__tagline {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.05em;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.footer__social {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40, 50, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 12px 20px;
+    backdrop-filter: blur(8px);
+}
+
+.footer__social-link {
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.footer__social-link:first-child {
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+}
+
+.footer__social-link:last-child {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+}
+
+.footer__social-link::before {
+    display: none;
+}
+
+.footer__social-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.footer__social-link svg {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.footer__social-link:hover svg {
+    transform: scale(1.1);
+}
+
+.footer__copyright {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    letter-spacing: 0.03em;
+}
+
+/* ===== CONTACT FORM SECTION ===== */
+.footer__contact-section {
+    padding: 48px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer__contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 48px;
+    align-items: flex-start;
+}
+
+.footer__contact-left {
+    display: flex;
+    align-items: flex-start;
+}
+
+.footer__contact-title {
+    font-family: var(--e-global-typography-primary-font-family), Sans-serif;
+    font-size: var(--e-global-typography-primary-font-size);
+    font-weight: var(--e-global-typography-primary-font-weight);
+    text-transform: var(--e-global-typography-primary-text-transform);
+    color: var(--e-global-color-secondary);
+    line-height: var(--e-global-typography-1662f3f-line-height, 1.1);
+    letter-spacing: var(--e-global-typography-1662f3f-letter-spacing, normal);
+    word-spacing: var(--e-global-typography-1662f3f-word-spacing, normal);
+    display: var(--display, block);
+    padding-top: var(--padding-top, 0px);
+    padding-bottom: var(--padding-bottom, 0px);
+    padding-left: var(--padding-left, 0px);
+    padding-right: var(--padding-right, 0px);
+    text-shadow: none;
+    margin: 0;
+    text-align: left;
+}
+
+/* Override to match provided style snapshot for the heading in contact section */
+#lien-he .footer__contact-title.elementor-heading-title.elementor-size-default {
+    font-family: 'Vanilla Ravioli', sans-serif;
+    color: #F2E8D9;
+    /* keep responsive size if global available, otherwise approximate 64px */
+    font-size: var(--e-global-typography-primary-font-size, 6rem );
+}
+
+.footer__contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer__form-input {
+    width: 50%;
+    max-width: 50%;
+    padding: 14px 16px;
+    background-color: #FFFFFF00;
+    border-style: solid;
+    border-color: var(--e-global-color-text, rgba(255,255,255,0.8));
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    color: var(--e-global-color-primary, #e6f1ed);
+    font-family: var(--e-global-typography-accent-font-family, var(--font-primary));
+    font-size: var(--e-global-typography-accent-font-size, 15px);
+    font-weight: var(--e-global-typography-accent-font-weight, 400);
+    transition: all 0.3s ease;
+}
+
+/* Ensure input text uses global primary color with high specificity */
+.footer__contact-section .footer__contact-form.elementor-form .footer__form-input.elementor-field.elementor-size-sm.elementor-field-textual {
+    color: #455946 !important;
+}
+
+.footer__form-input::placeholder {
+    color: #455946 !important;
+}
+
+.footer__form-input:focus {
+    outline: none;
+    border-bottom-color: var(--e-global-color-text, rgba(255, 255, 255, 0.9));
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure elementor-like layout rules take effect */
+.elementor-form-fields-wrapper.elementor-labels-above .footer__form-input {
+    flex-basis: 100%;
+    max-width: 100%;
+}
+
+.footer__submit-btn {
+    margin-top: 8px;
+    padding: 14px 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: fit-content;
+}
+
+.footer__submit-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.footer__submit-btn:active {
+    transform: translateY(0);
+}
+
+/* ===== BOTTOM SECTION: Three Columns ===== */
+.footer__bottom-section {
+    padding: 48px 0 32px;
+}
+
+.footer__info-panel {
+    width: min(960px, 92%);
+    margin: 0 auto;
+    padding: 24px 32px;
+    border-radius: 16px;
+    background: rgba(17, 24, 21, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    backdrop-filter: blur(6px);
 }
 
 .footer__grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 48px;
+    border: none;
 }
 
-.footer__logo img { height: 56px; width: 56px; object-fit: contain; }
-.footer__desc { margin-top: 12px; opacity: .9; line-height: 1.6; }
+.footer__column {
+    display: flex;
+    flex-direction: column;
+    border: none;
+}
 
-.footer__title { font-weight: 800; margin: 0 0 8px; color: #d1fae5; letter-spacing: .02em; }
-.footer__list { list-style: none; padding: 0; margin: 0; }
-.footer__list li { margin: 6px 0; }
-.footer__list a { color: #e6f1ed; text-decoration: none; opacity: .9; }
-.footer__list a:hover { text-decoration: underline; }
+/* Ensure no accidental pseudo dividers */
+.footer__grid::before,
+.footer__grid::after,
+.footer__column::before,
+.footer__column::after {
+    content: none !important;
+}
 
-.footer__hours.small { opacity: .85; margin-top: 6px; }
+.footer__title { 
+    font-family: var(--font-heading);
+    font-weight: 700; 
+    margin: 0 0 20px; 
+    color: #ffffff; 
+    letter-spacing: 0.03em; 
+    font-size: 1.1rem;
+}
 
-.payments { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
-.payment-img { height: 24px; object-fit: contain; filter: saturate(1.1); }
+.footer__list { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0;
+}
 
-.footer__bottom { padding: 14px 0 26px; }
-.center { display: flex; justify-content: center; align-items: center; text-align: center; }
-.small { font-size: .875rem; }
-.muted { color: #cfe9e1; opacity: .9; }
+.footer__list li { 
+    margin: 12px 0; 
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
 
+.footer__list a { 
+    color: rgba(255, 255, 255, 0.9); 
+    text-decoration: none; 
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.footer__list a:hover { 
+    color: #ffffff;
+    text-decoration: underline;
+    transform: translateX(4px);
+}
+
+.footer__list li:not(:has(a)) {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Responsive */
 @media (max-width: 880px) {
-    .footer__grid { grid-template-columns: 1fr 1fr; }
+    .footer__contact-wrapper {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .footer__grid {
+        gap: 32px;
+    }
+    
+    .footer__top {
+        padding: 48px 0 32px;
+    }
 }
 
 @media (max-width: 560px) {
-    .footer__grid { grid-template-columns: 1fr; }
+    .footer__contact-section {
+        padding: 32px 0;
+    }
+    
+    .footer__contact-title {
+        font-size: 1.5rem;
+    }
+    
+    .footer__contact-form {
+        gap: 16px;
+    }
+    
+    .footer__submit-btn {
+        width: 100%;
+    }
+    
+    .footer__grid {
+        gap: 32px;
+    }
+    
+    .footer__logo-large {
+        height: 64px;
+        width: 64px;
+    }
+    
+    .footer__social-link {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .footer__social-link svg {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 

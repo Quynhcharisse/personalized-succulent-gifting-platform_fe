@@ -88,22 +88,30 @@ export default function OrderGuide() {
     ]
 
     return (
+        <Box sx={{
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            minHeight: '100vh',
+            width: '100%'
+        }}>
         <Container maxWidth="lg" sx={{py: 4}}>
             {/* Header */}
             <Paper
                 elevation={0}
                 sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundColor: '#779977',
                     color: 'white',
                     p: 4,
                     mb: 4,
                     borderRadius: 3
                 }}
             >
-                <Typography variant="h3" component="h1" fontWeight="bold" textAlign="center" mb={2}>
-                    🌱 Hướng dẫn đặt hàng
+                <Typography variant="h3" component="h1" fontWeight="bold" textAlign="center" mb={2}sx={{opacity: 0.9, color: '#F2E8D9'}}>
+                    Hướng dẫn đặt hàng
                 </Typography>
-                <Typography variant="h6" textAlign="center" sx={{opacity: 0.9}}>
+                <Typography variant="h6" textAlign="center" sx={{opacity: 0.9, color: '#F2E8D9'}}>
                     Quý khách có thể đặt hàng trực tuyến thông qua 5 bước cơ bản dưới đây
                 </Typography>
             </Paper>
@@ -282,6 +290,7 @@ export default function OrderGuide() {
                 </Grid>
             </Grid>
         </Container>
+        </Box>
     )
 }
 

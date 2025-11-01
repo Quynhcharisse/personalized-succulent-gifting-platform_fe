@@ -198,7 +198,14 @@ export default function CustomRequestDetail() {
 
     if (loading) {
         return (
-            <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
+            <Box sx={{
+                minHeight: '100vh',
+                py: 4,
+                backgroundImage: "url('/header.jpg')",
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover'
+            }}>
                 <Container maxWidth="lg">
                     <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh'}}>
                         <CircularProgress/>
@@ -210,7 +217,14 @@ export default function CustomRequestDetail() {
 
     if (!request) {
         return (
-            <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
+            <Box sx={{
+                minHeight: '100vh',
+                py: 4,
+                backgroundImage: "url('/header.jpg')",
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover'
+            }}>
                 <Container maxWidth="lg">
                     <Paper elevation={0} sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
                         <Typography variant="h6" color="error" gutterBottom>
@@ -226,7 +240,14 @@ export default function CustomRequestDetail() {
     }
 
     return (
-        <Box sx={{backgroundColor: '#F6FBF9', minHeight: '100vh', py: 4}}>
+        <Box sx={{
+            minHeight: '100vh',
+            py: 4,
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover'
+        }}>
             <Container maxWidth="lg">
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3}}>
                     <Box sx={{display: 'flex', alignItems: 'center'}}>

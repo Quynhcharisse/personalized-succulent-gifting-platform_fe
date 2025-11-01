@@ -82,7 +82,6 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                 images: imageUrls
             };
 
-            console.log("Submitting design data:", requestData);
             const response = await processCustomRequest(requestData);
             if (response) {
                 enqueueSnackbar('Cập nhật thiết kế thành công', {variant: 'success'});

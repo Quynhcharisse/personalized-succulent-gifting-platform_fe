@@ -126,7 +126,15 @@ const BuyerPosts = () => {
     }
 
     return (
-        <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+        <Box sx={{
+            minHeight: '100vh',
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            py: 4
+        }}>
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
             <Typography variant="h4" fontWeight={700} mb={3}>Seller Posts</Typography>
 
             {posts.length === 0 ? (
@@ -142,6 +150,7 @@ const BuyerPosts = () => {
                     ))}
                 </Stack>
             )}
+        </Box>
         </Box>
     );
 };

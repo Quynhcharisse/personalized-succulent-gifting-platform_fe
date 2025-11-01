@@ -58,8 +58,6 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
             const response = await viewRequestDetailBySeller(requestId);
             // Handle nested data structure
             const data = response?.data?.data || response?.data || response;
-            console.log("Request detail data:", data);
-            console.log("designImage:", data?.designImage);
             setRequest(data);
         } catch (error) {
             console.error("Error fetching custom request detail:", error);

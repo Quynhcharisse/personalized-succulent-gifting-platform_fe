@@ -1930,19 +1930,12 @@ export default function Blogs() {
             component="section"
             sx={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 30%, #d1fae5 70%, #a7f3d0 100%)',
+                backgroundImage: "url('/header.jpg')",
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
                 position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '200px',
-                    background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(16,185,129,0.05) 100%)',
-                    borderRadius: '0 0 60px 60px',
-                }
+                overflow: 'hidden'
             }}
         >
             <Container maxWidth="xl"
