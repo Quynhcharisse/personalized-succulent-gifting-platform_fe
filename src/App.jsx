@@ -306,6 +306,14 @@ const router = createBrowserRouter([
                 )
             },
             {
+                path: 'custom-request/detail',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestDetail/>
+                    </Suspense>
+                )
+            },
+            {
                 path: 'create-custom-request',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>

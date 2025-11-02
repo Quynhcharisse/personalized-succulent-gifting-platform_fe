@@ -31,13 +31,16 @@ import {
     ExpandMore as ExpandMoreIcon,
     Edit as EditIcon
 } from '@mui/icons-material';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {viewCustomProductRequestByBuyer, createRevision} from '../../../services/CustomeRequestService.jsx';
 import {FENGSHUI, ZODIACS, GENDERS} from '../../constants.js';
 
 export default function CustomRequestDetail() {
-    const {id} = useParams();
+    const {id: idParam} = useParams();
+    const location = useLocation();
+    const stateId = location?.state?.id;
+    const id = stateId ?? idParam;
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
     
@@ -250,16 +253,16 @@ export default function CustomRequestDetail() {
         }}>
             <Container maxWidth="lg">
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3}}>
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', color: 'white'}}>
                         <Button
                             startIcon={<ArrowBack/>}
                             onClick={() => navigate('/custom-request')}
-                            sx={{mr: 2, color: '#0D3B2E'}}
+                            sx={{mr: 2, color: '#0D3B2E', color: 'white'}}
                         >
                             Quay lại
                         </Button>
-                        <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E'}}>
-                            <Build sx={{verticalAlign: 'middle', mr: 1}}/>
+                        <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E', color: 'white'}}>
+                            <Build sx={{verticalAlign: 'middle', mr: 1, color: 'white'}}/>
                             Chi Tiết Yêu Cầu #{request.id}
                         </Typography>
                     </Box>
@@ -269,6 +272,7 @@ export default function CustomRequestDetail() {
                             color="warning"
                             startIcon={<EditIcon/>}
                             onClick={() => setRevisionDialogOpen(true)}
+                            sx={{color: 'white'}}
                         >
                             Yêu Cầu Chỉnh Sửa
                         </Button>

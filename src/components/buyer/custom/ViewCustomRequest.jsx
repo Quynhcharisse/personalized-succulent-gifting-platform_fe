@@ -154,7 +154,7 @@ export default function ViewCustomRequest() {
                                                 boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
                                             }
                                         }}
-                                        onClick={() => navigate(`/custom-request/${request.id}`)}
+                                        onClick={() => navigate('/custom-request/detail', { state: { id: request.id } })}
                                     >
                                         <CardContent sx={{flexGrow: 1}}>
                                             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
@@ -186,7 +186,7 @@ export default function ViewCustomRequest() {
                                                 sx={{mt: 2}}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate(`/custom-request/${request.id}`);
+                                                    navigate('/custom-request/detail', { state: { id: request.id } });
                                                 }}
                                             >
                                                 Xem Chi Tiết

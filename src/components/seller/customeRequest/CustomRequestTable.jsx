@@ -1,5 +1,5 @@
 import React from 'react';
-import {Chip, Avatar, Box, Typography, IconButton} from '@mui/material';
+import {Chip, Avatar, Box, Typography, IconButton, Button} from '@mui/material';
 import {Visibility as VisibilityIcon} from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import {COLORS, FENGSHUI, ZODIACS} from '../../constants.js';
@@ -13,7 +13,8 @@ export default function CustomRequestTable({
     totalCount,
     onPageChange,
     onRowsPerPageChange,
-    onViewDetail
+    onViewDetail,
+    onApprove
 }) {
     const getFengShuiLabel = (value) => {
         const item = FENGSHUI.find(f => f.value === value);
@@ -76,7 +77,7 @@ export default function CustomRequestTable({
                     sx={{
                         fontWeight: 600,
                         backgroundColor:
-                            row.status?.includes('duyệt') ? COLORS.success : row.status?.includes('từ chối') ? COLORS.error : COLORS.warning,
+                            row.status?.includes('Đã duyệt') ? COLORS.success : row.status?.includes('Đã từ chối') ? COLORS.error : COLORS.warning,
                         color: 'white'
                     }}
                 />
@@ -92,17 +93,29 @@ export default function CustomRequestTable({
             field: 'action',
             align: 'center',
             render: (row) => (
-                <IconButton
-                    color="primary"
-                    onClick={() => onViewDetail?.(row)}
-                    sx={{
-                        '&:hover': {
-                            backgroundColor: 'rgba(11, 63, 49, 0.1)'
-                        }
-                    }}
-                >
-                    <VisibilityIcon/>
-                </IconButton>
+                <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1}}>
+                    <IconButton
+                        color="primary"
+                        onClick={() => onViewDetail?.(row)}
+                        sx={{
+                            '&:hover': {
+                                backgroundColor: 'rgba(11, 63, 49, 0.1)'
+                            }
+                        }}
+                    >
+                        <VisibilityIcon/>
+                    </IconButton>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        onClick={() => onApprove?.(row)}
+                        disabled={Boolean(row.status && (row.status.includes('từ chối')))}
+                        sx={{fontWeight: 600}}
+                    >
+                        Approved
+                    </Button>
+                </Box>
             )
         }
     ];

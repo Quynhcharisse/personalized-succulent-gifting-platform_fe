@@ -11,7 +11,6 @@ html, body {
     --muted: #475569;
     --bg: #ffffff;
     --surface: #f8fafc;
-    /* VSenda Color Palette - Dark elegant green */
     --neutral-50: #f1f5f9;
     --secondary-300: #6ea89a;
     --secondary-400: #1e5a4a;
@@ -44,7 +43,7 @@ body, #root {
 
 /* Global background image for Home page */
 .home {
-    background-image: url('/header.jpg');
+    background-image: url('/public/header.jpg');
     background-position: top center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -179,7 +178,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: var(--secondary-500);
 }
 
 p {
@@ -193,7 +191,7 @@ p {
     padding: clamp(4rem, 12vw, 8rem) 0 clamp(2rem, 6vw, 4rem);
     background: #0D3B2E; /* fallback */
     /* High-quality background rendering */
-    background-image: url('/hinhnen.jpg');
+    background-image: url('public/hinhnen.jpg');
     background-position: center center; /* keep subject centered */
     background-repeat: no-repeat;
     background-size: cover; /* avoid stretching which softens image */
@@ -791,7 +789,7 @@ p {
 /* Testimonials */
 .testimonials {
     padding: clamp(3rem, 6vw, 5rem) 0;
-    background-image: url('/header.jpg');
+    background-image: url('/public/hinhnen.jpg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -1578,7 +1576,6 @@ p {
 .btn--outline {
     background: transparent;
     border: 2px solid var(--secondary-500);
-    color: var(--secondary-500);
     display: inline-flex;
     align-items: center;
     gap: 8px;
