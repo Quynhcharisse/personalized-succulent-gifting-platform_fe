@@ -3,6 +3,7 @@ import {Box, Button, Container, Paper, Typography} from '@mui/material';
 import {Build as BuildIcon} from '@mui/icons-material';
 import CustomRequestTable from './CustomRequestTable.jsx';
 import CustomRequestDetailDialog from './CustomRequestDetailDialog.jsx';
+import ProcessRequestDialog from './ProcessRequestDialog.jsx';
 import {viewRequestBySeller} from '../../../services/CustomeRequestService.jsx';
 import usePagination from '../../../hooks/usePagination.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
@@ -16,6 +17,7 @@ export default function CustomRequestList() {
     const [total, setTotal] = useState(0);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
     const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+    const [processDialogOpen, setProcessDialogOpen] = useState(false);
 
     const loadData = async () => {
         try {
@@ -42,6 +44,12 @@ export default function CustomRequestList() {
     const handleCloseDetailDialog = () => {
         setDetailDialogOpen(false);
         setSelectedRequestId(null);
+    };
+
+    const handleApprove = (row) => {
+        if (!row?.id) return;
+        setSelectedRequestId(row.id);
+        setProcessDialogOpen(true);
     };
 
     useEffect(() => {
@@ -74,16 +82,15 @@ export default function CustomRequestList() {
                         </Box>
                     </Box>
                     <Button
-                        variant="outlined"
-                        onClick={() => { resetPagination(); loadData(); }}
+                        variant="contained"
+                        color='warning'
+                        onClick={() => {
+                            resetPagination();
+                            loadData();
+                        }}
                         sx={{
                             fontWeight: 600,
-                            borderColor: DASHBOARD_STYLES.table.headerBgColor,
-                            color: DASHBOARD_STYLES.table.headerBgColor,
-                            '&:hover': {
-                                backgroundColor: 'rgba(11, 63, 49, 0.1)',
-                                borderColor: DASHBOARD_STYLES.table.headerBgColor
-                            }
+                            borderColor: DASHBOARD_STYLES.table.headerBgColor
                         }}
                     >
                         Tải lại
@@ -100,12 +107,20 @@ export default function CustomRequestList() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     onViewDetail={handleViewDetail}
+                    onApprove={handleApprove}
                 />
             </Paper>
 
             <CustomRequestDetailDialog
                 open={detailDialogOpen}
                 onClose={handleCloseDetailDialog}
+                requestId={selectedRequestId}
+                onSuccess={loadData}
+            />
+
+            <ProcessRequestDialog
+                open={processDialogOpen}
+                onClose={() => setProcessDialogOpen(false)}
                 requestId={selectedRequestId}
                 onSuccess={loadData}
             />

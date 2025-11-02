@@ -48,7 +48,7 @@ export default function CustomRequest() {
         potSize: '',
         soil: '',
         soilMass: 500,
-        decorations: [], // Array of objects: [{name: '', quantity: 1}]
+        decorations: [],
     });
 
     // Filter State (single-select type, conditional values)
@@ -243,12 +243,12 @@ export default function CustomRequest() {
                     <Button
                         startIcon={<ArrowBack/>}
                         onClick={() => navigate('/custom-request')}
-                        sx={{mr: 2, color: '#0D3B2E'}}
+                        sx={{mr: 2, color: 'white'}}
                     >
                         Quay lại
                     </Button>
-                    <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E'}}>
-                        <Build sx={{verticalAlign: 'middle', mr: 1}}/>
+                    <Typography variant="h4" sx={{fontWeight: 700, color: 'white'}}>
+                        <Build sx={{verticalAlign: 'middle', mr: 1, color: 'white'}}/>
                         Điện Cây - Đặt hàng tùy chỉnh
                     </Typography>
                 </Box>

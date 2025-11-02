@@ -217,7 +217,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                         <BuildIcon sx={{fontSize: '2rem', color: 'white'}}/>
                     </Box>
                     <Box>
-                        <Typography variant="h5" sx={{fontWeight: 700, mb: 0.5}}>
+                        <Typography variant="h5" sx={{fontWeight: 700, mb: 0.5, color: 'white'}}>
                             Chi Tiết Yêu Cầu Tùy Chỉnh
                         </Typography>
                     </Box>

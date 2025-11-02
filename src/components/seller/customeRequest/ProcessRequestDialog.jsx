@@ -1,36 +1,38 @@
 import React, {useState} from 'react';
 import {
+    Alert,
+    Avatar,
     Box,
     Button,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
-    Typography,
+    DialogContent,
+    DialogTitle,
     IconButton,
-    Avatar,
-    Alert
+    TextField,
+    Typography
 } from '@mui/material';
 import {
-    Delete as DeleteIcon,
-    CloudUpload as CloudUploadIcon,
     Add as AddIcon,
+    CloudUpload as CloudUploadIcon,
+    Delete as DeleteIcon,
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
-import {uploadToCloudinary} from '../../../components/cloudinaryUpload.js';
+import {uploadToCloudinary} from '../../cloudinaryUpload.js';
 import {processCustomRequest} from '../../../services/CustomeRequestService.jsx';
 import {useSnackbar} from 'notistack';
 import {DASHBOARD_STYLES} from '../../constants.js';
 import ActionButton from '../../buttonCustom/ActionButton.jsx';
 
-export default function ProcessRequestDialog({open, onClose, requestId, onSuccess}) {
+export default function ProcessRequestDialog({open, onClose, requestId, onSuccess, isReject = false}) {
     const {enqueueSnackbar} = useSnackbar();
     const [images, setImages] = useState([{url: ''}]);
     const [uploading, setUploading] = useState(false);
     const [uploadingIndex, setUploadingIndex] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [rejectReason, setRejectReason] = useState('');
+    const [rejectOpen, setRejectOpen] = useState(false);
 
     const handleAddImage = () => {
         setImages(prev => [...prev, {url: ''}]);
@@ -63,8 +65,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
         }
     };
 
-    const handleSubmit = async () => {
-        // Validate: Must have at least one image
+    const handleApprove = async () => {
         const validImages = images.filter(img => img.url && img.url.trim() !== '');
         if (validImages.length === 0) {
             setError('Vui lòng tải ít nhất một ảnh thiết kế');
@@ -75,14 +76,13 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
         setError('');
 
         try {
-            // Convert [{url: '...'}] to ['url1', 'url2', ...]
-            const imageUrls = validImages.map(img => img.url);
             const requestData = {
                 id: requestId,
-                images: imageUrls
+                images: validImages.map(img => ({ url: img.url })),
+                rejectReason: rejectReason && rejectReason.trim() !== '' ? rejectReason.trim() : undefined
             };
 
-            const response = await processCustomRequest(requestData);
+            const response = await processCustomRequest(requestData, "true");
             if (response) {
                 enqueueSnackbar('Cập nhật thiết kế thành công', {variant: 'success'});
                 if (onSuccess) onSuccess();
@@ -98,9 +98,41 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
         }
     };
 
+    const handleOpenReject = () => {
+        setRejectOpen(true);
+    };
+
+    const handleConfirmReject = async () => {
+        setSubmitting(true);
+        setError('');
+
+        try {
+            const requestData = {
+                id: requestId,
+                images: [],
+                rejectReason: rejectReason && rejectReason.trim() !== '' ? rejectReason.trim() : undefined
+            };
+            const response = await processCustomRequest(requestData, "false");
+            if (response) {
+                enqueueSnackbar('Từ chối yêu cầu thành công', {variant: 'success'});
+                if (onSuccess) onSuccess();
+                handleClose();
+            }
+        } catch (error) {
+            console.error('Error submitting design:', error);
+            const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
+            setError(errorMsg);
+            enqueueSnackbar(errorMsg, {variant: 'error'});
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const handleClose = () => {
         setImages([{url: ''}]);
         setError('');
+        setRejectReason('');
+        setRejectOpen(false);
         onClose();
     };
 
@@ -180,6 +212,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                                         onChange={(e) => handleFileChange(e, index)}
                                         disabled={uploading}
                                     />
+
                                     <label htmlFor={`upload-button-${index}`}>
                                         <IconButton
                                             component="span"
@@ -255,26 +288,59 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                             )}
                         </Box>
                     </Box>
+
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{p: 3, pt: 0}}>
-                <ActionButton
-                    action="cancel"
-                    onClick={handleClose}
+            <DialogActions sx={{p: 3, pt: 0, gap: 1}}>
+                <Button
+                    variant={'contained'}
+                    color="error"
+                    onClick={handleOpenReject}
                     disabled={submitting}
-                />
-                <ActionButton
-                    action="submit"
-                    onClick={handleSubmit}
-                    disabled={submitting || images.filter(img => img.url).length === 0}
-                    sx={{
-                        minWidth: '120px'
-                    }}
+                    sx={{fontWeight: 600}}
                 >
-                    {submitting ? 'Đang xử lý...' : 'Cập nhật thiết kế'}
-                </ActionButton>
+                    Từ chối
+                </Button>
+                <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleApprove}
+                    disabled={submitting || images.filter(img => img.url).length === 0}
+                    sx={{fontWeight: 600}}
+                >
+                    Phê duyệt
+                </Button>
             </DialogActions>
+
+            {/* Confirm Reject Dialog */}
+            <Dialog
+                open={rejectOpen}
+                onClose={() => setRejectOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Xác nhận từ chối</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{mb: 2}}>
+                        Bạn có chắc chắn muốn từ chối yêu cầu này? Vui lòng nhập lý do (tuỳ chọn).
+                    </Typography>
+                    <TextField
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Nhập lý do từ chối"
+                        fullWidth
+                        multiline
+                        minRows={3}
+                    />
+                </DialogContent>
+                <DialogActions sx={{p: 2}}>
+                    <Button onClick={() => setRejectOpen(false)} disabled={submitting}>Hủy</Button>
+                    <Button color="error" variant="contained" onClick={handleConfirmReject} disabled={submitting}>
+                        Xác nhận từ chối
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Dialog>
     );
 }

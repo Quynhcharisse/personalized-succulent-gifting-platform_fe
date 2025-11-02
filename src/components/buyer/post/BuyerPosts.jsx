@@ -135,8 +135,6 @@ const BuyerPosts = () => {
             py: 4
         }}>
         <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-            <Typography variant="h4" fontWeight={700} mb={3}>Seller Posts</Typography>
-
             {posts.length === 0 ? (
                 <BuyerEmptyState onRefresh={refresh} />
             ) : (
