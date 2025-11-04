@@ -28,7 +28,7 @@ export default function SignIn() {
                     userDataToStore.avatar = userInfo.data.picture;
                 }
 
-                const role = userDataToStore?.role || null;
+                const role = (userDataToStore?.role || null);
                 
                 if (!role) {
                     enqueueSnackbar("Không tìm thấy role người dùng", {variant: "error"});
@@ -38,7 +38,7 @@ export default function SignIn() {
                 // Lưu user data kèm role vào localStorage để không cần gọi API mỗi lần
                 localStorage.setItem('user', JSON.stringify({
                     ...userDataToStore,
-                    role: role
+                    role: role ? role.toUpperCase() : null
                 }));
 
                 enqueueSnackbar(loginResponse.data.message, {variant: 'success', autoHideDuration: 1000});
@@ -118,7 +118,10 @@ export default function SignIn() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "linear-gradient(135deg, #2D6A4F 0%, #1B4332 100%)",
+                backgroundImage: "url('/header.jpg')",
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
                 position: "relative",
                 overflow: "hidden",
                 "&::before": {

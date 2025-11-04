@@ -6,14 +6,18 @@ import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
 
-import SucculentList from './components/buyer/SucculentList.jsx';
-import SucculentDetail from './components/buyer/SucculentDetail.jsx';
-import PotAccessoryDesigner from './components/buyer/PotAccessoryDesigner.jsx';
-import BuyerPosts from "./components/buyer/post/BuyerPosts.jsx";
-import ProductList from './components/buyer/ProductList.jsx';
-import ProductDetail from './components/buyer/ProductDetail.jsx';
-import Cart from './components/buyer/Cart.jsx';
 
+import Cart from './components/buyer/Cart.jsx';
+// Buyer components
+const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
+const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
+const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
+const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
+const ProductList = lazy(() => import('./components/buyer/product/ProductList.jsx'))
+const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetail.jsx'))
+const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest.jsx'))
+const ViewCustomRequest = lazy(() => import('./components/buyer/custom/ViewCustomRequest.jsx'))
+const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomRequestDetail.jsx'))
 
 
 // Lazy imports for layouts and frequently used components
@@ -36,6 +40,7 @@ const SucculentForm = lazy(() => import('./components/seller/succulent/Succulent
 const Accessory = lazy(() => import('./components/seller/accessory/Accessory.jsx'))
 const PostsManager = lazy(() => import('./components/seller/post/PostsManager.jsx'))
 const ProductTable = lazy(() => import('./components/seller/product/ProductTable.jsx'))
+const CustomRequestList = lazy(() => import('./components/seller/customeRequest/CustomRequestList.jsx'))
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
@@ -289,6 +294,38 @@ const router = createBrowserRouter([
                 path: 'product/:id',
                 element: <ProductDetail/>
             },
+            {
+                path: 'custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <ViewCustomRequest/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'custom-request/detail',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestDetail/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'create-custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequest/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'custom-request/:id',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestDetail/>
+                    </Suspense>
+                )
+            },
         ],
     },
     {
@@ -371,6 +408,14 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <ProductTable/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'custom-request',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CustomRequestList/>
                     </Suspense>
                 )
             },

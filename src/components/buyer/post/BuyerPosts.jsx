@@ -126,9 +126,15 @@ const BuyerPosts = () => {
     }
 
     return (
-        <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
-            <Typography variant="h4" fontWeight={700} mb={3}>Seller Posts</Typography>
-
+        <Box sx={{
+            minHeight: '100vh',
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            py: 4
+        }}>
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
             {posts.length === 0 ? (
                 <BuyerEmptyState onRefresh={refresh} />
             ) : (
@@ -142,6 +148,7 @@ const BuyerPosts = () => {
                     ))}
                 </Stack>
             )}
+        </Box>
         </Box>
     );
 };
