@@ -15,7 +15,10 @@ import {
 } from '@mui/material';
 import {ShoppingCart, FavoriteBorder, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import {viewProduct} from '../../../services/ProductService.jsx';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { viewProduct } from '../../../services/ProductService.jsx';
+import { addItem } from '../../../store/slices/cartSlice.js';
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -24,10 +27,12 @@ export default function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [quantity, setQuantity] = useState(1);
     const [imageError, setImageError] = useState(false);
     const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
     
+    const dispatch = useDispatch();
+    const cartItems = useSelector(state => state?.cart?.items || []);
+
     // Check if user is logged in
     const isLoggedIn = () => {
         const user = localStorage.getItem('user');
@@ -98,15 +103,47 @@ export default function ProductDetail() {
         return totalPrice;
     };
 
+    const isOutOfStock = !!(product?.status && !String(product.status).toLowerCase().includes('còn hàng'));
+
     const handleAddToCart = () => {
         if (!isLoggedIn()) {
             enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', {variant: 'info'});
             navigate('/login', {state: {from: `/product/${id}`}});
             return;
         }
-        // TODO: Implement add to cart functionality
-        console.log('Add to cart:', product.id, quantity, product.sizes?.[selectedSizeIndex]);
-        enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
+        if (isOutOfStock) {
+            enqueueSnackbar('Sản phẩm đã hết hàng', { variant: 'error' });
+            return;
+        }
+        if (product && product.sizes && product.sizes[selectedSizeIndex]) {
+            // If the same product+size already exists in cart, show info and do not add again
+            const sizeName = product.sizes[selectedSizeIndex].name;
+            const alreadyInCart = cartItems.some(it => it.id === product.id && it.size === sizeName);
+            if (alreadyInCart) {
+                enqueueSnackbar('Sản phẩm đã có trong giỏ hàng', { variant: 'info' });
+                return;
+            }
+            const priceForSize = calculateProductPrice(product.sizes[selectedSizeIndex]);
+            dispatch(addItem({
+                id: product.id,
+                name: typeof product.name === 'object' ? JSON.stringify(product.name) : product.name,
+                status: product.status,
+                size: sizeName,
+                image: product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg',
+                price: priceForSize,
+            }));
+            enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
+            console.log("Dispatch cart:", {
+                id: product.id,
+                name: typeof product.name === 'object' ? JSON.stringify(product.name) : product.name,
+                status: product.status,
+                size: sizeName,
+                image: product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg',
+                price: priceForSize,
+              });
+        } else {
+            enqueueSnackbar('Không thể thêm vào giỏ hàng', {variant: 'error'});
+        }
     };
     
     const handleAddToWishlist = () => {
@@ -263,30 +300,7 @@ export default function ProductDetail() {
                         
                         <Divider sx={{my: 3}}/>
                         
-                        {/* Quantity */}
-                        <Box sx={{display: 'flex', gap: 2, mb: 3, alignItems: 'center'}}>
-                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>Số lượng:</Typography>
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, border: '1px solid #ddd', borderRadius: 1}}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    sx={{minWidth: '40px'}}
-                                >
-                                    -
-                                </Button>
-                                <Typography sx={{minWidth: '50px', textAlign: 'center', px: 2}}>
-                                    {quantity}
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    sx={{minWidth: '40px'}}
-                                >
-                                    +
-                                </Button>
-                            </Box>
-                        </Box>
-                        
+                
                         {/* Action Buttons */}
                         <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4}}>
                             <Button
@@ -294,6 +308,7 @@ export default function ProductDetail() {
                                 size="large"
                                 startIcon={<ShoppingCart/>}
                                 onClick={handleAddToCart}
+                                disabled={isOutOfStock}
                                 sx={{
                                     flex: 1,
                                     minWidth: '200px',
@@ -306,7 +321,7 @@ export default function ProductDetail() {
                                     }
                                 }}
                             >
-                                Thêm vào giỏ hàng
+                                {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
                             </Button>
                             <Button
                                 variant="outlined"

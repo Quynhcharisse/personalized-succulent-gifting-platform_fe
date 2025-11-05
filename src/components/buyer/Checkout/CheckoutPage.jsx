@@ -1,16 +1,20 @@
-import { RoomServiceRounded, LocalActivityOutlined, ShoppingCartOutlined, PaymentOutlined } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, Divider, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItemButton, ListItemText, Radio, RadioGroup, FormControlLabel } from "@mui/material";
+import { RoomServiceRounded, LocalActivityOutlined, ShoppingCartOutlined, PaymentOutlined, DeleteOutline } from "@mui/icons-material";
+import { Box, Button, Card, CardContent, Divider, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItemButton, ListItemText, Radio, RadioGroup, FormControlLabel, IconButton } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ShippingAddressDialog from "./ShippingAddressDialog.jsx";
 import { COLORS, DASHBOARD_STYLES } from "../../constants.js";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axiosClient from "../../../config/APIConfig.jsx";
 import { getDefaultShippingAddress } from "../../../services/ShippingAddressService.jsx";
+import { getWalletBalance } from "../../../services/WalletService.jsx";
+import { removeItem } from "../../../store/slices/cartSlice.js";
 
 export default function CheckoutPage() {
 
   const items = useSelector(state => state?.cart?.items || []);
-  const [priceMap, setPriceMap] = useState({});
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showDialog, setShowDialog] = useState(false);
 
   // Shipping address (mock)
@@ -31,7 +35,7 @@ export default function CheckoutPage() {
             districtId : data.districtId || 0,
             wardCode : data.wardCode || ""
           });
-          if (data && data.districtId && data.wardCode) {
+          if (data && data.districtId && data.wardCode && items.length > 0) {
             const resFee = await axiosClient.post("/ghn/calculate/fee", {
               toDistrictId: data.districtId,
               wardCode: data.wardCode,
@@ -72,156 +76,54 @@ export default function CheckoutPage() {
   //   },
   // ];
 
-  const calculateProductPrice = (size) => {
-    if (!size) return 0
-    let total = 0
-    // succulents
-    if (Array.isArray(size.succulents)) {
-        size.succulents.forEach(sc => {
-            if (Array.isArray(sc.size)) {
-                sc.size.forEach(sz => {
-                    const unit = Number(sz?.price) || 0
-                    const q = Number(sz?.quantity) || 1
-                    total += unit * q
-                })
-            } else if (sc.size?.price) {
-                const unit = Number(sc.size.price) || 0
-                const q = Number(sc.quantity) || 1
-                total += unit * q
-            }
-        })
-    }
-    // pot price: take first size price if exists
-    if (Array.isArray(size.pot?.size) && size.pot.size.length > 0) {
-        total += Number(size.pot.size[0]?.price) || 0
-    }
-    // soil price
-    if (size.soil?.basePricing) {
-        const unitPrice = Number(size.soil.basePricing.price) || 0
-        const massValue = Number(size.soil.basePricing.massValue) || 1
-        const massAmount = Number(size.soil.massAmount) || 0
-        total += (unitPrice / massValue) * massAmount
-    }
-    // decorations
-    if (Array.isArray(size.decorations)) {
-        size.decorations.forEach(d => {
-            total += Number(d?.totalPrice) || 0
-        })
-    }
-    return total
-}
-
-  useEffect(() => {
-    const loadPrices = async () => {
-        const entries = await Promise.all(items.map(async (it) => {
-            const key = `${it.id}-${it.size || 'default'}`
-            if (priceMap[key] != null) return [key, priceMap[key]]
-            try {
-                const res = await axiosClient.get(`/product/${it.id}`)
-                const data = res?.data?.data
-                const size = Array.isArray(data?.sizes) ? (data.sizes.find(s => s.name === it.size) || data.sizes[0]) : null
-                const price = calculateProductPrice(size)
-                return [key, price]
-            } catch (e) {
-                return [key, 0]
-            }
-        }))
-        const next = { ...priceMap }
-        entries.forEach(([k, v]) => { next[k] = v })
-        setPriceMap(next)
-    }
-    if (items.length) loadPrices()
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [items]);
-useEffect(() => {
-  console.log("✅ priceMap updated:", priceMap);
-}, [priceMap]);
+  // Prices are stored directly on cart items; no external loading needed.
 
 const [shippingFee, setShippingFee] = useState(0);
   const subtotal = items.reduce((sum, i) => {
-  const key = `${i.id}-${i.size || 'default'}`;
-  const price = priceMap[key] || 0;
-  return sum + price * (i.quantity || 1);
+    const unit = Number(i?.price) || 0;
+    return sum + unit * (i.quantity || 1);
   }, 0);
 
   useEffect(() => {
     const updateFee = async () => {
       if (selectedAddress && items.length > 0) {
+        const totalWeight = items.reduce((sum, i) => sum + (i.quantity || 1) * 200, 0);
+      
         const resFee = await axiosClient.post("/ghn/calculate/fee", {
           toDistrictId: selectedAddress.districtId,
           wardCode: selectedAddress.wardCode,
           itemNames: items.map(i => i.name),
+          weight: totalWeight
         });
+      
         setShippingFee(resFee?.data?.data || 0);
+      } else {
+        setShippingFee(0);
       }
     };
   
     updateFee();
   }, [selectedAddress, items]);
 
-  // Mock vouchers
-  const vouchers = [
-    {
-      id: 1,
-      code: "PSGP10",
-      title: "Giảm 10% cho đơn từ 150K",
-      type: "percent", // percent | fixed
-      value: 10, // %
-      minOrder: 150000,
-      maxDiscount: 40000,
-    },
-    {
-      id: 2,
-      code: "FREESHIP",
-      title: "Giảm 30K phí vận chuyển cho đơn từ 200K",
-      type: "fixed",
-      value: 30000,
-      minOrder: 200000,
-      appliesTo: "shipping", // shipping | subtotal
-    },
-    {
-      id: 3,
-      code: "PSGP50K",
-      title: "Giảm 50K cho đơn từ 350K",
-      type: "fixed",
-      value: 50000,
-      minOrder: 350000,
-      appliesTo: "subtotal",
-    },
-  ];
+  // Voucher removed
+  const [walletBalance, setWalletBalance] = useState(0);
+  const preWalletTotal = Math.max(0, subtotal) + Math.max(0, shippingFee);
+  const walletDeduction = Math.min(walletBalance, preWalletTotal);
+  const total = Math.max(0, preWalletTotal - walletDeduction);
 
-  const [selectedVoucherId, setSelectedVoucherId] = useState("");
-  const [appliedVoucher, setAppliedVoucher] = useState(null);
-  const [voucherDialogOpen, setVoucherDialogOpen] = useState(false);
-  const [tempSelectedVoucherId, setTempSelectedVoucherId] = useState("");
+  useEffect(() => {
+    const loadWallet = async () => {
+      try {
+        const res = await getWalletBalance();
+        const balance = Number(res?.data?.data) || 0;
+        setWalletBalance(balance);
+      } catch (e) {
+        setWalletBalance(0);
+      }
+    };
+    loadWallet();
+  }, []);
 
-  const computeVoucherDiscount = () => {
-    if (!appliedVoucher) return { discountOnSubtotal: 0, discountOnShipping: 0 };
-    if (subtotal < (appliedVoucher.minOrder || 0)) return { discountOnSubtotal: 0, discountOnShipping: 0 };
-
-    if (appliedVoucher.type === "percent") {
-      const raw = Math.floor((subtotal * appliedVoucher.value) / 100);
-      const capped = Math.min(raw, appliedVoucher.maxDiscount || raw);
-      return { discountOnSubtotal: capped, discountOnShipping: 0 };
-    }
-
-    // fixed discount
-    if (appliedVoucher.appliesTo === "shipping") {
-      return { discountOnSubtotal: 0, discountOnShipping: Math.min(appliedVoucher.value, shippingFee) };
-    }
-    return { discountOnSubtotal: Math.min(appliedVoucher.value, subtotal), discountOnShipping: 0 };
-  };
-
-  const { discountOnSubtotal, discountOnShipping } = computeVoucherDiscount();
-  const total = Math.max(0, subtotal - discountOnSubtotal) + Math.max(0, shippingFee - discountOnShipping);
-
-  // Payment methods (mock)
-  const paymentMethods = [
-    { id: 'cod', label: 'Thanh toán khi nhận hàng (COD)' },
-    { id: 'momo', label: 'MoMo E-Wallet' },
-    { id: 'bank', label: 'Chuyển khoản ngân hàng' },
-  ];
-  const [selectedPayment, setSelectedPayment] = useState('cod');
 
   const formatCurrency = (v) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(v);
@@ -309,7 +211,7 @@ const [shippingFee, setShippingFee] = useState(0);
             <Box
               sx={{
                 display: { xs: "none", md: "grid" },
-                gridTemplateColumns: "1fr 200px 1fr 160px",
+                gridTemplateColumns: "1fr 140px 160px 1fr 120px",
                 gap: 2,
                 px: 2,
                 py: 1.5,
@@ -324,8 +226,10 @@ const [shippingFee, setShippingFee] = useState(0);
                 <ShoppingCartOutlined sx={{ color: 'white', fontSize: 16 }} />
                 <Typography variant="body2" fontWeight={700}>SẢN PHẨM</Typography>
         </Stack>
+              <Typography variant="body2" fontWeight={700} textAlign="right">Số lượng</Typography>
               <Typography variant="body2" fontWeight={700} textAlign="right">Size</Typography>
               <Typography variant="body2" fontWeight={700} textAlign="right">Thành tiền</Typography>
+              <Typography variant="body2" fontWeight={700} textAlign="right">Thao tác</Typography>
             </Box>
         
           <Divider sx={{ my: 1 }} />
@@ -337,7 +241,7 @@ const [shippingFee, setShippingFee] = useState(0);
               key={`${item.id}-${item.size}`}
               sx={{
                   display: { xs: "block", sm: "block", md: "grid" },
-                  gridTemplateColumns: "1fr 200px 1fr 160px",
+                  gridTemplateColumns: "1fr 140px 160px 1fr 120px",
                   gap: 2,
                   alignItems: "center",
                   px: { xs: 1.5, sm: 2 },
@@ -357,7 +261,7 @@ const [shippingFee, setShippingFee] = useState(0);
                 <Box sx={{ display: { xs : 'block', sm: 'block', md: 'none' } }}>
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
                     <img
-                      src={item.image}
+                      src={item.image || '/placeholder.jpg'}
                       alt={item.name}
                       style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, border: `2px solid ${COLORS.primary}20` }}
                     />
@@ -367,16 +271,25 @@ const [shippingFee, setShippingFee] = useState(0);
                   </Stack>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
-                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Size</Typography>
-                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.size}</Typography>
+                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Số lượng</Typography>
+                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.quantity || 1}</Typography>
                     </Box>
                   
                     <Box sx={{ textAlign: 'right' }}>
                       <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Thành tiền</Typography>
                       <Typography variant="subtitle2" fontWeight={700} sx={{ color: COLORS.primary }}>
-                      {formatCurrency(priceMap[`${item.id}-${item.size || 'default'}`] || 0)}
+                      {formatCurrency(item.price || 0)}
                       </Typography>
                     </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ color: COLORS.primaryLight, fontSize: '0.875rem' }}>Size</Typography>
+                      <Typography variant="body2" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.size}</Typography>
+                    </Box>
+                    <IconButton color="error" aria-label="Xóa khỏi giỏ" onClick={() => dispatch(removeItem({ id: item.id, size: item.size }))}>
+                      <DeleteOutline />
+                    </IconButton>
                   </Box>
                 </Box>
 
@@ -385,7 +298,7 @@ const [shippingFee, setShippingFee] = useState(0);
                   {/* Product column */}
                   <Stack direction="row" alignItems="center" spacing={1.5}>
                     <img
-                      src={item.image}
+                      src={item.image || '/placeholder.jpg'}
                       alt={item.name}
                       style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, border: `2px solid ${COLORS.primary}20` }}
                     />
@@ -395,13 +308,23 @@ const [shippingFee, setShippingFee] = useState(0);
                     </Box>
         </Stack>
 
-                  {/* Unit price */}
+                  {/* Quantity */}
+                  <Typography variant="body2" textAlign="right" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.quantity || 1}</Typography>
+
+                  {/* Size */}
                   <Typography variant="body2" textAlign="right" sx={{ color: COLORS.primary, fontWeight: 600 }}>{item.size}</Typography>
                 
                   {/* Line total */}
                   <Typography variant="subtitle2" textAlign="right" fontWeight={700} sx={{ color: COLORS.primary }}>
-                  {formatCurrency(priceMap[`${item.id}-${item.size || 'default'}`] || 0)}
+                   {formatCurrency(item.price || 0)}
                   </Typography>
+
+                  {/* Actions */}
+                  <Box sx={{ textAlign: 'right' }}>
+                    <IconButton color="error" aria-label="Xóa khỏi giỏ" onClick={() => dispatch(removeItem({ id: item.id, size: item.size }))}>
+                      <DeleteOutline />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             ))}
@@ -409,181 +332,7 @@ const [shippingFee, setShippingFee] = useState(0);
 
           <Divider sx={{ my: 2 }} />
 
-          {/* Voucher section */}
-          <Box sx={{ p: { xs: 1.5, sm: 2 }, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 2, border: `1px solid ${COLORS.primary}20`, mb: 2 }}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between', 
-              mb: 1,
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1, sm: 0 }
-            }}>
-              <Stack direction="row" spacing={1.25} alignItems="center">
-                <LocalActivityOutlined sx={{ color: COLORS.primary, fontSize: 20 }} />
-                <Typography variant="subtitle1" fontWeight={700} sx={{ color: COLORS.primary }}>VOUCHER CỦA SHOP</Typography>
-              </Stack>
-              <Button 
-                variant="text" 
-                onClick={() => { setTempSelectedVoucherId(appliedVoucher?.id || ""); setVoucherDialogOpen(true); }} 
-                sx={{ 
-                  color: 'white', 
-                  textTransform: 'none', 
-                  fontWeight: 600, 
-                  ...DASHBOARD_STYLES.primaryButton,
-                  alignSelf: { xs: 'stretch', sm: 'auto' }
-                }}
-              >
-                CHỌN VOUCHER
-              </Button>
-            </Box>
-            {appliedVoucher && (
-              <Typography variant="body2" sx={{ mt: 1, color: COLORS.primary, fontWeight: 600 }}>
-                Đã áp dụng: {appliedVoucher.code} — {appliedVoucher.title}
-              </Typography>
-            )}
-          </Box>
-
-          {/* Voucher dialog */}
-          <Dialog 
-            open={voucherDialogOpen} 
-            onClose={() => setVoucherDialogOpen(false)} 
-            maxWidth="md" 
-            fullWidth
-            slotProps={{
-              paper: {
-                sx: DASHBOARD_STYLES.dialog
-              }
-            }}
-          >
-            <DialogTitle sx={DASHBOARD_STYLES.dialogTitle}>
-              Chọn Voucher
-              <Typography variant="body2" sx={{opacity: 0.9, mt: 0.5, fontWeight: 400}}>
-                Chọn voucher phù hợp để giảm giá cho đơn hàng của bạn
-              </Typography>
-            </DialogTitle>
-            
-            <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
-              <Box sx={DASHBOARD_STYLES.formSection}>
-                <Typography variant="h6" sx={DASHBOARD_STYLES.sectionTitle}>Danh sách voucher khả dụng</Typography>
-                <Divider sx={{mb: 2}}/>
-                
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {vouchers.map((v) => {
-                    const selected = tempSelectedVoucherId === v.id;
-                    const reachable = subtotal >= (v.minOrder || 0);
-                    return (
-                      <Box
-                        key={v.id}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          border: selected ? `2px solid ${COLORS.primary}` : '1px solid #e0e0e0',
-                          backgroundColor: selected ? `${COLORS.primary}10` : 'white',
-                          cursor: reachable ? 'pointer' : 'not-allowed',
-                          opacity: reachable ? 1 : 0.6,
-                          transition: 'all 0.2s ease',
-                          '&:hover': reachable ? {
-                            backgroundColor: selected ? `${COLORS.primary}15` : '#f5f5f5',
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                          } : {},
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 2
-                        }}
-                        onClick={() => reachable && setTempSelectedVoucherId(v.id)}
-                      >
-                        <Radio 
-                          checked={selected} 
-                          disabled={!reachable}
-                          sx={{ 
-                            color: COLORS.primary,
-                            '&.Mui-checked': {
-                              color: COLORS.primary
-                            }
-                          }} 
-                        />
-                        <Box sx={{ flex: 1 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Typography variant="subtitle1" fontWeight={600} sx={{ color: COLORS.primary }}>
-                              {v.code}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: COLORS.primaryLight }}>
-                              —
-                            </Typography>
-                            <Typography variant="body2" fontWeight={500} sx={{ color: COLORS.primary }}>
-                              {v.title}
-                            </Typography>
-                          </Box>
-                          {!reachable && (
-                            <Typography variant="caption" sx={{ color: 'error.main' }}>
-                              Đơn tối thiểu {formatCurrency(v.minOrder)}
-                            </Typography>
-                          )}
-                          {v.type === 'percent' && (
-                            <Typography variant="caption" sx={{ color: COLORS.primaryLight, display: 'block' }}>
-                              Giảm tối đa {formatCurrency(v.maxDiscount || 0)}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography variant="h6" fontWeight={700} sx={{ color: COLORS.primary }}>
-                            {v.type === 'percent' ? `${v.value}%` : formatCurrency(v.value)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
-            </DialogContent>
-            
-            <DialogActions
-              sx={{
-                p: 4,
-                backgroundColor: '#eff5ef',
-                borderTop: '1px solid #e0e0e0',
-                justifyContent: 'space-between'
-              }}
-            >
-              <Button 
-                onClick={() => setVoucherDialogOpen(false)} 
-                sx={{ 
-                  textTransform: "none", 
-                  color: 'white', 
-                  ...DASHBOARD_STYLES.primaryButton,
-                  px: 4,
-                  py: 1.5
-                }}
-              >
-                Hủy
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setAppliedVoucher(vouchers.find((v) => v.id === tempSelectedVoucherId) || null);
-                  setSelectedVoucherId(tempSelectedVoucherId);
-                  setVoucherDialogOpen(false);
-                }}
-                disabled={!tempSelectedVoucherId}
-                sx={{ 
-                  textTransform: "none", 
-                  color: 'white', 
-                  ...DASHBOARD_STYLES.primaryButton,
-                  px: 4,
-                  py: 1.5,
-                  '&:disabled': {
-                    background: '#e0e0e0',
-                    color: '#9e9e9e',
-                    boxShadow: 'none'
-                  }
-                }}
-              >
-                Áp dụng
-              </Button>
-            </DialogActions>
-          </Dialog>
+          {/* Voucher removed */}
 
           {/* Totals */}
           <Box sx={{ marginBottom: 4, p: { xs: 1.5, sm: 2 }, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 2, border: `1px solid ${COLORS.primary}20` }}>
@@ -592,19 +341,19 @@ const [shippingFee, setShippingFee] = useState(0);
                 <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Tạm tính</Typography>
                 <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>{formatCurrency(subtotal)}</Typography>
               </Box>
-              {discountOnSubtotal > 0 && (
+              <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.5 }}>
+                <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Phí vận chuyển</Typography>
+                <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>{formatCurrency(shippingFee)}</Typography>
+              </Box>
+              {walletDeduction > 0 && (
                 <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.5 }}>
-                  <Typography sx={{ color: COLORS.success, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Giảm giá</Typography>
-                  <Typography sx={{ color: COLORS.success, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>- {formatCurrency(discountOnSubtotal)}</Typography>
+                  <Typography sx={{ color: COLORS.success, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Thanh toán qua ví</Typography>
+                  <Typography sx={{ color: COLORS.success, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>- {formatCurrency(walletDeduction)}</Typography>
                 </Box>
               )}
               <Box sx={{ display: "flex", justifyContent: "space-between", py: 0.5 }}>
-                <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Phí vận chuyển</Typography>
-                <Typography sx={{ color: COLORS.primary, fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-                  {discountOnShipping > 0
-                    ? `${formatCurrency(shippingFee)} → ${formatCurrency(Math.max(0, shippingFee - discountOnShipping))}`
-                    : formatCurrency(shippingFee)}
-                </Typography>
+                <Typography sx={{ color: COLORS.primaryLight, fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Số dư ví khả dụng</Typography>
+                <Typography sx={{ color: COLORS.primaryLight, fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>{formatCurrency(walletBalance)}</Typography>
               </Box>
               <Divider sx={{ my: 1 }} />
               <Box sx={{ display: "flex", justifyContent: "space-between", py: 1.5, backgroundColor: 'white' }}>
@@ -635,25 +384,14 @@ const [shippingFee, setShippingFee] = useState(0);
               </Box>
              <Divider sx={{ my: 1 }} />
              <Box sx={{ p: { xs: 1.5, sm: 2 }, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 2, border: `1px solid ${COLORS.primary}20`, mb: 3 }}>
-              <RadioGroup
-                value={selectedPayment}
-                onChange={(e) => setSelectedPayment(e.target.value)}
-              >
-                {paymentMethods.map((pm) => (
-                  <FormControlLabel
-                    key={pm.id}
-                    value={pm.id}
-                    control={<Radio sx={{ color: COLORS.primary }} />}
-                    label={<Typography sx={{ color: COLORS.primary, fontWeight: 600 }}>{pm.label}</Typography>}
-                    sx={{ mb: 1 }}
-                  />)
-                )}
-              </RadioGroup>
+              <Typography sx={{ color: COLORS.primary, fontWeight: 600 }}>
+                Thanh toán Online
+              </Typography>
             </Box>
         
             <Divider sx={{  my: 1, borderBottomWidth: 2, borderColor: COLORS.primary }} />
 
-            <Button 
+              <Button 
               variant="contained"
               color="primary"
               fullWidth
@@ -667,7 +405,20 @@ const [shippingFee, setShippingFee] = useState(0);
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 py: { xs: 1.5, sm: 2 }
               }}
-              onClick={() => alert(`Đặt hàng thành công!\nPhương thức: ${paymentMethods.find(p=>p.id===selectedPayment)?.label}\nTổng tiền: ${formatCurrency(total)}`)}
+              onClick={() => {
+                const orderCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+                navigate('/buyer/payment', {
+                  state: {
+                    orderCode,
+                    total,
+                    items,
+                    shippingAddress: selectedAddress,
+                    subtotal,
+                    shippingFee,
+                    walletDeduction,
+                  }
+                });
+              }}
             >
               ĐẶT HÀNG — {formatCurrency(total)}
             </Button>

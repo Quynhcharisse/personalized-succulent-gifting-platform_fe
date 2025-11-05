@@ -7,7 +7,10 @@ import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
 
 
-import Cart from './components/buyer/Cart.jsx';
+
+
+
+
 // Buyer components
 const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
 const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
@@ -45,8 +48,8 @@ const CustomRequestList = lazy(() => import('./components/seller/customeRequest/
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
-const CheckoutPage = lazy(() => import('./components/buyer/checkout/CheckoutPage.jsx'))
-const PaymentConfirmation = lazy(() => import('./components/buyer/checkout/PaymentConfirmation.jsx'))
+const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
+const Payment = lazy(() => import('./components/buyer/payment/Payment.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -470,13 +473,14 @@ const router = createBrowserRouter([
                 )
             },
             {
-                path: 'checkout/confirm',
+                path: 'payment',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
-                        <PaymentConfirmation/>
+                        <Payment/>
                     </Suspense>
                 )
             },
+           
             {
                 path: 'profile',
                 element: (

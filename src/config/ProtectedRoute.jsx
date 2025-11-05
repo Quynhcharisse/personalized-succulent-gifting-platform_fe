@@ -22,9 +22,17 @@ async function GetAccessData() {
 async function Logout() {
     signOut().then(res => {
         if (res && res.status === 200) {
-            if (localStorage.length > 0) {
-                localStorage.clear();
-            }
+            // Remove only current user's cart and user info
+            try {
+                const rawUser = localStorage.getItem('user')
+                if (rawUser) {
+                    const parsed = JSON.parse(rawUser)
+                    const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest'
+                    const cartKey = `psgp_cart_v1_${userIdentifier}`
+                    localStorage.removeItem(cartKey)
+                }
+            } catch {}
+            localStorage.removeItem('user')
             if (sessionStorage.length > 0) {
                 sessionStorage.clear()
             }

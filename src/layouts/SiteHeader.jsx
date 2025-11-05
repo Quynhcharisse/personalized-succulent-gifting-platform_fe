@@ -20,12 +20,14 @@ import {NotificationDisplay} from '../services/NotificationService.jsx';
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
 
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { reloadFromStorage } from '../store/slices/cartSlice';
 
 
 export default function SiteHeader() {
     const navigate = useNavigate()
     const location = useLocation()
+    const dispatch = useDispatch()
     const [anchorEl, setAnchorEl] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
     const menuOpen = Boolean(anchorEl)
@@ -47,6 +49,11 @@ export default function SiteHeader() {
             localStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
         }
     }, [location.pathname])
+
+    useEffect(() => {
+        // Reload cart when user context changes (per-account cart storage)
+        dispatch(reloadFromStorage())
+    }, [currentUser, dispatch])
 
     const [role, setRole] = useState(null);
     
@@ -105,7 +112,17 @@ export default function SiteHeader() {
     const handleLogout = async () => {
         try {
             await signOut()
-            localStorage.clear()
+            // Remove only current user's cart and user info
+            try {
+                const rawUser = localStorage.getItem('user')
+                if (rawUser) {
+                    const parsed = JSON.parse(rawUser)
+                    const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest'
+                    const cartKey = `psgp_cart_v1_${userIdentifier}`
+                    localStorage.removeItem(cartKey)
+                }
+            } catch {}
+            localStorage.removeItem('user')
             enqueueSnackbar('Đã đăng xuất', {variant: 'success'})
             handleCloseMenu()
             navigate('/', {replace: true})
