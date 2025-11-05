@@ -12,7 +12,7 @@ import {
     Paper,
     Grid
 } from '@mui/material';
-import {Build, Schedule, Visibility} from '@mui/icons-material';
+import {Build, Schedule, Visibility, Event as EventIcon} from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
@@ -176,6 +176,16 @@ export default function ViewCustomRequest() {
                                                         {formatDate(request.createdAt)}
                                                     </Typography>
                                                 </Box>
+                                                
+                                                {/* Occasion Info */}
+                                                {request.occasion && typeof request.occasion === 'string' && request.occasion.trim() !== '' && (
+                                                    <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary'}}>
+                                                        <EventIcon sx={{mr: 1, fontSize: 18}}/>
+                                                        <Typography variant="body2">
+                                                            Dịp: {request.occasion}
+                                                        </Typography>
+                                                    </Box>
+                                                )}
                                             </Stack>
 
                                             <Button

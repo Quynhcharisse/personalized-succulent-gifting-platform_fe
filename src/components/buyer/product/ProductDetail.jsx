@@ -24,9 +24,9 @@ export default function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [quantity, setQuantity] = useState(1);
     const [imageError, setImageError] = useState(false);
     const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
+    const [quantity, setQuantity] = useState(1);
     
     // Check if user is logged in
     const isLoggedIn = () => {
@@ -37,6 +37,11 @@ export default function ProductDetail() {
     useEffect(() => {
         fetchProductDetail();
     }, [id]);
+
+    // Reset quantity when size changes
+    useEffect(() => {
+        setQuantity(1);
+    }, [selectedSizeIndex]);
 
     const fetchProductDetail = async () => {
         try {
@@ -61,10 +66,6 @@ export default function ProductDetail() {
         }
     };
 
-    const formatPrice = (vnd) => {
-        return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(vnd);
-    };
-
     const calculateProductPrice = (size) => {
         let totalPrice = 0;
 
@@ -75,7 +76,7 @@ export default function ProductDetail() {
                     totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
                 });
             } else if (succulent.size?.price) {
-                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+                totalPrice += (succulent.size.price || 0);
             }
         });
 
@@ -105,8 +106,28 @@ export default function ProductDetail() {
             return;
         }
         // TODO: Implement add to cart functionality
-        console.log('Add to cart:', product.id, quantity, product.sizes?.[selectedSizeIndex]);
-        enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
+        console.log('Add to cart:', {
+            productId: product.id,
+            size: product.sizes?.[selectedSizeIndex],
+            quantity: quantity
+        });
+        enqueueSnackbar(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`, {variant: 'success'});
+    };
+    
+    const handleBuyNow = () => {
+        if (!isLoggedIn()) {
+            enqueueSnackbar('Vui lòng đăng nhập để mua hàng', {variant: 'info'});
+            navigate('/login', {state: {from: `/product/${id}`}});
+            return;
+        }
+        // TODO: Implement buy now functionality - redirect to checkout
+        console.log('Buy now:', {
+            productId: product.id,
+            size: product.sizes?.[selectedSizeIndex],
+            quantity: quantity
+        });
+        enqueueSnackbar('Đang chuyển đến trang thanh toán...', {variant: 'info'});
+        // navigate('/checkout', { state: { ... } });
     };
     
     const handleAddToWishlist = () => {
@@ -261,62 +282,154 @@ export default function ProductDetail() {
                             </Box>
                         )}
                         
+                        {/* Quantity Selector */}
+                        {selectedSize && (
+                            <Box sx={{mb: 3}}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 3, mb: 2}}>
+                                    <Typography variant="subtitle1" sx={{fontWeight: 600, minWidth: '80px'}}>
+                                        Số Lượng
+                                    </Typography>
+                                    
+                                    {/* Quantity Controls */}
+                                    <Box sx={{display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: 1}}>
+                                        <Button
+                                            variant="text"
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                            disabled={quantity <= 1}
+                                            sx={{
+                                                minWidth: '40px',
+                                                height: '40px',
+                                                color: '#666',
+                                                '&:hover': {
+                                                    backgroundColor: '#f5f5f5'
+                                                }
+                                            }}
+                                        >
+                                            -
+                                        </Button>
+                                        
+                                        <Typography sx={{
+                                            minWidth: '60px', 
+                                            textAlign: 'center', 
+                                            px: 2,
+                                            fontSize: '1.1rem',
+                                            fontWeight: 600,
+                                            color: '#d32f2f'
+                                        }}>
+                                            {quantity}
+                                        </Typography>
+                                        
+                                        <Button
+                                            variant="text"
+                                            onClick={() => setQuantity(Math.min(selectedSize.quantity, quantity + 1))}
+                                            disabled={quantity >= selectedSize.quantity}
+                                            sx={{
+                                                minWidth: '40px',
+                                                height: '40px',
+                                                color: '#666',
+                                                '&:hover': {
+                                                    backgroundColor: '#f5f5f5'
+                                                }
+                                            }}
+                                        >
+                                            +
+                                        </Button>
+                                    </Box>
+                                    
+                                    {/* Stock Info */}
+                                    <Typography variant="body2" color="text.secondary">
+                                        {selectedSize.quantity} sản phẩm có sẵn
+                                    </Typography>
+                                </Box>
+
+                                {/* Succulent Quantities Info */}
+                                {selectedSize.succulents && (
+                                    <Box sx={{mt: 2}}>
+                                        <Typography variant="body2" sx={{mb: 1, fontWeight: 500, color: '#666'}}>
+                                            Thành phần sản phẩm:
+                                        </Typography>
+                                        <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
+                                            {selectedSize.succulents.map((succulent, idx) => (
+                                                <Box key={idx}>
+                                                    {succulent.size && Array.isArray(succulent.size) && (
+                                                        succulent.size.map((sizeItem, sizeIdx) => (
+                                                            <Chip
+                                                                key={sizeIdx}
+                                                                label={`${succulent.name} (${sizeItem.name}): ${sizeItem.quantity} cây`}
+                                                                size="small"
+                                                                sx={{
+                                                                    mr: 0.5,
+                                                                    mb: 0.5,
+                                                                    backgroundColor: '#f0f8f4',
+                                                                    color: '#0D3B2E',
+                                                                    fontSize: '0.75rem'
+                                                                }}
+                                                            />
+                                                        ))
+                                                    )}
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+                        
                         <Divider sx={{my: 3}}/>
                         
-                        {/* Quantity */}
-                        <Box sx={{display: 'flex', gap: 2, mb: 3, alignItems: 'center'}}>
-                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>Số lượng:</Typography>
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, border: '1px solid #ddd', borderRadius: 1}}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    sx={{minWidth: '40px'}}
-                                >
-                                    -
-                                </Button>
-                                <Typography sx={{minWidth: '50px', textAlign: 'center', px: 2}}>
-                                    {quantity}
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    sx={{minWidth: '40px'}}
-                                >
-                                    +
-                                </Button>
-                            </Box>
-                        </Box>
                         
                         {/* Action Buttons */}
                         <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4}}>
                             <Button
-                                variant="contained"
+                                variant="outlined"
                                 size="large"
                                 startIcon={<ShoppingCart/>}
                                 onClick={handleAddToCart}
+                                disabled={selectedSize?.quantity === 0}
                                 sx={{
                                     flex: 1,
                                     minWidth: '200px',
-                                    backgroundColor: '#0D3B2E',
+                                    borderColor: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
+                                    color: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
                                     py: 1.5,
                                     fontSize: '1rem',
                                     fontWeight: 600,
                                     '&:hover': {
-                                        backgroundColor: '#1e5a4a',
+                                        borderColor: selectedSize?.quantity === 0 ? '#ccc' : '#b71c1c',
+                                        backgroundColor: selectedSize?.quantity === 0 ? 'transparent' : 'rgba(211, 47, 47, 0.04)',
+                                    },
+                                    '&:disabled': {
+                                        borderColor: '#ccc',
+                                        color: '#ccc'
                                     }
                                 }}
                             >
-                                Thêm vào giỏ hàng
+                                {selectedSize?.quantity === 0 ? 'Hết hàng' : 'Thêm Vào Giỏ Hàng'}
                             </Button>
+                            
                             <Button
-                                variant="outlined"
+                                variant="contained"
                                 size="large"
-                                startIcon={<FavoriteBorder/>}
-                                onClick={handleAddToWishlist}
+                                onClick={handleBuyNow}
+                                disabled={selectedSize?.quantity === 0}
+                                sx={{
+                                    flex: 1,
+                                    minWidth: '200px',
+                                    backgroundColor: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
+                                    py: 1.5,
+                                    fontSize: '1rem',
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: selectedSize?.quantity === 0 ? '#ccc' : '#b71c1c',
+                                    },
+                                    '&:disabled': {
+                                        backgroundColor: '#ccc',
+                                        color: '#666'
+                                    }
+                                }}
                             >
-                                Yêu thích
+                                {selectedSize?.quantity === 0 ? 'Hết hàng' : 'Mua Ngay'}
                             </Button>
-                           
                         </Box>
                         {/* Custom request button removed from product detail */}
                         
@@ -342,149 +455,130 @@ export default function ProductDetail() {
                         Chi tiết sản phẩm - {selectedSize.name}
                     </Typography>
                     
-                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 3}}>
-                        {/* Succulents */}
-                        {selectedSize.succulents && selectedSize.succulents.length > 0 && (
-                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
-                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                    {/* Combined Product Components */}
+                    <Paper elevation={2} sx={{p: 4, mb: 3}}>
+                        <Typography variant="h6" sx={{fontWeight: 700, mb: 3, color: '#0D3B2E'}}>
+                            Thành phần sản phẩm
+                        </Typography>
+                        
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                            {/* Succulents */}
+                            {selectedSize.succulents && selectedSize.succulents.length > 0 && (
+                                <Box>
                                     <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                         <LocalFlorist sx={{mr: 1, color: '#4caf50'}}/>
-                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                        <Typography variant="subtitle1" sx={{fontWeight: 700}}>
                                             Sen Đá
                                         </Typography>
                                     </Box>
-                                    {selectedSize.succulents.map((succulent, idx) => (
-                                        <Box key={idx} sx={{mb: 2, pb: 2, borderBottom: idx < selectedSize.succulents.length - 1 ? '1px solid #eee' : 'none'}}>
-                                            <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
-                                                {succulent.name}
-                                            </Typography>
-                                            {succulent.description && (
-                                                <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
-                                                    {succulent.description}
+                                    <Box sx={{pl: 4}}>
+                                        {selectedSize.succulents.map((succulent, idx) => (
+                                            <Box key={idx} sx={{mb: 2}}>
+                                                <Typography variant="body1" sx={{fontWeight: 600, mb: 0.5}}>
+                                                    • {succulent.name}
                                                 </Typography>
-                                            )}
-                                            {succulent.size && Array.isArray(succulent.size) && (
-                                                <Box sx={{mt: 1}}>
-                                                    {succulent.size.map((sizeItem, sizeIdx) => (
-                                                        <Chip
-                                                            key={sizeIdx}
-                                                            label={`${sizeItem.name}: ${new Intl.NumberFormat('vi-VN').format(sizeItem.price)} ₫ (SL: ${sizeItem.quantity})`}
-                                                            size="small"
-                                                            sx={{mr: 1, mb: 0.5}}
-                                                        />
-                                                    ))}
-                                                </Box>
-                                            )}
-                                        </Box>
-                                    ))}
-                                </Paper>
-                            </Box>
-                        )}
+                                                {succulent.description && (
+                                                    <Typography variant="body2" color="text.secondary" sx={{ml: 2, mb: 1}}>
+                                                        {succulent.description}
+                                                    </Typography>
+                                                )}
+                                                {succulent.size && Array.isArray(succulent.size) && (
+                                                    <Box sx={{ml: 2, mt: 1}}>
+                                                        {succulent.size.map((sizeItem, sizeIdx) => (
+                                                            <Chip
+                                                                key={sizeIdx}
+                                                                label={`${sizeItem.name}: ${sizeItem.quantity} cây`}
+                                                                size="small"
+                                                                sx={{mr: 1, mb: 0.5, backgroundColor: '#e8f5e9'}}
+                                                            />
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
+                            )}
 
-                        {/* Pot */}
-                        {selectedSize.pot && (
-                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
-                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                            {/* Pot */}
+                            {selectedSize.pot && (
+                                <Box>
                                     <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                         <SquareFoot sx={{mr: 1, color: '#ff9800'}}/>
-                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                        <Typography variant="subtitle1" sx={{fontWeight: 700}}>
                                             Chậu
                                         </Typography>
                                     </Box>
-                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
-                                        {selectedSize.pot.name}
-                                    </Typography>
-                                    {selectedSize.pot.description && (
-                                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
-                                            {selectedSize.pot.description}
+                                    <Box sx={{pl: 4}}>
+                                        <Typography variant="body1" sx={{fontWeight: 600, mb: 1}}>
+                                            • {selectedSize.pot.name}
                                         </Typography>
-                                    )}
-                                    <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1}}>
-                                        <Chip label={`Chất liệu: ${selectedSize.pot.material}`} size="small"/>
-                                        {selectedSize.pot.color && (
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                <Typography variant="caption">Màu:</Typography>
-                                                <Box sx={{width: 24, height: 24, backgroundColor: selectedSize.pot.color, borderRadius: '50%', border: '1px solid #ddd'}}/>
-                                            </Box>
+                                        {selectedSize.pot.description && (
+                                            <Typography variant="body2" color="text.secondary" sx={{ml: 2, mb: 2}}>
+                                                {selectedSize.pot.description}
+                                            </Typography>
                                         )}
-                                    </Box>
-                                    {selectedSize.pot.size && selectedSize.pot.size.length > 0 && (
-                                        <Box sx={{mt: 2}}>
-                                            {selectedSize.pot.size.map((potSize, idx) => (
-                                                <Box key={idx} sx={{mb: 1}}>
-                                                    <Typography variant="body2">
-                                                        <strong>{potSize.name}:</strong> {new Intl.NumberFormat('vi-VN').format(potSize.price)} ₫
-                                                        {potSize.upperCrossSectionArea && ` • Diện tích: ${potSize.upperCrossSectionArea}m²`}
-                                                        {potSize.height && ` • Chiều cao: ${potSize.height}cm`}
-                                                    </Typography>
+                                        <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', ml: 2}}>
+                                            <Chip label={`Chất liệu: ${selectedSize.pot.material}`} size="small" sx={{backgroundColor: '#fff3e0'}}/>
+                                            {selectedSize.pot.color && (
+                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                    <Typography variant="caption">Màu:</Typography>
+                                                    <Box sx={{width: 20, height: 20, backgroundColor: selectedSize.pot.color, borderRadius: '50%', border: '1px solid #ddd'}}/>
                                                 </Box>
-                                            ))}
+                                            )}
                                         </Box>
-                                    )}
-                                </Paper>
-                            </Box>
-                        )}
+                                    </Box>
+                                </Box>
+                            )}
 
-                        {/* Soil */}
-                        {selectedSize.soil && (
-                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
-                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                            {/* Soil */}
+                            {selectedSize.soil && (
+                                <Box>
                                     <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                         <WaterDrop sx={{mr: 1, color: '#2196f3'}}/>
-                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                        <Typography variant="subtitle1" sx={{fontWeight: 700}}>
                                             Đất/Đá
                                         </Typography>
                                     </Box>
-                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
-                                        {selectedSize.soil.name}
-                                    </Typography>
-                                    {selectedSize.soil.description && (
-                                        <Typography variant="body2" color="text.secondary" sx={{mb: 2, whiteSpace: 'pre-line'}}>
-                                            {selectedSize.soil.description}
+                                    <Box sx={{pl: 4}}>
+                                        <Typography variant="body1" sx={{fontWeight: 600, mb: 1}}>
+                                            • {selectedSize.soil.name}
                                         </Typography>
-                                    )}
-                                    {selectedSize.soil.basePricing && (
-                                        <Box>
-                                            <Typography variant="body2">
-                                                <strong>Khối lượng:</strong> {selectedSize.soil.massAmount} {selectedSize.soil.basePricing.massUnit || 'gram'}
+                                        {selectedSize.soil.description && (
+                                            <Typography variant="body2" color="text.secondary" sx={{ml: 2, whiteSpace: 'pre-line'}}>
+                                                {selectedSize.soil.description}
                                             </Typography>
-                                            <Typography variant="body2">
-                                                <strong>Giá:</strong> {new Intl.NumberFormat('vi-VN').format(
-                                                    (selectedSize.soil.basePricing.price / selectedSize.soil.basePricing.massValue) * selectedSize.soil.massAmount
-                                                )} ₫
-                                            </Typography>
-                                        </Box>
-                                    )}
-                                </Paper>
-                            </Box>
-                        )}
-
-                        {/* Decorations */}
-                        {selectedSize.decorations && selectedSize.decorations.length > 0 && (
-                            <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 12px)'}}}>
-                                <Paper elevation={2} sx={{p: 3, height: '100%'}}>
+                                        )}
+                                    </Box>
+                                </Box>
+                            )}
+                            {/* Decorations */}
+                            {selectedSize.decorations && selectedSize.decorations.length > 0 && (
+                                <Box>
                                     <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                         <Brush sx={{mr: 1, color: '#9c27b0'}}/>
-                                        <Typography variant="h6" sx={{fontWeight: 700}}>
+                                        <Typography variant="subtitle1" sx={{fontWeight: 700}}>
                                             Trang trí
                                         </Typography>
                                     </Box>
-                                    {selectedSize.decorations.map((decoration, idx) => (
-                                        <Box key={idx} sx={{mb: 2}}>
-                                            <Typography variant="subtitle2" sx={{fontWeight: 600}}>
-                                                {decoration.name || `Phụ kiện ${idx + 1}`}
-                                            </Typography>
-                                            {decoration.totalPrice && (
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Giá: {new Intl.NumberFormat('vi-VN').format(decoration.totalPrice)} ₫
+                                    <Box sx={{pl: 4}}>
+                                        {selectedSize.decorations.map((decoration, idx) => (
+                                            <Box key={idx} sx={{mb: 2}}>
+                                                <Typography variant="body1" sx={{fontWeight: 600, mb: 0.5}}>
+                                                    • {decoration.name || `Phụ kiện ${idx + 1}`}
                                                 </Typography>
-                                            )}
-                                        </Box>
-                                    ))}
-                                </Paper>
-                            </Box>
-                        )}
-                    </Box>
+                                                {decoration.description && (
+                                                    <Typography variant="body2" color="text.secondary" sx={{ml: 2}}>
+                                                        {decoration.description}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
+                            )}
+                        </Box>
+                    </Paper>
                 </Box>
             )}
         </Container>
