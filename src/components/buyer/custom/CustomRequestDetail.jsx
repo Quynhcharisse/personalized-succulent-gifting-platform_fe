@@ -28,9 +28,9 @@ import {
     LocalFlorist as PotIcon,
     Park as SoilIcon,
     Schedule,
-    Spa as SucculentIcon,
-    Event as EventIcon
+    Spa as SucculentIcon
 } from '@mui/icons-material';
+import { Event as EventIcon } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
@@ -263,11 +263,11 @@ export default function CustomRequestDetail() {
                         <Button
                             startIcon={<ArrowBack/>}
                             onClick={() => navigate('/custom-request')}
-                            sx={{mr: 2, color: '#0D3B2E', color: 'white'}}
+                            sx={{mr: 2, color: 'white'}}
                         >
                             Quay lại
                         </Button>
-                        <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E', color: 'white'}}>
+                        <Typography variant="h4" sx={{fontWeight: 700, color: 'white'}}>
                             <Build sx={{verticalAlign: 'middle', mr: 1, color: 'white'}}/>
                             Chi Tiết Yêu Cầu #{request.id}
                         </Typography>
@@ -313,10 +313,15 @@ export default function CustomRequestDetail() {
                                             Tạo lúc: {formatDate(request.createdAt)}
                                         </Typography>
                                     </Box>
-                                    
+
                                     {/* Occasion Info */}
                                     {request.occasion && typeof request.occasion === 'string' && request.occasion.trim() !== '' && (
-                                        <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary', mt: 1}}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: 'text.secondary',
+                                            mt: 1
+                                        }}>
                                             <EventIcon sx={{mr: 1}}/>
                                             <Typography variant="body2">
                                                 Dịp: {request.occasion}
