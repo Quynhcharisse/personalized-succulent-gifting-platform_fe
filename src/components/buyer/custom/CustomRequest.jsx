@@ -49,6 +49,7 @@ export default function CustomRequest() {
         soil: '',
         soilMass: 500,
         decorations: [],
+        occasion: '',
     });
 
     // Filter State (single-select type, conditional values)
@@ -181,6 +182,7 @@ export default function CustomRequest() {
 
             const payload = {
                 images: formData.images,
+                occasion: formData.occasion || null,
                 size: {
                     succulents: formData.succulents.map(s => {
                         console.log("allSucculents: ", allSucculents)
@@ -255,6 +257,87 @@ export default function CustomRequest() {
 
                 <Paper elevation={0}
                        sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
+                    
+                    {/* Occasion Field */}
+                    <Box sx={{mb: 4}}>
+                        <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>Dịp đặc biệt (tùy chọn)</Typography>
+                        
+                        {/* Quick Select Buttons */}
+                        <Box sx={{mb: 2}}>
+                            <Typography variant="body2" sx={{mb: 1, color: 'text.secondary'}}>Chọn nhanh:</Typography>
+                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                                {[
+                                    'Sinh nhật',
+                                    'Ngày 8/3',
+                                    'Ngày 20/10',
+                                    'Valentine',
+                                    'Tết Nguyên Đán',
+                                    'Khai trương',
+                                    'Tốt nghiệp',
+                                    'Cưới hỏi',
+                                    'Thăng chức',
+                                    'Chúc mừng',
+                                    'Xin lỗi',
+                                    'Cảm ơn'
+                                ].map((occasion) => (
+                                    <Button
+                                        key={occasion}
+                                        variant={formData.occasion === occasion ? 'contained' : 'outlined'}
+                                        size="small"
+                                        onClick={() => setFormData(prev => ({...prev, occasion}))}
+                                        sx={{
+                                            borderRadius: 20,
+                                            textTransform: 'none',
+                                            fontSize: '0.875rem',
+                                            ...(formData.occasion === occasion ? {
+                                                backgroundColor: '#2E7D32',
+                                                color: 'white',
+                                                '&:hover': {
+                                                    backgroundColor: '#1B5E20'
+                                                }
+                                            } : {
+                                                borderColor: '#E0EBE7',
+                                                color: '#2E7D32',
+                                                '&:hover': {
+                                                    borderColor: '#2E7D32',
+                                                    backgroundColor: 'rgba(46, 125, 50, 0.04)'
+                                                }
+                                            })
+                                        }}
+                                    >
+                                        {occasion}
+                                    </Button>
+                                ))}
+                            </Box>
+                        </Box>
+
+                        <TextField
+                            fullWidth
+                            label="Hoặc nhập dịp khác"
+                            placeholder="Nhập dịp đặc biệt khác..."
+                            value={formData.occasion}
+                            onChange={(e) => setFormData(prev => ({...prev, occasion: e.target.value}))}
+                            sx={{
+                                backgroundColor: '#F9FCFB',
+                                borderRadius: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                },
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#E0EBE7'
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#BFD9D1'
+                                },
+                                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#2E7D32'
+                                }
+                            }}
+                        />
+                    </Box>
+
+                    <Divider sx={{my: 4}}/>
+                    
                     {/* Filters */}
                     <Box sx={{mb: 4}}>
                         <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>Bộ lọc sen đá</Typography>
