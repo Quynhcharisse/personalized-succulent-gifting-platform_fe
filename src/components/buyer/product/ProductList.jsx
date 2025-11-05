@@ -68,7 +68,7 @@ export default function ProductList() {
                 });
             } else if (succulent.size?.price) {
                 // Old structure: size is object
-                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+                totalPrice += (succulent.size.price || 0);
             }
         });
 
