@@ -1,40 +1,40 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Avatar,
     Box,
     Button,
     Card,
     CardContent,
-    CircularProgress,
-    Container,
-    Typography,
     Chip,
-    Paper,
-    Avatar,
-    Divider,
-    Stack,
+    CircularProgress,
     Collapse,
-    IconButton,
+    Container,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField
+    DialogContent,
+    DialogTitle,
+    Divider,
+    IconButton,
+    Paper,
+    TextField,
+    Typography
 } from '@mui/material';
 import {
     ArrowBack,
+    AutoAwesome as DecorationIcon,
     Build,
-    Schedule,
-    Spa as SucculentIcon,
+    Edit as EditIcon,
+    ExpandMore as ExpandMoreIcon,
     LocalFlorist as PotIcon,
     Park as SoilIcon,
-    AutoAwesome as DecorationIcon,
-    ExpandMore as ExpandMoreIcon,
-    Edit as EditIcon
+    Schedule,
+    Spa as SucculentIcon,
+    Event as EventIcon
 } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
-import {viewCustomProductRequestByBuyer, createRevision} from '../../../services/CustomeRequestService.jsx';
-import {FENGSHUI, ZODIACS, GENDERS} from '../../constants.js';
+import {createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
+import {FENGSHUI, GENDERS, ZODIACS} from '../../constants.js';
 
 export default function CustomRequestDetail() {
     const {id: idParam} = useParams();
@@ -43,7 +43,7 @@ export default function CustomRequestDetail() {
     const id = stateId ?? idParam;
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
-    
+
     const [loading, setLoading] = useState(true);
     const [request, setRequest] = useState(null);
     const [expandedSections, setExpandedSections] = useState({
@@ -70,12 +70,12 @@ export default function CustomRequestDetail() {
         try {
             setLoading(true);
             const response = await viewCustomProductRequestByBuyer();
-            
+
             // Handle nested data structure
             const data = response?.data?.data?.body?.data || response?.data?.body?.data || response?.data?.data || [];
             const foundRequest = Array.isArray(data) ? data.find(req => req.id.toString() === id.toString()) : null;
             setRequest(foundRequest);
-            
+
             if (!foundRequest) {
                 enqueueSnackbar("Không tìm thấy yêu cầu", {variant: 'warning'});
             }
@@ -229,11 +229,17 @@ export default function CustomRequestDetail() {
                 backgroundSize: 'cover'
             }}>
                 <Container maxWidth="lg">
-                    <Paper elevation={0} sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
+                    <Paper elevation={0} sx={{
+                        p: 4,
+                        borderRadius: 3,
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+                        backgroundColor: '#fff'
+                    }}>
                         <Typography variant="h6" color="error" gutterBottom>
                             Không tìm thấy yêu cầu
                         </Typography>
-                        <Button variant="contained" color="success" onClick={() => navigate('/custom-request')} sx={{mt: 2}}>
+                        <Button variant="contained" color="success" onClick={() => navigate('/custom-request')}
+                                sx={{mt: 2}}>
                             Quay lại danh sách
                         </Button>
                     </Paper>
@@ -279,13 +285,19 @@ export default function CustomRequestDetail() {
                     )}
                 </Box>
 
-                <Paper elevation={0} sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
+                <Paper elevation={0}
+                       sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
                         {/* Request Info */}
                         <Box>
                             <Card sx={{border: '1px solid #E6F1ED', backgroundColor: '#FAFFFD', borderRadius: 2}}>
                                 <CardContent>
-                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        mb: 2
+                                    }}>
                                         <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                             Thông tin yêu cầu
                                         </Typography>
@@ -301,6 +313,16 @@ export default function CustomRequestDetail() {
                                             Tạo lúc: {formatDate(request.createdAt)}
                                         </Typography>
                                     </Box>
+                                    
+                                    {/* Occasion Info */}
+                                    {request.occasion && typeof request.occasion === 'string' && request.occasion.trim() !== '' && (
+                                        <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary', mt: 1}}>
+                                            <EventIcon sx={{mr: 1}}/>
+                                            <Typography variant="body2">
+                                                Dịp: {request.occasion}
+                                            </Typography>
+                                        </Box>
+                                    )}
                                 </CardContent>
                             </Card>
                         </Box>
@@ -352,13 +374,15 @@ export default function CustomRequestDetail() {
                                             </Box>
                                             <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                                 <Box>
-                                                    <Typography variant="body2" color="text.secondary">Điện thoại</Typography>
+                                                    <Typography variant="body2" color="text.secondary">Điện
+                                                        thoại</Typography>
                                                     <Typography variant="body1" sx={{fontWeight: 600}}>
                                                         {request.buyer.phone || 'N/A'}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="body2" color="text.secondary">Địa chỉ</Typography>
+                                                    <Typography variant="body2" color="text.secondary">Địa
+                                                        chỉ</Typography>
                                                     <Typography variant="body1" sx={{fontWeight: 600}}>
                                                         {request.buyer.address || 'N/A'}
                                                     </Typography>
@@ -379,15 +403,28 @@ export default function CustomRequestDetail() {
                                         Chi tiết sản phẩm tùy chỉnh
                                     </Typography>
                                     {request.customData.map((customItem, idx) => (
-                                        <Paper key={idx} sx={{border: '1px solid #E6F1ED', backgroundColor: '#FAFFFD', borderRadius: 2, overflow: 'hidden', mb: 3}}>
+                                        <Paper key={idx} sx={{
+                                            border: '1px solid #E6F1ED',
+                                            backgroundColor: '#FAFFFD',
+                                            borderRadius: 2,
+                                            overflow: 'hidden',
+                                            mb: 3
+                                        }}>
                                             {/* Succulents */}
                                             {customItem.succulents && customItem.succulents.length > 0 && (
                                                 <Box>
-                                                    <Box 
-                                                        sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, cursor: 'pointer'}}
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            p: 2,
+                                                            cursor: 'pointer'
+                                                        }}
                                                         onClick={() => handleToggleSection('succulents')}
                                                     >
-                                                        <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                        <Typography variant="h6"
+                                                                    sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                             Sen Đá
                                                         </Typography>
                                                         <IconButton size="small">
@@ -400,7 +437,14 @@ export default function CustomRequestDetail() {
                                                     <Collapse in={expandedSections.succulents}>
                                                         <Box sx={{px: 2, pb: 2}}>
                                                             {customItem.succulents.map((succ, sIdx) => (
-                                                                <Box key={sIdx} sx={{display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2, pb: 2, borderBottom: sIdx < customItem.succulents.length - 1 ? '1px solid #E6F1ED' : 'none'}}>
+                                                                <Box key={sIdx} sx={{
+                                                                    display: 'flex',
+                                                                    gap: 2,
+                                                                    alignItems: 'flex-start',
+                                                                    mb: 2,
+                                                                    pb: 2,
+                                                                    borderBottom: sIdx < customItem.succulents.length - 1 ? '1px solid #E6F1ED' : 'none'
+                                                                }}>
                                                                     <Avatar
                                                                         src={succ.image}
                                                                         variant="rounded"
@@ -409,27 +453,41 @@ export default function CustomRequestDetail() {
                                                                         <SucculentIcon/>
                                                                     </Avatar>
                                                                     <Box sx={{flex: 1}}>
-                                                                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                                                        <Typography variant="subtitle1"
+                                                                                    sx={{fontWeight: 600, mb: 1}}>
                                                                             {succ.name}
                                                                         </Typography>
-                                                                        <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                                        <Typography variant="body2"
+                                                                                    color="text.secondary" sx={{mb: 1}}>
                                                                             {succ.description}
                                                                         </Typography>
                                                                         {succ.size && succ.size.length > 0 && (
-                                                                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-                                                                                <Typography variant="body2" sx={{fontWeight: 600}}>Kích thước & Số lượng:</Typography>
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                gap: 1
+                                                                            }}>
+                                                                                <Typography variant="body2"
+                                                                                            sx={{fontWeight: 600}}>Kích
+                                                                                    thước & Số lượng:</Typography>
                                                                                 {succ.size.map((sz, sizeIdx) => (
-                                                                                    <Box key={sizeIdx} sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
+                                                                                    <Box key={sizeIdx} sx={{
+                                                                                        display: 'flex',
+                                                                                        flexDirection: 'column',
+                                                                                        gap: 0.5
+                                                                                    }}>
                                                                                         <Chip
                                                                                             label={getSizeLabel(sz.name)}
                                                                                             size="small"
-                                                                                            sx={{width: 'fit-content', backgroundColor: '#0D3B2E', color: 'white'}}
+                                                                                            sx={{
+                                                                                                width: 'fit-content',
+                                                                                                backgroundColor: '#0D3B2E',
+                                                                                                color: 'white'
+                                                                                            }}
                                                                                         />
-                                                                                        <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{fontWeight: 600}}>
                                                                                             Số lượng: {sz.quantity}
-                                                                                        </Typography>
-                                                                                        <Typography variant="body2" color="success.main" sx={{fontWeight: 600}}>
-                                                                                            {formatPrice(sz.price)}
                                                                                         </Typography>
                                                                                     </Box>
                                                                                 ))}
@@ -446,11 +504,18 @@ export default function CustomRequestDetail() {
                                             {/* Pot */}
                                             {customItem.pot && (
                                                 <Box sx={{borderTop: '1px solid #E6F1ED'}}>
-                                                    <Box 
-                                                        sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, cursor: 'pointer'}}
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            p: 2,
+                                                            cursor: 'pointer'
+                                                        }}
                                                         onClick={() => handleToggleSection('pot')}
                                                     >
-                                                        <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                        <Typography variant="h6"
+                                                                    sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                             Chậu
                                                         </Typography>
                                                         <IconButton size="small">
@@ -462,7 +527,11 @@ export default function CustomRequestDetail() {
                                                     </Box>
                                                     <Collapse in={expandedSections.pot}>
                                                         <Box sx={{px: 2, pb: 2}}>
-                                                            <Box sx={{display: 'flex', gap: 2, alignItems: 'flex-start'}}>
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                gap: 2,
+                                                                alignItems: 'flex-start'
+                                                            }}>
                                                                 {customItem.pot.image && customItem.pot.image.length > 0 && (
                                                                     <Avatar
                                                                         src={customItem.pot.image[0]}
@@ -473,25 +542,41 @@ export default function CustomRequestDetail() {
                                                                     </Avatar>
                                                                 )}
                                                                 <Box sx={{flex: 1}}>
-                                                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                                                    <Typography variant="subtitle1"
+                                                                                sx={{fontWeight: 600, mb: 1}}>
                                                                         {customItem.pot.name}
                                                                     </Typography>
-                                                                    <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                                    <Typography variant="body2" color="text.secondary"
+                                                                                sx={{mb: 1}}>
                                                                         {customItem.pot.description}
                                                                     </Typography>
-                                                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, mt: 1}}>
+                                                                    <Box sx={{
+                                                                        display: 'flex',
+                                                                        flexDirection: 'column',
+                                                                        gap: 2,
+                                                                        mt: 1
+                                                                    }}>
                                                                         {customItem.pot.material && (
                                                                             <Box>
-                                                                                <Typography variant="body2" color="text.secondary">Chất liệu</Typography>
-                                                                                <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                                <Typography variant="body2"
+                                                                                            color="text.secondary">Chất
+                                                                                    liệu</Typography>
+                                                                                <Typography variant="body2"
+                                                                                            sx={{fontWeight: 600}}>
                                                                                     {customItem.pot.material}
                                                                                 </Typography>
                                                                             </Box>
                                                                         )}
                                                                         {customItem.pot.color && (
                                                                             <Box>
-                                                                                <Typography variant="body2" color="text.secondary">Màu sắc</Typography>
-                                                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                                                <Typography variant="body2"
+                                                                                            color="text.secondary">Màu
+                                                                                    sắc</Typography>
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    gap: 1
+                                                                                }}>
                                                                                     <Box sx={{
                                                                                         width: 24,
                                                                                         height: 24,
@@ -499,7 +584,8 @@ export default function CustomRequestDetail() {
                                                                                         backgroundColor: customItem.pot.color,
                                                                                         border: '1px solid #ddd'
                                                                                     }}/>
-                                                                                    <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                                    <Typography variant="body2"
+                                                                                                sx={{fontWeight: 600}}>
                                                                                         {customItem.pot.color}
                                                                                     </Typography>
                                                                                 </Box>
@@ -507,10 +593,14 @@ export default function CustomRequestDetail() {
                                                                         )}
                                                                         {customItem.pot.size && customItem.pot.size.length > 0 && (
                                                                             <Box>
-                                                                                <Typography variant="body2" color="text.secondary">Kích thước</Typography>
+                                                                                <Typography variant="body2"
+                                                                                            color="text.secondary">Kích
+                                                                                    thước</Typography>
                                                                                 {customItem.pot.size.map((sz, sIdx) => (
-                                                                                    <Typography key={sIdx} variant="body2" sx={{fontWeight: 600}}>
-                                                                                        {getSizeLabel(sz.name)} - {formatPrice(sz.price)}
+                                                                                    <Typography key={sIdx}
+                                                                                                variant="body2"
+                                                                                                sx={{fontWeight: 600}}>
+                                                                                        {getSizeLabel(sz.name)}
                                                                                     </Typography>
                                                                                 ))}
                                                                             </Box>
@@ -526,11 +616,18 @@ export default function CustomRequestDetail() {
                                             {/* Soil */}
                                             {customItem.soil && (
                                                 <Box sx={{borderTop: '1px solid #E6F1ED'}}>
-                                                    <Box 
-                                                        sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, cursor: 'pointer'}}
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            p: 2,
+                                                            cursor: 'pointer'
+                                                        }}
                                                         onClick={() => handleToggleSection('soil')}
                                                     >
-                                                        <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                        <Typography variant="h6"
+                                                                    sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                             Đất
                                                         </Typography>
                                                         <IconButton size="small">
@@ -542,7 +639,11 @@ export default function CustomRequestDetail() {
                                                     </Box>
                                                     <Collapse in={expandedSections.soil}>
                                                         <Box sx={{px: 2, pb: 2}}>
-                                                            <Box sx={{display: 'flex', gap: 2, alignItems: 'flex-start'}}>
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                gap: 2,
+                                                                alignItems: 'flex-start'
+                                                            }}>
                                                                 {customItem.soil.image && customItem.soil.image.length > 0 && customItem.soil.image[0]?.url && (
                                                                     <Avatar
                                                                         src={customItem.soil.image[0].url}
@@ -553,26 +654,28 @@ export default function CustomRequestDetail() {
                                                                     </Avatar>
                                                                 )}
                                                                 <Box sx={{flex: 1}}>
-                                                                    <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                                                    <Typography variant="subtitle1"
+                                                                                sx={{fontWeight: 600, mb: 1}}>
                                                                         {customItem.soil.name}
                                                                     </Typography>
-                                                                    <Typography variant="body2" color="text.secondary" sx={{mb: 1, whiteSpace: 'pre-line'}}>
+                                                                    <Typography variant="body2" color="text.secondary"
+                                                                                sx={{mb: 1, whiteSpace: 'pre-line'}}>
                                                                         {customItem.soil.description}
                                                                     </Typography>
-                                                                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, mt: 1}}>
+                                                                    <Box sx={{
+                                                                        display: 'flex',
+                                                                        flexDirection: 'column',
+                                                                        gap: 2,
+                                                                        mt: 1
+                                                                    }}>
                                                                         {customItem.soil.massAmount && (
                                                                             <Box>
-                                                                                <Typography variant="body2" color="text.secondary">Khối lượng</Typography>
-                                                                                <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                                <Typography variant="body2"
+                                                                                            color="text.secondary">Khối
+                                                                                    lượng</Typography>
+                                                                                <Typography variant="body2"
+                                                                                            sx={{fontWeight: 600}}>
                                                                                     {customItem.soil.massAmount} kg
-                                                                                </Typography>
-                                                                            </Box>
-                                                                        )}
-                                                                        {customItem.soil.basePricing && (
-                                                                            <Box>
-                                                                                <Typography variant="body2" color="text.secondary">Giá cơ bản</Typography>
-                                                                                <Typography variant="body2" sx={{fontWeight: 600}}>
-                                                                                    {formatPrice(customItem.soil.basePricing.price)}
                                                                                 </Typography>
                                                                             </Box>
                                                                         )}
@@ -587,11 +690,18 @@ export default function CustomRequestDetail() {
                                             {/* Decorations */}
                                             {customItem.decorations && customItem.decorations.length > 0 && (
                                                 <Box sx={{borderTop: '1px solid #E6F1ED'}}>
-                                                    <Box 
-                                                        sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, cursor: 'pointer'}}
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            p: 2,
+                                                            cursor: 'pointer'
+                                                        }}
                                                         onClick={() => handleToggleSection('decorations')}
                                                     >
-                                                        <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                        <Typography variant="h6"
+                                                                    sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                             Đồ Trang Trí
                                                         </Typography>
                                                         <IconButton size="small">
@@ -604,7 +714,14 @@ export default function CustomRequestDetail() {
                                                     <Collapse in={expandedSections.decorations}>
                                                         <Box sx={{px: 2, pb: 2}}>
                                                             {customItem.decorations.map((decoration, dIdx) => (
-                                                                <Box key={dIdx} sx={{display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2, pb: 2, borderBottom: dIdx < customItem.decorations.length - 1 ? '1px solid #E6F1ED' : 'none'}}>
+                                                                <Box key={dIdx} sx={{
+                                                                    display: 'flex',
+                                                                    gap: 2,
+                                                                    alignItems: 'flex-start',
+                                                                    mb: 2,
+                                                                    pb: 2,
+                                                                    borderBottom: dIdx < customItem.decorations.length - 1 ? '1px solid #E6F1ED' : 'none'
+                                                                }}>
                                                                     {decoration.image && decoration.image.length > 0 && (
                                                                         <Avatar
                                                                             src={decoration.image[0]}
@@ -615,34 +732,28 @@ export default function CustomRequestDetail() {
                                                                         </Avatar>
                                                                     )}
                                                                     <Box sx={{flex: 1}}>
-                                                                        <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 1}}>
+                                                                        <Typography variant="subtitle1"
+                                                                                    sx={{fontWeight: 600, mb: 1}}>
                                                                             {decoration.name}
                                                                         </Typography>
-                                                                        <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                                        <Typography variant="body2"
+                                                                                    color="text.secondary" sx={{mb: 1}}>
                                                                             {decoration.description}
                                                                         </Typography>
-                                                                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, mt: 1}}>
+                                                                        <Box sx={{
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: 2,
+                                                                            mt: 1
+                                                                        }}>
                                                                             {decoration.quantity && (
                                                                                 <Box>
-                                                                                    <Typography variant="body2" color="text.secondary">Số lượng</Typography>
-                                                                                    <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                                    <Typography variant="body2"
+                                                                                                color="text.secondary">Số
+                                                                                        lượng</Typography>
+                                                                                    <Typography variant="body2"
+                                                                                                sx={{fontWeight: 600}}>
                                                                                         {decoration.quantity}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                            )}
-                                                                            {decoration.unitPrice && (
-                                                                                <Box>
-                                                                                    <Typography variant="body2" color="text.secondary">Đơn giá</Typography>
-                                                                                    <Typography variant="body2" sx={{fontWeight: 600}}>
-                                                                                        {formatPrice(decoration.unitPrice)}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                            )}
-                                                                            {decoration.totalPrice && (
-                                                                                <Box>
-                                                                                    <Typography variant="body2" color="text.secondary">Tổng tiền</Typography>
-                                                                                    <Typography variant="body2" color="success.main" sx={{fontWeight: 600}}>
-                                                                                        {formatPrice(decoration.totalPrice)}
                                                                                     </Typography>
                                                                                 </Box>
                                                                             )}
@@ -665,8 +776,14 @@ export default function CustomRequestDetail() {
                             <>
                                 <Divider sx={{my: 2}}/>
                                 <Box>
-                                    <Box 
-                                        sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, cursor: 'pointer'}}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            mb: 2,
+                                            cursor: 'pointer'
+                                        }}
                                         onClick={() => handleToggleSection('versions')}
                                     >
                                         <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
@@ -682,11 +799,22 @@ export default function CustomRequestDetail() {
                                     <Collapse in={expandedSections.versions}>
                                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                             {request.versions.map((version, idx) => (
-                                                <Paper key={idx} sx={{border: '1px solid #E6F1ED', backgroundColor: '#FAFFFD', borderRadius: 2, overflow: 'hidden'}}>
+                                                <Paper key={idx} sx={{
+                                                    border: '1px solid #E6F1ED',
+                                                    backgroundColor: '#FAFFFD',
+                                                    borderRadius: 2,
+                                                    overflow: 'hidden'
+                                                }}>
                                                     <Box sx={{p: 2}}>
-                                                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'flex-start',
+                                                            mb: 2
+                                                        }}>
                                                             <Box>
-                                                                <Typography variant="subtitle1" sx={{fontWeight: 600, color: '#0D3B2E'}}>
+                                                                <Typography variant="subtitle1"
+                                                                            sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                                     {version.version}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="text.secondary">
@@ -702,15 +830,18 @@ export default function CustomRequestDetail() {
                                                         </Box>
                                                         {version.revisionContent && (
                                                             <Box sx={{mb: 2}}>
-                                                                <Typography variant="body2" color="text.secondary">Nội dung chỉnh sửa:</Typography>
-                                                                <Typography variant="body1" sx={{fontWeight: 500, mt: 0.5}}>
+                                                                <Typography variant="body2" color="text.secondary">Nội
+                                                                    dung chỉnh sửa:</Typography>
+                                                                <Typography variant="body1"
+                                                                            sx={{fontWeight: 500, mt: 0.5}}>
                                                                     {version.revisionContent}
                                                                 </Typography>
                                                             </Box>
                                                         )}
                                                         {version.images && version.images.length > 0 && (
                                                             <Box>
-                                                                <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{mb: 1}}>
                                                                     Ảnh thiết kế ({version.images.length}):
                                                                 </Typography>
                                                                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2}}>
@@ -736,10 +867,17 @@ export default function CustomRequestDetail() {
                                                                 </Box>
                                                             </Box>
                                                         )}
-                                                        <Box sx={{display: 'flex', gap: 3, mt: 2, fontSize: '0.875rem', color: 'text.secondary'}}>
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            gap: 3,
+                                                            mt: 2,
+                                                            fontSize: '0.875rem',
+                                                            color: 'text.secondary'
+                                                        }}>
                                                             {version.revisionDate && (
                                                                 <Typography variant="body2">
-                                                                    Ngày chỉnh sửa: {formatDateArray(version.revisionDate)}
+                                                                    Ngày chỉnh
+                                                                    sửa: {formatDateArray(version.revisionDate)}
                                                                 </Typography>
                                                             )}
                                                             {version.createDate && (
