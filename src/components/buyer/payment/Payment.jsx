@@ -1,40 +1,98 @@
 import { usePayOS } from "@payos/payos-checkout";
 import React, { useEffect, useState, useRef } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createEmbeddedPaymentLink, cancelPaymentLink } from "../../../services/WalletService";
+import { cancelPaymentLink } from "../../../services/WalletService";
+import { confirmPayment } from "../../../services/PaymentService.jsx";
 import "./Payment.css";
+import { createPaymentUrl } from "../../../services/PayOsService";
 
 export default function Payment() {
     const navigate = useNavigate();
-    const [productIds, setProductIds] = useState([]);
+    const location = useLocation();
+  const forceNew = Boolean(location?.state?.forceNew);
+    const initialShippingFee = Number(location?.state?.shippingFee || 0);
+  // Try restore session synchronously to avoid briefly resetting timer to 5:00 on refresh
+  const restoredSession = (() => {
+    try {
+      const raw = (typeof window !== 'undefined' ? window.localStorage : null)?.getItem('payos-session');
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const now = Date.now();
+      if (data?.expiresAt && data.expiresAt > now && data?.checkoutUrl && data?.orderCode) {
+        const remain = Math.max(0, Math.floor((data.expiresAt - now) / 1000));
+        return { ...data, remain };
+      }
+    } catch {}
+    return null;
+  })();
+
+  // Detect a stale (expired) session; if present, we'll show expired state instead of creating new link on refresh
+  const staleSession = (() => {
+    try {
+      const raw = (typeof window !== 'undefined' ? window.localStorage : null)?.getItem('payos-session');
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const now = Date.now();
+      if (data?.expiresAt && data.expiresAt <= now && data?.checkoutUrl && data?.orderCode) {
+        return data;
+      }
+    } catch {}
+    return null;
+  })();
+
+  // Detect a browser refresh (Navigation Timing Level 2 or fallback)
+  const isReload = (() => {
+    try {
+      const navs = typeof performance !== 'undefined' && performance.getEntriesByType ? performance.getEntriesByType('navigation') : [];
+      if (navs && navs.length > 0) return navs[0]?.type === 'reload';
+      if (typeof performance !== 'undefined' && performance.navigation) return performance.navigation.type === 1;
+    } catch {}
+    return false;
+  })();
+
+
+  const [shippingFee, setShippingFee] = useState(
+    typeof restoredSession?.shippingFee === 'number' ? Number(restoredSession.shippingFee) : initialShippingFee
+  );
+    const cartItems = useSelector(state => state?.cart?.items || []);
     const STORAGE_KEY = 'payos-session';
-    const [orderCode, setOrderCode] = useState(null);
-    const [isOpen, setIsOpen] = useState(false);
+  const STORAGE = typeof window !== 'undefined' ? window.localStorage : null;
+  const FORCE_KEY = 'payos-force-new';
+  const [orderCode, setOrderCode] = useState(restoredSession?.orderCode || null);
+  const [isOpen, setIsOpen] = useState(Boolean(restoredSession));
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
     const [isCreatingLink, setIsCreatingLink] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 phút = 300 giây
-    const [isExpired, setIsExpired] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(restoredSession?.remain ?? 5 * 60); // giây
+  const [expiresAt, setExpiresAt] = useState(restoredSession?.expiresAt || null);
+  const [isExpired, setIsExpired] = useState(false);
+
+  const paymentSuccessRef = useRef(false); // Set true onSuccess
+
     const timerRef = useRef(null);
     const expiredHandledRef = useRef(false);
+    const expiredRedirectRef = useRef(false);
+    const cancelCalledRef = useRef(false);
+    const orderCodeRef = useRef(restoredSession?.orderCode || null);
   
     const [payOSConfig, setPayOSConfig] = useState({
       RETURN_URL: window.location.href, // required
       ELEMENT_ID: "embedded-payment-container", // required
-      CHECKOUT_URL: null, // required
+      CHECKOUT_URL: restoredSession?.checkoutUrl || null, // required
       embedded: true, // Nếu dùng giao diện nhúng
-      onSuccess: (event) => {
-        //TODO: Hành động sau khi người dùng thanh toán đơn hàng thành công
-        
+      onSuccess: async (event) => {   // <-- thêm async
+        try {
+          await confirmPayment(buildConfirmPayload(true));
+        } catch (confirmErr) {
+          console.error('confirm payment failed', confirmErr);
+        }
+        paymentSuccessRef.current = true;
         setIsOpen(false);
         setMessage("Thanh toán thành công");
-        setMessageType("success");
-        
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+        STORAGE?.removeItem(STORAGE_KEY);
+        if (timerRef.current) clearInterval(timerRef.current);
       },
     });
   
@@ -43,24 +101,31 @@ export default function Payment() {
     const handleGetPaymentLink = async () => {
       setIsCreatingLink(true);
       try {
-      const response = await createEmbeddedPaymentLink();
+      const products = (cartItems || []).map((it) => ({
+        productId: it.id,
+        size: it.size,
+        price: Number(it.price) || 0,
+        quantity: Number(it.quantity || 1),
+      }));
+      const response = await createPaymentUrl({ products, shippingFee });
       const result = response.data;
-        setOrderCode(result.orderCode);
+      setOrderCode(result.orderCode);
+      orderCodeRef.current = result.orderCode;
       setPayOSConfig((oldConfig) => ({
         ...oldConfig,
         CHECKOUT_URL: result.checkoutUrl,
       }));
-        setProductIds(result.productIds);
       setIsOpen(true);
         // Lưu session để tránh reset khi refresh
         const now = Date.now();
-        const expiresAt = now + 5 * 60 * 1000;
+        const newExpiresAt = now + 5 * 60 * 1000;
         try {
-          sessionStorage.setItem(
+          STORAGE && STORAGE.setItem(
             STORAGE_KEY,
-            JSON.stringify({ orderCode: result.orderCode, checkoutUrl: result.checkoutUrl, expiresAt })
+            JSON.stringify({ orderCode: result.orderCode, checkoutUrl: result.checkoutUrl, expiresAt: newExpiresAt, shippingFee })
           );
         } catch {}
+        setExpiresAt(newExpiresAt);
         setTimeRemaining(5 * 60); // Reset về 5 phút khi tạo link mới
         setIsExpired(false);
       } catch (error) {
@@ -72,6 +137,21 @@ export default function Payment() {
       }
     };
 
+    const buildConfirmPayload = (successFlag) => {
+      const code = orderCodeRef.current || orderCode || 0;
+      return {
+        products: (cartItems || []).map((it) => ({
+          productId: it.id,
+          size: it.size,
+          price: Number(it.price) || 0,
+          quantity: Number(it.quantity || 1),
+        })),
+        orderCode: Number(code) || 0,
+        shippingFee: Number(shippingFee) || 0,
+        success: Boolean(successFlag),
+      };
+    };
+
     const handleCancelPayment = async () => {
       // Hủy và quay về trang checkout
       try {
@@ -80,29 +160,32 @@ export default function Payment() {
         if (orderCode) {
           await cancelPaymentLink(orderCode);
         }
+        try {
+          await confirmPayment(buildConfirmPayload(false));
+        } catch (confirmErr) {
+          console.error('confirm payment failed', confirmErr);
+        }
       } catch (e) {
         // ignore
       } finally {
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+        try { STORAGE && STORAGE.removeItem(STORAGE_KEY); } catch {}
         setIsCancelling(false);
         navigate('/buyer/checkout');
       }
     };
 
-    // Đếm ngược thời gian
+    // Đếm ngược thời gian (dựa trên expiresAt để giữ chính xác tuyệt đối)
     useEffect(() => {
-      if (isOpen && !isExpired) {
+      if (isOpen && !isExpired && expiresAt) {
         timerRef.current = setInterval(() => {
-          setTimeRemaining((prev) => {
-            if (prev <= 1) {
-              setIsExpired(true);
-              if (timerRef.current) {
-                clearInterval(timerRef.current);
-              }
-              return 0;
+          const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+          setTimeRemaining(remaining);
+          if (remaining === 0) {
+            setIsExpired(true);
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
             }
-            return prev - 1;
-          });
+          }
         }, 1000);
       }
 
@@ -111,7 +194,64 @@ export default function Payment() {
           clearInterval(timerRef.current);
         }
       };
-    }, [isOpen, isExpired]);
+    }, [isOpen, isExpired, expiresAt]);
+
+    // Track previous pathname để phát hiện khi chuyển trang
+  const prevPathnameRef = useRef(location.pathname);
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const prevPath = prevPathnameRef.current;
+
+    // Nếu chuyển từ trang payment sang trang khác
+    if (prevPath === "/buyer/payment" && currentPath !== "/buyer/payment" && !isReload && !paymentSuccessRef.current && !expiredRedirectRef.current && !cancelCalledRef.current) {
+      cancelCalledRef.current = true;
+      const code = orderCodeRef.current || orderCode;
+      (async () => {
+        try { exit && exit(); } catch {}
+        if (code) {
+          try {
+            await cancelPaymentLink(code);
+            await confirmPayment(buildConfirmPayload(false));
+          } catch (confirmErr) {
+            console.error('confirm payment failed on route change', confirmErr);
+          }
+        }
+        try { STORAGE && STORAGE.removeItem(STORAGE_KEY); } catch {}
+      })();
+    }
+
+    prevPathnameRef.current = currentPath;
+  }, [location.pathname, orderCode, isReload]);
+
+  // Cập nhật orderCodeRef khi orderCode thay đổi
+  useEffect(() => {
+    if (orderCode) {
+      orderCodeRef.current = orderCode;
+    }
+  }, [orderCode]);
+
+  // Cleanup khi component unmount - đảm bảo gọi cancel khi rời khỏi component
+  useEffect(() => {
+    return () => {
+      // Chỉ gọi nếu chưa gọi cancel, chưa thành công, và không phải do hết hạn
+      const code = orderCodeRef.current;
+      if (!paymentSuccessRef.current && !expiredRedirectRef.current && !cancelCalledRef.current && code) {
+        cancelCalledRef.current = true;
+        // Dùng async để đảm bảo request được gửi
+        (async () => {
+          try { exit && exit(); } catch {}
+          try {
+            await cancelPaymentLink(code);
+            await confirmPayment(buildConfirmPayload(false));
+          } catch (confirmErr) {
+            console.error('confirm payment failed on unmount', confirmErr);
+          }
+          try { STORAGE && STORAGE.removeItem(STORAGE_KEY); } catch {}
+        })();
+      }
+    };
+  }, []);
 
     // Khi hết hạn tự động hủy và quay lại trang checkout
     useEffect(() => {
@@ -120,13 +260,16 @@ export default function Payment() {
         (async () => {
           try {
             try { exit && exit(); } catch {}
-            if (orderCode) {
-              await cancelPaymentLink(orderCode);
+            try {
+              await confirmPayment(buildConfirmPayload(false));
+            } catch (confirmErr) {
+              console.error('confirm payment failed', confirmErr);
             }
           } catch (e) {
             // ignore
           } finally {
-            try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+            expiredRedirectRef.current = true;
+            try { STORAGE && STORAGE.removeItem(STORAGE_KEY); } catch {}
             navigate('/buyer/checkout');
           }
         })();
@@ -140,29 +283,39 @@ export default function Payment() {
       return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     };
 
-    // Tự động gọi API khi component mount
+    // Khi vào trang Payment:
+    // - Nếu forceNew=true (đi từ Checkout), luôn tạo link mới, dọn session cũ
+    // - Nếu refresh trang (không có forceNew), dùng session đã khôi phục đồng bộ ở trên nếu còn hạn
     useEffect(() => {
-      // Thử khôi phục session nếu còn hạn
-      try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const data = JSON.parse(raw);
-          const now = Date.now();
-          if (data?.expiresAt && data.expiresAt > now && data?.checkoutUrl && data?.orderCode) {
-            setOrderCode(data.orderCode);
-            setPayOSConfig((old) => ({ ...old, CHECKOUT_URL: data.checkoutUrl }));
-            setIsOpen(true);
-            const remain = Math.max(0, Math.floor((data.expiresAt - now) / 1000));
-            setTimeRemaining(remain);
-            setIsExpired(false);
-            return; // Không tạo link mới
-          } else {
-            sessionStorage.removeItem(STORAGE_KEY);
-          }
-        }
-      } catch {}
+      // 1) If we have a valid saved session, ALWAYS restore (covers refresh reliably)
+      if (restoredSession) {
+        setPayOSConfig((old) => ({ ...old, CHECKOUT_URL: restoredSession.checkoutUrl }));
+        setIsOpen(true);
+        setTimeRemaining(restoredSession.remain);
+        if (restoredSession.expiresAt) setExpiresAt(restoredSession.expiresAt);
+        setIsExpired(false);
+        return;
+      }
+
+      // 2) Durable force flag (coming from Checkout) → force new link once
+      const forceFlag = Boolean(forceNew) || (STORAGE ? STORAGE.getItem(FORCE_KEY) === '1' : false);
+      if (forceFlag) {
+        try { STORAGE && STORAGE.removeItem(STORAGE_KEY); } catch {}
+        try { STORAGE && STORAGE.removeItem(FORCE_KEY); } catch {}
+        handleGetPaymentLink();
+        return;
+      }
+      // Nếu có session nhưng đã hết hạn, hiển thị trạng thái hết hạn và KHÔNG tạo link mới
+      if (staleSession) {
+        setOrderCode(staleSession.orderCode || null);
+        setIsOpen(false);
+        setTimeRemaining(0);
+        setIsExpired(true);
+        return;
+      }
+      // Không có session hợp lệ => tạo mới
       handleGetPaymentLink();
-    }, []);
+    }, [forceNew, isReload]);
   
     useEffect(() => {
       if (payOSConfig.CHECKOUT_URL != null) {

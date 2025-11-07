@@ -273,18 +273,20 @@ export default function SiteHeader() {
                                         <ListItemIcon><PersonIcon fontSize="small"/></ListItemIcon>
                                         Hồ sơ của tôi
                                     </MenuItem>
-                                    {role === 'BUYER' && (
-                                        <>
-                                            <MenuItem onClick={() => navigate('/')}>
+                                    {role === 'BUYER' && [
+                                        (
+                                            <MenuItem key="buyer-home" onClick={() => navigate('/')}>
                                                 <ListItemIcon><HomeIcon fontSize="small"/></ListItemIcon>
                                                 Trang sản phẩm
                                             </MenuItem>
-                                            <MenuItem onClick={() => navigate('/custom-request')}>
+                                        ),
+                                        (
+                                            <MenuItem key="buyer-custom" onClick={() => navigate('/custom-request')}>
                                                 <ListItemIcon><BuildIcon fontSize="small"/></ListItemIcon>
                                                 Yêu cầu tùy chỉnh
                                             </MenuItem>
-                                        </>
-                                    )}
+                                        )
+                                    ]}
                                     {role === 'ADMIN' && (
                                         <MenuItem onClick={() => navigate('/admin/dashboard')}>
                                             <ListItemIcon><DashboardIcon fontSize="small"/></ListItemIcon>
