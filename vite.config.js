@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // Get backend URL from environment variable, default to localhost:8080
-const BACKEND_URL = 'http://localhost:8080';
+const BACKEND_URL = process.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
 console.log('Vite config: Using backend at', BACKEND_URL);
 
