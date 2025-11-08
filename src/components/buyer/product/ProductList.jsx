@@ -502,33 +502,7 @@ export default function ProductList() {
                                                         {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
                                     </Typography>
                                                 )}
-                                            </Box>
-                                            
-                                            {/* Add to Cart Button */}
-                                    <Button 
-                                        variant="contained" 
-                                                fullWidth
-                                                startIcon={<ShoppingCart sx={{fontSize: '1.2rem'}}/>}
-                                        onClick={(e) => handleAddToCart(e, product)}
-                                                sx={{
-                                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
-                                                    color: 'white',
-                                                    fontWeight: 700,
-                                                    py: 1.5,
-                                                    borderRadius: 2.5,
-                                                    fontSize: '1rem',
-                                                    textTransform: 'none',
-                                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.35)',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(135deg, #1e5a4a 0%, #0D3B2E 100%)',
-                                                        boxShadow: '0 8px 24px rgba(13, 59, 46, 0.5)',
-                                                        transform: 'translateY(-2px)'
-                                                    },
-                                                    transition: 'all 0.3s ease'
-                                                }}
-                                            >
-                                                Thêm vào giỏ hàng
-                                    </Button>
+                                            </Box>                                 
                                 </Box>
                             </CardContent>
                         </Card>

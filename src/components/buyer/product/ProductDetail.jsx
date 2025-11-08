@@ -11,11 +11,18 @@ import {
     CircularProgress,
     Alert,
     Card,
-    CardMedia
+    CardMedia,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import {ShoppingCart, FavoriteBorder, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import {viewProduct} from '../../../services/ProductService.jsx';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { viewProduct } from '../../../services/ProductService.jsx';
+import { addItem } from '../../../store/slices/cartSlice.js';
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -27,7 +34,12 @@ export default function ProductDetail() {
     const [imageError, setImageError] = useState(false);
     const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [openLimitDialog, setOpenLimitDialog] = useState(false);
+    const [limitMessage, setLimitMessage] = useState('');
     
+    const dispatch = useDispatch();
+    const cartItems = useSelector(state => state?.cart?.items || []);
+
     // Check if user is logged in
     const isLoggedIn = () => {
         const user = localStorage.getItem('user');
@@ -99,19 +111,64 @@ export default function ProductDetail() {
         return totalPrice;
     };
 
+    // Compute selected size, price and remaining availability BEFORE any conditional returns
+    const selectedSize = product?.sizes?.[selectedSizeIndex];
+    const currentPrice = selectedSize ? calculateProductPrice(selectedSize) : 0;
+    const productName = typeof product?.name === 'object' ? JSON.stringify(product?.name) : product?.name;
+    const sizeKey = selectedSize?.name ?? String(selectedSizeIndex);
+    const inCartQty = (cartItems || []).filter(it => it.id === product?.id && it.size === sizeKey)
+        .reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+    const availableQty = Math.max(0, Number(selectedSize?.quantity || 0) - inCartQty);
+
+    // Clamp quantity when dependencies change (to the size stock, not remaining)
+    useEffect(() => {
+        setQuantity((q) => {
+            const sizeStock = Number(selectedSize?.quantity || 0);
+            const clamped = Math.min(Math.max(1, q), Math.max(1, sizeStock));
+            return clamped;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedSizeIndex, inCartQty, selectedSize?.quantity]);
+
     const handleAddToCart = () => {
         if (!isLoggedIn()) {
             enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', {variant: 'info'});
             navigate('/login', {state: {from: `/product/${id}`}});
             return;
         }
-        // TODO: Implement add to cart functionality
-        console.log('Add to cart:', {
-            productId: product.id,
-            size: product.sizes?.[selectedSizeIndex],
-            quantity: quantity
-        });
-        enqueueSnackbar(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`, {variant: 'success'});
+
+        const sizeObj = product.sizes?.[selectedSizeIndex];
+        const sizeKey = sizeObj?.name ?? String(selectedSizeIndex);
+
+        // Tính số lượng còn lại theo size (tồn kho - đã có trong giỏ)
+        const alreadyInCart = (cartItems || []).filter(it => it.id === product.id && it.size === sizeKey)
+            .reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+        const stock = Number(sizeObj?.quantity || 0);
+        const remaining = Math.max(0, stock - alreadyInCart);
+
+        if (remaining <= 0) {
+            setLimitMessage(`Bạn đã có ${alreadyInCart} sản phẩm trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá giới hạn mua hàng của bạn.`);
+            setOpenLimitDialog(true);
+            return;
+        }
+        if (quantity > remaining) {
+            setLimitMessage(`Bạn đã có ${alreadyInCart} sản phẩm trong giỏ hàng. Không thể thêm ${quantity} sản phẩm vì chỉ còn ${remaining} sản phẩm cho kích thước này.`);
+            setOpenLimitDialog(true);
+            return;
+        }
+
+        const imageUrl = sizeObj?.image?.url || product.images?.[0]?.url || product.thumbnail || '';
+        const unitPrice = currentPrice; // giá theo size
+
+        dispatch(addItem({
+            id: product.id,
+            name: productName,
+            size: sizeKey,
+            image: imageUrl,
+            quantity,
+            price: unitPrice,
+        }));
+
     };
     
     const handleBuyNow = () => {
@@ -128,6 +185,7 @@ export default function ProductDetail() {
         });
         enqueueSnackbar('Đang chuyển đến trang thanh toán...', {variant: 'info'});
         // navigate('/checkout', { state: { ... } });
+
     };
     
     const handleAddToWishlist = () => {
@@ -177,9 +235,7 @@ export default function ProductDetail() {
         );
     }
 
-    const selectedSize = product.sizes?.[selectedSizeIndex];
-    const currentPrice = selectedSize ? calculateProductPrice(selectedSize) : 0;
-    const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
+
 
     return (
         <Container maxWidth="lg" sx={{py: 4}}>
@@ -321,8 +377,8 @@ export default function ProductDetail() {
                                         
                                         <Button
                                             variant="text"
-                                            onClick={() => setQuantity(Math.min(selectedSize.quantity, quantity + 1))}
-                                            disabled={quantity >= selectedSize.quantity}
+                                            onClick={() => setQuantity(Math.min(Number(selectedSize?.quantity || 0), quantity + 1))}
+                                            disabled={quantity >= Number(selectedSize?.quantity || 0)}
                                             sx={{
                                                 minWidth: '40px',
                                                 height: '40px',
@@ -338,7 +394,7 @@ export default function ProductDetail() {
                                     
                                     {/* Stock Info */}
                                     <Typography variant="body2" color="text.secondary">
-                                        {selectedSize.quantity} sản phẩm có sẵn
+                                        {Number(selectedSize?.quantity || 0)} sản phẩm có sẵn
                                     </Typography>
                                 </Box>
 
@@ -377,7 +433,7 @@ export default function ProductDetail() {
                         
                         <Divider sx={{my: 3}}/>
                         
-                        
+
                         {/* Action Buttons */}
                         <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4}}>
                             <Button
@@ -385,18 +441,20 @@ export default function ProductDetail() {
                                 size="large"
                                 startIcon={<ShoppingCart/>}
                                 onClick={handleAddToCart}
-                                disabled={selectedSize?.quantity === 0}
+
+                                disabled={Number(selectedSize?.quantity || 0) === 0}
+
                                 sx={{
                                     flex: 1,
                                     minWidth: '200px',
-                                    borderColor: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
-                                    color: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
+                                    borderColor: Number(selectedSize?.quantity || 0) === 0 ? '#ccc' : '#d32f2f',
+                                    color: Number(selectedSize?.quantity || 0) === 0 ? '#ccc' : '#d32f2f',
                                     py: 1.5,
                                     fontSize: '1rem',
                                     fontWeight: 600,
                                     '&:hover': {
-                                        borderColor: selectedSize?.quantity === 0 ? '#ccc' : '#b71c1c',
-                                        backgroundColor: selectedSize?.quantity === 0 ? 'transparent' : 'rgba(211, 47, 47, 0.04)',
+                                        borderColor: Number(selectedSize?.quantity || 0) === 0 ? '#ccc' : '#b71c1c',
+                                        backgroundColor: Number(selectedSize?.quantity || 0) === 0 ? 'transparent' : 'rgba(211, 47, 47, 0.04)',
                                     },
                                     '&:disabled': {
                                         borderColor: '#ccc',
@@ -404,23 +462,25 @@ export default function ProductDetail() {
                                     }
                                 }}
                             >
-                                {selectedSize?.quantity === 0 ? 'Hết hàng' : 'Thêm Vào Giỏ Hàng'}
+
+                                {Number(selectedSize?.quantity || 0) === 0 ? 'Hết hàng' : 'Thêm Vào Giỏ Hàng'}
+
                             </Button>
                             
                             <Button
                                 variant="contained"
                                 size="large"
                                 onClick={handleBuyNow}
-                                disabled={selectedSize?.quantity === 0}
+                                disabled={Number(selectedSize?.quantity || 0) === 0}
                                 sx={{
                                     flex: 1,
                                     minWidth: '200px',
-                                    backgroundColor: selectedSize?.quantity === 0 ? '#ccc' : '#d32f2f',
+                                    backgroundColor: Number(selectedSize?.quantity || 0) === 0 ? '#ccc' : '#d32f2f',
                                     py: 1.5,
                                     fontSize: '1rem',
                                     fontWeight: 600,
                                     '&:hover': {
-                                        backgroundColor: selectedSize?.quantity === 0 ? '#ccc' : '#b71c1c',
+                                        backgroundColor: Number(selectedSize?.quantity || 0) === 0 ? '#ccc' : '#b71c1c',
                                     },
                                     '&:disabled': {
                                         backgroundColor: '#ccc',
@@ -428,7 +488,7 @@ export default function ProductDetail() {
                                     }
                                 }}
                             >
-                                {selectedSize?.quantity === 0 ? 'Hết hàng' : 'Mua Ngay'}
+                                {Number(selectedSize?.quantity || 0) === 0 ? 'Hết hàng' : 'Mua Ngay'}
                             </Button>
                         </Box>
                         {/* Custom request button removed from product detail */}
@@ -444,6 +504,19 @@ export default function ProductDetail() {
                                 {typeof product.description === 'object' ? JSON.stringify(product.description) : product.description}
                             </Typography>
                         </Box>
+
+                        {/* Purchase limit dialog */}
+                        <Dialog open={openLimitDialog} onClose={() => setOpenLimitDialog(false)}>
+                            <DialogTitle>Thông báo</DialogTitle>
+                            <DialogContent>
+                                <Typography>{limitMessage}</Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => setOpenLimitDialog(false)} autoFocus>
+                                    OK
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
                 </Box>
             </Box>

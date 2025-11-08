@@ -5,6 +5,12 @@ import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
+
+
+
+
+
+
 // Buyer components
 const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
 const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
@@ -15,6 +21,7 @@ const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetai
 const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest.jsx'))
 const ViewCustomRequest = lazy(() => import('./components/buyer/custom/ViewCustomRequest.jsx'))
 const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomRequestDetail.jsx'))
+
 
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
@@ -42,6 +49,7 @@ const CustomRequestList = lazy(() => import('./components/seller/customeRequest/
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 
 const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
+const Payment = lazy(() => import('./components/buyer/payment/Payment.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -280,15 +288,7 @@ const router = createBrowserRouter([
                         <SignIn/>
                     </Suspense>
                 )
-            },
-            {
-                path: 'checkout',
-                element: (
-                    <Suspense fallback={<LoadingFallback/>}>
-                        <CheckoutPage/>
-                    </Suspense>
-                )
-            },
+            },    
             {
                 path: 'product',
                 element: <ProductList/>
@@ -464,6 +464,23 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
+            {
+                path: 'checkout',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CheckoutPage/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'payment',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Payment/>
+                    </Suspense>
+                )
+            },
+           
             {
                 path: 'profile',
                 element: (
