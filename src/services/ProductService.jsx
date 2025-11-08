@@ -86,3 +86,8 @@ export const deactiveProduct = async (id) => {
     const response = await axiosClient.put(`/product/${id}`);
     return response || null
 }
+
+export const checkAvailabilityProductsBySize = async(payload) => {
+    const response = await axiosClient.put(`/product/check/availability/products`, payload);
+    return response || null
+}

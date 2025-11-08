@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react'
 import '../styles/ui/SiteHeader.css'
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
-import {Avatar, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
+import {Avatar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
 import {
     AccountCircle as AccountCircleIcon,
     Build as BuildIcon,
@@ -16,15 +16,22 @@ import {
 import {enqueueSnackbar} from 'notistack'
 import {signOut} from '../services/AccountService.jsx'
 import {NotificationDisplay} from '../services/NotificationService.jsx';
+
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { reloadFromStorage } from '../store/slices/cartSlice';
+
 
 export default function SiteHeader() {
     const navigate = useNavigate()
     const location = useLocation()
+    const dispatch = useDispatch()
     const [anchorEl, setAnchorEl] = useState(null)
     const [currentUser, setCurrentUser] = useState(null)
     const menuOpen = Boolean(anchorEl)
+    const cartCount = useSelector(state => state?.cart?.items?.length || 0)
 
     useEffect(() => {
         const raw = localStorage.getItem('user')
@@ -42,6 +49,11 @@ export default function SiteHeader() {
             localStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
         }
     }, [location.pathname])
+
+    useEffect(() => {
+        // Reload cart when user context changes (per-account cart storage)
+        dispatch(reloadFromStorage())
+    }, [currentUser, dispatch])
 
     const [role, setRole] = useState(null);
     
@@ -100,7 +112,17 @@ export default function SiteHeader() {
     const handleLogout = async () => {
         try {
             await signOut()
-            localStorage.clear()
+            // Remove only current user's cart and user info
+            try {
+                const rawUser = localStorage.getItem('user')
+                if (rawUser) {
+                    const parsed = JSON.parse(rawUser)
+                    const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest'
+                    const cartKey = `psgp_cart_v1_${userIdentifier}`
+                    localStorage.removeItem(cartKey)
+                }
+            } catch {}
+            localStorage.removeItem('user')
             enqueueSnackbar('Đã đăng xuất', {variant: 'success'})
             handleCloseMenu()
             navigate('/', {replace: true})
@@ -144,14 +166,16 @@ export default function SiteHeader() {
                                 }}
                             />
                         </Link>
-                        <Link className="header__icon" title="Giỏ hàng" to="#">
-                            <LocalGroceryStoreIcon
-                                sx={{
-                                    width: 22,
-                                    height: 22,
-                                    color: '#0D3B2E'
-                                }}
-                            />
+                        <Link className="header__icon" title="Giỏ hàng" to="/buyer/checkout">
+                            <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
+                                <LocalGroceryStoreIcon
+                                    sx={{
+                                        width: 22,
+                                        height: 22,
+                                        color: '#0D3B2E'
+                                    }}
+                                />
+                            </Badge>
                         </Link>
                         <Link className="header__icon" title="Thông báo" to="#">
                             <NotificationDisplay/>
@@ -249,18 +273,20 @@ export default function SiteHeader() {
                                         <ListItemIcon><PersonIcon fontSize="small"/></ListItemIcon>
                                         Hồ sơ của tôi
                                     </MenuItem>
-                                    {role === 'BUYER' && (
-                                        <>
-                                            <MenuItem onClick={() => navigate('/')}>
+                                    {role === 'BUYER' && [
+                                        (
+                                            <MenuItem key="buyer-home" onClick={() => navigate('/')}>
                                                 <ListItemIcon><HomeIcon fontSize="small"/></ListItemIcon>
                                                 Trang sản phẩm
                                             </MenuItem>
-                                            <MenuItem onClick={() => navigate('/custom-request')}>
+                                        ),
+                                        (
+                                            <MenuItem key="buyer-custom" onClick={() => navigate('/custom-request')}>
                                                 <ListItemIcon><BuildIcon fontSize="small"/></ListItemIcon>
                                                 Yêu cầu tùy chỉnh
                                             </MenuItem>
-                                        </>
-                                    )}
+                                        )
+                                    ]}
                                     {role === 'ADMIN' && (
                                         <MenuItem onClick={() => navigate('/admin/dashboard')}>
                                             <ListItemIcon><DashboardIcon fontSize="small"/></ListItemIcon>
