@@ -1,9 +1,10 @@
 import { usePayOS } from "@payos/payos-checkout";
 import React, { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cancelPaymentLink } from "../../../services/WalletService";
 import { confirmPayment } from "../../../services/PaymentService.jsx";
+import { clear } from "../../../store/slices/cartSlice.js";
 import "./Payment.css";
 import { createPaymentUrl } from "../../../services/PayOsService";
 
@@ -56,6 +57,7 @@ export default function Payment() {
     typeof restoredSession?.shippingFee === 'number' ? Number(restoredSession.shippingFee) : initialShippingFee
   );
     const cartItems = useSelector(state => state?.cart?.items || []);
+    const dispatch = useDispatch();
     const STORAGE_KEY = 'payos-session';
   const STORAGE = typeof window !== 'undefined' ? window.localStorage : null;
   const FORCE_KEY = 'payos-force-new';
@@ -76,7 +78,28 @@ export default function Payment() {
     const expiredRedirectRef = useRef(false);
     const cancelCalledRef = useRef(false);
     const orderCodeRef = useRef(restoredSession?.orderCode || null);
-  
+    const dispatchRef = useRef(dispatch);
+    const clearAllCartStorageRef = useRef(() => {
+      try {
+        if (!STORAGE) return;
+        const keysToRemove = [];
+        for (let i = 0; i < STORAGE.length; i++) {
+          const key = STORAGE.key(i);
+          if (key && key.startsWith('psgp_cart_v1_')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => STORAGE.removeItem(key));
+      } catch (err) {
+        console.error('Error clearing cart storage:', err);
+      }
+    });
+
+    // Cập nhật refs khi dispatch thay đổi
+    useEffect(() => {
+      dispatchRef.current = dispatch;
+    }, [dispatch]);
+
     const [payOSConfig, setPayOSConfig] = useState({
       RETURN_URL: window.location.href, // required
       ELEMENT_ID: "embedded-payment-container", // required
@@ -88,6 +111,10 @@ export default function Payment() {
         } catch (confirmErr) {
           console.error('confirm payment failed', confirmErr);
         }
+        // Clear Redux cart
+        dispatchRef.current(clear());
+        // Xóa tất cả cart storage items
+        clearAllCartStorageRef.current();
         paymentSuccessRef.current = true;
         setIsOpen(false);
         setMessage("Thanh toán thành công");
