@@ -7,6 +7,7 @@ import { confirmPayment } from "../../../services/PaymentService.jsx";
 import { clear } from "../../../store/slices/cartSlice.js";
 import "./Payment.css";
 import { createPaymentUrl } from "../../../services/PayOsService";
+import axiosClient from "../../../config/APIConfig.jsx";
 
 export default function Payment() {
     const navigate = useNavigate();
@@ -278,6 +279,35 @@ export default function Payment() {
         })();
       }
     };
+  }, []);
+
+  // Trường hợp đóng trình duyệt/tab: cố gắng gửi cancel + confirm bằng sendBeacon/keepalive
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (paymentSuccessRef.current || expiredRedirectRef.current || cancelCalledRef.current) return;
+      const code = orderCodeRef.current;
+      if (!code) return;
+      cancelCalledRef.current = true;
+      const base = typeof axiosClient?.defaults?.baseURL === 'string' ? axiosClient.defaults.baseURL : '';
+      const origin = (typeof window !== 'undefined' ? window.location.origin : '');
+      const baseAbs = base?.startsWith('http') ? base : (origin + (base || ''));
+      const cancelPaymentLinkUrl = `${baseAbs}/wallet?orderCode=${encodeURIComponent(code)}`;
+      const confirmUrl = `${baseAbs}/payment/confirm`;
+      try {
+        // Best effort: DELETE may not be supported by sendBeacon, fallback to keepalive fetch if needed
+        navigator.sendBeacon(cancelPaymentLinkUrl, new Blob([], { type: 'application/json' }));
+      } catch {
+        try { fetch(walletUrl, { method: 'DELETE', keepalive: true }); } catch {}
+      }
+      try {
+        const body = JSON.stringify(buildConfirmPayload(false));
+        navigator.sendBeacon(confirmUrl, new Blob([body], { type: 'application/json' }));
+      } catch {
+        try { fetch(confirmUrl, { method: 'POST', body: JSON.stringify(buildConfirmPayload(false)), headers: { 'Content-Type': 'application/json' }, keepalive: true }); } catch {}
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
     // Khi hết hạn tự động hủy và quay lại trang checkout
