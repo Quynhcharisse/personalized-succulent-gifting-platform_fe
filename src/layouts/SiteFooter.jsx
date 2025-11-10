@@ -52,12 +52,11 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      {/* VSenda-style Top Section: Logo, Tagline, Social Media */}
+      {/* Chinh Logo*/}
       <div id="gioi-thieu" className="footer__top">
         <div className="container footer__top-content">
           <div className="footer__brand">
             <img className="footer__logo-large" src="/LaNhoBenThemLogo.png" alt="Lá Nhỏ Bên Thềm" />
-            <h2 className="footer__brand-name">Lá Nhỏ Bên Thềm</h2>
             <p className="footer__tagline">Làm đẹp cho đời sống tinh thần</p>
           </div>
           
