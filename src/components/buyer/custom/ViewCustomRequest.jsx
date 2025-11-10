@@ -177,13 +177,45 @@ export default function ViewCustomRequest() {
                                                     </Typography>
                                                 </Box>
                                                 
-                                                {/* Occasion Info */}
+                                                {/* Occasion Badge - Compact Style */}
                                                 {request.occasion && typeof request.occasion === 'string' && request.occasion.trim() !== '' && (
-                                                    <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary'}}>
-                                                        <EventIcon sx={{mr: 1, fontSize: 18}}/>
-                                                        <Typography variant="body2">
-                                                            Dịp: {request.occasion}
-                                                        </Typography>
+                                                    <Box sx={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 0.75,
+                                                        mt: 1,
+                                                        px: 1.5,
+                                                        py: 0.75,
+                                                        background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                                                        borderRadius: 1.5,
+                                                        border: '1.5px solid #fff',
+                                                        boxShadow: '0 2px 6px rgba(252, 182, 159, 0.25)',
+                                                    }}>
+                                                        <EventIcon sx={{
+                                                            color: '#d35400',
+                                                            fontSize: 16
+                                                        }}/>
+                                                        <Box>
+                                                            <Typography variant="caption" sx={{
+                                                                color: '#8b4513',
+                                                                fontWeight: 600,
+                                                                fontSize: '0.6rem',
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '0.3px',
+                                                                display: 'block',
+                                                                lineHeight: 1.2
+                                                            }}>
+                                                                Dịp
+                                                            </Typography>
+                                                            <Typography variant="body2" sx={{
+                                                                color: '#d35400',
+                                                                fontWeight: 700,
+                                                                fontSize: '0.85rem',
+                                                                lineHeight: 1.2
+                                                            }}>
+                                                                {request.occasion}
+                                                            </Typography>
+                                                        </Box>
                                                     </Box>
                                                 )}
                                             </Stack>

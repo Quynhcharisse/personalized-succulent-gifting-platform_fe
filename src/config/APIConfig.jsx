@@ -10,7 +10,7 @@ const axiosClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-    // withCredentials: true,
+    withCredentials: true,
 });
 
 axiosClient.interceptors.response.use(
@@ -28,7 +28,6 @@ axiosClient.interceptors.response.use(
                 return Promise.reject(error);
             }
 
-            // Don't redirect for public endpoints
             const publicEndpoints = ["/account/access", "/product", "/product/list"];
             const isPublicEndpoint = publicEndpoints.some(endpoint => originalRequest.url.startsWith(endpoint));
 

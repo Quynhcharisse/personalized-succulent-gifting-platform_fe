@@ -146,7 +146,9 @@ export default function SiteHeader() {
                     <NavLink to="/huong-dan-mua-hang"> Hướng dẫn mua hàng </NavLink>
                     <NavLink to="/cham-soc"> Chăm sóc </NavLink>
                     <NavLink to="/buyer/posts"> Bài đăng </NavLink>
-                    <NavLink to="/custom-request"> Điện Cây </NavLink>
+                    {(!currentUser || role === 'BUYER') && (
+                        <NavLink to="/custom-request"> Điện Cây </NavLink>
+                    )}
                 </nav>
                 <div className="header__actions">
                     <div className="searchbar">

@@ -170,8 +170,8 @@
 }
 
 .footer__logo-large {
-    height: 80px;
-    width: 80px;
+    height: 30vh;
+    width: 30vw;
     object-fit: contain;
     filter: brightness(1.1) drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1));
 }
@@ -489,8 +489,8 @@
     }
     
     .footer__logo-large {
-        height: 64px;
-        width: 64px;
+        height: 50vh;
+        width: 50vw;
     }
     
     .footer__social-link {

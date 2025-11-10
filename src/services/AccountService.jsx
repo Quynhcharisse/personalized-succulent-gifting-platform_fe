@@ -7,7 +7,7 @@ export const signOut = async () => {
 
 export const getAccess = async () => {
     const response = await axiosClient.post("/account/access")
-    return response || null;
+    return response && response.status === 200 ? response : null;
 }
 
 export const viewProfile = async () => {
