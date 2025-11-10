@@ -291,11 +291,11 @@ export default function Payment() {
       const base = typeof axiosClient?.defaults?.baseURL === 'string' ? axiosClient.defaults.baseURL : '';
       const origin = (typeof window !== 'undefined' ? window.location.origin : '');
       const baseAbs = base?.startsWith('http') ? base : (origin + (base || ''));
-      const walletUrl = `${baseAbs}/wallet?orderCode=${encodeURIComponent(code)}`;
+      const cancelPaymentLinkUrl = `${baseAbs}/wallet?orderCode=${encodeURIComponent(code)}`;
       const confirmUrl = `${baseAbs}/payment/confirm`;
       try {
         // Best effort: DELETE may not be supported by sendBeacon, fallback to keepalive fetch if needed
-        navigator.sendBeacon(walletUrl, new Blob([], { type: 'application/json' }));
+        navigator.sendBeacon(cancelPaymentLinkUrl, new Blob([], { type: 'application/json' }));
       } catch {
         try { fetch(walletUrl, { method: 'DELETE', keepalive: true }); } catch {}
       }
