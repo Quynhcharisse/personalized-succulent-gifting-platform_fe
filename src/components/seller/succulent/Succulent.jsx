@@ -261,8 +261,71 @@ const SucculentForm = () => {
                     setSubmitMessage({text: 'Có lỗi xảy ra khi tạo sản phẩm', type: 'error'});
                 }
             } catch (error) {
-                console.error('Error creating succulent:', error);
-                const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tạo sản phẩm';
+                console.error('❌ Error creating succulent:', error);
+                
+                // Hiển thị chi tiết lỗi từ Backend
+                let errorMessage = 'Có lỗi xảy ra khi tạo sản phẩm';
+                
+                if (error.response) {
+                    // Server trả về response với error
+                    const status = error.response.status;
+                    const backendMessage = error.response.data?.message || error.response.data?.error || error.response.data;
+                    
+                    console.error('📋 Backend Error Details:', {
+                        status: status,
+                        statusText: error.response.statusText,
+                        message: backendMessage,
+                        fullData: error.response.data,
+                        headers: error.response.headers
+                    });
+                    
+                    if (status === 403) {
+                        // Kiểm tra xem có phải lỗi authentication không
+                        const user = localStorage.getItem('user');
+                        if (!user || user === 'undefined') {
+                            errorMessage = `🔐 Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.`;
+                        } else {
+                            errorMessage = `🚫 Không có quyền truy cập: ${
+                                typeof backendMessage === 'string' 
+                                    ? backendMessage 
+                                    : 'Bạn không có quyền tạo sen đá. Vui lòng đăng nhập với tài khoản SELLER.'
+                            }`;
+                        }
+                    } else if (status === 401) {
+                        errorMessage = `🔐 Chưa xác thực: ${
+                            typeof backendMessage === 'string'
+                                ? backendMessage
+                                : 'Vui lòng đăng nhập lại.'
+                        }`;
+                    } else if (status === 400) {
+                        errorMessage = `⚠️ Dữ liệu không hợp lệ: ${
+                            typeof backendMessage === 'string'
+                                ? backendMessage
+                                : 'Vui lòng kiểm tra lại thông tin.'
+                        }`;
+                    } else if (status === 500) {
+                        errorMessage = `💥 Lỗi server: ${
+                            typeof backendMessage === 'string'
+                                ? backendMessage
+                                : 'Vui lòng thử lại sau.'
+                        }`;
+                    } else {
+                        errorMessage = `❌ Lỗi ${status}: ${
+                            typeof backendMessage === 'string'
+                                ? backendMessage
+                                : error.response.statusText || 'Lỗi không xác định'
+                        }`;
+                    }
+                } else if (error.request) {
+                    // Request được gửi nhưng không nhận được response
+                    errorMessage = '🌐 Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+                    console.error('📡 No response received:', error.request);
+                } else {
+                    // Lỗi khi setup request
+                    errorMessage = `⚙️ Lỗi: ${error.message}`;
+                    console.error('⚙️ Request setup error:', error.message);
+                }
+                
                 setSubmitMessage({text: errorMessage, type: 'error'});
             } finally {
                 setIsSubmitting(false);

@@ -287,75 +287,98 @@ export default function ProductList() {
                                         display: 'flex',
                                         flexDirection: 'column',
                                 cursor: 'pointer',
-                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                                         position: 'relative',
                                         maxWidth: '100%',
                                         margin: '0 auto',
-                                        borderRadius: 3,
+                                        borderRadius: 4,
                                         overflow: 'hidden',
-                                        border: '1px solid rgba(13, 59, 46, 0.08)',
-                                        background: 'white',
-                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                                        border: '2px solid rgba(255, 255, 255, 0.8)',
+                                        background: 'rgba(255, 255, 255, 0.95)',
+                                        backdropFilter: 'blur(20px)',
+                                        boxShadow: '0 8px 32px rgba(13, 59, 46, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                                         '&:hover': {
-                                            transform: 'translateY(-12px) scale(1.02)',
-                                            boxShadow: '0 20px 40px rgba(13, 59, 46, 0.2)',
-                                            borderColor: '#0D3B2E',
+                                            transform: 'translateY(-16px) scale(1.03)',
+                                            boxShadow: '0 24px 48px rgba(13, 59, 46, 0.25), 0 8px 16px rgba(0, 0, 0, 0.12)',
+                                            borderColor: 'rgba(13, 59, 46, 0.3)',
+                                            background: 'rgba(255, 255, 255, 1)',
                                             '& .product-image': {
-                                                transform: 'scale(1.1)'
+                                                transform: 'scale(1.15) rotate(2deg)'
                                             },
                                             '& .product-overlay': {
                                                 opacity: 1
                                             },
                                             '& .action-icons': {
-                                                opacity: 1
+                                                opacity: 1,
+                                                transform: 'translateY(0)'
+                                            },
+                                            '& .view-detail-btn': {
+                                                opacity: 1,
+                                                transform: 'translateY(0)'
                                             }
                                         }
                                     }}
                                 >
-                                    {/* Discount Badge */}
+                                    {/* Discount Badge - Enhanced */}
                                     {discount && discount > 0 && (
                                         <Chip
-                                            label={`-${discount}%`}
+                                            label={`🔥 -${discount}%`}
                                             sx={{
                                                 position: 'absolute',
-                                                top: 12,
-                                                left: 12,
+                                                top: 16,
+                                                left: 16,
                                                 zIndex: 3,
-                                                background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+                                                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)',
                                                 color: 'white',
-                                                fontWeight: 800,
-                                                fontSize: '0.875rem',
-                                                height: '38px',
-                                                px: 2,
-                                                boxShadow: '0 4px 12px rgba(255, 107, 107, 0.5)',
+                                                fontWeight: 900,
+                                                fontSize: '0.95rem',
+                                                height: '42px',
+                                                px: 2.5,
+                                                boxShadow: '0 6px 20px rgba(255, 71, 87, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                                                border: '2px solid rgba(255, 255, 255, 0.3)',
+                                                backdropFilter: 'blur(10px)',
+                                                animation: 'pulse 2s ease-in-out infinite',
+                                                '@keyframes pulse': {
+                                                    '0%, 100%': {
+                                                        transform: 'scale(1)'
+                                                    },
+                                                    '50%': {
+                                                        transform: 'scale(1.05)'
+                                                    }
+                                                },
                                                 '& .MuiChip-label': {
-                                                    px: 1.5
+                                                    px: 1.5,
+                                                    letterSpacing: '0.5px'
                                                 }
                                             }}
                                         />
                                     )}
 
-                                    {/* Action Icons - View and Custom Request */}
+                                    {/* Action Icons - Enhanced Glass Morphism */}
                                     <Box
                                         sx={{
                                             position: 'absolute',
-                                            top: 12,
-                                            right: 12,
+                                            top: 16,
+                                            right: 16,
                                             zIndex: 3,
                                             display: 'flex',
-                                            gap: 1,
+                                            gap: 1.5,
                                             opacity: 0,
-                                            transition: 'opacity 0.3s ease',
+                                            transform: 'translateY(-10px)',
+                                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                                             '& .MuiIconButton-root': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                backdropFilter: 'blur(10px)',
-                                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                backdropFilter: 'blur(20px)',
+                                                boxShadow: '0 4px 16px rgba(13, 59, 46, 0.2)',
+                                                border: '2px solid rgba(255, 255, 255, 0.6)',
                                 '&:hover': {
-                                                    backgroundColor: 'white',
-                                                    transform: 'scale(1.1)',
-                                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
+                                                    backgroundColor: '#0D3B2E',
+                                                    color: 'white',
+                                                    transform: 'scale(1.15) rotate(5deg)',
+                                                    boxShadow: '0 6px 20px rgba(13, 59, 46, 0.4)',
+                                                    borderColor: '#0D3B2E'
                                                 },
-                                                transition: 'all 0.2s ease'
+                                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                                             }
                                         }}
                                         className="action-icons"
@@ -365,16 +388,28 @@ export default function ProductList() {
                                             size="small"
                                             onClick={(e) => handleViewDetail(e, product.id)}
                                             sx={{
-                                                width: 40,
-                                                height: 40,
+                                                width: 44,
+                                                height: 44,
                                                 color: '#0D3B2E'
                                             }}
                                             title="Xem chi tiết"
                                         >
-                                            <Visibility sx={{fontSize: '1.2rem'}}/>
+                                            <Visibility sx={{fontSize: '1.3rem'}}/>
                                         </IconButton>
                                         
-                                        {/* Custom request entry removed from product list */}
+                                        {/* Shopping Cart Icon */}
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleAddToCart(e, product)}
+                                            sx={{
+                                                width: 44,
+                                                height: 44,
+                                                color: '#0D3B2E'
+                                            }}
+                                            title="Thêm vào giỏ"
+                                        >
+                                            <ShoppingCart sx={{fontSize: '1.3rem'}}/>
+                                        </IconButton>
                                     </Box>
                                     
                                     {/* Image Container with Overlay */}
@@ -396,10 +431,11 @@ export default function ProductList() {
                                                 left: 0,
                                                 right: 0,
                                                 bottom: 0,
-                                                background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(13,59,46,0.15) 100%)',
+                                                background: 'linear-gradient(135deg, rgba(13,59,46,0.1) 0%, rgba(29,89,74,0.3) 50%, rgba(13,59,46,0.4) 100%)',
                                                 zIndex: 1,
                                                 opacity: 0,
-                                                transition: 'opacity 0.3s ease'
+                                                transition: 'opacity 0.5s ease',
+                                                backdropFilter: 'blur(2px)'
                                             }}
                                         />
                             <CardMedia
@@ -502,11 +538,41 @@ export default function ProductList() {
                                                         {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
                                     </Typography>
                                                 )}
-                                            </Box>                                 
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                                                            </Box>
+                                                            
+                                                            {/* View Detail Button - Enhanced */}
+                                                            <Button
+                                                                fullWidth
+                                                                variant="contained"
+                                                                startIcon={<Visibility />}
+                                                                onClick={(e) => handleViewDetail(e, product.id)}
+                                                                className="view-detail-btn"
+                                                                sx={{
+                                                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1a5f4a 100%)',
+                                                                    color: 'white',
+                                                                    fontWeight: 700,
+                                                                    fontSize: '0.95rem',
+                                                                    py: 1.5,
+                                                                    borderRadius: 2.5,
+                                                                    textTransform: 'none',
+                                                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.3)',
+                                                                    opacity: 0.95,
+                                                                    transform: 'translateY(5px)',
+                                                                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                    '&:hover': {
+                                                                        background: 'linear-gradient(135deg, #1a5f4a 0%, #2d8659 100%)',
+                                                                        boxShadow: '0 8px 24px rgba(13, 59, 46, 0.4)',
+                                                                        transform: 'translateY(0)',
+                                                                        opacity: 1
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Xem Chi Tiết
+                                                            </Button>
+                                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
                         );
                     })}
             </Grid>
