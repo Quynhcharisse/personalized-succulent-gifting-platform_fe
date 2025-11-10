@@ -130,11 +130,11 @@ export default function ProductDetail() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSizeIndex, inCartQty, selectedSize?.quantity]);
 
-    const handleAddToCart = () => {
+    const addSelectionToCart = () => {
         if (!isLoggedIn()) {
-            enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', {variant: 'info'});
-            navigate('/login', {state: {from: `/product/${id}`}});
-            return;
+            enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', { variant: 'info' });
+            navigate('/login', { state: { from: `/product/${id}` } });
+            return false;
         }
 
         const sizeObj = product.sizes?.[selectedSizeIndex];
@@ -149,12 +149,12 @@ export default function ProductDetail() {
         if (remaining <= 0) {
             setLimitMessage(`Bạn đã có ${alreadyInCart} sản phẩm trong giỏ hàng. Không thể thêm số lượng đã chọn vào giỏ hàng vì sẽ vượt quá giới hạn mua hàng của bạn.`);
             setOpenLimitDialog(true);
-            return;
+            return false;
         }
         if (quantity > remaining) {
             setLimitMessage(`Bạn đã có ${alreadyInCart} sản phẩm trong giỏ hàng. Không thể thêm ${quantity} sản phẩm vì chỉ còn ${remaining} sản phẩm cho kích thước này.`);
             setOpenLimitDialog(true);
-            return;
+            return false;
         }
 
         const imageUrl = sizeObj?.image?.url || product.images?.[0]?.url || product.thumbnail || '';
@@ -169,23 +169,22 @@ export default function ProductDetail() {
             price: unitPrice,
         }));
 
+        return true;
+    };
+
+    const handleAddToCart = () => {
+        const success = addSelectionToCart();
+        if (success) {
+            enqueueSnackbar('Đã thêm sản phẩm vào giỏ hàng', { variant: 'success' });
+        }
     };
     
     const handleBuyNow = () => {
-        if (!isLoggedIn()) {
-            enqueueSnackbar('Vui lòng đăng nhập để mua hàng', {variant: 'info'});
-            navigate('/login', {state: {from: `/product/${id}`}});
-            return;
+        const success = addSelectionToCart();
+        if (success) {
+            enqueueSnackbar('Đang chuyển đến trang thanh toán...', { variant: 'info' });
+            navigate('/buyer/checkout');
         }
-        // TODO: Implement buy now functionality - redirect to checkout
-        console.log('Buy now:', {
-            productId: product.id,
-            size: product.sizes?.[selectedSizeIndex],
-            quantity: quantity
-        });
-        enqueueSnackbar('Đang chuyển đến trang thanh toán...', {variant: 'info'});
-        // navigate('/checkout', { state: { ... } });
-
     };
     
     const handleAddToWishlist = () => {
