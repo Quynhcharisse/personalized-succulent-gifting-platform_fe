@@ -1,7 +1,7 @@
 // ===============================
 // File: src/components/buyer/checkout/CheckoutPage.jsx
 // ===============================
-import { RoomServiceRounded, ShoppingCartOutlined, PaymentOutlined, DeleteOutline, Add, Remove } from "@mui/icons-material";
+import { RoomServiceRounded, ShoppingCartOutlined, PaymentOutlined, DeleteOutline, Add, Remove, HomeOutlined } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Divider, Stack, Typography, IconButton } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -157,8 +157,36 @@ export default function CheckoutPage() {
   return (
     <>
       <Box sx={{ bgcolor: 'white', px: { xs: 1, sm: 2, md: 3 }, py: 2.5, borderRadius: 1, mb: 2, mt: 2, borderTop: '1px solid #e0e0e0' }}>
+       
         <Card sx={{ ...DASHBOARD_STYLES.paper }}>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            {/* Back to Home inside card (placed before Address Header) */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<HomeOutlined />}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  borderRadius: 999,
+                  px: 1.5,
+                  color: COLORS.primary,
+                  borderColor: `${COLORS.primary}66`,
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    borderColor: COLORS.primary,
+                    backgroundColor: 'rgba(11,63,49,0.06)',
+                    boxShadow: 'none',
+                  },
+                  '& .MuiButton-startIcon': { mr: 0.75 },
+                }}
+                onClick={() => navigate('/')}
+              >
+                Về trang chủ
+              </Button>
+            </Box>
             {/* Address Header */}
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 140px 120px 160px" }, gap: 2, px: { xs: 1, sm: 2 }, py: 1.5, backgroundColor: COLORS.primary, borderRadius: 2, color: 'white', fontWeight: 600, marginTop: 3 }}>
               <Stack direction="row" spacing={1} alignItems="center">
