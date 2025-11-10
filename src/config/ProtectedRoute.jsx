@@ -5,7 +5,6 @@ import {getAccessToken} from "../utils/CookieUtil.jsx";
 import {jwtDecode} from "jwt-decode";
 
 async function GetAccessData() {
-    console.log("I am here")
     const accessToken = await getAccessToken()
     if (accessToken) {
         try {

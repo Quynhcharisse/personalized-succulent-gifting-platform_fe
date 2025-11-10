@@ -33,8 +33,19 @@ export const getTotalSupplierCount = async () => {
 
 //------------------- Succulents ------------------//
 export const createSucculent = async (succulentData) => {
-    const response = await axiosClient.post("/product/succulent", succulentData);
-    return response || null
+    try {
+        const response = await axiosClient.post("/product/succulent", succulentData);
+        return response || null;
+    } catch (error) {
+        console.error('❌ Create Succulent Error:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            message: error.response?.data?.message || error.message,
+            data: error.response?.data,
+            headers: error.response?.headers
+        });
+        throw error;
+    }
 }
 export const getSucculents = async () => {
     const response = await axiosClient.get("/product/succulents");

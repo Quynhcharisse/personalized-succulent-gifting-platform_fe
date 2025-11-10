@@ -1,13 +1,14 @@
-import axiosClient from "../config/APIConfig.jsx";
+import axiosClient, { clearTokenCache } from "../config/APIConfig.jsx";
 
 export const signOut = async () => {
     const response = await axiosClient.post("/account/logout");
+    clearTokenCache(); // Clear token cache khi logout
     return response || null
 }
 
 export const getAccess = async () => {
     const response = await axiosClient.post("/account/access")
-    return response || null;
+    return response && response.status === 200 ? response : null;
 }
 
 export const viewProfile = async () => {
