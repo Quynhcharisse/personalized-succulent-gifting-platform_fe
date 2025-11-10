@@ -16,20 +16,24 @@ import {
     Add as AddIcon,
     Edit as EditIcon,
     Inventory as InventoryIcon,
-    Visibility as ViewIcon
+    Visibility as ViewIcon,
+    Delete as DeleteIcon
 } from '@mui/icons-material';
-import {viewProduct} from '../../../services/ProductService.jsx';
+import {deactiveProduct, viewProduct} from '../../../services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';
 import usePagination from '../../../hooks/usePagination.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 import ProductViewDialog from "./ProductViewDialog.jsx";
+import { useConfirm } from 'material-ui-confirm';
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const confirm = useConfirm();
 
     // Pagination hook
     const {page, rowsPerPage, handleChangePage, handleChangeRowsPerPage} = usePagination(0, 10);
@@ -174,16 +178,16 @@ const ProductTable = () => {
             header: 'Trạng Thái',
             render: (row) => (
                 <Chip
-                    label="ACTIVE"
-                    size="small"
-                    sx={{
-                        backgroundColor: '#22c55e',
-                        color: 'white',
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                        textTransform: 'uppercase'
-                    }}
-                />
+                label={getStatusLabel(row.status)}
+                color={getStatusColor(row.status)}
+                size="small"
+                sx={{
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase'
+                }}
+              />
             )
         },
         {
@@ -220,6 +224,20 @@ const ProductTable = () => {
                             <EditIcon/>
                         </IconButton>
                     </Tooltip>
+                    <Tooltip title="Xóa Sản Phẩm">
+        <IconButton
+          onClick={() => handleDeleteProduct(row)}
+          sx={{
+            color: 'red',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 0, 0, 0.1)',
+              transform: 'scale(1.1)'
+            }
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Tooltip>
                 </Stack>
             )
         }
@@ -271,6 +289,28 @@ const ProductTable = () => {
         setViewDialogOpen(true);
     };
 
+
+
+const handleDeleteProduct = async (product) => {
+  try {
+    await confirm({
+      title: 'Xác nhận xoá sản phẩm',
+      description: `Bạn có chắc chắn muốn xoá "${product.name}" không?`,
+      confirmationText: 'Xoá',
+      cancellationText: 'Huỷ',
+      confirmationButtonProps: { color: 'error' },
+    });
+
+    const response = await deactiveProduct(product.id);
+    showNotification(response.data.message || 'Xoá sản phẩm thành công', 'success');
+    loadProducts();
+  } catch (err) {
+    if (err) { // Nếu người dùng bấm Huỷ thì confirm sẽ ném error, nên check kỹ
+      console.error('Error deleting product:', err);
+      showNotification('Không thể xoá sản phẩm', 'error');
+    }
+  }
+};
 
     // Handle dialog close
     const handleDialogClose = () => {

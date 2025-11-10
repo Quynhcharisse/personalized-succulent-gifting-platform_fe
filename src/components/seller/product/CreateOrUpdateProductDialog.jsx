@@ -33,6 +33,219 @@ import {createOrUpdateProduct, getAccessories, getSucculents} from '../../../ser
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 
+const toStringSafe = (value) => (value === null || value === undefined ? '' : String(value));
+
+const resolveImageUrl = (image) => {
+    if (!image) return '';
+    if (typeof image === 'string') return image;
+    return image.url ?? image.imageUrl ?? image.image ?? image.src ?? image.path ?? image.fileUrl ?? '';
+};
+
+const normalizeEditProductData = (product = {}) => {
+    const normalizedSizes = Array.isArray(product.sizes) ? product.sizes.map((size) => {
+        const normalizedSucculents = Array.isArray(size.succulents) ? size.succulents.map((succulent) => {
+            const firstSize = Array.isArray(succulent.sizes) ? succulent.sizes[0] : null;
+            const rawSizeValue = firstSize?.size ?? succulent.size ?? succulent.sizeCode ?? succulent.sizeName ?? firstSize?.name;
+            return {
+                id: toStringSafe(succulent.id ?? succulent.succulentId),
+                name: succulent.name ?? succulent.speciesName ?? '',
+                size: toStringSafe(rawSizeValue),
+                quantity: toStringSafe(firstSize?.quantity ?? succulent.quantity ?? 1),
+            };
+        }) : [];
+
+        const rawPot = size.pot ?? {};
+        const potName = toStringSafe(rawPot.name ?? rawPot.potName ?? rawPot.title);
+        const potSizeValue = (() => {
+            const value = rawPot.size ?? rawPot.sizeName ?? rawPot.sizeCode ?? rawPot.selectedSize;
+            if (Array.isArray(value)) {
+                const first = value[0];
+                if (typeof first === 'string') return first;
+                return first?.name ?? first?.label ?? first?.value ?? '';
+            }
+            if (value && typeof value === 'object') {
+                return value.name ?? value.label ?? value.value ?? '';
+            }
+            return value;
+        })();
+
+        return {
+            name: toStringSafe(size.name),
+            succulents: normalizedSucculents,
+            pot: {
+                name: potName,
+                size: toStringSafe(potSizeValue),
+            },
+            soil: {
+                name: toStringSafe(size.soil?.name ?? size.soil?.soilName),
+                massAmount: toStringSafe(size.soil?.massAmount ?? size.soil?.weight ?? size.soil?.mass ?? size.soil?.amount),
+            },
+            decoration: {
+                included: size.decoration?.included ?? false,
+                details: Array.isArray(size.decoration?.details) ? size.decoration.details.map((detail) => ({
+                    name: toStringSafe(detail.name),
+                    quantity: toStringSafe(detail.quantity ?? detail.qty),
+                })) : [],
+            },
+        };
+    }) : [];
+
+    const normalizedImages = Array.isArray(product.images) ? product.images.map((image, index) => {
+        const url = resolveImageUrl(image);
+        return {
+            url,
+            altText: image?.altText ?? image?.description ?? '',
+            primary: Boolean(image?.primary ?? (index === 0)),
+            displayOrder: image?.displayOrder ?? index + 1,
+        };
+    }) : [];
+
+    return {
+        productId: product.productId ?? product.id ?? null,
+        name: toStringSafe(product.name),
+        description: toStringSafe(product.description),
+        sizes: normalizedSizes,
+        images: normalizedImages,
+    };
+};
+
+const extractSucculentSizeOptions = (succulentEntity = {}) => {
+    if (!succulentEntity) return [];
+    const rawSize = succulentEntity.size;
+
+    if (Array.isArray(rawSize)) {
+        return rawSize.map((item, index) => {
+            const value = toStringSafe(
+                item?.name ??
+                item?.size ??
+                item?.label ??
+                (typeof item === 'string' ? item : index)
+            );
+            const label = value ? value.charAt(0).toUpperCase() + value.slice(1) : `Size ${index + 1}`;
+            return { value, label };
+        }).filter(option => option.value !== '');
+    }
+
+    if (rawSize && typeof rawSize === 'object') {
+        return Object.keys(rawSize).map((key) => ({
+            value: toStringSafe(key),
+            label: key.charAt(0).toUpperCase() + key.slice(1),
+        }));
+    }
+
+    if (typeof rawSize === 'string') {
+        const value = toStringSafe(rawSize);
+        return value ? [{ value, label: value.charAt(0).toUpperCase() + value.slice(1) }] : [];
+    }
+
+    return [];
+};
+
+const extractPotSizeOptions = (potEntity = {}) => {
+    if (!potEntity) return [];
+
+    if (Array.isArray(potEntity.availableSizes)) {
+        return potEntity.availableSizes.map((sizeName, index) => {
+            const value = toStringSafe(sizeName ?? index);
+            const label = value ? value.charAt(0).toUpperCase() + value.slice(1) : `Size ${index + 1}`;
+            return { value, label };
+        }).filter(option => option.value !== '');
+    }
+
+    if (Array.isArray(potEntity.size)) {
+        return potEntity.size.map((item, index) => {
+            const value = toStringSafe(item?.name ?? item?.value ?? item ?? index);
+            const label = item?.displayName ?? item?.label ?? (value ? value.charAt(0).toUpperCase() + value.slice(1) : `Size ${index + 1}`);
+            return { value, label };
+        }).filter(option => option.value !== '');
+    }
+
+    const rawSize = potEntity.sizeName ?? potEntity.size ?? potEntity.defaultSize;
+    if (rawSize) {
+        const value = toStringSafe(rawSize);
+        return value ? [{ value, label: value.charAt(0).toUpperCase() + value.slice(1) }] : [];
+    }
+
+    return [];
+};
+
+const alignSucculentSizesWithOptions = (sizes = [], succulentsList = []) => {
+    if (!Array.isArray(sizes) || sizes.length === 0) return sizes;
+
+    let changed = false;
+    const alignedSizes = sizes.map((size) => {
+        const alignedSucculents = Array.isArray(size.succulents) ? size.succulents.map((succulent) => {
+            if (!succulent?.id) return succulent;
+            const succulentEntity = succulentsList.find((s) => toStringSafe(s.id) === succulent.id);
+            const options = extractSucculentSizeOptions(succulentEntity);
+            if (!options.length) return succulent;
+
+            const currentValue = toStringSafe(succulent.size);
+            const matched = options.find((opt) =>
+                opt.value === currentValue ||
+                opt.value.toLowerCase() === currentValue.toLowerCase()
+            );
+
+            if (matched) {
+                if (matched.value !== currentValue) changed = true;
+                return {...succulent, size: matched.value};
+            }
+
+            changed = true;
+            return {...succulent, size: options[0].value};
+        }) : size.succulents;
+
+        if (alignedSucculents !== size.succulents) {
+            return {...size, succulents: alignedSucculents};
+        }
+        return size;
+    });
+
+    return changed ? alignedSizes : sizes;
+};
+
+const alignPotSizesWithOptions = (sizes = [], potsList = []) => {
+    if (!Array.isArray(sizes) || sizes.length === 0) return sizes;
+
+    let changed = false;
+    const alignedSizes = sizes.map((size) => {
+        if (!size?.pot?.name) return size;
+
+        const potEntity = potsList.find((pot) => toStringSafe(pot.name) === toStringSafe(size.pot.name));
+        if (!potEntity) return size;
+
+        const options = extractPotSizeOptions(potEntity);
+        if (!options.length) return size;
+
+        const currentValue = toStringSafe(size.pot.size);
+        const matched = options.find((opt) =>
+            opt.value === currentValue ||
+            opt.value.toLowerCase() === currentValue.toLowerCase()
+        );
+
+        if (matched) {
+            if (matched.value !== currentValue) changed = true;
+            return {
+                ...size,
+                pot: {
+                    ...size.pot,
+                    size: matched.value,
+                },
+            };
+        }
+
+        changed = true;
+        return {
+            ...size,
+            pot: {
+                ...size.pot,
+                size: options[0].value,
+            },
+        };
+    });
+
+    return changed ? alignedSizes : sizes;
+};
 const CreateOrUpdateProductDialog = ({
                                          open,
                                          onClose,
@@ -64,13 +277,7 @@ const CreateOrUpdateProductDialog = ({
         console.log('Initialize form data - editProduct:', editProduct);
 
         if (isEdit && editProduct) {
-            const initialData = {
-                productId: editProduct.productId || editProduct.id || null,
-                name: editProduct.name || '',
-                description: editProduct.description || '',
-                sizes: editProduct.sizes || [],
-                images: editProduct.images || []
-            };
+            const initialData = normalizeEditProductData(editProduct);
             console.log('Setting form data for edit:', initialData);
             setFormData(initialData);
         } else {
@@ -175,6 +382,41 @@ const CreateOrUpdateProductDialog = ({
             loadData();
         }
     }, [open]);
+
+    // Align succulent sizes once dropdown data is available (especially when editing)
+    useEffect(() => {
+        if (!open || !isEdit || !editProduct || !Array.isArray(succulents) || succulents.length === 0) {
+            return;
+        }
+
+        setFormData(prev => {
+            const alignedSizes = alignSucculentSizesWithOptions(prev.sizes, succulents);
+            if (alignedSizes === prev.sizes) return prev;
+            return {
+                ...prev,
+                sizes: alignedSizes,
+            };
+        });
+    }, [open, isEdit, editProduct, succulents]);
+
+    // Align pot sizes once pots data is loaded (edit mode)
+    useEffect(() => {
+        if (!open || !isEdit || !editProduct || !Array.isArray(accessories) || accessories.length === 0) {
+            return;
+        }
+
+        const pots = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'PLANT_POT') : [];
+        if (!pots.length) return;
+
+        setFormData(prev => {
+            const alignedSizes = alignPotSizesWithOptions(prev.sizes, pots);
+            if (alignedSizes === prev.sizes) return prev;
+            return {
+                ...prev,
+                sizes: alignedSizes,
+            };
+        });
+    }, [open, isEdit, editProduct, accessories]);
 
     const addSize = () => {
         setFormData(prev => ({
@@ -742,8 +984,9 @@ const CreateOrUpdateProductDialog = ({
                                                                 <Select
                                                                     value={succulent.id}
                                                                     onChange={(e) => {
-                                                                        const selectedSucculent = succulents.find(s => s.id === e.target.value);
-                                                                        updateSucculentInSize(sizeIndex, succulentIndex, 'id', e.target.value);
+                                                                        const value = toStringSafe(e.target.value);
+                                                                        const selectedSucculent = succulents.find(s => toStringSafe(s.id) === value);
+                                                                        updateSucculentInSize(sizeIndex, succulentIndex, 'id', value);
                                                                         updateSucculentInSize(sizeIndex, succulentIndex, 'name', selectedSucculent?.speciesName || '');
                                                                         // Reset size khi chọn succulent mới
                                                                         updateSucculentInSize(sizeIndex, succulentIndex, 'size', '');
@@ -752,7 +995,7 @@ const CreateOrUpdateProductDialog = ({
                                                                     sx={DASHBOARD_STYLES.formField}
                                                                 >
                                                                     {Array.isArray(succulents) && succulents.map((s) => (
-                                                                        <MenuItem key={s.id} value={s.id}>
+                                                                        <MenuItem key={s.id} value={toStringSafe(s.id)}>
                                                                             {s.speciesName}
                                                                         </MenuItem>
                                                                     ))}
@@ -770,16 +1013,20 @@ const CreateOrUpdateProductDialog = ({
                                                                         sx={DASHBOARD_STYLES.formField}
                                                                     >
                                                                         {(() => {
-                                                                            const selectedSucculent = succulents.find(s => s.id === succulent.id);
-                                                                            if (selectedSucculent?.size && typeof selectedSucculent.size === 'object') {
-                                                                                return Object.keys(selectedSucculent.size).map(sizeKey => (
-                                                                                    <MenuItem key={sizeKey}
-                                                                                              value={sizeKey}>
-                                                                                        {sizeKey.charAt(0).toUpperCase() + sizeKey.slice(1)}
+                                                                            const selectedSucculent = succulents.find(s => toStringSafe(s.id) === succulent.id);
+                                                                            const options = extractSucculentSizeOptions(selectedSucculent);
+                                                                            if (options.length === 0) {
+                                                                                return (
+                                                                                    <MenuItem value="" disabled>
+                                                                                        Không có dữ liệu kích thước
                                                                                     </MenuItem>
-                                                                                ));
+                                                                                );
                                                                             }
-                                                                            return null;
+                                                                            return options.map((opt) => (
+                                                                                <MenuItem key={opt.value} value={opt.value}>
+                                                                                    {opt.label}
+                                                                                </MenuItem>
+                                                                            ));
                                                                         })()}
                                                                     </Select>
                                                                 </FormControl>
@@ -849,26 +1096,18 @@ const CreateOrUpdateProductDialog = ({
                                                         sx={DASHBOARD_STYLES.formField}
                                                     >
                                                         {(() => {
-                                                            const selectedPot = availablePots.find(p => p.name === size.pot.name);
-                                                            if (selectedPot?.availableSizes && Array.isArray(selectedPot.availableSizes)) {
-                                                                return selectedPot.availableSizes.map(sizeName => (
-                                                                    <MenuItem key={sizeName} value={sizeName}>
-                                                                        {sizeName.charAt(0).toUpperCase() + sizeName.slice(1)}
-                                                                    </MenuItem>
-                                                                ));
-                                                            } else if (selectedPot?.size && Array.isArray(selectedPot.size)) {
-                                                                return selectedPot.size.map(sizeObj => (
-                                                                    <MenuItem key={sizeObj.name} value={sizeObj.name}>
-                                                                        {sizeObj.name.charAt(0).toUpperCase() + sizeObj.name.slice(1)}
-                                                                    </MenuItem>
-                                                                ));
-                                                            }
-                                                            // Fallback nếu không có size info
-                                                            return [
-                                                                <MenuItem key="small" value="small">Small</MenuItem>,
-                                                                <MenuItem key="medium" value="medium">Medium</MenuItem>,
-                                                                <MenuItem key="large" value="large">Large</MenuItem>
+                                                            const selectedPot = availablePots.find(p => toStringSafe(p.name) === toStringSafe(size.pot.name));
+                                                            const options = extractPotSizeOptions(selectedPot);
+                                                            const finalOptions = options.length ? options : [
+                                                                { value: 'small', label: 'Small' },
+                                                                { value: 'medium', label: 'Medium' },
+                                                                { value: 'large', label: 'Large' },
                                                             ];
+                                                            return finalOptions.map((opt) => (
+                                                                <MenuItem key={opt.value} value={opt.value}>
+                                                                    {opt.label}
+                                                                </MenuItem>
+                                                            ));
                                                         })()}
                                                     </Select>
                                                 </FormControl>

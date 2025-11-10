@@ -94,7 +94,7 @@ export const viewProduct = async () => {
 }
 
 export const deactiveProduct = async (id) => {
-    const response = await axiosClient.put(`/product/${id}`);
+    const response = await axiosClient.delete(`/product/${id}`);
     return response || null
 }
 
