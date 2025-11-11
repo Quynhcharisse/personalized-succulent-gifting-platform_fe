@@ -19,7 +19,7 @@ import SendIcon from '@mui/icons-material/Send';
 const BuyerPostCard = ({ post, onSubmitComment }) => {
     const p = post || {};
 
-    const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Post #${p.id}` : 'Untitled');
+    const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Bài đăng #${p.id}` : 'Không tiêu đề');
 
     let images = [];
     if (Array.isArray(p.images)) images = p.images;
@@ -30,7 +30,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
 
     const productObj = p.product || null;
     const productId = productObj?.id || p.productId;
-    const productName = productObj?.name || (productId ? `View product #${productId}` : null);
+    const productName = productObj?.name || (productId ? `Sản phẩm #${productId}` : null);
     const productHref = productId ? `/product/${productId}` : '#';
 
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -109,27 +109,27 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                 </Typography>
 
                 <Stack direction="row" spacing={2} alignItems="center">
-                    <Typography variant="subtitle2">Product:</Typography>
+                    <Typography variant="subtitle2">Sản phẩm:</Typography>
                     {productId ? (
                         <Link href={productHref} underline="hover" target="_blank" rel="noopener">
                             {productName}
                         </Link>
                     ) : (
-                        <Typography color="text.secondary">No product linked</Typography>
+                        <Typography color="text.secondary">Không có sản phẩm liên kết</Typography>
                     )}
                 </Stack>
 
                 <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Tags:</Typography>
+                    <Typography variant="subtitle2">Thẻ:</Typography>
                     <Typography variant="body2" color="text.secondary">
                         {tagsArray.length > 0 ? tagsArray.map(t => t.tagName ?? t).join(', ') : '-'}
                     </Typography>
                 </Stack>
 
                 <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Comments ({p.comments?.count ?? commentsArray.length}):</Typography>
+                    <Typography variant="subtitle2">Bình luận ({p.comments?.count ?? commentsArray.length}):</Typography>
                     {commentsArray.map(c => {
-                        const author = c.buyerName || c.buyer_name || c.userName || `User #${c.accountId ?? c.buyerId ?? '??'}`;
+                        const author = c.buyerName || c.buyer_name || c.userName || `Người dùng #${c.accountId ?? c.buyerId ?? '??'}`;
                         const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : '';
                         return (
                             <Box key={c.id ?? c.createdAt} sx={{ mb: 1 }}>
@@ -148,8 +148,8 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                 {/* comment input */}
                 <Box mt={2} display="flex" gap={1} alignItems="flex-end">
                     <TextField
-                        label="Write a comment"
-                        placeholder="Type your comment and press Enter or click send"
+                        label="Viết bình luận"
+                        placeholder="Nhập bình luận và nhấn Enter hoặc gửi"
                         multiline
                         maxRows={4}
                         fullWidth
@@ -163,7 +163,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                         color="primary"
                         onClick={handleSubmitComment}
                         disabled={isSubmitting || !commentText.trim()}
-                        aria-label="send comment"
+                        aria-label="gửi bình luận"
                     >
                         {isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
                     </IconButton>
@@ -173,7 +173,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
             <CardActions>
                 {productId && (
                     <Link href={productHref} target="_blank" rel="noopener" sx={{ ml: 'auto' }}>
-                        <Button size="small">Open Product</Button>
+                        <Button size="small">Mở sản phẩm</Button>
                     </Link>
                 )}
             </CardActions>
