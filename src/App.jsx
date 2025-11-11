@@ -288,7 +288,7 @@ const router = createBrowserRouter([
                         <SignIn/>
                     </Suspense>
                 )
-            },    
+            },
             {
                 path: 'product',
                 element: <ProductList/>
@@ -328,6 +328,13 @@ const router = createBrowserRouter([
                         <CustomRequestDetail/>
                     </Suspense>
                 )
+            },
+            {
+                path: 'posts',
+                element:
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <BuyerPosts/>
+                    </Suspense>
             },
         ],
     },
@@ -440,7 +447,11 @@ const router = createBrowserRouter([
             },
             {
                 path: '/seller/posts',
-                element: <PostsManager/>
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <BuyerPosts/>
+                    </Suspense>
+                )
             }
         ]
     },
@@ -480,7 +491,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-           
+
             {
                 path: 'profile',
                 element: (
@@ -500,11 +511,7 @@ const router = createBrowserRouter([
             {
                 path: 'succulent/:id/design',
                 element: <PotAccessoryDesigner/>
-            },
-            {
-                path: 'posts',
-                element: <BuyerPosts/>
-            },
+            }
         ]
     },
     {
