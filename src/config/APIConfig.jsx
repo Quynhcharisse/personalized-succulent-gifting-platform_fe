@@ -41,13 +41,21 @@ const getAccessToken = async () => {
         tokenFetchPromise = null;
         return null;
     }).catch(error => {
-        console.error('⚠️ Failed to get access token:', {
+        // Log error details for debugging
+        const errorDetails = {
             status: error.response?.status,
-            message: error.response?.data?.message || error.message
-        });
+            message: error.response?.data?.message || error.message,
+            url: error.config?.url
+        };
+        
+        console.warn('⚠️ Failed to get access token:', errorDetails);
+        
         tokenFetchPromise = null;
         cachedToken = null;
-        throw error;
+        
+        // Return null instead of throwing - allow requests without token
+        // This is OK for public endpoints like /product/list
+        return null;
     });
     
     return tokenFetchPromise;
@@ -62,21 +70,22 @@ export const clearTokenCache = () => {
 // Request interceptor: Tự động thêm access token vào header
 axiosClient.interceptors.request.use(
     async (config) => {
-        // Bỏ qua việc thêm token cho endpoint login/refresh/access
+
         const skipTokenEndpoints = ['/auth/login', '/auth/refresh', '/account/access'];
         const shouldSkipToken = skipTokenEndpoints.some(endpoint => config.url?.includes(endpoint));
         
+        // Public endpoints (có thể truy cập không cần token)
+        const publicEndpoints = ['/product', '/product/list', '/succulent'];
+        const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
+        
         if (!shouldSkipToken) {
-            try {
-                const token = await getAccessToken();
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                    console.log('✅ Token attached to request');
-                } else {
-                    console.warn('⚠️ No token available, request may fail');
-                }
-            } catch (error) {
-                console.error('❌ Cannot get access token, request will proceed without auth');
+            const token = await getAccessToken();
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+                // console.log('✅ Token attached to request:', config.url);
+            } else if (!isPublicEndpoint) {
+                // Chỉ warn nếu endpoint không phải public
+                console.warn('⚠️ No token available for protected endpoint:', config.url);
             }
         }
         
