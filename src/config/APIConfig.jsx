@@ -1,7 +1,7 @@
 import {refreshToken} from "../services/AuthService.jsx";
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL + '/api/v1'
+const baseURL = '/api/v1'
 
 axios.defaults.baseURL = baseURL;
 
