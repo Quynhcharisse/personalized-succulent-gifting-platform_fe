@@ -7,11 +7,11 @@ const BuyerEmptyState = ({ onRefresh }) => (
         <CardContent>
             <Stack alignItems="center" spacing={2}>
                 <SentimentDissatisfiedIcon fontSize="large" color="disabled" />
-                <Typography variant="h6" sx={{ color: 'black', fontWeight: 'bold' }}>No posts available</Typography>
+                <Typography variant="h6" sx={{ color: 'black', fontWeight: 'bold' }}>Chưa có bài đăng</Typography>
                 <Typography variant="body2" color="text.secondary">
-                    There are no published posts from sellers yet.
+                    Hiện chưa có bài đăng nào từ người bán.
                 </Typography>
-                <Button variant="contained" onClick={onRefresh}>Refresh</Button>
+                <Button variant="contained" onClick={onRefresh}>Tải lại</Button>
             </Stack>
         </CardContent>
     </Card>
