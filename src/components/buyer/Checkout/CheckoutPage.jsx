@@ -37,6 +37,7 @@ export default function CheckoutPage() {
         const data = res?.data?.data;
         if (data) {
           const addr = {
+            id: data.id || data.shippingAddressId || data.addressId || null,
             shippingAddress: data.shippingAddress || "",
             address: data.address || "",
             districtId: data.districtId || 0,
@@ -140,7 +141,7 @@ export default function CheckoutPage() {
           orderCode,
           total,
           items,
-          shippingAddress: selectedAddress,
+          shippingAddressId: selectedAddress?.id || null,
           subtotal,
           shippingFee,
           walletDeduction,
