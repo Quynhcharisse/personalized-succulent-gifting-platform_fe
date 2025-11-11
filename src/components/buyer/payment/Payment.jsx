@@ -13,7 +13,8 @@ export default function Payment() {
     const navigate = useNavigate();
     const location = useLocation();
   const forceNew = Boolean(location?.state?.forceNew);
-    const initialShippingFee = Number(location?.state?.shippingFee || 0);
+  const initialShippingFee = Number(location?.state?.shippingFee || 0);
+  const initialShippingAddressId = location?.state?.shippingAddressId || null;
   // Try restore session synchronously to avoid briefly resetting timer to 5:00 on refresh
   const restoredSession = (() => {
     try {
@@ -176,6 +177,7 @@ export default function Payment() {
         })),
         orderCode: Number(code) || 0,
         shippingFee: Number(shippingFee) || 0,
+        shippingAddressId: initialShippingAddressId || null,
         success: Boolean(successFlag),
       };
     };
