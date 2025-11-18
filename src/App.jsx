@@ -449,7 +449,7 @@ const router = createBrowserRouter([
                 path: '/seller/posts',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
-                        <BuyerPosts/>
+                        <PostsManager/>
                     </Suspense>
                 )
             }

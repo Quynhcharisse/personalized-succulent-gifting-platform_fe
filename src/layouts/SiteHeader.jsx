@@ -145,7 +145,7 @@ export default function SiteHeader() {
                     <NavLink to="/" end> Sản phẩm </NavLink>
                     <NavLink to="/huong-dan-mua-hang"> Hướng dẫn mua hàng </NavLink>
                     <NavLink to="/cham-soc"> Chăm sóc </NavLink>
-                    <NavLink to="/buyer/posts"> Bài đăng </NavLink>
+                    <NavLink to="/posts"> Bài đăng </NavLink>
                     {(!currentUser || role === 'BUYER') && (
                         <NavLink to="/custom-request"> Điện Cây </NavLink>
                     )}
