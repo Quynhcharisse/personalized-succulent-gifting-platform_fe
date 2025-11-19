@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Box,
-    Card,
-    CardContent,
-    Typography,
-    CircularProgress,
-    Alert,
-    alpha
-} from '@mui/material';
-import { Business as BusinessIcon } from '@mui/icons-material';
-import { getTotalSupplierCount } from '../../services/ProductService.jsx';
+import React, {useEffect, useState} from 'react';
+import {Alert, alpha, Box, Card, CardContent, CircularProgress, Typography} from '@mui/material';
+import {Business as BusinessIcon} from '@mui/icons-material';
+import {getTotalSupplierCount} from '../../services/ProductService.jsx';
 
 const colors = {
     primary: '#0b3f31',
@@ -35,17 +27,17 @@ export default function SupplierStatsCard() {
     const fetchData = async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const response = await getTotalSupplierCount();
             console.log('🔍 Supplier API Response:', response);
             console.log('🔍 Response type:', typeof response);
             console.log('🔍 Response keys:', response ? Object.keys(response) : 'null');
-            
+
             const count = response?.data?.totalSupplierCount || 0;
             console.log('🔍 Extracted supplier count:', count);
             console.log('🔍 Setting totalSuppliers to:', count);
-            
+
             setTotalSuppliers(count);
             setLastUpdated(new Date());
         } catch (err) {
@@ -70,8 +62,8 @@ export default function SupplierStatsCard() {
                 boxShadow: `0 12px 40px ${alpha(colors.info, 0.2)}`,
             }
         }}>
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <CardContent sx={{p: 3, height: '100%', display: 'flex', flexDirection: 'column'}}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
                     <Box sx={{
                         width: 56,
                         height: 56,
@@ -83,23 +75,23 @@ export default function SupplierStatsCard() {
                         boxShadow: `0 4px 12px ${alpha(colors.info, 0.3)}`,
                         mr: 2
                     }}>
-                        <BusinessIcon sx={{ fontSize: 32, color: 'white' }} />
+                        <BusinessIcon sx={{fontSize: 32, color: 'white'}}/>
                     </Box>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" sx={{ 
-                            fontWeight: 700, 
+                    <Box sx={{flexGrow: 1}}>
+                        <Typography variant="h6" sx={{
+                            fontWeight: 700,
                             color: colors.primary,
                             mb: 0.5
                         }}>
                             Tổng số nhà cung cấp
                         </Typography>
                         {loading ? (
-                            <CircularProgress size={24} sx={{ color: colors.info }} />
+                            <CircularProgress size={24} sx={{color: colors.info}}/>
                         ) : error ? (
-                            <Alert severity="error" sx={{ mt: 1, p: 1 }}>{error}</Alert>
+                            <Alert severity="error" sx={{mt: 1, p: 1}}>{error}</Alert>
                         ) : (
-                            <Typography variant="h3" sx={{ 
-                                fontWeight: 800, 
+                            <Typography variant="h3" sx={{
+                                fontWeight: 800,
                                 background: `linear-gradient(135deg, ${colors.info} 0%, ${colors.primary} 100%)`,
                                 backgroundClip: 'text',
                                 WebkitBackgroundClip: 'text',
@@ -109,13 +101,14 @@ export default function SupplierStatsCard() {
                                 {totalSuppliers.toLocaleString('vi-VN')}
                             </Typography>
                         )}
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
                             đối tác đã đăng ký
                         </Typography>
                     </Box>
                 </Box>
                 {lastUpdated && (
-                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 'auto', textAlign: 'left' }}>
+                    <Typography variant="caption" color="text.disabled"
+                                sx={{display: 'block', mt: 'auto', textAlign: 'left'}}>
                         Cập nhật cuối: {lastUpdated.toLocaleTimeString('vi-VN')}
                     </Typography>
                 )}

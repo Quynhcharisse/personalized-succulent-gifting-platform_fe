@@ -15,9 +15,7 @@ const ProductViewDialog = ({
                                open, onClose,
                                selectedProduct,
                                getStatusLabel,
-                               getStatusColor,
-                               calculateSizePrice,
-                               handleEditProduct
+                               calculateSizePrice
                            }) => {
     if (!selectedProduct) return null;
 

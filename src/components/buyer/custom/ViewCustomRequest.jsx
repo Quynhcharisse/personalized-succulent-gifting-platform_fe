@@ -1,18 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {
     Box,
-    Container,
-    Typography,
+    Button,
     Card,
     CardContent,
     Chip,
     CircularProgress,
-    Stack,
-    Button,
+    Container,
+    Grid,
     Paper,
-    Grid
+    Stack,
+    Typography
 } from '@mui/material';
-import {Build, Schedule, Visibility, Event as EventIcon} from '@mui/icons-material';
+import {Build, Event as EventIcon, Schedule, Visibility} from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
@@ -36,12 +36,11 @@ export default function ViewCustomRequest() {
         try {
             setLoading(true);
             const response = await viewCustomProductRequestByBuyer();
-            
+
             // Handle nested data structure
             const data = response?.data?.data?.body?.data || response?.data?.body?.data || response?.data?.data || [];
             setRequests(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error fetching custom requests:", error);
             enqueueSnackbar("Không thể tải danh sách yêu cầu", {variant: 'error'});
         } finally {
             setLoading(false);
@@ -105,7 +104,8 @@ export default function ViewCustomRequest() {
             backgroundSize: 'cover'
         }}>
             <Container maxWidth="lg">
-                <Paper elevation={0} sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
+                <Paper elevation={0}
+                       sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
                     <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4}}>
                         <Typography variant="h4" sx={{fontWeight: 700, color: '#0D3B2E'}}>
                             <Build sx={{verticalAlign: 'middle', mr: 1}}/>
@@ -154,10 +154,15 @@ export default function ViewCustomRequest() {
                                                 boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
                                             }
                                         }}
-                                        onClick={() => navigate('/custom-request/detail', { state: { id: request.id } })}
+                                        onClick={() => navigate('/custom-request/detail', {state: {id: request.id}})}
                                     >
                                         <CardContent sx={{flexGrow: 1}}>
-                                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'flex-start',
+                                                mb: 2
+                                            }}>
                                                 <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
                                                     Yêu cầu #{request.id}
                                                 </Typography>
@@ -170,13 +175,17 @@ export default function ViewCustomRequest() {
                                             </Box>
 
                                             <Stack spacing={1} sx={{mt: 2}}>
-                                                <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary'}}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    color: 'text.secondary'
+                                                }}>
                                                     <Schedule sx={{mr: 1, fontSize: 18}}/>
                                                     <Typography variant="body2">
                                                         {formatDate(request.createdAt)}
                                                     </Typography>
                                                 </Box>
-                                                
+
                                                 {/* Occasion Badge - Compact Style */}
                                                 {request.occasion && typeof request.occasion === 'string' && request.occasion.trim() !== '' && (
                                                     <Box sx={{
@@ -228,7 +237,7 @@ export default function ViewCustomRequest() {
                                                 sx={{mt: 2}}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate('/custom-request/detail', { state: { id: request.id } });
+                                                    navigate('/custom-request/detail', {state: {id: request.id}});
                                                 }}
                                             >
                                                 Xem Chi Tiết

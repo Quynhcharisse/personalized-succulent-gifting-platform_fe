@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-    Card,
-    CardContent,
-    CardMedia,
-    CardHeader,
-    CardActions,
-    Typography,
-    Link,
-    Stack,
     Box,
     Button,
-    TextField,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    CardMedia,
+    CircularProgress,
     IconButton,
-    CircularProgress
+    Link,
+    Stack,
+    TextField,
+    Typography
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
-const BuyerPostCard = ({ post, onSubmitComment }) => {
+const BuyerPostCard = ({post, onSubmitComment}) => {
     const p = post || {};
 
     const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Bài đăng #${p.id}` : 'Không tiêu đề');
@@ -74,13 +74,13 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                     height="320"
                     image={mainImage}
                     alt={images[selectedIndex]?.name || title}
-                    sx={{ objectFit: 'cover' }}
+                    sx={{objectFit: 'cover'}}
                 />
             ) : null}
 
             {images.length > 1 && (
-                <Box sx={{ px: 2, pt: 1 }}>
-                    <Stack direction="row" spacing={1} sx={{ overflowX: 'auto' }}>
+                <Box sx={{px: 2, pt: 1}}>
+                    <Stack direction="row" spacing={1} sx={{overflowX: 'auto'}}>
                         {images.map((img, idx) => (
                             <Box
                                 key={img.id ?? img.link ?? idx}
@@ -127,12 +127,13 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                 </Stack>
 
                 <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Bình luận ({p.comments?.count ?? commentsArray.length}):</Typography>
+                    <Typography variant="subtitle2">Bình luận
+                        ({p.comments?.count ?? commentsArray.length}):</Typography>
                     {commentsArray.map(c => {
                         const author = c.buyerName || c.buyer_name || c.userName || `Người dùng #${c.accountId ?? c.buyerId ?? '??'}`;
                         const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : '';
                         return (
-                            <Box key={c.id ?? c.createdAt} sx={{ mb: 1 }}>
+                            <Box key={c.id ?? c.createdAt} sx={{mb: 1}}>
                                 <Stack direction="row" justifyContent="space-between" alignItems="baseline">
                                     <Typography variant="subtitle2">{author}</Typography>
                                     {time && <Typography variant="caption" color="text.secondary">{time}</Typography>}
@@ -165,14 +166,14 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                         disabled={isSubmitting || !commentText.trim()}
                         aria-label="gửi bình luận"
                     >
-                        {isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
+                        {isSubmitting ? <CircularProgress size={20}/> : <SendIcon/>}
                     </IconButton>
                 </Box>
             </CardContent>
 
             <CardActions>
                 {productId && (
-                    <Link href={productHref} target="_blank" rel="noopener" sx={{ ml: 'auto' }}>
+                    <Link href={productHref} target="_blank" rel="noopener" sx={{ml: 'auto'}}>
                         <Button size="small">Mở sản phẩm</Button>
                     </Link>
                 )}

@@ -158,7 +158,8 @@ export default function Home() {
         <>
             <div className="home">
                 <header className="hero">
-                    <h2 className="elementor-heading-title elementor-size-default">Kết tinh kì diệu cho đời sống tinh thần</h2>
+                    <h2 className="elementor-heading-title elementor-size-default">Kết tinh kì diệu cho đời sống tinh
+                        thần</h2>
                     <p className="hero__poem">
                         Sen đá biểu tượng của sự bền bỉ, sức sống mạnh mẽ và ý chí kiên cương vươn lên trong cuộc sống.
                     </p>
@@ -177,8 +178,11 @@ export default function Home() {
                             <div
                                 className="elementor-element elementor-element-6156fef5 elementor-widget elementor-widget-text-editor">
                                 <p>
-                                    <strong>Sứ mệnh Lá Nhỏ Bên Thềm</strong>   mang không gian xanh và tái định nghĩa trải nghiệm sen đá bằng sự kết hợp giữa Nghệ thuật Thiết kế Thủ công và Dịch vụ "Điện Cây" cá nhân hóa,
-                                     hướng tới trở thành thương hiệu sen đá tiên phong về chất lượng, sự độc đáo, và giải pháp chăm sóc hỗ trợ.
+                                    <strong>Sứ mệnh Lá Nhỏ Bên Thềm</strong> mang không gian xanh và tái định nghĩa trải
+                                    nghiệm sen đá bằng sự kết hợp giữa Nghệ thuật Thiết kế Thủ công và Dịch vụ "Điện
+                                    Cây" cá nhân hóa,
+                                    hướng tới trở thành thương hiệu sen đá tiên phong về chất lượng, sự độc đáo, và giải
+                                    pháp chăm sóc hỗ trợ.
                                 </p>
                             </div>
                         </div>
@@ -186,7 +190,7 @@ export default function Home() {
                         <div className="elementor-element elementor-element-1bc7c3c2 e-con-full e-flex e-con e-child">
                             <div
                                 className="elementor-element elementor-element-166b09a9 elementor-widget elementor-widget-image">
-                                <img decoding="async" width="380" height="782" 
+                                <img decoding="async" width="380" height="782"
                                      src="/vien.jpg" alt=""/>
                             </div>
                         </div>
@@ -195,8 +199,12 @@ export default function Home() {
                             <div
                                 className="elementor-element elementor-element-4219b4f7 elementor-widget elementor-widget-text-editor">
                                 <p>
-                                    <strong>Lá Nhỏ Bên Thềm</strong> là thương hiệu tiên phong xây dựng Hệ sinh thái Sen đá Kỹ thuật số (Digital Succulent Ecosystem) trong lĩnh vực sen đá online, đặt mục tiêu trở thành thương hiệu dẫn đầu về thiết kế nghệ thuật, cá nhân hóa, và giải pháp chăm sóc hỗ trợ.
-                                    <strong>Lá Nhỏ Bên Thềm</strong> tượng trưng cho sự bình an, vĩnh cửu, ý chí kiên cường, phấn đấu vươn lên
+                                    <strong>Lá Nhỏ Bên Thềm</strong> là thương hiệu tiên phong xây dựng Hệ sinh thái Sen
+                                    đá Kỹ thuật số (Digital Succulent Ecosystem) trong lĩnh vực sen đá online, đặt mục
+                                    tiêu trở thành thương hiệu dẫn đầu về thiết kế nghệ thuật, cá nhân hóa, và giải pháp
+                                    chăm sóc hỗ trợ.
+                                    <strong>Lá Nhỏ Bên Thềm</strong> tượng trưng cho sự bình an, vĩnh cửu, ý chí kiên
+                                    cường, phấn đấu vươn lên
                                     trong cuộc sống, không khuất phục trước nghịch cảnh.
                                 </p>
                             </div>
