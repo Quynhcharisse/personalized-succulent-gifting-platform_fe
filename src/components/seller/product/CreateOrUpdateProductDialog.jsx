@@ -7,6 +7,7 @@ import {
     Box,
     Button,
     Card,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -69,6 +70,28 @@ const normalizeEditProductData = (product = {}) => {
             return value;
         })();
 
+        const rawDecorationDetails = (() => {
+            if (Array.isArray(size.decoration?.details)) {
+                return size.decoration.details;
+            }
+            if (Array.isArray(size.decorations)) {
+                return size.decorations;
+            }
+            return [];
+        })();
+
+        const decorationDetails = rawDecorationDetails.map((detail) => ({
+            name: toStringSafe(detail?.name ?? detail?.title ?? detail?.id),
+            quantity: toStringSafe(detail?.quantity ?? detail?.qty ?? detail?.count ?? 1),
+        }));
+
+        const decorationIncluded = (() => {
+            if (typeof size.decoration?.included === 'boolean') {
+                return size.decoration.included;
+            }
+            return decorationDetails.length > 0;
+        })();
+
         return {
             name: toStringSafe(size.name),
             succulents: normalizedSucculents,
@@ -81,11 +104,8 @@ const normalizeEditProductData = (product = {}) => {
                 massAmount: toStringSafe(size.soil?.massAmount ?? size.soil?.weight ?? size.soil?.mass ?? size.soil?.amount),
             },
             decoration: {
-                included: size.decoration?.included ?? false,
-                details: Array.isArray(size.decoration?.details) ? size.decoration.details.map((detail) => ({
-                    name: toStringSafe(detail.name),
-                    quantity: toStringSafe(detail.quantity ?? detail.qty),
-                })) : [],
+                included: decorationIncluded,
+                details: decorationDetails,
             },
         };
     }) : [];
@@ -251,7 +271,8 @@ const CreateOrUpdateProductDialog = ({
                                          onClose,
                                          onCreate,
                                          editProduct = null,
-                                         isEdit = false
+                                         isEdit = false,
+                                         loading = false
                                      }) => {
     const [formData, setFormData] = useState({
         productId: null,
@@ -273,7 +294,14 @@ const CreateOrUpdateProductDialog = ({
 
     // Initialize form data
     useEffect(() => {
-        if (isEdit && editProduct) {
+        if (!open) {
+            return;
+        }
+
+        if (isEdit) {
+            if (loading) return;
+            if (!editProduct) return;
+
             const initialData = normalizeEditProductData(editProduct);
             setFormData(initialData);
         } else {
@@ -286,7 +314,7 @@ const CreateOrUpdateProductDialog = ({
             };
             setFormData(initialData);
         }
-    }, [isEdit, editProduct, open]);
+    }, [isEdit, editProduct, open, loading]);
 
     // Load dropdown data
     useEffect(() => {
@@ -377,7 +405,7 @@ const CreateOrUpdateProductDialog = ({
 
     // Align succulent sizes once dropdown data is available (especially when editing)
     useEffect(() => {
-        if (!open || !isEdit || !editProduct || !Array.isArray(succulents) || succulents.length === 0) {
+        if (!open || !isEdit || !editProduct || loading || !Array.isArray(succulents) || succulents.length === 0) {
             return;
         }
 
@@ -389,11 +417,11 @@ const CreateOrUpdateProductDialog = ({
                 sizes: alignedSizes,
             };
         });
-    }, [open, isEdit, editProduct, succulents]);
+    }, [open, isEdit, editProduct, succulents, loading]);
 
     // Align pot sizes once pots data is loaded (edit mode)
     useEffect(() => {
-        if (!open || !isEdit || !editProduct || !Array.isArray(accessories) || accessories.length === 0) {
+        if (!open || !isEdit || !editProduct || loading || !Array.isArray(accessories) || accessories.length === 0) {
             return;
         }
 
@@ -408,7 +436,7 @@ const CreateOrUpdateProductDialog = ({
                 sizes: alignedSizes,
             };
         });
-    }, [open, isEdit, editProduct, accessories]);
+    }, [open, isEdit, editProduct, accessories, loading]);
 
     const addSize = () => {
         setFormData(prev => ({
@@ -752,6 +780,12 @@ const CreateOrUpdateProductDialog = ({
             </DialogTitle>
 
             <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
+                {loading && isEdit ? (
+                    <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 320}}>
+                        <CircularProgress size={48}/>
+                    </Box>
+                ) : (
+                <>
                 {message.text && (
                     <Alert severity={message.type === 'success' ? 'success' : 'error'} variant="filled"
                            sx={{mb: 3, fontWeight: 600, borderRadius: 2}}>
@@ -1388,6 +1422,8 @@ const CreateOrUpdateProductDialog = ({
                         </Card>
                     ))}
                 </Card>
+                </>
+                )}
             </DialogContent>
 
             <DialogActions sx={{p: 3, backgroundColor: '#f7faf7'}}>
