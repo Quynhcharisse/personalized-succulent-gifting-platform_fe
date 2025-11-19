@@ -23,24 +23,135 @@ import {createDecorationAccessory, createPotAccessory, createSoilAccessory} from
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import { DASHBOARD_STYLES } from '../../constants.js';
 
-export default function CreateAccessoryDialog({open, onClose, onCreate, editItem = null, isEdit = false}) {
-    const [form, setForm] = useState({
-        name: '',
-        description: '',
-        category: '',
-        priceSell: '',
-        quantity: '',
-        image: '',
-        material: '',
-        color: '#2196f3',
-        availableMassValue: '',
-        basePricing: {
-            massValue: '',
-            massUnit: 'gram',
-            price: ''
-        },
-        sizes: []
+const EMPTY_FORM = {
+    name: '',
+    description: '',
+    category: '',
+    priceSell: '',
+    quantity: '',
+    image: '',
+    material: '',
+    color: '#2196f3',
+    availableMassValue: '',
+    basePricing: {
+        massValue: '',
+        massUnit: 'gram',
+        price: ''
+    },
+    sizes: []
+};
+
+const CATEGORY_TO_BACKEND = {
+    pots: 'PLANT_POT',
+    PLANT_POT: 'PLANT_POT',
+    soils: 'SOIL',
+    SOIL: 'SOIL',
+    decorations: 'DECOR_ACCESSORY',
+    DECOR_ACCESSORY: 'DECOR_ACCESSORY'
+};
+
+const pickImageUrl = (source) => {
+    if (!source) return '';
+    const inspect = (val) => {
+        if (!val) return null;
+        if (typeof val === 'string') return val;
+        if (typeof val === 'object') {
+            return val.url || val.image || null;
+        }
+        return null;
+    };
+
+    if (typeof source === 'string') return source;
+    if (Array.isArray(source)) {
+        for (const item of source) {
+            const img = inspect(item);
+            if (img) return img;
+        }
+        return '';
+    }
+    if (typeof source === 'object') {
+        const keys = ['image', 'images', 'url'];
+        for (const key of keys) {
+            const val = source[key];
+            const img = pickImageUrl(val);
+            if (img) return img;
+        }
+    }
+    return '';
+};
+
+const mapPotSizesToForm = (rawSizes = []) => {
+    if (!Array.isArray(rawSizes)) return [];
+    return rawSizes.map((size) => {
+        const safe = size || {};
+        const getString = (value) => (value === undefined || value === null ? '' : String(value));
+        return {
+            name: getString(safe.name || safe.sizeName),
+            price: getString(safe.price),
+            availableQty: getString(safe.availableQty ?? safe.quantity),
+            potHeight: getString(safe.potHeight),
+            potUpperCrossSectionArea: getString(safe.potUpperCrossSectionArea),
+            maxSoilMassValue: getString(safe.maxSoilMassValue)
+        };
     });
+};
+
+const createEmptyForm = () => ({
+    ...EMPTY_FORM,
+    basePricing: {...EMPTY_FORM.basePricing},
+    sizes: []
+});
+
+const asString = (value) => (value === undefined || value === null ? '' : String(value));
+
+const buildFormFromEditItem = (item) => {
+    const draft = createEmptyForm();
+    if (!item) return draft;
+
+    const raw = item.raw || item || {};
+    const categoryKey = item.category || raw.category;
+    draft.category = CATEGORY_TO_BACKEND[categoryKey] || '';
+
+    draft.name = asString(raw.name ?? item.name);
+    draft.description = asString(raw.description ?? item.description);
+    draft.image = pickImageUrl(raw) || pickImageUrl(item) || '';
+
+    switch (draft.category) {
+        case 'PLANT_POT': {
+            draft.material = asString(raw.material ?? item.material);
+            draft.color = raw.color || item.color || draft.color;
+            const sizes = Array.isArray(raw.size)
+                ? raw.size
+                : Array.isArray(raw.sizes)
+                    ? raw.sizes
+                    : item.sizes;
+            draft.sizes = mapPotSizesToForm(sizes);
+            break;
+        }
+        case 'SOIL': {
+            draft.availableMassValue = asString(raw.availableMassValue ?? raw.quantity ?? item.availableMassValue);
+            const basePricing = raw.basePricing || item.basePricing || {};
+            draft.basePricing = {
+                massValue: asString(basePricing.massValue),
+                massUnit: basePricing.massUnit || 'gram',
+                price: asString(basePricing.price)
+            };
+            break;
+        }
+        case 'DECOR_ACCESSORY': {
+            draft.priceSell = asString(raw.price ?? item.price ?? raw.priceSell);
+            draft.quantity = asString(raw.availableQty ?? raw.quantity ?? item.availableQty);
+            break;
+        }
+        default:
+            break;
+    }
+
+    return draft;
+};
+
+export default function CreateAccessoryDialog({open, onClose, onCreate, editItem = null, isEdit = false}) {
+    const [form, setForm] = useState(() => createEmptyForm());
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState({type: '', text: ''});
     const [isUploading, setIsUploading] = useState(false);
@@ -49,43 +160,17 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
 
     // Initialize form with edit data if in edit mode
     React.useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        setErrors({});
+        setMessage({type: '', text: ''});
+
         if (isEdit && editItem) {
-            setForm({
-                name: editItem.name || '',
-                description: editItem.description || '',
-                category: editItem.category || '',
-                priceSell: editItem.price || '',
-                quantity: editItem.availableQty || '',
-                image: editItem.image?.[0] || '',
-                material: editItem.material || '',
-                color: editItem.color || '#2196f3',
-                availableMassValue: editItem.availableMassValue || '',
-                basePricing: {
-                    massValue: editItem.basePricing?.massValue || '',
-                    massUnit: editItem.basePricing?.massUnit || 'gram',
-                    price: editItem.basePricing?.price || ''
-                },
-                sizes: editItem.sizes || []
-            });
+            setForm(buildFormFromEditItem(editItem));
         } else {
-            // Reset form for create mode
-            setForm({
-                name: '',
-                description: '',
-                category: '',
-                priceSell: '',
-                quantity: '',
-                image: '',
-                material: '',
-                color: '#2196f3',
-                availableMassValue: '',
-                basePricing: {
-                    massValue: '',
-                    massUnit: 'gram',
-                    price: ''
-                },
-                sizes: []
-            });
+            setForm(createEmptyForm());
         }
     }, [isEdit, editItem, open]);
 
