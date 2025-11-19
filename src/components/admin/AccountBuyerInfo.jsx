@@ -4,7 +4,6 @@ import {
     alpha,
     Avatar,
     Box,
-    Button,
     Card,
     CardContent,
     Chip,
@@ -233,8 +232,8 @@ function AccountDetailModal({open, onClose, account}) {
 
             <DialogActions sx={{px: 3, pb: 3}}>
                 <ActionButton
-                onClick={onClose}
-                action="close"
+                    onClick={onClose}
+                    action="close"
                 />
             </DialogActions>
         </Dialog>

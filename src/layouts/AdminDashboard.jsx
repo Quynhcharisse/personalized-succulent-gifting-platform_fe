@@ -29,7 +29,6 @@ import {
 } from '@mui/icons-material';
 import {Outlet, useLocation, useNavigate} from 'react-router-dom';
 import {NotificationDisplay} from '../services/NotificationService.jsx';
-import BuyerStatsChart from '../components/admin/BuyerStatsChart';
 
 const DRAWER_WIDTH = 280;
 

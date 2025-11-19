@@ -70,7 +70,7 @@ const NAVIGATION = [
         title: 'Quản lý sản phẩm',
         icon: <InventoryIcon/>,
         path: '/seller/products'
-    },  
+    },
     {
         segment: 'custom-request',
         title: 'Quản lý yêu cầu tùy chỉnh',

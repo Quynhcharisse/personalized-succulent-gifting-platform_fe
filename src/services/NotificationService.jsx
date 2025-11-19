@@ -13,9 +13,19 @@ export function NotificationDisplay() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        const wsEndpoint = import.meta.env.MODE === 'development'
-            ? '/ws-endpoint'
-            : `${import.meta.env.VITE_API_URL}/ws-endpoint`;
+        // ⚠️ TEMPORARY: WebSocket disabled due to CORS/403 error on production
+        // TODO: Enable after backend WebSocket CORS is configured
+        
+        console.warn('⚠️ WebSocket notifications disabled temporarily');
+        
+        // Uncomment below when backend is ready:
+        /*
+        // Extract base URL without /api/v1 for WebSocket
+        const baseUrl = import.meta.env.MODE === 'development'
+            ? ''
+            : 'https://personalized-succulent-gifting-platform.onrender.com';
+        
+        const wsEndpoint = `${baseUrl}/ws-endpoint`;
         
         console.log('NotificationService: Connecting to WebSocket at', wsEndpoint);
         
@@ -52,6 +62,7 @@ export function NotificationDisplay() {
                 stompClient.disconnect();
             }
         };
+        */
     }, []);
 
     const fetchNotifications = async () => {

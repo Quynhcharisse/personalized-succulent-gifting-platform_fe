@@ -38,98 +38,98 @@ const ContentRenderer = ({content}) => {
     const lines = content.split('\n');
 
     return (<Box>
-            {lines.map((line, index) => {
-                const trimmedLine = line.trim();
+        {lines.map((line, index) => {
+            const trimmedLine = line.trim();
 
-                // Kiểm tra nếu là markdown image: ![alt](url)
-                const markdownMatch = trimmedLine.match(/^!\[(.*?)\]\((.*?)\)$/);
-                if (markdownMatch) {
-                    const [, altText, src] = markdownMatch;
-                    return (<Box key={index} sx={{my: 2}}>
-                            <img
-                                src={src}
-                                alt={altText}
-                                style={{
-                                    width: '100%',
-                                    maxWidth: '600px',
-                                    height: 'auto',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    display: 'block'
-                                }}
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                }}
-                            />
-                        </Box>);
-                }
+            // Kiểm tra nếu là markdown image: ![alt](url)
+            const markdownMatch = trimmedLine.match(/^!\[(.*?)\]\((.*?)\)$/);
+            if (markdownMatch) {
+                const [, altText, src] = markdownMatch;
+                return (<Box key={index} sx={{my: 2}}>
+                    <img
+                        src={src}
+                        alt={altText}
+                        style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            height: 'auto',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            display: 'block'
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                </Box>);
+            }
 
-                // Kiểm tra nếu là URL hình ảnh thuần túy: http://... hoặc https://...
-                const urlMatch = trimmedLine.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg)(_grande\.jpg|\.jpg)?$/i);
-                if (urlMatch) {
-                    return (<Box key={index} sx={{my: 2}}>
-                            <img
-                                src={trimmedLine}
-                                alt="Hình ảnh minh họa"
-                                style={{
-                                    width: '100%',
-                                    maxWidth: '600px',
-                                    height: 'auto',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    display: 'block'
-                                }}
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                }}
-                            />
-                        </Box>);
-                }
+            // Kiểm tra nếu là URL hình ảnh thuần túy: http://... hoặc https://...
+            const urlMatch = trimmedLine.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg)(_grande\.jpg|\.jpg)?$/i);
+            if (urlMatch) {
+                return (<Box key={index} sx={{my: 2}}>
+                    <img
+                        src={trimmedLine}
+                        alt="Hình ảnh minh họa"
+                        style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            height: 'auto',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            display: 'block'
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                </Box>);
+            }
 
-                // Kiểm tra nếu là URL file.hstatic.net (không cần đuôi file)
-                const hstaticMatch = trimmedLine.match(/^https?:\/\/file\.hstatic\.net\/.*$/i);
-                if (hstaticMatch) {
-                    return (<Box key={index} sx={{my: 2}}>
-                            <img
-                                src={trimmedLine}
-                                alt="Hình ảnh minh họa"
-                                style={{
-                                    width: '100%',
-                                    maxWidth: '600px',
-                                    height: 'auto',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    display: 'block'
-                                }}
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                }}
-                            />
-                        </Box>);
-                }
+            // Kiểm tra nếu là URL file.hstatic.net (không cần đuôi file)
+            const hstaticMatch = trimmedLine.match(/^https?:\/\/file\.hstatic\.net\/.*$/i);
+            if (hstaticMatch) {
+                return (<Box key={index} sx={{my: 2}}>
+                    <img
+                        src={trimmedLine}
+                        alt="Hình ảnh minh họa"
+                        style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            height: 'auto',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            display: 'block'
+                        }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                        }}
+                    />
+                </Box>);
+            }
 
-                // Nếu không phải hình ảnh, render như text thường
-                if (trimmedLine) {
-                    return (<Typography
-                            key={index}
-                            variant="body1"
-                            sx={{
-                                lineHeight: 1.8, mb: line === '' ? 1 : 0, '& strong': {
-                                    color: 'primary.main', fontWeight: 700
-                                }
-                            }}
-                        >
-                            {line}
-                        </Typography>);
-                } else {
-                    // Dòng trống tạo khoảng cách
-                    return <Box key={index} sx={{height: '0.5rem'}}/>;
-                }
-            })}
-        </Box>);
+            // Nếu không phải hình ảnh, render như text thường
+            if (trimmedLine) {
+                return (<Typography
+                    key={index}
+                    variant="body1"
+                    sx={{
+                        lineHeight: 1.8, mb: line === '' ? 1 : 0, '& strong': {
+                            color: 'primary.main', fontWeight: 700
+                        }
+                    }}
+                >
+                    {line}
+                </Typography>);
+            } else {
+                // Dòng trống tạo khoảng cách
+                return <Box key={index} sx={{height: '0.5rem'}}/>;
+            }
+        })}
+    </Box>);
 };
 
 export default function Blogs() {
@@ -1927,83 +1927,347 @@ export default function Blogs() {
     }
 
     return (<Box
-            component="section"
-            sx={{
-                minHeight: '100vh',
-                backgroundImage: "url('/header.jpg')",
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                position: 'relative',
-                overflow: 'hidden'
-            }}
-        >
-            <Container maxWidth="xl"
-                       sx={{position: 'relative', zIndex: 1, py: {xs: 6, md: 8}, px: {xs: 2, sm: 3, md: 4}}}>
-                {/* Clean Header Section */}
-                <Box sx={{textAlign: 'center', mb: {xs: 5, md: 6}}}>
-                    <Typography
-                        variant="overline"
-                        sx={{
-                            color: '#059669',
-                            fontWeight: 600,
-                            letterSpacing: 1.5,
-                            fontSize: '0.8rem',
-                            mb: 2,
-                            display: 'block'
-                        }}
-                    >
-                        🌿 KIẾN THỨC CHĂM SÓC
-                    </Typography>
+        component="section"
+        sx={{
+            minHeight: '100vh',
+            backgroundImage: "url('/header.jpg')",
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            position: 'relative',
+            overflow: 'hidden'
+        }}
+    >
+        <Container maxWidth="xl"
+                   sx={{position: 'relative', zIndex: 1, py: {xs: 6, md: 8}, px: {xs: 2, sm: 3, md: 4}}}>
+            {/* Clean Header Section */}
+            <Box sx={{textAlign: 'center', mb: {xs: 5, md: 6}}}>
+                <Typography
+                    variant="overline"
+                    sx={{
+                        color: '#059669',
+                        fontWeight: 600,
+                        letterSpacing: 1.5,
+                        fontSize: '0.8rem',
+                        mb: 2,
+                        display: 'block'
+                    }}
+                >
+                    🌿 KIẾN THỨC CHĂM SÓC
+                </Typography>
 
-                    <Typography
-                        variant="h1"
-                        component="h1"
-                        sx={{
-                            fontFamily: '"Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif',
-                            fontWeight: 700,
-                            mb: 3,
-                            fontSize: {xs: '2.2rem', md: '3rem', lg: '3.4rem'},
-                            background: 'linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%)',
-                            backgroundClip: 'text',
-                            color: 'transparent',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            lineHeight: 1.15,
-                            letterSpacing: '-0.02em'
-                        }}
-                    >
-                        Góc chăm sóc sen đá
-                    </Typography>
+                <Typography
+                    variant="h1"
+                    component="h1"
+                    sx={{
+                        fontFamily: '"Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif',
+                        fontWeight: 700,
+                        mb: 3,
+                        fontSize: {xs: '2.2rem', md: '3rem', lg: '3.4rem'},
+                        background: 'linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%)',
+                        backgroundClip: 'text',
+                        color: 'transparent',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        lineHeight: 1.15,
+                        letterSpacing: '-0.02em'
+                    }}
+                >
+                    Góc chăm sóc sen đá
+                </Typography>
 
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            maxWidth: '600px',
-                            mx: 'auto',
-                            lineHeight: 1.6,
-                            fontWeight: 400,
-                            color: '#374151',
-                            fontSize: {xs: '1rem', md: '1.1rem'},
-                            mb: 4
-                        }}
-                    >
-                        Khám phá bí quyết chăm sóc sen đá từ những chuyên gia.
-                        Từ cơ bản đến nâng cao, tất cả đều ở đây.
-                    </Typography>
-
-                    {/* Simple Decorative Line */}
-                    <Box sx={{
-                        width: 60,
-                        height: 3,
-                        background: 'linear-gradient(90deg, #10b981, #34d399)',
-                        borderRadius: 2,
+                <Typography
+                    variant="h6"
+                    sx={{
+                        maxWidth: '600px',
                         mx: 'auto',
-                        mb: 2
-                    }}/>
+                        lineHeight: 1.6,
+                        fontWeight: 400,
+                        color: '#374151',
+                        fontSize: {xs: '1rem', md: '1.1rem'},
+                        mb: 4
+                    }}
+                >
+                    Khám phá bí quyết chăm sóc sen đá từ những chuyên gia.
+                    Từ cơ bản đến nâng cao, tất cả đều ở đây.
+                </Typography>
+
+                {/* Simple Decorative Line */}
+                <Box sx={{
+                    width: 60,
+                    height: 3,
+                    background: 'linear-gradient(90deg, #10b981, #34d399)',
+                    borderRadius: 2,
+                    mx: 'auto',
+                    mb: 2
+                }}/>
+            </Box>
+
+            {/* Blog Grid */}
+            <Grid
+                container
+                spacing={{xs: 2, sm: 3, md: 3, lg: 4}}
+                sx={{
+                    mb: {xs: 4, md: 6}, justifyContent: 'center', alignItems: 'stretch'
+                }}
+            >
+                {posts.slice(0, showAdditionalPosts ? posts.length : posts.length - 3).map((post) => (<Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    xl={3}
+                    key={post.id}
+                    sx={{
+                        display: 'flex'
+                    }}
+                >
+                    <Card
+                        sx={{
+                            width: '100%',
+                            maxWidth: 350,
+                            height: '100%',
+                            minHeight: 480,
+                            mx: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(16, 185, 129, 0.15)',
+                            borderRadius: 3,
+                            boxShadow: '0 4px 24px rgba(16, 185, 129, 0.08)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&:hover': {
+                                transform: 'translateY(-8px)',
+                                boxShadow: '0 16px 48px rgba(16, 185, 129, 0.18)',
+                                borderColor: 'rgba(16, 185, 129, 0.25)',
+                            }
+                        }}
+                    >
+                        {/* Clean Card Image */}
+                        <Box sx={{position: 'relative'}}>
+                            <CardMedia
+                                component="img"
+                                height="200"
+                                image={post.img}
+                                alt={post.title}
+                                onError={(e) => {
+                                    e.target.src = '/nen.jpg'
+                                }}
+                                sx={{
+                                    transition: 'transform 0.3s ease', '.MuiCard-root:hover &': {
+                                        transform: 'scale(1.03)',
+                                    }
+                                }}
+                            />
+
+                            {/* Clean Category Chip */}
+                            <Chip
+                                label={post.category}
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    top: 12,
+                                    left: 12,
+                                    fontWeight: 600,
+                                    fontSize: '0.7rem',
+                                    background: 'rgba(255,255,255,0.9)',
+                                    backdropFilter: 'blur(8px)',
+                                    border: '1px solid rgba(16,185,129,0.2)',
+                                    color: '#059669',
+                                    zIndex: 3,
+                                }}
+                            />
+
+                            {/* Clean Difficulty Chip */}
+                            <Chip
+                                label={post.difficulty}
+                                color={getDifficultyColor(post.difficulty)}
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    top: 12,
+                                    right: 12,
+                                    fontWeight: 600,
+                                    fontSize: '0.7rem',
+                                    zIndex: 3,
+                                }}
+                            />
+                        </Box>
+
+                        <CardContent sx={{
+                            flexGrow: 1, p: 3, position: 'relative',
+                        }}>
+                            {/* Clean Meta Information */}
+                            <Stack
+                                direction="row"
+                                spacing={1.5}
+                                sx={{
+                                    mb: 2.5, color: '#6b7280', fontSize: '0.8rem'
+                                }}
+                                alignItems="center"
+                                justifyContent="center"
+                            >
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                    <CalendarIcon sx={{fontSize: 12, color: '#059669'}}/>
+                                    <Typography variant="caption" fontWeight={500}>{post.date}</Typography>
+                                </Stack>
+                                <Box
+                                    sx={{width: 3, height: 3, borderRadius: '50%', bgcolor: '#d1d5db'}}/>
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                    <TimeIcon sx={{fontSize: 12, color: '#059669'}}/>
+                                    <Typography variant="caption" fontWeight={500}>
+                                        {post.readTime}
+                                    </Typography>
+                                </Stack>
+                            </Stack>
+
+                            {/* Enhanced Title */}
+                            <Typography
+                                variant="h6"
+                                component="h3"
+                                sx={{
+                                    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
+                                    fontWeight: 600,
+                                    mb: 2,
+                                    lineHeight: 1.4,
+                                    fontSize: {xs: '1.1rem', md: '1.15rem'},
+                                    color: '#1f2937',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    letterSpacing: '-0.005em',
+                                    wordBreak: 'break-word',
+                                    hyphens: 'auto'
+                                }}
+                            >
+                                {post.title}
+                            </Typography>
+
+                            {/* Enhanced Description */}
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    mb: 2.5,
+                                    lineHeight: 1.65,
+                                    fontSize: '0.875rem',
+                                    color: '#4b5563',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    fontWeight: 400,
+                                    wordBreak: 'break-word',
+                                    hyphens: 'auto'
+                                }}
+                            >
+                                {post.description}
+                            </Typography>
+
+                            {/* Clean Tags */}
+                            <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap', gap: 0.5, mb: 2.5}}>
+                                {post.tags.slice(0, 3).map((tag, index) => (<Chip
+                                    key={index}
+                                    label={tag}
+                                    size="small"
+                                    sx={{
+                                        fontSize: '0.7rem',
+                                        height: 24,
+                                        fontWeight: 500,
+                                        background: 'rgba(16,185,129,0.1)',
+                                        border: '1px solid rgba(16,185,129,0.2)',
+                                        color: '#059669',
+                                        borderRadius: 2,
+                                    }}
+                                />))}
+                            </Stack>
+                        </CardContent>
+
+                        <Divider sx={{opacity: 0.05}}/>
+
+                        {/* Clean Card Actions */}
+                        <CardActions sx={{
+                            p: 3, justifyContent: 'space-between', alignItems: 'center',
+                        }}>
+                            <Stack direction="row" spacing={1.5} alignItems="center">
+                                <Avatar
+                                    sx={{
+                                        width: 36,
+                                        height: 36,
+                                        background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {post.author.charAt(0)}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="body2" fontWeight={600} color="#1f2937"
+                                                fontSize="0.85rem">
+                                        {post.author}
+                                    </Typography>
+                                    <Typography variant="caption" color="#6b7280" fontSize="0.7rem">
+                                        Chuyên gia
+                                    </Typography>
+                                </Box>
+                            </Stack>
+
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleOpenPost(post)}
+                                sx={{
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    borderRadius: 2,
+                                    px: 2.5,
+                                    py: 1,
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
+                                    color: 'white',
+                                    fontSize: '0.8rem',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                        boxShadow: '0 6px 20px rgba(16,185,129,0.3)',
+                                        transform: 'translateY(-1px)'
+                                    }
+                                }}
+                            >
+                                Đọc ngay
+                            </Button>
+                        </CardActions>
+                    </Card>
+                </Grid>))}
+            </Grid>
+
+            {/* Additional Posts Section */}
+            {showAdditionalPosts && (<>
+                <Box sx={{textAlign: 'center', mb: 4, mt: 6}}>
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontFamily: '"Inter", "Segoe UI", sans-serif',
+                            fontWeight: 700,
+                            mb: 2,
+                            color: '#047857',
+                        }}
+                    >
+                        🌟 Bài viết đặc biệt
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: '#6b7280', maxWidth: '600px', mx: 'auto'
+                        }}
+                    >
+                        Những kỹ thuật và mẹo hay từ cộng đồng yêu sen đá
+                    </Typography>
                 </Box>
 
-                {/* Blog Grid */}
                 <Grid
                     container
                     spacing={{xs: 2, sm: 3, md: 3, lg: 4}}
@@ -2011,746 +2275,482 @@ export default function Blogs() {
                         mb: {xs: 4, md: 6}, justifyContent: 'center', alignItems: 'stretch'
                     }}
                 >
-                    {posts.slice(0, showAdditionalPosts ? posts.length : posts.length - 3).map((post) => (<Grid
-                            item
-                            xs={12}
-                            sm={6}
-                            md={4}
-                            lg={3}
-                            xl={3}
-                            key={post.id}
+                    {posts.slice(-3).map((post) => (<Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        xl={3}
+                        key={post.id}
+                        sx={{
+                            display: 'flex'
+                        }}
+                    >
+                        <Card
                             sx={{
-                                display: 'flex'
+                                width: '100%',
+                                maxWidth: 350,
+                                height: '100%',
+                                minHeight: 480,
+                                mx: 'auto',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                background: 'rgba(255, 255, 255, 0.95)',
+                                backdropFilter: 'blur(12px)',
+                                border: '2px solid rgba(16, 185, 129, 0.2)',
+                                borderRadius: 3,
+                                boxShadow: '0 6px 32px rgba(16, 185, 129, 0.12)',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                position: 'relative',
+                                '&:hover': {
+                                    transform: 'translateY(-8px) scale(1.02)',
+                                    boxShadow: '0 12px 48px rgba(16, 185, 129, 0.2)',
+                                    borderColor: 'rgba(16, 185, 129, 0.3)',
+                                },
+                                '&::before': {
+                                    content: '"🔥"',
+                                    position: 'absolute',
+                                    top: 15,
+                                    right: 15,
+                                    fontSize: '1.2rem',
+                                    zIndex: 2
+                                }
                             }}
                         >
-                            <Card
+                            <CardMedia
+                                component="img"
+                                height="200"
+                                image={post.img}
+                                alt={post.title}
                                 sx={{
-                                    width: '100%',
-                                    maxWidth: 350,
-                                    height: '100%',
-                                    minHeight: 480,
-                                    mx: 'auto',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    background: 'rgba(255, 255, 255, 0.95)',
-                                    backdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(16, 185, 129, 0.15)',
-                                    borderRadius: 3,
-                                    boxShadow: '0 4px 24px rgba(16, 185, 129, 0.08)',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                    '&:hover': {
-                                        transform: 'translateY(-8px)',
-                                        boxShadow: '0 16px 48px rgba(16, 185, 129, 0.18)',
-                                        borderColor: 'rgba(16, 185, 129, 0.25)',
-                                    }
+                                    objectFit: 'cover',
+                                    borderRadius: '12px 12px 0 0',
+                                    transition: 'transform 0.3s ease'
                                 }}
-                            >
-                                {/* Clean Card Image */}
-                                <Box sx={{position: 'relative'}}>
-                                    <CardMedia
-                                        component="img"
-                                        height="200"
-                                        image={post.img}
-                                        alt={post.title}
-                                        onError={(e) => {
-                                            e.target.src = '/nen.jpg'
-                                        }}
-                                        sx={{
-                                            transition: 'transform 0.3s ease', '.MuiCard-root:hover &': {
-                                                transform: 'scale(1.03)',
-                                            }
-                                        }}
-                                    />
+                            />
 
-                                    {/* Clean Category Chip */}
-                                    <Chip
-                                        label={post.category}
-                                        size="small"
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 12,
-                                            left: 12,
-                                            fontWeight: 600,
-                                            fontSize: '0.7rem',
-                                            background: 'rgba(255,255,255,0.9)',
-                                            backdropFilter: 'blur(8px)',
-                                            border: '1px solid rgba(16,185,129,0.2)',
-                                            color: '#059669',
-                                            zIndex: 3,
-                                        }}
-                                    />
-
-                                    {/* Clean Difficulty Chip */}
-                                    <Chip
-                                        label={post.difficulty}
-                                        color={getDifficultyColor(post.difficulty)}
-                                        size="small"
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 12,
-                                            right: 12,
-                                            fontWeight: 600,
-                                            fontSize: '0.7rem',
-                                            zIndex: 3,
-                                        }}
-                                    />
-                                </Box>
-
-                                <CardContent sx={{
-                                    flexGrow: 1, p: 3, position: 'relative',
-                                }}>
-                                    {/* Clean Meta Information */}
-                                    <Stack
-                                        direction="row"
-                                        spacing={1.5}
-                                        sx={{
-                                            mb: 2.5, color: '#6b7280', fontSize: '0.8rem'
-                                        }}
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >
-                                        <Stack direction="row" spacing={0.5} alignItems="center">
-                                            <CalendarIcon sx={{fontSize: 12, color: '#059669'}}/>
-                                            <Typography variant="caption" fontWeight={500}>{post.date}</Typography>
-                                        </Stack>
-                                        <Box
-                                            sx={{width: 3, height: 3, borderRadius: '50%', bgcolor: '#d1d5db'}}/>
-                                        <Stack direction="row" spacing={0.5} alignItems="center">
-                                            <TimeIcon sx={{fontSize: 12, color: '#059669'}}/>
-                                            <Typography variant="caption" fontWeight={500}>
-                                                {post.readTime}
-                                            </Typography>
-                                        </Stack>
+                            <CardContent sx={{flexGrow: 1, p: 3}}>
+                                <Stack spacing={2}>
+                                    <Stack direction="row" spacing={1} sx={{mb: 1}}>
+                                        <Chip
+                                            label={post.category}
+                                            size="small"
+                                            color={getCategoryColor(post.category)}
+                                            sx={{
+                                                fontSize: '0.7rem', fontWeight: 600, borderRadius: 2
+                                            }}
+                                        />
+                                        <Chip
+                                            label={post.difficulty}
+                                            size="small"
+                                            color={getDifficultyColor(post.difficulty)}
+                                            variant="outlined"
+                                            sx={{
+                                                fontSize: '0.7rem', fontWeight: 500, borderRadius: 2
+                                            }}
+                                        />
                                     </Stack>
 
-                                    {/* Enhanced Title */}
                                     <Typography
                                         variant="h6"
                                         component="h3"
                                         sx={{
                                             fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
-                                            fontWeight: 600,
-                                            mb: 2,
+                                            fontWeight: 700,
+                                            fontSize: '1.1rem',
                                             lineHeight: 1.4,
-                                            fontSize: {xs: '1.1rem', md: '1.15rem'},
-                                            color: '#1f2937',
+                                            color: '#111827',
+                                            letterSpacing: '-0.01em',
+                                            wordBreak: 'break-word',
+                                            hyphens: 'auto',
+                                            mb: 1.5,
                                             display: '-webkit-box',
                                             WebkitLineClamp: 2,
                                             WebkitBoxOrient: 'vertical',
-                                            overflow: 'hidden',
-                                            letterSpacing: '-0.005em',
-                                            wordBreak: 'break-word',
-                                            hyphens: 'auto'
+                                            overflow: 'hidden'
                                         }}
                                     >
                                         {post.title}
                                     </Typography>
 
-                                    {/* Enhanced Description */}
                                     <Typography
                                         variant="body2"
                                         sx={{
-                                            mb: 2.5,
-                                            lineHeight: 1.65,
+                                            fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
+                                            color: '#6b7280',
+                                            lineHeight: 1.6,
+                                            fontWeight: 400,
                                             fontSize: '0.875rem',
-                                            color: '#4b5563',
+                                            wordBreak: 'break-word',
+                                            hyphens: 'auto',
                                             display: '-webkit-box',
                                             WebkitLineClamp: 3,
                                             WebkitBoxOrient: 'vertical',
                                             overflow: 'hidden',
-                                            fontWeight: 400,
-                                            wordBreak: 'break-word',
-                                            hyphens: 'auto'
+                                            mb: 2
                                         }}
                                     >
                                         {post.description}
                                     </Typography>
 
-                                    {/* Clean Tags */}
-                                    <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap', gap: 0.5, mb: 2.5}}>
+                                    <Stack direction="row" spacing={1} sx={{mb: 2}}>
                                         {post.tags.slice(0, 3).map((tag, index) => (<Chip
-                                                key={index}
-                                                label={tag}
-                                                size="small"
-                                                sx={{
-                                                    fontSize: '0.7rem',
-                                                    height: 24,
-                                                    fontWeight: 500,
-                                                    background: 'rgba(16,185,129,0.1)',
-                                                    border: '1px solid rgba(16,185,129,0.2)',
-                                                    color: '#059669',
-                                                    borderRadius: 2,
-                                                }}
-                                            />))}
-                                    </Stack>
-                                </CardContent>
-
-                                <Divider sx={{opacity: 0.05}}/>
-
-                                {/* Clean Card Actions */}
-                                <CardActions sx={{
-                                    p: 3, justifyContent: 'space-between', alignItems: 'center',
-                                }}>
-                                    <Stack direction="row" spacing={1.5} alignItems="center">
-                                        <Avatar
-                                            sx={{
-                                                width: 36,
-                                                height: 36,
-                                                background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            {post.author.charAt(0)}
-                                        </Avatar>
-                                        <Box>
-                                            <Typography variant="body2" fontWeight={600} color="#1f2937"
-                                                        fontSize="0.85rem">
-                                                {post.author}
-                                            </Typography>
-                                            <Typography variant="caption" color="#6b7280" fontSize="0.7rem">
-                                                Chuyên gia
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => handleOpenPost(post)}
-                                        sx={{
-                                            textTransform: 'none',
-                                            fontWeight: 600,
-                                            borderRadius: 2,
-                                            px: 2.5,
-                                            py: 1,
-                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                            boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
-                                            color: 'white',
-                                            fontSize: '0.8rem',
-                                            '&:hover': {
-                                                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                                boxShadow: '0 6px 20px rgba(16,185,129,0.3)',
-                                                transform: 'translateY(-1px)'
-                                            }
-                                        }}
-                                    >
-                                        Đọc ngay
-                                    </Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>))}
-                </Grid>
-
-                {/* Additional Posts Section */}
-                {showAdditionalPosts && (<>
-                        <Box sx={{textAlign: 'center', mb: 4, mt: 6}}>
-                            <Typography
-                                variant="h4"
-                                sx={{
-                                    fontFamily: '"Inter", "Segoe UI", sans-serif',
-                                    fontWeight: 700,
-                                    mb: 2,
-                                    color: '#047857',
-                                }}
-                            >
-                                🌟 Bài viết đặc biệt
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    color: '#6b7280', maxWidth: '600px', mx: 'auto'
-                                }}
-                            >
-                                Những kỹ thuật và mẹo hay từ cộng đồng yêu sen đá
-                            </Typography>
-                        </Box>
-
-                        <Grid
-                            container
-                            spacing={{xs: 2, sm: 3, md: 3, lg: 4}}
-                            sx={{
-                                mb: {xs: 4, md: 6}, justifyContent: 'center', alignItems: 'stretch'
-                            }}
-                        >
-                            {posts.slice(-3).map((post) => (<Grid
-                                    item
-                                    xs={12}
-                                    sm={6}
-                                    md={4}
-                                    lg={3}
-                                    xl={3}
-                                    key={post.id}
-                                    sx={{
-                                        display: 'flex'
-                                    }}
-                                >
-                                    <Card
-                                        sx={{
-                                            width: '100%',
-                                            maxWidth: 350,
-                                            height: '100%',
-                                            minHeight: 480,
-                                            mx: 'auto',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            background: 'rgba(255, 255, 255, 0.95)',
-                                            backdropFilter: 'blur(12px)',
-                                            border: '2px solid rgba(16, 185, 129, 0.2)',
-                                            borderRadius: 3,
-                                            boxShadow: '0 6px 32px rgba(16, 185, 129, 0.12)',
-                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                            position: 'relative',
-                                            '&:hover': {
-                                                transform: 'translateY(-8px) scale(1.02)',
-                                                boxShadow: '0 12px 48px rgba(16, 185, 129, 0.2)',
-                                                borderColor: 'rgba(16, 185, 129, 0.3)',
-                                            },
-                                            '&::before': {
-                                                content: '"🔥"',
-                                                position: 'absolute',
-                                                top: 15,
-                                                right: 15,
-                                                fontSize: '1.2rem',
-                                                zIndex: 2
-                                            }
-                                        }}
-                                    >
-                                        <CardMedia
-                                            component="img"
-                                            height="200"
-                                            image={post.img}
-                                            alt={post.title}
-                                            sx={{
-                                                objectFit: 'cover',
-                                                borderRadius: '12px 12px 0 0',
-                                                transition: 'transform 0.3s ease'
-                                            }}
-                                        />
-
-                                        <CardContent sx={{flexGrow: 1, p: 3}}>
-                                            <Stack spacing={2}>
-                                                <Stack direction="row" spacing={1} sx={{mb: 1}}>
-                                                    <Chip
-                                                        label={post.category}
-                                                        size="small"
-                                                        color={getCategoryColor(post.category)}
-                                                        sx={{
-                                                            fontSize: '0.7rem', fontWeight: 600, borderRadius: 2
-                                                        }}
-                                                    />
-                                                    <Chip
-                                                        label={post.difficulty}
-                                                        size="small"
-                                                        color={getDifficultyColor(post.difficulty)}
-                                                        variant="outlined"
-                                                        sx={{
-                                                            fontSize: '0.7rem', fontWeight: 500, borderRadius: 2
-                                                        }}
-                                                    />
-                                                </Stack>
-
-                                                <Typography
-                                                    variant="h6"
-                                                    component="h3"
-                                                    sx={{
-                                                        fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
-                                                        fontWeight: 700,
-                                                        fontSize: '1.1rem',
-                                                        lineHeight: 1.4,
-                                                        color: '#111827',
-                                                        letterSpacing: '-0.01em',
-                                                        wordBreak: 'break-word',
-                                                        hyphens: 'auto',
-                                                        mb: 1.5,
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        overflow: 'hidden'
-                                                    }}
-                                                >
-                                                    {post.title}
-                                                </Typography>
-
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{
-                                                        fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif',
-                                                        color: '#6b7280',
-                                                        lineHeight: 1.6,
-                                                        fontWeight: 400,
-                                                        fontSize: '0.875rem',
-                                                        wordBreak: 'break-word',
-                                                        hyphens: 'auto',
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 3,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        overflow: 'hidden',
-                                                        mb: 2
-                                                    }}
-                                                >
-                                                    {post.description}
-                                                </Typography>
-
-                                                <Stack direction="row" spacing={1} sx={{mb: 2}}>
-                                                    {post.tags.slice(0, 3).map((tag, index) => (<Chip
-                                                            key={index}
-                                                            label={tag}
-                                                            size="small"
-                                                            variant="outlined"
-                                                            sx={{
-                                                                fontSize: '0.65rem',
-                                                                height: 24,
-                                                                borderColor: 'rgba(16, 185, 129, 0.3)',
-                                                                color: '#059669',
-                                                                fontWeight: 500,
-                                                                '&:hover': {
-                                                                    borderColor: '#10b981',
-                                                                    backgroundColor: 'rgba(16, 185, 129, 0.05)'
-                                                                }
-                                                            }}
-                                                        />))}
-                                                </Stack>
-
-                                                <Stack direction="row" alignItems="center" spacing={2}>
-                                                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                                                        <Avatar sx={{
-                                                            width: 24,
-                                                            height: 24,
-                                                            bgcolor: '#10b981',
-                                                            fontSize: '0.75rem'
-                                                        }}>
-                                                            {post.author.charAt(0)}
-                                                        </Avatar>
-                                                        <Typography variant="caption"
-                                                                    sx={{color: '#6b7280', fontWeight: 500}}>
-                                                            {post.author}
-                                                        </Typography>
-                                                    </Stack>
-
-                                                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                                                        <TimeIcon sx={{fontSize: '0.875rem', color: '#9ca3af'}}/>
-                                                        <Typography variant="caption" sx={{color: '#6b7280'}}>
-                                                            {post.readTime}
-                                                        </Typography>
-                                                    </Stack>
-                                                </Stack>
-                                            </Stack>
-                                        </CardContent>
-
-                                        <CardActions sx={{p: 3, pt: 0}}>
-                                            <Button
-                                                fullWidth
-                                                variant="contained"
-                                                onClick={() => handleOpenPost(post)}
-                                                endIcon={<ArrowForwardIcon/>}
-                                                sx={{
-                                                    textTransform: 'none',
-                                                    fontWeight: 600,
-                                                    borderRadius: 2.5,
-                                                    py: 1.2,
-                                                    fontSize: '0.9rem',
-                                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                                    boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                                        boxShadow: '0 6px 24px rgba(16, 185, 129, 0.4)',
-                                                        transform: 'translateY(-1px)'
-                                                    }
-                                                }}
-                                            >
-                                                Đọc ngay
-                                            </Button>
-                                        </CardActions>
-                                    </Card>
-                                </Grid>))}
-                        </Grid>
-                    </>)}
-
-                {/* Clean Footer CTA */}
-                <Box sx={{
-                    textAlign: 'center',
-                    mt: 5,
-                    p: 5,
-                    background: 'rgba(255,255,255,0.8)',
-                    borderRadius: 4,
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(16,185,129,0.1)',
-                    boxShadow: '0 8px 32px rgba(16,185,129,0.08)'
-                }}>
-                    <Typography
-                        variant="h5"
-                        fontWeight={700}
-                        sx={{
-                            mb: 2, color: '#059669', fontFamily: '"Inter", "Segoe UI", sans-serif',
-                        }}
-                    >
-                        Muốn học thêm? 🌱
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            mb: 4, fontWeight: 400, color: '#6b7280', maxWidth: '500px', mx: 'auto'
-                        }}
-                    >
-                        Khám phá thêm những bí quyết chăm sóc sen đá từ cộng đồng yêu cây
-                    </Typography>
-
-                    <Button
-                        variant="contained"
-                        size="medium"
-                        onClick={() => setShowAdditionalPosts(!showAdditionalPosts)}
-                        endIcon={<ArrowForwardIcon sx={{
-                            transform: showAdditionalPosts ? 'rotate(90deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.3s ease'
-                        }}/>}
-                        sx={{
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            borderRadius: 3,
-                            px: 4,
-                            py: 1.5,
-                            fontSize: '0.95rem',
-                            background: showAdditionalPosts ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            boxShadow: showAdditionalPosts ? '0 6px 24px rgba(220,38,38,0.25)' : '0 6px 24px rgba(16,185,129,0.25)',
-                            '&:hover': {
-                                background: showAdditionalPosts ? 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                boxShadow: showAdditionalPosts ? '0 8px 32px rgba(220,38,38,0.35)' : '0 8px 32px rgba(16,185,129,0.35)',
-                                transform: 'translateY(-2px)'
-                            }
-                        }}
-                    >
-                        {showAdditionalPosts ? 'Ẩn bài viết đặc biệt' : 'Khám phá thêm bài viết'}
-                    </Button>
-                </Box>
-            </Container>
-
-            {/* Content Dialog */}
-            <Dialog
-                open={openDialog}
-                onClose={handleClosePost}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        borderRadius: 4,
-                        maxHeight: '90vh',
-                        background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                    }
-                }}
-            >
-                {selectedPost && (<>
-                        <DialogTitle sx={{
-                            p: 4,
-                            background: 'linear-gradient(135deg, #0b3f31 0%, #1e6f57 100%)',
-                            color: 'white',
-                            position: 'relative'
-                        }}>
-                            <Stack direction="row" spacing={2} alignItems="flex-start">
-                                <Box sx={{flexGrow: 1}}>
-                                    <Typography variant="h4" fontWeight={800} gutterBottom>
-                                        {selectedPost.title}
-                                    </Typography>
-                                    <Stack direction="row" spacing={3} alignItems="center" sx={{mt: 2}}>
-                                        <Stack direction="row" spacing={1} alignItems="center">
-                                            <Avatar sx={{width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.2)'}}>
-                                                {selectedPost.author.charAt(0)}
-                                            </Avatar>
-                                            <Typography variant="body2" fontWeight={600}>
-                                                {selectedPost.author}
-                                            </Typography>
-                                        </Stack>
-                                        <Stack direction="row" spacing={0.5} alignItems="center">
-                                            <CalendarIcon sx={{fontSize: 16}}/>
-                                            <Typography variant="body2">{selectedPost.date}</Typography>
-                                        </Stack>
-                                        <Stack direction="row" spacing={0.5} alignItems="center">
-                                            <TimeIcon sx={{fontSize: 16}}/>
-                                            <Typography variant="body2">{selectedPost.readTime}</Typography>
-                                        </Stack>
-                                    </Stack>
-                                </Box>
-                                <IconButton
-                                    onClick={handleClosePost}
-                                    sx={{
-                                        color: 'white', '&:hover': {
-                                            backgroundColor: 'rgba(255,255,255,0.1)'
-                                        }
-                                    }}
-                                >
-                                    <CloseIcon/>
-                                </IconButton>
-                            </Stack>
-                        </DialogTitle>
-
-                        <DialogContent sx={{p: 4}}>
-                            {/* Introduction */}
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    mb: 4,
-                                    lineHeight: 1.7,
-                                    color: 'text.secondary',
-                                    fontStyle: 'italic',
-                                    borderLeft: '4px solid',
-                                    borderColor: 'primary.main',
-                                    pl: 3,
-                                    background: 'rgba(16,185,129,0.05)',
-                                    p: 2,
-                                    borderRadius: 2
-                                }}
-                            >
-                                {selectedPost.content.intro}
-                            </Typography>
-
-                            {/* Video Player (if video exists) */}
-                            {selectedPost.content.videoUrl && (<Box sx={{
-                                    mb: 4,
-                                    position: 'relative',
-                                    borderRadius: 3,
-                                    overflow: 'hidden',
-                                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.05) 100%)',
-                                    border: '2px solid rgba(16,185,129,0.2)',
-                                    p: 3
-                                }}>
-                                    <Stack spacing={2} alignItems="center">
-                                        <Typography variant="h6" fontWeight={700} color="primary.main"
-                                                    textAlign="center">
-                                            🎥 Video hướng dẫn chi tiết
-                                        </Typography>
-                                        <Box sx={{
-                                            position: 'relative',
-                                            width: '100%',
-                                            paddingBottom: '56.25%', // 16:9 aspect ratio
-                                            height: 0,
-                                            borderRadius: 2,
-                                            overflow: 'hidden',
-                                            boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
-                                        }}>
-                                            <iframe
-                                                src={selectedPost.content.videoUrl.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/')}
-                                                title="Video hướng dẫn"
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    borderRadius: '8px'
-                                                }}
-                                            />
-                                        </Box>
-                                        <Typography variant="body2" color="text.secondary" textAlign="center">
-                                            💡 Xem video để hiểu rõ hơn về cách nhận biết và phân loại sen đá
-                                        </Typography>
-                                    </Stack>
-                                </Box>)}
-
-                            {/* Content Sections */}
-                            <List sx={{width: '100%'}}>
-                                {selectedPost.content.sections.map((section, index) => (<Box key={section.id}>
-                                        <ListItem
-                                            button
-                                            onClick={() => toggleSection(section.id)}
-                                            sx={{
-                                                borderRadius: 2,
-                                                mb: 1,
-                                                background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.05) 100%)',
-                                                border: '1px solid rgba(16,185,129,0.2)',
-                                                '&:hover': {
-                                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(5,150,105,0.08) 100%)',
-                                                }
-                                            }}
-                                        >
-                                            <ListItemText
-                                                primary={<Typography variant="h6" fontWeight={700} color="primary.main">
-                                                    {section.title}
-                                                </Typography>}
-                                            />
-                                            {expandedSections[section.id] ? <ExpandLess/> : <ExpandMore/>}
-                                        </ListItem>
-                                        <Collapse in={expandedSections[section.id]} timeout="auto" unmountOnExit>
-                                            <Box sx={{
-                                                p: 3,
-                                                ml: 2,
-                                                background: 'rgba(255,255,255,0.7)',
-                                                borderRadius: 2,
-                                                border: '1px solid rgba(0,0,0,0.05)',
-                                                mb: 2
-                                            }}>
-                                                <ContentRenderer content={section.content}/>
-                                                {section.videoEmbed && (<Box sx={{
-                                                        mt: 3,
-                                                        borderRadius: 2,
-                                                        overflow: 'hidden',
-                                                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
-                                                    }}>
-                                                        <iframe
-                                                            src={section.videoEmbed}
-                                                            title="Video hướng dẫn"
-                                                            width="100%"
-                                                            height="400"
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            style={{
-                                                                borderRadius: '8px'
-                                                            }}
-                                                        />
-                                                    </Box>)}
-                                            </Box>
-                                        </Collapse>
-                                    </Box>))}
-                            </List>
-                        </DialogContent>
-
-                        <DialogActions sx={{
-                            p: 4,
-                            background: 'linear-gradient(145deg, rgba(248,250,252,0.8) 0%, rgba(255,255,255,0.9) 100%)',
-                            borderTop: '1px solid rgba(0,0,0,0.05)'
-                        }}>
-                            <Stack direction="row" spacing={2} sx={{width: '100%', justifyContent: 'space-between'}}>
-                                <Stack direction="row" spacing={1}>
-                                    {selectedPost.tags.map((tag, index) => (<Chip
                                             key={index}
                                             label={tag}
                                             size="small"
+                                            variant="outlined"
                                             sx={{
-                                                background: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.1) 100%)',
-                                                border: '1px solid rgba(16,185,129,0.3)',
-                                                color: 'success.main',
-                                                fontWeight: 600
+                                                fontSize: '0.65rem',
+                                                height: 24,
+                                                borderColor: 'rgba(16, 185, 129, 0.3)',
+                                                color: '#059669',
+                                                fontWeight: 500,
+                                                '&:hover': {
+                                                    borderColor: '#10b981',
+                                                    backgroundColor: 'rgba(16, 185, 129, 0.05)'
+                                                }
                                             }}
                                         />))}
+                                    </Stack>
+
+                                    <Stack direction="row" alignItems="center" spacing={2}>
+                                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                                            <Avatar sx={{
+                                                width: 24,
+                                                height: 24,
+                                                bgcolor: '#10b981',
+                                                fontSize: '0.75rem'
+                                            }}>
+                                                {post.author.charAt(0)}
+                                            </Avatar>
+                                            <Typography variant="caption"
+                                                        sx={{color: '#6b7280', fontWeight: 500}}>
+                                                {post.author}
+                                            </Typography>
+                                        </Stack>
+
+                                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                                            <TimeIcon sx={{fontSize: '0.875rem', color: '#9ca3af'}}/>
+                                            <Typography variant="caption" sx={{color: '#6b7280'}}>
+                                                {post.readTime}
+                                            </Typography>
+                                        </Stack>
+                                    </Stack>
                                 </Stack>
+                            </CardContent>
+
+                            <CardActions sx={{p: 3, pt: 0}}>
                                 <Button
-                                    variant="outlined"
-                                    onClick={handleClosePost}
+                                    fullWidth
+                                    variant="contained"
+                                    onClick={() => handleOpenPost(post)}
+                                    endIcon={<ArrowForwardIcon/>}
                                     sx={{
-                                        borderRadius: 3,
                                         textTransform: 'none',
                                         fontWeight: 600,
-                                        borderWidth: 2,
+                                        borderRadius: 2.5,
+                                        py: 1.2,
+                                        fontSize: '0.9rem',
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)',
                                         '&:hover': {
-                                            borderWidth: 2
+                                            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                            boxShadow: '0 6px 24px rgba(16, 185, 129, 0.4)',
+                                            transform: 'translateY(-1px)'
                                         }
                                     }}
                                 >
-                                    Đóng
+                                    Đọc ngay
                                 </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>))}
+                </Grid>
+            </>)}
+
+            {/* Clean Footer CTA */}
+            <Box sx={{
+                textAlign: 'center',
+                mt: 5,
+                p: 5,
+                background: 'rgba(255,255,255,0.8)',
+                borderRadius: 4,
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(16,185,129,0.1)',
+                boxShadow: '0 8px 32px rgba(16,185,129,0.08)'
+            }}>
+                <Typography
+                    variant="h5"
+                    fontWeight={700}
+                    sx={{
+                        mb: 2, color: '#059669', fontFamily: '"Inter", "Segoe UI", sans-serif',
+                    }}
+                >
+                    Muốn học thêm? 🌱
+                </Typography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        mb: 4, fontWeight: 400, color: '#6b7280', maxWidth: '500px', mx: 'auto'
+                    }}
+                >
+                    Khám phá thêm những bí quyết chăm sóc sen đá từ cộng đồng yêu cây
+                </Typography>
+
+                <Button
+                    variant="contained"
+                    size="medium"
+                    onClick={() => setShowAdditionalPosts(!showAdditionalPosts)}
+                    endIcon={<ArrowForwardIcon sx={{
+                        transform: showAdditionalPosts ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease'
+                    }}/>}
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        px: 4,
+                        py: 1.5,
+                        fontSize: '0.95rem',
+                        background: showAdditionalPosts ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        boxShadow: showAdditionalPosts ? '0 6px 24px rgba(220,38,38,0.25)' : '0 6px 24px rgba(16,185,129,0.25)',
+                        '&:hover': {
+                            background: showAdditionalPosts ? 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                            boxShadow: showAdditionalPosts ? '0 8px 32px rgba(220,38,38,0.35)' : '0 8px 32px rgba(16,185,129,0.35)',
+                            transform: 'translateY(-2px)'
+                        }
+                    }}
+                >
+                    {showAdditionalPosts ? 'Ẩn bài viết đặc biệt' : 'Khám phá thêm bài viết'}
+                </Button>
+            </Box>
+        </Container>
+
+        {/* Content Dialog */}
+        <Dialog
+            open={openDialog}
+            onClose={handleClosePost}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    borderRadius: 4,
+                    maxHeight: '90vh',
+                    background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                }
+            }}
+        >
+            {selectedPost && (<>
+                <DialogTitle sx={{
+                    p: 4,
+                    background: 'linear-gradient(135deg, #0b3f31 0%, #1e6f57 100%)',
+                    color: 'white',
+                    position: 'relative'
+                }}>
+                    <Stack direction="row" spacing={2} alignItems="flex-start">
+                        <Box sx={{flexGrow: 1}}>
+                            <Typography variant="h4" fontWeight={800} gutterBottom>
+                                {selectedPost.title}
+                            </Typography>
+                            <Stack direction="row" spacing={3} alignItems="center" sx={{mt: 2}}>
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <Avatar sx={{width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.2)'}}>
+                                        {selectedPost.author.charAt(0)}
+                                    </Avatar>
+                                    <Typography variant="body2" fontWeight={600}>
+                                        {selectedPost.author}
+                                    </Typography>
+                                </Stack>
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                    <CalendarIcon sx={{fontSize: 16}}/>
+                                    <Typography variant="body2">{selectedPost.date}</Typography>
+                                </Stack>
+                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                    <TimeIcon sx={{fontSize: 16}}/>
+                                    <Typography variant="body2">{selectedPost.readTime}</Typography>
+                                </Stack>
                             </Stack>
-                        </DialogActions>
-                    </>)}
-            </Dialog>
-        </Box>)
+                        </Box>
+                        <IconButton
+                            onClick={handleClosePost}
+                            sx={{
+                                color: 'white', '&:hover': {
+                                    backgroundColor: 'rgba(255,255,255,0.1)'
+                                }
+                            }}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </Stack>
+                </DialogTitle>
+
+                <DialogContent sx={{p: 4}}>
+                    {/* Introduction */}
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            mb: 4,
+                            lineHeight: 1.7,
+                            color: 'text.secondary',
+                            fontStyle: 'italic',
+                            borderLeft: '4px solid',
+                            borderColor: 'primary.main',
+                            pl: 3,
+                            background: 'rgba(16,185,129,0.05)',
+                            p: 2,
+                            borderRadius: 2
+                        }}
+                    >
+                        {selectedPost.content.intro}
+                    </Typography>
+
+                    {/* Video Player (if video exists) */}
+                    {selectedPost.content.videoUrl && (<Box sx={{
+                        mb: 4,
+                        position: 'relative',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                        background: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.05) 100%)',
+                        border: '2px solid rgba(16,185,129,0.2)',
+                        p: 3
+                    }}>
+                        <Stack spacing={2} alignItems="center">
+                            <Typography variant="h6" fontWeight={700} color="primary.main"
+                                        textAlign="center">
+                                🎥 Video hướng dẫn chi tiết
+                            </Typography>
+                            <Box sx={{
+                                position: 'relative',
+                                width: '100%',
+                                paddingBottom: '56.25%', // 16:9 aspect ratio
+                                height: 0,
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+                            }}>
+                                <iframe
+                                    src={selectedPost.content.videoUrl.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/')}
+                                    title="Video hướng dẫn"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: '8px'
+                                    }}
+                                />
+                            </Box>
+                            <Typography variant="body2" color="text.secondary" textAlign="center">
+                                💡 Xem video để hiểu rõ hơn về cách nhận biết và phân loại sen đá
+                            </Typography>
+                        </Stack>
+                    </Box>)}
+
+                    {/* Content Sections */}
+                    <List sx={{width: '100%'}}>
+                        {selectedPost.content.sections.map((section, index) => (<Box key={section.id}>
+                            <ListItem
+                                button
+                                onClick={() => toggleSection(section.id)}
+                                sx={{
+                                    borderRadius: 2,
+                                    mb: 1,
+                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.05) 100%)',
+                                    border: '1px solid rgba(16,185,129,0.2)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(5,150,105,0.08) 100%)',
+                                    }
+                                }}
+                            >
+                                <ListItemText
+                                    primary={<Typography variant="h6" fontWeight={700} color="primary.main">
+                                        {section.title}
+                                    </Typography>}
+                                />
+                                {expandedSections[section.id] ? <ExpandLess/> : <ExpandMore/>}
+                            </ListItem>
+                            <Collapse in={expandedSections[section.id]} timeout="auto" unmountOnExit>
+                                <Box sx={{
+                                    p: 3,
+                                    ml: 2,
+                                    background: 'rgba(255,255,255,0.7)',
+                                    borderRadius: 2,
+                                    border: '1px solid rgba(0,0,0,0.05)',
+                                    mb: 2
+                                }}>
+                                    <ContentRenderer content={section.content}/>
+                                    {section.videoEmbed && (<Box sx={{
+                                        mt: 3,
+                                        borderRadius: 2,
+                                        overflow: 'hidden',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+                                    }}>
+                                        <iframe
+                                            src={section.videoEmbed}
+                                            title="Video hướng dẫn"
+                                            width="100%"
+                                            height="400"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            style={{
+                                                borderRadius: '8px'
+                                            }}
+                                        />
+                                    </Box>)}
+                                </Box>
+                            </Collapse>
+                        </Box>))}
+                    </List>
+                </DialogContent>
+
+                <DialogActions sx={{
+                    p: 4,
+                    background: 'linear-gradient(145deg, rgba(248,250,252,0.8) 0%, rgba(255,255,255,0.9) 100%)',
+                    borderTop: '1px solid rgba(0,0,0,0.05)'
+                }}>
+                    <Stack direction="row" spacing={2} sx={{width: '100%', justifyContent: 'space-between'}}>
+                        <Stack direction="row" spacing={1}>
+                            {selectedPost.tags.map((tag, index) => (<Chip
+                                key={index}
+                                label={tag}
+                                size="small"
+                                sx={{
+                                    background: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(5,150,105,0.1) 100%)',
+                                    border: '1px solid rgba(16,185,129,0.3)',
+                                    color: 'success.main',
+                                    fontWeight: 600
+                                }}
+                            />))}
+                        </Stack>
+                        <Button
+                            variant="outlined"
+                            onClick={handleClosePost}
+                            sx={{
+                                borderRadius: 3,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                borderWidth: 2,
+                                '&:hover': {
+                                    borderWidth: 2
+                                }
+                            }}
+                        >
+                            Đóng
+                        </Button>
+                    </Stack>
+                </DialogActions>
+            </>)}
+        </Dialog>
+    </Box>)
 }
 
 

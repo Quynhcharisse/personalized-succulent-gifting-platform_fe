@@ -48,7 +48,6 @@ const DeactiveProduct = ({
                 showNotification(errorMessage, 'error');
             }
         } catch (err) {
-            console.error('Error deactivating product:', err);
             const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi vô hiệu hóa sản phẩm';
             setError(errorMessage);
             showNotification(errorMessage, 'error');

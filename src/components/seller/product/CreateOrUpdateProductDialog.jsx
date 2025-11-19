@@ -7,6 +7,7 @@ import {
     Box,
     Button,
     Card,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -69,6 +70,28 @@ const normalizeEditProductData = (product = {}) => {
             return value;
         })();
 
+        const rawDecorationDetails = (() => {
+            if (Array.isArray(size.decoration?.details)) {
+                return size.decoration.details;
+            }
+            if (Array.isArray(size.decorations)) {
+                return size.decorations;
+            }
+            return [];
+        })();
+
+        const decorationDetails = rawDecorationDetails.map((detail) => ({
+            name: toStringSafe(detail?.name ?? detail?.title ?? detail?.id),
+            quantity: toStringSafe(detail?.quantity ?? detail?.qty ?? detail?.count ?? 1),
+        }));
+
+        const decorationIncluded = (() => {
+            if (typeof size.decoration?.included === 'boolean') {
+                return size.decoration.included;
+            }
+            return decorationDetails.length > 0;
+        })();
+
         return {
             name: toStringSafe(size.name),
             succulents: normalizedSucculents,
@@ -81,11 +104,8 @@ const normalizeEditProductData = (product = {}) => {
                 massAmount: toStringSafe(size.soil?.massAmount ?? size.soil?.weight ?? size.soil?.mass ?? size.soil?.amount),
             },
             decoration: {
-                included: size.decoration?.included ?? false,
-                details: Array.isArray(size.decoration?.details) ? size.decoration.details.map((detail) => ({
-                    name: toStringSafe(detail.name),
-                    quantity: toStringSafe(detail.quantity ?? detail.qty),
-                })) : [],
+                included: decorationIncluded,
+                details: decorationDetails,
             },
         };
     }) : [];
@@ -251,7 +271,8 @@ const CreateOrUpdateProductDialog = ({
                                          onClose,
                                          onCreate,
                                          editProduct = null,
-                                         isEdit = false
+                                         isEdit = false,
+                                         loading = false
                                      }) => {
     const [formData, setFormData] = useState({
         productId: null,
@@ -273,12 +294,15 @@ const CreateOrUpdateProductDialog = ({
 
     // Initialize form data
     useEffect(() => {
-        console.log('Initialize form data - isEdit:', isEdit);
-        console.log('Initialize form data - editProduct:', editProduct);
+        if (!open) {
+            return;
+        }
 
-        if (isEdit && editProduct) {
+        if (isEdit) {
+            if (loading) return;
+            if (!editProduct) return;
+
             const initialData = normalizeEditProductData(editProduct);
-            console.log('Setting form data for edit:', initialData);
             setFormData(initialData);
         } else {
             const initialData = {
@@ -288,10 +312,9 @@ const CreateOrUpdateProductDialog = ({
                 sizes: [],
                 images: []
             };
-            console.log('Setting form data for create:', initialData);
             setFormData(initialData);
         }
-    }, [isEdit, editProduct, open]);
+    }, [isEdit, editProduct, open, loading]);
 
     // Load dropdown data
     useEffect(() => {
@@ -301,9 +324,6 @@ const CreateOrUpdateProductDialog = ({
                     getSucculents(),
                     getAccessories('all')
                 ]);
-
-                console.log('Succulents response:', succulentsRes);
-                console.log('Accessories response:', accessoriesRes);
 
                 // Handle succulents data
                 if (succulentsRes?.data?.data && Array.isArray(succulentsRes.data.data)) {
@@ -385,7 +405,7 @@ const CreateOrUpdateProductDialog = ({
 
     // Align succulent sizes once dropdown data is available (especially when editing)
     useEffect(() => {
-        if (!open || !isEdit || !editProduct || !Array.isArray(succulents) || succulents.length === 0) {
+        if (!open || !isEdit || !editProduct || loading || !Array.isArray(succulents) || succulents.length === 0) {
             return;
         }
 
@@ -397,11 +417,11 @@ const CreateOrUpdateProductDialog = ({
                 sizes: alignedSizes,
             };
         });
-    }, [open, isEdit, editProduct, succulents]);
+    }, [open, isEdit, editProduct, succulents, loading]);
 
     // Align pot sizes once pots data is loaded (edit mode)
     useEffect(() => {
-        if (!open || !isEdit || !editProduct || !Array.isArray(accessories) || accessories.length === 0) {
+        if (!open || !isEdit || !editProduct || loading || !Array.isArray(accessories) || accessories.length === 0) {
             return;
         }
 
@@ -416,7 +436,7 @@ const CreateOrUpdateProductDialog = ({
                 sizes: alignedSizes,
             };
         });
-    }, [open, isEdit, editProduct, accessories]);
+    }, [open, isEdit, editProduct, accessories, loading]);
 
     const addSize = () => {
         setFormData(prev => ({
@@ -677,11 +697,6 @@ const CreateOrUpdateProductDialog = ({
                 url: image.url.trim()
             })) : []
         };
-
-        console.log('TransformDataForAPI - isEdit:', isEdit);
-        console.log('TransformDataForAPI - productId:', payload.productId);
-        console.log('TransformDataForAPI - createAction:', payload.createAction);
-
         return payload;
     };
 
@@ -696,11 +711,6 @@ const CreateOrUpdateProductDialog = ({
 
         try {
             const payload = transformDataForAPI();
-            console.log('Product payload:', payload);
-            console.log('isEdit:', isEdit);
-            console.log('formData.productId:', formData.productId);
-            console.log('editProduct:', editProduct);
-
             const response = await createOrUpdateProduct(payload);
 
             if (response && response.data && response.data.message) {
@@ -733,13 +743,6 @@ const CreateOrUpdateProductDialog = ({
     const availablePots = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'PLANT_POT') : [];
     const availableSoils = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'SOIL') : [];
     const availableDecorations = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'DECORATION') : [];
-
-    // Debug logs
-    console.log('Current succulents state:', succulents);
-    console.log('Current accessories state:', accessories);
-    console.log('Available pots:', availablePots);
-    console.log('Available soils:', availableSoils);
-    console.log('Available decorations:', availableDecorations);
 
     return (
         <Dialog
@@ -777,6 +780,12 @@ const CreateOrUpdateProductDialog = ({
             </DialogTitle>
 
             <DialogContent sx={DASHBOARD_STYLES.dialogContent}>
+                {loading && isEdit ? (
+                    <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 320}}>
+                        <CircularProgress size={48}/>
+                    </Box>
+                ) : (
+                <>
                 {message.text && (
                     <Alert severity={message.type === 'success' ? 'success' : 'error'} variant="filled"
                            sx={{mb: 3, fontWeight: 600, borderRadius: 2}}>
@@ -1413,6 +1422,8 @@ const CreateOrUpdateProductDialog = ({
                         </Card>
                     ))}
                 </Card>
+                </>
+                )}
             </DialogContent>
 
             <DialogActions sx={{p: 3, backgroundColor: '#f7faf7'}}>

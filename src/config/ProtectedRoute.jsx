@@ -30,7 +30,8 @@ async function Logout() {
                     const cartKey = `psgp_cart_v1_${userIdentifier}`
                     localStorage.removeItem(cartKey)
                 }
-            } catch {}
+            } catch {
+            }
             localStorage.removeItem('user')
             if (sessionStorage.length > 0) {
                 sessionStorage.clear()
@@ -63,57 +64,44 @@ export default function ProtectedRoute({children, allowRoles = []}) {
                 setHasAttemptedAuth(true);
 
                 const data = await GetAccessData();
-                console.log("First data: ", data)
 
                 if (data != null) {
-                    console.log("Data not null")
                     const isValidRole = await CheckIfRoleValid(allowRoles, data.role);
                     if (isValidRole) {
-                        console.log("Valid role")
                         setIsAuthenticated(true);
                         setHasValidRole(true);
                         setIsLoading(false);
                         return;
                     } else {
                         console.log("Invalid role")
-                        // await Logout();
                         return;
                     }
                 }
 
                 const refreshResponse = await refreshToken();
-                console.log("Data is null")
                 if (refreshResponse.status === 401 || refreshResponse.status === 403) {
                     console.log("Refresh error 401 / 403")
-                    // await Logout();
                     return;
                 }
 
                 const retryData = await GetAccessData();
-                console.log("Retry data: ", retryData)
                 if (retryData != null) {
-                    console.log("Retry data not null")
                     const isValidRole = await CheckIfRoleValid(allowRoles, retryData.role);
                     if (isValidRole) {
-                        console.log("Valid role")
                         setIsAuthenticated(true);
                         setHasValidRole(true);
                         setIsLoading(false);
 
                     } else {
                         console.log("Invalid role")
-                        // await Logout();
 
                     }
                 } else {
                     console.log("Retry data is null")
-                    // await Logout();
-
                 }
 
             } catch (error) {
                 console.error("Authentication error:", error);
-                // await Logout();
             } finally {
                 setIsLoading(false);
             }
@@ -123,7 +111,6 @@ export default function ProtectedRoute({children, allowRoles = []}) {
     }, [allowRoles]);
 
     if (isLoading) {
-        // Không hiển thị loading UI ở đây nữa, sẽ dùng GlobalLoadingOverlay
         return null;
     }
 

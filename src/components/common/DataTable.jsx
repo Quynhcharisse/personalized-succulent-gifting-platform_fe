@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+    Box,
+    CircularProgress,
     Paper,
     Table,
     TableBody,
@@ -8,46 +10,44 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    Typography,
-    CircularProgress,
-    Box
+    Typography
 } from '@mui/material';
 
 const DataTable = ({
-    // Data props
-    data = [],
-    columns = [],
-    
-    // Loading & Error states
-    loading = false,
-    error = null,
-    
-    // Pagination props
-    pagination = true,
-    page = 0,
-    rowsPerPage = 10,
-    totalCount = 0,
-    onPageChange,
-    onRowsPerPageChange,
-    rowsPerPageOptions = [5, 10, 25, 50],
-    
-    // Styling props
-    headerBgColor = '#4CAF50',
-    headerTextColor = 'white',
-    hoverColor = '#f8f9fa',
-    borderColor = '#e0e0e0',
-    
-    // Custom render props
-    renderRow = null,
-    emptyMessage = 'Không có dữ liệu',
-    
-    // Table props
-    stickyHeader = false,
-    size = 'medium'
-}) => {
+                       // Data props
+                       data = [],
+                       columns = [],
+
+                       // Loading & Error states
+                       loading = false,
+                       error = null,
+
+                       // Pagination props
+                       pagination = true,
+                       page = 0,
+                       rowsPerPage = 10,
+                       totalCount = 0,
+                       onPageChange,
+                       onRowsPerPageChange,
+                       rowsPerPageOptions = [5, 10, 25, 50],
+
+                       // Styling props
+                       headerBgColor = '#4CAF50',
+                       headerTextColor = 'white',
+                       hoverColor = '#f8f9fa',
+                       borderColor = '#e0e0e0',
+
+                       // Custom render props
+                       renderRow = null,
+                       emptyMessage = 'Không có dữ liệu',
+
+                       // Table props
+                       stickyHeader = false,
+                       size = 'medium'
+                   }) => {
     // Default row renderer
     const defaultRenderRow = (row, index) => (
-        <TableRow 
+        <TableRow
             key={row.id || index}
             hover
             sx={{
@@ -136,7 +136,7 @@ const DataTable = ({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            data.map((row, index) => 
+                            data.map((row, index) =>
                                 renderRow ? renderRow(row, index) : defaultRenderRow(row, index)
                             )
                         )}

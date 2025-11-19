@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import '../styles/ui/SiteHeader.css'
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
 import {Avatar, Badge, Box, Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography} from '@mui/material'
@@ -21,8 +21,8 @@ import {NotificationDisplay} from '../services/NotificationService.jsx';
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { reloadFromStorage } from '../store/slices/cartSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {reloadFromStorage} from '../store/slices/cartSlice';
 
 
 export default function SiteHeader() {
@@ -57,29 +57,29 @@ export default function SiteHeader() {
     }, [currentUser, dispatch])
 
     const [role, setRole] = useState(null);
-    
+
     useEffect(() => {
         // Strategy: Dùng localStorage với verification định kỳ
         if (!currentUser) {
             setRole(null)
             return
         }
-        
+
         // Lấy role từ localStorage (performance)
         const localRole = (currentUser?.role || null)
-        
+
         // Verify với JWT ngay lần đầu, sau đó cache trong 5 phút
         const lastVerified = sessionStorage.getItem('role_verified_at')
         const now = Date.now()
         const FIVE_MINUTES = 5 * 60 * 1000
-        
+
         const verifyRole = async () => {
             try {
                 const access = await getAccessToken()
                 if (access) {
                     const decoded = jwtDecode(access)
                     const jwtRole = (decoded?.role || null)
-                    
+
                     if (localRole !== jwtRole) {
                         // Role bị fake, dùng JWT role
                         setRole(jwtRole ? jwtRole.toUpperCase() : null)
@@ -95,7 +95,7 @@ export default function SiteHeader() {
                 setRole(localRole ? localRole.toUpperCase() : null)
             }
         }
-        
+
         // Verify lần đầu hoặc sau 5 phút
         if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
             verifyRole()
@@ -122,7 +122,8 @@ export default function SiteHeader() {
                     const cartKey = `psgp_cart_v1_${userIdentifier}`
                     localStorage.removeItem(cartKey)
                 }
-            } catch {}
+            } catch {
+            }
             localStorage.removeItem('user')
             enqueueSnackbar('Đã đăng xuất', {variant: 'success'})
             handleCloseMenu()
@@ -145,7 +146,7 @@ export default function SiteHeader() {
                     <NavLink to="/" end> Sản phẩm </NavLink>
                     <NavLink to="/huong-dan-mua-hang"> Hướng dẫn mua hàng </NavLink>
                     <NavLink to="/cham-soc"> Chăm sóc </NavLink>
-                    <NavLink to="/buyer/posts"> Bài đăng </NavLink>
+                    <NavLink to="/posts"> Bài đăng </NavLink>
                     {(!currentUser || role === 'BUYER') && (
                         <NavLink to="/custom-request"> Điện Cây </NavLink>
                     )}

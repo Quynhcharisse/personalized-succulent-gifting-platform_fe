@@ -52,7 +52,7 @@ const ChatBot = () => {
                     <CloseIcon/>
                 </IconButton>
                 <iframe
-                    src="https://udify.app/chatbot/lEPq0T619KaQc5OR"
+                    src="https://udify.app/chatbot/wELC5dhszeiBgJoJ"
                     title="Chatbot"
                     width="100%"
                     height="100%"
