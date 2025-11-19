@@ -305,7 +305,13 @@ const ProductTable = () => {
 
     // Handle edit product
     const handleEditProduct = (product) => {
-        setSelectedProduct(product);
+        if (!product) {
+            showNotification('Không xác định được sản phẩm cần chỉnh sửa', 'error');
+            return;
+        }
+
+        const productClone = JSON.parse(JSON.stringify(product));
+        setSelectedProduct(productClone);
         setIsEdit(true);
         setDialogOpen(true);
     };
