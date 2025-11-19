@@ -14,7 +14,7 @@ import {DASHBOARD_STYLES} from '../../constants.js';
 const ProductViewDialog = ({
                                open, onClose,
                                selectedProduct,
-                               getStatusLabel,
+                               getStatusDisplay,
                                calculateSizePrice
                            }) => {
     if (!selectedProduct) return null;
@@ -219,21 +219,24 @@ const ProductViewDialog = ({
                                         }}>
                                             Trạng thái
                                         </Typography>
-                                        <Chip
-                                            label={getStatusLabel(selectedProduct.status)}
-                                            sx={{
-                                                fontWeight: 700,
-                                                backgroundColor: '#22c55e',
-                                                color: 'white',
-                                                fontSize: '0.9rem',
-                                                px: 2,
-                                                py: 1,
-                                                height: 'auto',
-                                                '& .MuiChip-label': {
-                                                    px: 1
-                                                }
-                                            }}
-                                        />
+                                        {(() => {
+                                            const status = getStatusDisplay(selectedProduct.status);
+                                            return (
+                                                <Chip
+                                                    label={status.label}
+                                                    sx={{
+                                                        fontWeight: 800,
+                                                        fontSize: '0.85rem',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.8px',
+                                                        px: 3,
+                                                        py: 1,
+                                                        borderRadius: '999px',
+                                                        ...status.chipSx
+                                                    }}
+                                                />
+                                            );
+                                        })()}
                                     </Box>
                                 </Box>
                                 <Box sx={{
