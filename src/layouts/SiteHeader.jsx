@@ -11,6 +11,7 @@ import {
     LocalGroceryStore as LocalGroceryStoreIcon,
     Logout as LogoutIcon,
     Person as PersonIcon,
+    Receipt as ReceiptIcon,
     Storefront as StorefrontIcon
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
@@ -127,7 +128,6 @@ export default function SiteHeader() {
             enqueueSnackbar('Đã đăng xuất', {variant: 'success'})
             handleCloseMenu()
             navigate('/', {replace: true})
-            // Reload to refresh header state derived from storage/cookies
             setTimeout(() => window.location.reload(), 300)
         } catch (error) {
             enqueueSnackbar('Không thể đăng xuất. Vui lòng thử lại', {variant: 'error'})
@@ -287,6 +287,12 @@ export default function SiteHeader() {
                                             <MenuItem key="buyer-custom" onClick={() => navigate('/custom-request')}>
                                                 <ListItemIcon><BuildIcon fontSize="small"/></ListItemIcon>
                                                 Yêu cầu tùy chỉnh
+                                            </MenuItem>
+                                        ),
+                                        (
+                                            <MenuItem key="buyer-order" onClick={() => navigate('/buyer/orders')}>
+                                                <ListItemIcon><ReceiptIcon fontSize="small"/></ListItemIcon>
+                                                Đơn hàng
                                             </MenuItem>
                                         )
                                     ]}
