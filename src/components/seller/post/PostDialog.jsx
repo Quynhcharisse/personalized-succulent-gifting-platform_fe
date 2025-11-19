@@ -235,10 +235,10 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                         {/* Post images as name+link list */}
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <Typography variant="subtitle2">Images</Typography>
-                                <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Add image</Button>
+                                <Typography variant="subtitle2">Hình ảnh</Typography>
+                                <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Thêm ảnh</Button>
                                 <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
-                                    Provide name and link for each image
+                                    Cung cấp tên và liên kết cho mỗi ảnh
                                 </Typography>
                             </Box>
 
@@ -246,14 +246,14 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                                 {postImages.map((pi, idx) => (
                                     <Box key={pi.id ?? `pi-${idx}`} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                         <TextField
-                                            label="Name"
+                                            label="Tên"
                                             value={pi.name}
                                             onChange={e => updatePostImage(idx, 'name', e.target.value)}
                                             size="small"
                                             fullWidth
                                         />
                                         <TextField
-                                            label="Link"
+                                            label="Liên kết"
                                             value={pi.link}
                                             onChange={e => updatePostImage(idx, 'link', e.target.value)}
                                             size="small"
@@ -265,7 +265,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                                     </Box>
                                 ))}
                                 {postImages.length === 0 && (
-                                    <Typography variant="caption" color="text.secondary">No images added</Typography>
+                                    <Typography variant="caption" color="text.secondary">Chưa thêm ảnh</Typography>
                                 )}
                             </Stack>
                         </Box>

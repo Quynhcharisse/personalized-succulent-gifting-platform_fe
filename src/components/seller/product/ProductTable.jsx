@@ -256,7 +256,6 @@ const ProductTable = () => {
                 setProducts([]);
             }
         } catch (err) {
-            console.error('Error loading products:', err);
             setError('Không thể tải danh sách sản phẩm');
             showNotification('Lỗi khi tải danh sách sản phẩm', 'error');
         } finally {
@@ -306,7 +305,6 @@ const handleDeleteProduct = async (product) => {
     loadProducts();
   } catch (err) {
     if (err) { // Nếu người dùng bấm Huỷ thì confirm sẽ ném error, nên check kỹ
-      console.error('Error deleting product:', err);
       showNotification('Không thể xoá sản phẩm', 'error');
     }
   }

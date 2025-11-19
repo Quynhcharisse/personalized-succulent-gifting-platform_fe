@@ -273,12 +273,8 @@ const CreateOrUpdateProductDialog = ({
 
     // Initialize form data
     useEffect(() => {
-        console.log('Initialize form data - isEdit:', isEdit);
-        console.log('Initialize form data - editProduct:', editProduct);
-
         if (isEdit && editProduct) {
             const initialData = normalizeEditProductData(editProduct);
-            console.log('Setting form data for edit:', initialData);
             setFormData(initialData);
         } else {
             const initialData = {
@@ -288,7 +284,6 @@ const CreateOrUpdateProductDialog = ({
                 sizes: [],
                 images: []
             };
-            console.log('Setting form data for create:', initialData);
             setFormData(initialData);
         }
     }, [isEdit, editProduct, open]);
@@ -301,9 +296,6 @@ const CreateOrUpdateProductDialog = ({
                     getSucculents(),
                     getAccessories('all')
                 ]);
-
-                console.log('Succulents response:', succulentsRes);
-                console.log('Accessories response:', accessoriesRes);
 
                 // Handle succulents data
                 if (succulentsRes?.data?.data && Array.isArray(succulentsRes.data.data)) {
@@ -677,11 +669,6 @@ const CreateOrUpdateProductDialog = ({
                 url: image.url.trim()
             })) : []
         };
-
-        console.log('TransformDataForAPI - isEdit:', isEdit);
-        console.log('TransformDataForAPI - productId:', payload.productId);
-        console.log('TransformDataForAPI - createAction:', payload.createAction);
-
         return payload;
     };
 
@@ -696,11 +683,6 @@ const CreateOrUpdateProductDialog = ({
 
         try {
             const payload = transformDataForAPI();
-            console.log('Product payload:', payload);
-            console.log('isEdit:', isEdit);
-            console.log('formData.productId:', formData.productId);
-            console.log('editProduct:', editProduct);
-
             const response = await createOrUpdateProduct(payload);
 
             if (response && response.data && response.data.message) {
@@ -733,13 +715,6 @@ const CreateOrUpdateProductDialog = ({
     const availablePots = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'PLANT_POT') : [];
     const availableSoils = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'SOIL') : [];
     const availableDecorations = Array.isArray(accessories) ? accessories.filter(acc => acc.category === 'DECORATION') : [];
-
-    // Debug logs
-    console.log('Current succulents state:', succulents);
-    console.log('Current accessories state:', accessories);
-    console.log('Available pots:', availablePots);
-    console.log('Available soils:', availableSoils);
-    console.log('Available decorations:', availableDecorations);
 
     return (
         <Dialog

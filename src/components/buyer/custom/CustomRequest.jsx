@@ -16,7 +16,13 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {Add as AddIcon, ArrowBack, Build, Delete as DeleteIcon, PhotoCamera as PhotoCameraIcon, AutoAwesome as AutoAwesomeIcon} from '@mui/icons-material';
+import {
+    Add as AddIcon,
+    ArrowBack,
+    Build,
+    Delete as DeleteIcon,
+    PhotoCamera as PhotoCameraIcon
+} from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
 import {getAccessories, getSucculents} from '../../../services/ProductService.jsx';
 import {createCustomProductRequest} from '../../../services/CustomeRequestService.jsx';
@@ -81,7 +87,6 @@ export default function CustomRequest() {
                     setAvailableDecorations(acc.decorations || []);
                 }
             } catch (error) {
-                console.error("Error loading data:", error);
                 enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
             } finally {
                 setLoading(false);
@@ -97,7 +102,7 @@ export default function CustomRequest() {
             if (filterType === 'fengshui') {
                 return s.fengShuiElements && s.fengShuiElements.includes(filterValue);
             }
-            if (filterType === 'zodiac') {  
+            if (filterType === 'zodiac') {
                 return s.zodiacs && s.zodiacs.includes(filterValue);
             }
             return true;
@@ -319,7 +324,6 @@ export default function CustomRequest() {
                 occasion: formData.occasion || null,
                 size: {
                     succulents: formData.succulents.map(s => {
-                        console.log("allSucculents: ", allSucculents)
                         const succulentData = allSucculents.find(as => as.id === s.id);
                         return {
                             id: succulentData?.id,
@@ -352,7 +356,6 @@ export default function CustomRequest() {
             enqueueSnackbar('Gửi yêu cầu thành công!', {variant: 'success'});
             navigate('/custom-request');
         } catch (error) {
-            console.error("Error submitting custom request:", error);
             enqueueSnackbar('Gửi yêu cầu thất bại', {variant: 'error'});
         } finally {
             setIsSubmitting(false);
@@ -417,11 +420,11 @@ export default function CustomRequest() {
 
                 <Paper elevation={0}
                        sx={{p: 4, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', backgroundColor: '#fff'}}>
-                    
+
                     {/* Occasion Field */}
                     <Box sx={{mb: 4}}>
                         <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>Dịp đặc biệt (tùy chọn)</Typography>
-                        
+
                         {/* Quick Select Buttons */}
                         <Box sx={{mb: 2}}>
                             <Typography variant="body2" sx={{mb: 1, color: 'text.secondary'}}>Chọn nhanh:</Typography>
@@ -497,7 +500,7 @@ export default function CustomRequest() {
                     </Box>
 
                     <Divider sx={{my: 4}}/>
-                    
+
                     {/* Filters */}
                     <Box sx={{mb: 4}}>
                         <Typography variant="h6" sx={{fontWeight: 600, mb: 2}}>Bộ lọc sen đá</Typography>
@@ -633,11 +636,11 @@ export default function CustomRequest() {
                                 <TextField sx={{flex: 1}} label="Số lượng" type="number" value={succulent.quantity}
                                            onChange={(e) => handleSucculentChange(index, 'quantity', parseInt(e.target.value) || 1)}
                                            slotProps={{
-                                            input: {
-                                                min: 1
-                                            }
+                                               input: {
+                                                   min: 1
+                                               }
                                            }}
-                                           />
+                                />
                                 <IconButton color="error"
                                             onClick={() => handleRemoveSucculent(index)}><DeleteIcon/></IconButton>
                             </Card>
@@ -687,11 +690,11 @@ export default function CustomRequest() {
                                            soilMass: parseInt(e.target.value) || 0
                                        }))} sx={{mt: 2}}
                                        slotProps={{
-                                        input: {
-                                            endAdornment: <InputAdornment position="end">g</InputAdornment>
-                                        }
+                                           input: {
+                                               endAdornment: <InputAdornment position="end">g</InputAdornment>
+                                           }
                                        }}
-                                       />
+                            />
                         </Box>
                     </Box>
 
@@ -734,11 +737,11 @@ export default function CustomRequest() {
                                 <TextField sx={{flex: 1}} label="Số lượng" type="number" value={decoration.quantity}
                                            onChange={(e) => handleDecorationChange(index, 'quantity', parseInt(e.target.value) || 1)}
                                            slotProps={{
-                                            input: {
-                                                min: 1
-                                            }
+                                               input: {
+                                                   min: 1
+                                               }
                                            }}
-                                           />
+                                />
                                 <IconButton color="error"
                                             onClick={() => handleRemoveDecoration(index)}><DeleteIcon/></IconButton>
                             </Card>
