@@ -47,36 +47,56 @@ const ProductTable = () => {
     const {showNotification} = useNotify();
 
     // Helper functions
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'available':
-            case 'có sẵn':
-                return 'success';
-            case 'unavailable':
-            case 'hết hàng':
-                return 'error';
-            case 'draft':
-            case 'bản nháp':
-                return 'warning';
-            default:
-                return 'default';
+    const STATUS_STYLES = [
+        {
+            matches: ['available', 'có sẵn', 'co san', 'in_stock', 'in stock', 'đang còn hàng', 'dang con hang'],
+            label: 'ĐANG CÒN HÀNG',
+            chipSx: {
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: '#ffffff',
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.25)'
+            }
+        },
+        {
+            matches: ['unavailable', 'hết hàng', 'het hang', 'out_of_stock', 'out of stock'],
+            label: 'HẾT HÀNG',
+            chipSx: {
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: '#ffffff',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)'
+            }
+        },
+        {
+            matches: ['draft', 'bản nháp', 'ban nhap', 'pending'],
+            label: 'BẢN NHÁP',
+            chipSx: {
+                background: 'linear-gradient(135deg, #facc15 0%, #eab308 100%)',
+                color: '#1f2937',
+                boxShadow: '0 4px 12px rgba(234, 179, 8, 0.25)'
+            }
         }
-    };
+    ];
 
-    const getStatusLabel = (status) => {
-        switch (status) {
-            case 'available':
-            case 'có sẵn':
-                return 'Có sẵn';
-            case 'unavailable':
-            case 'hết hàng':
-                return 'Hết hàng';
-            case 'draft':
-            case 'bản nháp':
-                return 'Bản nháp';
-            default:
-                return status;
+    const getStatusDisplay = (status) => {
+        const normalized = (status ?? '').toString().trim().toLowerCase();
+        const matched = STATUS_STYLES.find((style) => style.matches.includes(normalized));
+
+        if (matched) {
+            return {
+                label: matched.label,
+                chipSx: matched.chipSx
+            };
         }
+
+        return {
+            label: (status ?? 'Không xác định').toString().toUpperCase(),
+            chipSx: {
+                backgroundColor: '#e5e7eb',
+                color: '#374151',
+                boxShadow: 'none',
+                border: '1px solid rgba(107, 114, 128, 0.35)'
+            }
+        };
     };
 
     const calculateSizePrice = (size) => {
@@ -177,17 +197,25 @@ const ProductTable = () => {
             field: 'status',
             header: 'Trạng Thái',
             render: (row) => (
-                <Chip
-                label={getStatusLabel(row.status)}
-                color={getStatusColor(row.status)}
-                size="small"
-                sx={{
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase'
-                }}
-              />
+                (() => {
+                    const status = getStatusDisplay(row.status);
+                    return (
+                        <Chip
+                            label={status.label}
+                            size="small"
+                            sx={{
+                                fontWeight: 700,
+                                fontSize: '0.7rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.6px',
+                                px: 2.2,
+                                py: 0.5,
+                                borderRadius: '999px',
+                                ...status.chipSx
+                            }}
+                        />
+                    );
+                })()
             )
         },
         {
@@ -277,7 +305,13 @@ const ProductTable = () => {
 
     // Handle edit product
     const handleEditProduct = (product) => {
-        setSelectedProduct(product);
+        if (!product) {
+            showNotification('Không xác định được sản phẩm cần chỉnh sửa', 'error');
+            return;
+        }
+
+        const productClone = JSON.parse(JSON.stringify(product));
+        setSelectedProduct(productClone);
         setIsEdit(true);
         setDialogOpen(true);
     };
@@ -401,8 +435,7 @@ const handleDeleteProduct = async (product) => {
                 open={viewDialogOpen}
                 onClose={() => setViewDialogOpen(false)}
                 selectedProduct={selectedProduct}
-                getStatusLabel={getStatusLabel}
-                getStatusColor={getStatusColor}
+                getStatusDisplay={getStatusDisplay}
                 calculateSizePrice={calculateSizePrice}
                 handleEditProduct={handleEditProduct}
             />
