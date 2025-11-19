@@ -24,13 +24,13 @@ import {
     AutoAwesome as DecorationIcon,
     Build,
     Edit as EditIcon,
+    Event as EventIcon,
     ExpandMore as ExpandMoreIcon,
     LocalFlorist as PotIcon,
     Park as SoilIcon,
     Schedule,
     Spa as SucculentIcon
 } from '@mui/icons-material';
-import { Event as EventIcon } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
@@ -80,7 +80,6 @@ export default function CustomRequestDetail() {
                 enqueueSnackbar("Không tìm thấy yêu cầu", {variant: 'warning'});
             }
         } catch (error) {
-            console.error("Error fetching custom request detail:", error);
             enqueueSnackbar("Không thể tải chi tiết yêu cầu", {variant: 'error'});
             navigate('/custom-request');
         } finally {
@@ -192,7 +191,6 @@ export default function CustomRequestDetail() {
                 fetchCustomRequestDetail();
             }
         } catch (error) {
-            console.error("Error submitting revision:", error);
             enqueueSnackbar("Không thể gửi yêu cầu chỉnh sửa", {variant: 'error'});
         } finally {
             setSubmittingRevision(false);

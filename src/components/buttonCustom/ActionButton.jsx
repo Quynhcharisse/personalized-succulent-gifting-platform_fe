@@ -3,17 +3,17 @@ import {COLORS} from "../constants.js";
 import {Button, CircularProgress} from "@mui/material";
 
 export default function ActionButton({
-    action = 'primary',
-    loading = false,
-    disabled = false,
-    type = 'button',
-    onClick,
-    children,
-    startIcon,
-    endIcon,
-    sx,
-    ...rest
-}) {
+                                         action = 'primary',
+                                         loading = false,
+                                         disabled = false,
+                                         type = 'button',
+                                         onClick,
+                                         children,
+                                         startIcon,
+                                         endIcon,
+                                         sx,
+                                         ...rest
+                                     }) {
     // Xử lý mặc định cho các action
     const handleDefaultAction = () => {
         switch (action) {
@@ -34,13 +34,13 @@ export default function ActionButton({
 
     // palette dựa trên COLORS
     const palette = {
-        close:  { bg: COLORS.info, text: COLORS.surface },
-        cancel: { bg: COLORS.error, text: COLORS.surface },
-        update: { bg: COLORS.warning, text: COLORS.surface },
-        create: { bg: COLORS.success, text: COLORS.surface },
-        primary:{ bg: COLORS.primary, text: COLORS.surface },
-        submit: { bg: COLORS.primary, text: COLORS.surface },
-    }[action] || { bg: COLORS.primary, text: COLORS.surface };
+        close: {bg: COLORS.info, text: COLORS.surface},
+        cancel: {bg: COLORS.error, text: COLORS.surface},
+        update: {bg: COLORS.warning, text: COLORS.surface},
+        create: {bg: COLORS.success, text: COLORS.surface},
+        primary: {bg: COLORS.primary, text: COLORS.surface},
+        submit: {bg: COLORS.primary, text: COLORS.surface},
+    }[action] || {bg: COLORS.primary, text: COLORS.surface};
 
     // label mặc định theo action (có thể override bằng children)
     const defaultLabel = {
@@ -79,7 +79,7 @@ export default function ActionButton({
         >
             {loading ? (
                 <>
-                    <CircularProgress size={20} sx={{ mr: 1, color: COLORS.surface }} />
+                    <CircularProgress size={20} sx={{mr: 1, color: COLORS.surface}}/>
                     Đang xử lý...
                 </>
             ) : (
