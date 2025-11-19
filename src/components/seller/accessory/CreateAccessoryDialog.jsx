@@ -358,19 +358,15 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
             switch (form.category) {
                 case 'DECOR_ACCESSORY':
                     accessoryData = createDecorationData();
-                    console.log('Decoration payload:', JSON.stringify(accessoryData, null, 2), 'createAction:', !isEdit);
                     response = await createDecorationAccessory(accessoryData, !isEdit);
                     break;
                 case 'PLANT_POT':
                     accessoryData = createPotData();
-                    console.log('Pot payload:', JSON.stringify(accessoryData, null, 2));
-                    console.log('Image URL:', form.image);
-                    console.log('Images array:', accessoryData.potData.images);
                     response = await createPotAccessory(accessoryData, !isEdit);
                     break;
                 case 'SOIL':
                     accessoryData = createSoilData();
-                    console.log('Soil payload:', JSON.stringify(accessoryData, null, 2), 'createAction:', !isEdit);
+
                     response = await createSoilAccessory(accessoryData, !isEdit);
                     break;
                 default:
@@ -387,7 +383,6 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                 setMessage({type: 'error', text: isEdit ? 'Cập nhật phụ kiện thất bại' : 'Tạo phụ kiện thất bại'});
             }
         } catch (error) {
-            console.error('Error creating/updating accessory:', error);
             console.error('Error response:', error.response?.data);
             console.error('Error status:', error.response?.status);
             
