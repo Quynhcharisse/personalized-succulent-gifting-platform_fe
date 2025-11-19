@@ -158,6 +158,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [originalName, setOriginalName] = useState('');
+    const [originalNameKey, setOriginalNameKey] = useState('');
 
     // Initialize form with edit data if in edit mode
     React.useEffect(() => {
@@ -173,9 +174,11 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
             const raw = editItem?.raw || editItem || {};
             const rawName = asString(raw.name ?? editItem?.name ?? '').trim();
             setOriginalName(rawName);
+            setOriginalNameKey(rawName.toLowerCase());
         } else {
             setForm(createEmptyForm());
             setOriginalName('');
+            setOriginalNameKey('');
         }
     }, [isEdit, editItem, open]);
 
@@ -263,7 +266,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     };
 
     const createDecorationData = () => {
-        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
+        const nameForRequest = isEdit && originalNameKey ? originalNameKey : form.name.trim();
         return {
             createPot: false,
             potData: null,
@@ -286,7 +289,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
         if (!imageUrl) {
             throw new Error('Hình ảnh là bắt buộc');
         }
-        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
+        const nameForRequest = isEdit && originalNameKey ? originalNameKey : form.name.trim();
 
         return {
             createPot: true,
@@ -316,7 +319,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     }
 
     const createSoilData = () => {
-        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
+        const nameForRequest = isEdit && originalNameKey ? originalNameKey : form.name.trim();
         return {
             createPot: false,
             potData: null,
