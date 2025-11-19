@@ -157,6 +157,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [originalName, setOriginalName] = useState('');
 
     // Initialize form with edit data if in edit mode
     React.useEffect(() => {
@@ -169,8 +170,12 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
 
         if (isEdit && editItem) {
             setForm(buildFormFromEditItem(editItem));
+            const raw = editItem?.raw || editItem || {};
+            const rawName = asString(raw.name ?? editItem?.name ?? '').trim();
+            setOriginalName(rawName);
         } else {
             setForm(createEmptyForm());
+            setOriginalName('');
         }
     }, [isEdit, editItem, open]);
 
@@ -258,6 +263,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     };
 
     const createDecorationData = () => {
+        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
         return {
             createPot: false,
             potData: null,
@@ -265,7 +271,7 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
             soilData: null,
             createDecoration: true,
             decorationData: {
-                name: form.name.trim(),
+                name: nameForRequest,
                 description: form.description.trim(),
                 price: Number(form.priceSell),
                 availableQty: Number(form.quantity),
@@ -280,11 +286,12 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
         if (!imageUrl) {
             throw new Error('Hình ảnh là bắt buộc');
         }
-        
+        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
+
         return {
             createPot: true,
             potData: {
-                name: form.name.trim(),
+                name: nameForRequest,
                 description: form.description.trim(),
                 material: form.material.trim(),
                 color: form.color,
@@ -309,12 +316,13 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
     }
 
     const createSoilData = () => {
+        const nameForRequest = isEdit && originalName ? originalName : form.name.trim();
         return {
             createPot: false,
             potData: null,
             createSoil: true,
             soilData: {
-                name: form.name.trim(),
+                name: nameForRequest,
                 description: form.description.trim(),
                 availableMassValue: Number(form.availableMassValue),
                 basePricing: {
@@ -491,6 +499,9 @@ export default function CreateAccessoryDialog({open, onClose, onCreate, editItem
                     error={!!errors.name}
                     helperText={errors.name}
                     sx={DASHBOARD_STYLES.formField}
+                    InputProps={{
+                        readOnly: isEdit
+                    }}
                 />
                         </Box>
                         <Box>
