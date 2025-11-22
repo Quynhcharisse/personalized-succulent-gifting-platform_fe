@@ -19,6 +19,7 @@ import {
 import {
     Add as AddIcon,
     ArrowBack,
+    AutoAwesome as AutoAwesomeIcon,
     Build,
     Delete as DeleteIcon,
     PhotoCamera as PhotoCameraIcon
