@@ -41,87 +41,6 @@ export default function Home() {
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
-    const bestSellerTeasers = [
-        {
-            id: 'kit-01',
-            name: 'Bộ dụng cụ chăm cây 5 món',
-            priceVnd: 129000,
-            image:
-                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
-        },
-        {
-            id: 'pot-01',
-            name: 'Chậu gốm men mờ 10cm',
-            priceVnd: 99000,
-            image:
-                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
-        },
-        {
-            id: 'mix-01',
-            name: 'Combo 3 chậu phối cảnh',
-            priceVnd: 219000,
-            image:
-                'https://i.pinimg.com/1200x/91/1c/2b/911c2b2c588dd90c2682f527a2b3a2fb.jpg',
-        },
-    ]
-
-
-    const testimonials = [
-        {
-            id: 'rv-01',
-            name: 'Khải Anh',
-            text:
-                'Shop tư vấn rất nhiệt tình. Cây đóng gói chắc chắn, nhận hàng lá vẫn tươi.',
-            rating: 5,
-        },
-        {
-            id: 'rv-02',
-            name: 'Chi Lam',
-            text: 'Giá hợp lý, cây khỏe. Mua tặng bạn được khen hết lời!',
-            rating: 5,
-        },
-        {
-            id: 'rv-03',
-            name: 'Minh Quân',
-            text: 'Lần đầu trồng vẫn sống tốt nhờ hướng dẫn chăm rất chi tiết.',
-            rating: 4,
-        },
-    ]
-
-    const calculateProductPrice = (size) => {
-        if (!size) return 0;
-        let totalPrice = 0;
-
-        // Add succulent prices
-        size.succulents?.forEach(succulent => {
-            if (succulent.size && Array.isArray(succulent.size)) {
-                succulent.size.forEach(sizeItem => {
-                    totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
-                });
-            } else if (succulent.size?.price) {
-                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
-            }
-        });
-
-        // Add pot price
-        if (size.pot?.size && size.pot.size.length > 0) {
-            totalPrice += size.pot.size[0].price || 0;
-        }
-
-        // Add soil price
-        if (size.soil?.basePricing) {
-            const soilPrice = (size.soil.basePricing.price / size.soil.basePricing.massValue) * size.soil.massAmount;
-            totalPrice += soilPrice;
-        }
-
-        // Add decoration prices
-        size.decorations?.forEach(decoration => {
-            totalPrice += decoration.totalPrice || 0;
-        });
-
-        return totalPrice;
-    };
-
     // Highlight only sections on Home (exclude /cham-soc which is a separate page)
     useEffect(() => {
         const sectionIds = ['san-pham', 'danh-gia', 'ly-do']
@@ -142,17 +61,6 @@ export default function Home() {
         })
         return () => observer.disconnect()
     }, [])
-
-    // Close contact dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (showContactDropdown && !event.target.closest('.contact-widget')) {
-                setShowContactDropdown(false)
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [showContactDropdown])
 
     return (
         <>
@@ -223,7 +131,8 @@ export default function Home() {
                             <h2 className="section-title">Sản phẩm bán chạy</h2>
                         </div>
                         <div className="bestsellers__grid">
-                            {(catalogProducts.length > 0 ? catalogProducts.slice(0, 3) : bestSellerTeasers).map((t) => {
+                            {/* Chỉ render khi có dữ liệu thật từ catalogProducts */}
+                            {catalogProducts.slice(0, 3).map((t) => {
                                 const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
                                 const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
                                 return (
@@ -243,6 +152,9 @@ export default function Home() {
                                     </article>
                                 );
                             })}
+                            {catalogProducts.length === 0 && (
+                                <p style={{textAlign: 'center', width: '100%'}}>Đang cập nhật sản phẩm...</p>
+                            )}
                         </div>
                         <div style={{display: 'flex', justifyContent: 'center', marginTop: '2rem'}}>
                             <Button
