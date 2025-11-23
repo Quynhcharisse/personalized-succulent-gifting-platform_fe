@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {
     Alert,
@@ -21,15 +21,16 @@ import {ArrowBack, Brush, LocalFlorist, ShoppingCart, SquareFoot, WaterDrop} fro
 import {useSnackbar} from 'notistack';
 
 import {useDispatch, useSelector} from 'react-redux';
-import {viewProduct} from '../../../services/ProductService.jsx';
-import {addItem} from '../../../store/slices/cartSlice.js';
+import {viewProduct} from '@/services/ProductService.jsx';
+import {addItem} from '@/store/slices/cartSlice.js';
+import {createProductSlug, findProductBySlug} from '@utils/slugUtil.js';
 
 // Cache key for sessionStorage (same as ProductList)
 const PRODUCTS_CACHE_KEY = 'products_cache';
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
 export default function ProductDetail() {
-    const {id} = useParams();
+    const {slug} = useParams();
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
     const [product, setProduct] = useState(null);
@@ -52,24 +53,25 @@ export default function ProductDetail() {
 
     useEffect(() => {
         fetchProductDetail();
-    }, [id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [slug]);
 
     // Reset quantity when size changes
     useEffect(() => {
         setQuantity(1);
     }, [selectedSizeIndex]);
 
-    // Try to get product from cache first
+    // Try to get product from cache first by slug
     const getProductFromCache = useCallback(() => {
         try {
             const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
             if (cached) {
-                const { data, timestamp } = JSON.parse(cached);
+                const {data, timestamp} = JSON.parse(cached);
                 const now = Date.now();
-                
+
                 // Use cache if it's still valid (less than 5 minutes old)
                 if (now - timestamp < CACHE_EXPIRY_TIME) {
-                    const product = data.find(p => p.id === parseInt(id));
+                    const product = findProductBySlug(slug, data);
                     if (product) {
                         return product;
                     }
@@ -79,7 +81,7 @@ export default function ProductDetail() {
             console.warn('Error reading product cache:', error);
         }
         return null;
-    }, [id]);
+    }, [slug]);
 
     const fetchProductDetail = async () => {
         try {
@@ -99,7 +101,7 @@ export default function ProductDetail() {
             // Step 2: Only call API if cache is not available
             const response = await viewProduct();
             if (response && response.data && response.data.data) {
-                const product = response.data.data.find(p => p.id === parseInt(id));
+                const product = findProductBySlug(slug, response.data.data);
                 if (product) {
                     setProduct(product);
                     setError(null);
@@ -122,15 +124,22 @@ export default function ProductDetail() {
         try {
             const response = await viewProduct();
             if (response && response.data && response.data.data) {
-                const product = response.data.data.find(p => p.id === parseInt(id));
+                const product = findProductBySlug(slug, response.data.data);
                 if (product) {
                     setProduct(product);
+                } else {
+                    // Product no longer exists in API but was in cache
+                    // Keep showing cached version but log warning
+                    if (!silent) {
+                        console.warn('Product not found in fresh data, but showing cached version');
+                    }
                 }
             }
         } catch (error) {
             if (!silent) {
                 console.error('Error fetching fresh product:', error);
             }
+            // If API fails, keep showing cached version (better than showing error)
         }
     };
 
@@ -188,8 +197,10 @@ export default function ProductDetail() {
 
     const addSelectionToCart = () => {
         if (!isLoggedIn()) {
+            const productName = typeof product?.name === 'object' ? JSON.stringify(product?.name) : product?.name;
+            const currentSlug = productName ? createProductSlug(productName, product?.id) : slug;
             enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', {variant: 'info'});
-            navigate('/login', {state: {from: `/product/${id}`}});
+            navigate('/login', {state: {from: `/product/${currentSlug}`}});
             return false;
         }
 
@@ -245,8 +256,10 @@ export default function ProductDetail() {
 
     const handleAddToWishlist = () => {
         if (!isLoggedIn()) {
+            const productName = typeof product?.name === 'object' ? JSON.stringify(product?.name) : product?.name;
+            const currentSlug = productName ? createProductSlug(productName, product?.id) : slug;
             enqueueSnackbar('Vui lòng đăng nhập để thêm vào yêu thích', {variant: 'info'});
-            navigate('/login', {state: {from: `/product/${id}`}});
+            navigate('/login', {state: {from: `/product/${currentSlug}`}});
             return;
         }
 

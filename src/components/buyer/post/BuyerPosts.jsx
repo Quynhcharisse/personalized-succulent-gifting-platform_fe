@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Stack, CircularProgress } from '@mui/material';
-import { viewPosts, createPostComment } from '../../../services/PostService.jsx';
-import { viewProduct } from '../../../services/ProductService.jsx';
+import React, {useEffect, useState} from 'react';
+import {Box, CircularProgress, Stack, Typography} from '@mui/material';
+import {createPostComment, viewPosts} from '@/services/PostService.jsx';
+import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerEmptyState from './BuyerEmptyState.jsx';
 
@@ -16,7 +16,7 @@ const fetchProductsByIds = async (ids = []) => {
     unique.forEach((id, idx) => {
         const payload = res[idx];
         const data = payload?.data ?? payload;
-        if (data) map[id] = { id: data.id ?? id, name: data.name ?? data.title ?? `Sản phẩm #${id}` };
+        if (data) map[id] = {id: data.id ?? id, name: data.name ?? data.title ?? `Sản phẩm #${id}`};
     });
     return map;
 };
@@ -42,7 +42,7 @@ const BuyerPosts = () => {
                 }))
                 : (Array.isArray(p?.comments) ? p.comments : []);
 
-            const product = p.product || (p.productId ? { id: p.productId, name: p.productName || '-' } : null);
+            const product = p.product || (p.productId ? {id: p.productId, name: p.productName || '-'} : null);
             const images = Array.isArray(p?.images?.postImages) ? p.images.postImages : (Array.isArray(p?.images) ? p.images : []);
 
             return {
@@ -75,7 +75,7 @@ const BuyerPosts = () => {
                         ...(productFromApi || {})
                     };
 
-                    const seller = { id: p.sellerId, name: p.sellerName || `Người bán #${p.sellerId}` };
+                    const seller = {id: p.sellerId, name: p.sellerName || `Người bán #${p.sellerId}`};
 
                     const comments = (p.comments || []).map(c => ({
                         ...c,
@@ -105,7 +105,7 @@ const BuyerPosts = () => {
 
     const handleCreateComment = async (postId, content) => {
         try {
-            await createPostComment(postId, { content });
+            await createPostComment(postId, {content});
             refresh();
         } catch (err) {
             console.error('Đăng bình luận thất bại', err);
@@ -114,8 +114,8 @@ const BuyerPosts = () => {
 
     if (isLoading) {
         return (
-            <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, textAlign: 'center' }}>
-                <CircularProgress />
+            <Box sx={{maxWidth: 800, mx: 'auto', py: 6, textAlign: 'center'}}>
+                <CircularProgress/>
                 <Typography variant="body2" color="text.secondary" mt={2}>Đang tải bài đăng...</Typography>
             </Box>
         );
@@ -130,9 +130,9 @@ const BuyerPosts = () => {
             backgroundSize: 'cover',
             py: 4
         }}>
-            <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+            <Box sx={{maxWidth: 800, mx: 'auto'}}>
                 {posts.length === 0 ? (
-                    <BuyerEmptyState onRefresh={refresh} />
+                    <BuyerEmptyState onRefresh={refresh}/>
                 ) : (
                     <Stack spacing={3}>
                         {posts.map(post => (

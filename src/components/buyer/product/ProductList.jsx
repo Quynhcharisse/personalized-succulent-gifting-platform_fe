@@ -4,6 +4,7 @@ import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextFi
 import {Search, Clear, LocalFlorist, ShoppingCart, Visibility} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '../../../services/ProductService.jsx';
+import {createProductSlug} from '../../../utils/slugUtil.js';
 
 // Cache key for sessionStorage
 const PRODUCTS_CACHE_KEY = 'products_cache';
@@ -294,7 +295,7 @@ export default function ProductList() {
                         {/* View Detail Icon */}
                         <IconButton
                             size="small"
-                            onClick={(e) => onViewDetail(e, product.id)}
+                            onClick={(e) => onViewDetail(e, product)}
                             sx={{
                                 width: 44,
                                 height: 44,
@@ -454,7 +455,7 @@ export default function ProductList() {
                                 fullWidth
                                 variant="contained"
                                 startIcon={<Visibility />}
-                                onClick={(e) => onViewDetail(e, product.id)}
+                                onClick={(e) => onViewDetail(e, product)}
                                 className="view-detail-btn"
                                 sx={{
                                     background: 'linear-gradient(135deg, #0D3B2E 0%, #1a5f4a 100%)',
@@ -486,8 +487,10 @@ export default function ProductList() {
     });
     ProductCard.displayName = 'ProductCard';
 
-    const handleProductClick = useCallback((productId) => {
-        navigate(`/product/${productId}`);
+    const handleProductClick = useCallback((product) => {
+        const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
+        const slug = createProductSlug(productName, product.id);
+        navigate(`/product/${slug}`);
     }, [navigate]);
     
     const handleAddToCart = useCallback((e, product) => {
@@ -502,9 +505,11 @@ export default function ProductList() {
         enqueueSnackbar('Đã thêm vào giỏ hàng', {variant: 'success'});
     }, [isLoggedIn, enqueueSnackbar, navigate]);
 
-    const handleViewDetail = useCallback((e, productId) => {
+    const handleViewDetail = useCallback((e, product) => {
         e.stopPropagation();
-        navigate(`/product/${productId}`);
+        const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
+        const slug = createProductSlug(productName, product.id);
+        navigate(`/product/${slug}`);
     }, [navigate]);
 
     // Removed custom request on product card

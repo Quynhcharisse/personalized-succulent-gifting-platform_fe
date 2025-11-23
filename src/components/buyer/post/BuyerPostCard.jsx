@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardActions,
-    Typography,
-    Link,
-    Stack,
     Box,
     Button,
-    TextField,
-    IconButton,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
     CircularProgress,
     Dialog,
     DialogContent,
-    DialogTitle
+    DialogTitle,
+    IconButton,
+    Link,
+    Stack,
+    TextField,
+    Typography
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import {createProductSlug} from '@utils/slugUtil.js';
 
-const BuyerPostCard = ({ post, onSubmitComment }) => {
+const BuyerPostCard = ({post, onSubmitComment}) => {
     const p = post || {};
 
     const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Bài đăng #${p.id}` : 'Không tiêu đề');
@@ -36,7 +37,12 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
     const productObj = p.product || null;
     const productId = productObj?.id || p.productId;
     const productName = productObj?.name || (productId ? `Sản phẩm #${productId}` : null);
-    const productHref = productId ? `/product/${productId}` : '#';
+    // Always use createProductSlug to avoid exposing ID in URL
+    // Even if productName is default, it will create slug from name (e.g., "san-pham-123" instead of "product-123")
+    const productSlug = productId && productName
+        ? createProductSlug(productName, productId)
+        : null;
+    const productHref = productSlug ? `/product/${productSlug}` : '#';
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const mainImage = images.length > 0 ? (images[selectedIndex]?.link || images[selectedIndex]?.url || null) : null;
@@ -98,7 +104,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
 
         if (cnt === 1) {
             return (
-                <Box sx={{ px: 2, pt: 1 }}>
+                <Box sx={{px: 2, pt: 1}}>
                     <Box
                         component="img"
                         src={images[0]?.link || images[0]?.url}
@@ -135,7 +141,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
         const itemsToRender = cnt > 4 ? images.slice(0, 4) : images.slice(0, Math.min(cnt, 4));
 
         return (
-            <Box sx={{ px: 2, pt: 1 }}>
+            <Box sx={{px: 2, pt: 1}}>
                 <Box
                     sx={{
                         display: 'grid',
@@ -154,7 +160,10 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                         return (
                             <Box
                                 key={key}
-                                onClick={() => { setSelectedIndex(idx); openLightboxAt(idx); }}
+                                onClick={() => {
+                                    setSelectedIndex(idx);
+                                    openLightboxAt(idx);
+                                }}
                                 sx={{
                                     position: 'relative',
                                     width: '100%',
@@ -237,12 +246,13 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                 </Stack>
 
                 <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Bình luận ({p.comments?.count ?? commentsArray.length}):</Typography>
+                    <Typography variant="subtitle2">Bình luận
+                        ({p.comments?.count ?? commentsArray.length}):</Typography>
                     {commentsArray.map(c => {
                         const author = c.buyerName || c.buyer_name || c.userName || `Người dùng #${c.accountId ?? c.buyerId ?? '??'}`;
                         const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : '';
                         return (
-                            <Box key={c.id ?? c.createdAt} sx={{ mb: 1 }}>
+                            <Box key={c.id ?? c.createdAt} sx={{mb: 1}}>
                                 <Stack direction="row" justifyContent="space-between" alignItems="baseline">
                                     <Typography variant="subtitle2">{author}</Typography>
                                     {time && <Typography variant="caption" color="text.secondary">{time}</Typography>}
@@ -275,14 +285,14 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                         disabled={isSubmitting || !commentText.trim()}
                         aria-label="gửi bình luận"
                     >
-                        {isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
+                        {isSubmitting ? <CircularProgress size={20}/> : <SendIcon/>}
                     </IconButton>
                 </Box>
             </CardContent>
 
             <CardActions>
                 {productId && (
-                    <Link href={productHref} target="_blank" rel="noopener" sx={{ ml: 'auto' }}>
+                    <Link href={productHref} target="_blank" rel="noopener" sx={{ml: 'auto'}}>
                         <Button size="small">Mở sản phẩm</Button>
                     </Link>
                 )}
@@ -290,21 +300,21 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
 
             {/* Lightbox dialog */}
             <Dialog open={lightboxOpen} onClose={closeLightbox} maxWidth="lg" fullWidth>
-                <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-                    <Box />
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1}}>
+                    <Box/>
+                    <Box sx={{display: 'flex', gap: 1, alignItems: 'center'}}>
                         <IconButton onClick={prevLightbox} aria-label="previous image" size="large">
-                            <ArrowBackIosNewIcon />
+                            <ArrowBackIosNewIcon/>
                         </IconButton>
                         <IconButton onClick={nextLightbox} aria-label="next image" size="large">
-                            <ArrowForwardIosIcon />
+                            <ArrowForwardIosIcon/>
                         </IconButton>
                         <IconButton onClick={closeLightbox} aria-label="close" size="large">
-                            <CloseIcon />
+                            <CloseIcon/>
                         </IconButton>
                     </Box>
                 </DialogTitle>
-                <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                <DialogContent sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2}}>
                     {images[lightboxIndex] ? (
                         <Box
                             component="img"
