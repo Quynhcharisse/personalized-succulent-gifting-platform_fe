@@ -17,6 +17,9 @@ import {useNavigate} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 import {viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
 
+const CUSTOM_REQUESTS_CACHE_KEY = 'custom_requests_cache';
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
+
 export default function ViewCustomRequest() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,14 +35,64 @@ export default function ViewCustomRequest() {
         fetchCustomRequests();
     }, []);
 
+    const getCachedRequests = () => {
+        try {
+            const cached = sessionStorage.getItem(CUSTOM_REQUESTS_CACHE_KEY);
+            if (!cached) return null;
+
+            const {data, timestamp} = JSON.parse(cached);
+            const now = Date.now();
+
+            // Check if cache is still valid
+            if (now - timestamp < CACHE_EXPIRY_TIME) {
+                return data;
+            }
+
+            // Cache expired, remove it
+            sessionStorage.removeItem(CUSTOM_REQUESTS_CACHE_KEY);
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const setCachedRequests = (data) => {
+        try {
+            sessionStorage.setItem(CUSTOM_REQUESTS_CACHE_KEY, JSON.stringify({
+                data,
+                timestamp: Date.now()
+            }));
+        } catch (error) {
+            console.error('Error caching requests:', error);
+        }
+    };
+
     const fetchCustomRequests = async () => {
+        // Try to get from cache first
+        const cachedData = getCachedRequests();
+        if (cachedData) {
+            setRequests(cachedData);
+            setLoading(false);
+            // Fetch fresh data in background
+            fetchFreshData();
+            return;
+        }
+
+        // No cache, fetch from API
+        await fetchFreshData();
+    };
+
+    const fetchFreshData = async () => {
         try {
             setLoading(true);
             const response = await viewCustomProductRequestByBuyer();
 
             // Handle nested data structure
             const data = response?.data?.data?.body?.data || response?.data?.body?.data || response?.data?.data || [];
-            setRequests(Array.isArray(data) ? data : []);
+            const requestsArray = Array.isArray(data) ? data : [];
+            
+            setRequests(requestsArray);
+            setCachedRequests(requestsArray); // Cache the data
         } catch (error) {
             enqueueSnackbar("Không thể tải danh sách yêu cầu", {variant: 'error'});
         } finally {

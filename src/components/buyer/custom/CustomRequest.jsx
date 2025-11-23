@@ -49,6 +49,11 @@ export default function CustomRequest() {
 
     const succulentSizeOrder = ['small', 'medium', 'large']
 
+    // Cache keys
+    const SUCCULENTS_CACHE_KEY = 'succulents_cache';
+    const ACCESSORIES_CACHE_KEY = 'accessories_cache';
+    const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes (longer for static data)
+
     // Form Data State
     const [formData, setFormData] = useState({
         images: [],
@@ -65,6 +70,37 @@ export default function CustomRequest() {
     const [filterType, setFilterType] = useState('none'); // 'none' | 'fengshui' | 'zodiac'
     const [filterValue, setFilterValue] = useState('all');
 
+    // Cache helpers
+    const getCachedData = (cacheKey) => {
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (!cached) return null;
+
+            const {data, timestamp} = JSON.parse(cached);
+            const now = Date.now();
+
+            if (now - timestamp < CACHE_EXPIRY_TIME) {
+                return data;
+            }
+
+            sessionStorage.removeItem(cacheKey);
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const setCachedData = (cacheKey, data) => {
+        try {
+            sessionStorage.setItem(cacheKey, JSON.stringify({
+                data,
+                timestamp: Date.now()
+            }));
+        } catch (error) {
+            console.error(`Error caching ${cacheKey}:`, error);
+        }
+    };
+
     // Data Fetching
     useEffect(() => {
         if (localStorage.getItem("user") == null) {
@@ -73,28 +109,68 @@ export default function CustomRequest() {
 
         const loadData = async () => {
             try {
-                const [succulentsRes, accessoriesRes] = await Promise.all([
-                    getSucculents(),
-                    getAccessories('all')
-                ]);
+                // Try to get from cache first
+                const cachedSucculents = getCachedData(SUCCULENTS_CACHE_KEY);
+                const cachedAccessories = getCachedData(ACCESSORIES_CACHE_KEY);
 
-                if (succulentsRes?.data?.data) {
-                    setAllSucculents(succulentsRes.data.data || []);
+                if (cachedSucculents) {
+                    setAllSucculents(cachedSucculents);
                 }
-                if (accessoriesRes?.data?.data) {
-                    const acc = accessoriesRes.data.data;
-                    setAvailablePots(acc.pots || []);
-                    setAvailableSoils(acc.soils || []);
-                    setAvailableDecorations(acc.decorations || []);
+                if (cachedAccessories) {
+                    setAvailablePots(cachedAccessories.pots || []);
+                    setAvailableSoils(cachedAccessories.soils || []);
+                    setAvailableDecorations(cachedAccessories.decorations || []);
                 }
+
+                // If we have both cached, we can show UI immediately
+                if (cachedSucculents && cachedAccessories) {
+                    setLoading(false);
+                    // Fetch fresh data in background
+                    fetchFreshData();
+                    return;
+                }
+
+                // Fetch from API
+                await fetchFreshData();
             } catch (error) {
                 enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
-            } finally {
                 setLoading(false);
             }
         };
         loadData();
     }, []);
+
+    const fetchFreshData = async () => {
+        try {
+            setLoading(true);
+            const [succulentsRes, accessoriesRes] = await Promise.all([
+                getSucculents(),
+                getAccessories('all')
+            ]);
+
+            if (succulentsRes?.data?.data) {
+                const succulentsData = succulentsRes.data.data || [];
+                setAllSucculents(succulentsData);
+                setCachedData(SUCCULENTS_CACHE_KEY, succulentsData);
+            }
+            if (accessoriesRes?.data?.data) {
+                const acc = accessoriesRes.data.data;
+                const accessoriesData = {
+                    pots: acc.pots || [],
+                    soils: acc.soils || [],
+                    decorations: acc.decorations || []
+                };
+                setAvailablePots(accessoriesData.pots);
+                setAvailableSoils(accessoriesData.soils);
+                setAvailableDecorations(accessoriesData.decorations);
+                setCachedData(ACCESSORIES_CACHE_KEY, accessoriesData);
+            }
+        } catch (error) {
+            enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Filtered Succulents
     const filteredSucculents = useMemo(() => {
