@@ -5,9 +5,42 @@ import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerEmptyState from './BuyerEmptyState.jsx';
 
+const POSTS_CACHE_KEY = 'buyer_posts_cache';
+const PRODUCTS_CACHE_KEY = 'products_cache';
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
+
 const fetchProductsByIds = async (ids = []) => {
     const unique = Array.from(new Set(ids)).filter(Boolean);
     if (unique.length === 0) return {};
+    
+    // Try to get from cache first
+    try {
+        const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+        if (cached) {
+            const {data: cachedProducts, timestamp} = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - timestamp < CACHE_EXPIRY_TIME && Array.isArray(cachedProducts)) {
+                // Find products from cache
+                const map = {};
+                unique.forEach(id => {
+                    const found = cachedProducts.find(p => p.id?.toString() === id.toString());
+                    if (found) {
+                        map[id] = {id: found.id, name: found.name || found.title || `Sản phẩm #${id}`};
+                    }
+                });
+                
+                // If we found all products in cache, return early
+                if (Object.keys(map).length === unique.length) {
+                    return map;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error reading products cache:', error);
+    }
+    
+    // Fetch from API
     const productsResponse = await viewProduct(unique);
     const res = Array.isArray(productsResponse)
         ? productsResponse
@@ -18,6 +51,37 @@ const fetchProductsByIds = async (ids = []) => {
         const data = payload?.data ?? payload;
         if (data) map[id] = {id: data.id ?? id, name: data.name ?? data.title ?? `Sản phẩm #${id}`};
     });
+    
+    // Update cache
+    try {
+        const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+        let cachedProducts = [];
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed.data && Array.isArray(parsed.data)) {
+                cachedProducts = parsed.data;
+            }
+        }
+        
+        // Merge new products into cache
+        const productsArray = Object.values(map);
+        productsArray.forEach(newProduct => {
+            const existingIndex = cachedProducts.findIndex(p => p.id?.toString() === newProduct.id?.toString());
+            if (existingIndex >= 0) {
+                cachedProducts[existingIndex] = newProduct;
+            } else {
+                cachedProducts.push(newProduct);
+            }
+        });
+        
+        sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({
+            data: cachedProducts,
+            timestamp: Date.now()
+        }));
+    } catch (error) {
+        console.error('Error updating products cache:', error);
+    }
+    
     return map;
 };
 
@@ -55,53 +119,111 @@ const BuyerPosts = () => {
         });
     };
 
+    const getCachedPosts = () => {
+        try {
+            const cached = sessionStorage.getItem(POSTS_CACHE_KEY);
+            if (!cached) return null;
+
+            const {data, timestamp} = JSON.parse(cached);
+            const now = Date.now();
+
+            // Check if cache is still valid
+            if (now - timestamp < CACHE_EXPIRY_TIME) {
+                return data;
+            }
+
+            // Cache expired, remove it
+            sessionStorage.removeItem(POSTS_CACHE_KEY);
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const setCachedPosts = (data) => {
+        try {
+            sessionStorage.setItem(POSTS_CACHE_KEY, JSON.stringify({
+                data,
+                timestamp: Date.now()
+            }));
+        } catch (error) {
+            console.error('Error caching posts:', error);
+        }
+    };
+
     useEffect(() => {
         const fetch = async () => {
-            setIsLoading(true);
-            try {
-                const res = await viewPosts();
-                const payload = res?.data?.data ?? res?.data ?? res;
-                const normalized = normalizePosts(payload);
-
-                const productIds = normalized.map(p => p.product?.id ?? p.productId).filter(Boolean);
-
-                const productsMap = await fetchProductsByIds(productIds);
-
-                const enhanced = normalized.map(p => {
-                    const prodId = p.product?.id ?? p.productId;
-                    const productFromApi = prodId ? productsMap[prodId] : null;
-                    const product = {
-                        ...(p.product || {}),
-                        ...(productFromApi || {})
-                    };
-
-                    const seller = {id: p.sellerId, name: p.sellerName || `Người bán #${p.sellerId}`};
-
-                    const comments = (p.comments || []).map(c => ({
-                        ...c,
-                        buyerName: c.buyerName || c.buyer_name || `Người dùng #${c.buyerId}`
-                    }));
-
-                    return {
-                        ...p,
-                        product,
-                        seller,
-                        comments
-                    };
-                });
-
-                setPosts(enhanced);
-            } catch (err) {
-                console.error(err);
-                setPosts([]);
-            } finally {
+            // Try to get from cache first
+            const cachedPosts = getCachedPosts();
+            if (cachedPosts) {
+                setPosts(cachedPosts);
                 setIsLoading(false);
+                // Fetch fresh data in background (without loading indicator)
+                fetchFreshData(false);
+                return;
             }
+
+            // No cache, fetch from API
+            await fetchFreshData(true);
         };
         fetch();
     }, [refreshKey]);
 
-    const refresh = () => setRefreshKey(k => k + 1);
+    const fetchFreshData = async (showLoading = true) => {
+        if (showLoading) {
+            setIsLoading(true);
+        }
+        try {
+            const res = await viewPosts();
+            const payload = res?.data?.data ?? res?.data ?? res;
+            const normalized = normalizePosts(payload);
+
+            const productIds = normalized.map(p => p.product?.id ?? p.productId).filter(Boolean);
+
+            const productsMap = await fetchProductsByIds(productIds);
+
+            const enhanced = normalized.map(p => {
+                const prodId = p.product?.id ?? p.productId;
+                const productFromApi = prodId ? productsMap[prodId] : null;
+                const product = {
+                    ...(p.product || {}),
+                    ...(productFromApi || {})
+                };
+
+                const seller = {id: p.sellerId, name: p.sellerName || `Người bán #${p.sellerId}`};
+
+                const comments = (p.comments || []).map(c => ({
+                    ...c,
+                    buyerName: c.buyerName || c.buyer_name || `Người dùng #${c.buyerId}`
+                }));
+
+                return {
+                    ...p,
+                    product,
+                    seller,
+                    comments
+                };
+            });
+
+            setPosts(enhanced);
+            setCachedPosts(enhanced); // Cache the data
+        } catch (err) {
+            console.error(err);
+            if (showLoading) {
+                setPosts([]);
+            }
+        } finally {
+            if (showLoading) {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    const refresh = () => {
+        // Clear cache to force fresh data
+        sessionStorage.removeItem(POSTS_CACHE_KEY);
+        setRefreshKey(k => k + 1);
+    };
 
     const handleCreateComment = async (postId, content) => {
         try {

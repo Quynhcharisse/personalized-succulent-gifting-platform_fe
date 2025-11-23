@@ -57,6 +57,9 @@ export default function CustomRequestDetail() {
     const [revisionComment, setRevisionComment] = useState('');
     const [submittingRevision, setSubmittingRevision] = useState(false);
 
+    const CUSTOM_REQUESTS_CACHE_KEY = 'custom_requests_cache';
+    const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
+
     useEffect(() => {
         if (localStorage.getItem("user") == null) {
             window.location.href = "/login";
@@ -66,15 +69,78 @@ export default function CustomRequestDetail() {
         fetchCustomRequestDetail();
     }, [id]);
 
+    const getCachedRequests = () => {
+        try {
+            const cached = sessionStorage.getItem(CUSTOM_REQUESTS_CACHE_KEY);
+            if (!cached) return null;
+
+            const {data, timestamp} = JSON.parse(cached);
+            const now = Date.now();
+
+            // Check if cache is still valid
+            if (now - timestamp < CACHE_EXPIRY_TIME) {
+                return data;
+            }
+
+            // Cache expired, remove it
+            sessionStorage.removeItem(CUSTOM_REQUESTS_CACHE_KEY);
+            return null;
+        } catch (error) {
+            return null;
+        }
+    };
+
     const fetchCustomRequestDetail = async () => {
         try {
             setLoading(true);
+
+            // Try to get from cache first
+            const cachedData = getCachedRequests();
+            if (cachedData) {
+                const foundRequest = Array.isArray(cachedData) 
+                    ? cachedData.find(req => req.id.toString() === id.toString()) 
+                    : null;
+                
+                if (foundRequest) {
+                    setRequest(foundRequest);
+                    setLoading(false);
+                    // Fetch fresh data in background
+                    fetchFreshData();
+                    return;
+                }
+            }
+
+            // No cache or not found in cache, fetch from API
+            await fetchFreshData();
+        } catch (error) {
+            enqueueSnackbar("Không thể tải chi tiết yêu cầu", {variant: 'error'});
+            navigate('/custom-request');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchFreshData = async () => {
+        try {
             const response = await viewCustomProductRequestByBuyer();
 
             // Handle nested data structure
             const data = response?.data?.data?.body?.data || response?.data?.body?.data || response?.data?.data || [];
-            const foundRequest = Array.isArray(data) ? data.find(req => req.id.toString() === id.toString()) : null;
+            const requestsArray = Array.isArray(data) ? data : [];
+            
+            // Find the request by ID
+            const foundRequest = requestsArray.find(req => req.id.toString() === id.toString());
             setRequest(foundRequest);
+
+            // Update cache
+            try {
+                sessionStorage.setItem(CUSTOM_REQUESTS_CACHE_KEY, JSON.stringify({
+                    data: requestsArray,
+                    timestamp: Date.now()
+                }));
+            } catch (error) {
+                console.error('Error caching requests:', error);
+            }
 
             if (!foundRequest) {
                 enqueueSnackbar("Không tìm thấy yêu cầu", {variant: 'warning'});
@@ -82,8 +148,6 @@ export default function CustomRequestDetail() {
         } catch (error) {
             enqueueSnackbar("Không thể tải chi tiết yêu cầu", {variant: 'error'});
             navigate('/custom-request');
-        } finally {
-            setLoading(false);
         }
     };
 
