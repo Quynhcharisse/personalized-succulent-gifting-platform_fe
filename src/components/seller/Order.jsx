@@ -221,12 +221,12 @@ const formatCurrency = (value) => new Intl.NumberFormat('vi-VN', {
 const formatDate = (isoDate) => {
     if (!isoDate) return '—'
     return new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-}).format(new Date(isoDate))
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(new Date(isoDate))
 }
 
 export default function Order() {
@@ -308,11 +308,31 @@ export default function Order() {
         }
     }
 
-    const handleCloseDetail = () => {
-        setDetailOpen(false)
-        setSelectedOrder(null)
-        setDetailError(null)
+    const handleUpdateOrder = async (order, newStatus) => {
+        try {
+            await OrderService.updateOrder(order.orderId, newStatus)
+            alert("Cập nhật thành công!")
+            fetchOrders()
+        } catch (err) {
+            alert(err.response?.data?.message || "Không thể cập nhật đơn!")
+        }
+    };
+    
+
+    const handleCancelOrder = async (order) => {
+        if (!window.confirm(`Bạn có chắc muốn hủy đơn #${order.orderId}?`)) return
+    
+        try {
+            await OrderService.cancelOrder(order.orderId) 
+            // Tự đổi API theo backend của bạn
+    
+            alert('Hủy đơn thành công!')
+            fetchOrders() // load lại danh sách
+        } catch (err) {
+            alert(err.response?.data?.message || 'Không thể hủy đơn!')
+        }
     }
+
 
     const renderStatusChip = (status) => {
         const meta = statusMeta[status] || {}
@@ -357,19 +377,19 @@ export default function Order() {
                             <Stack direction="row" spacing={2}>
                                 <Tooltip title={loading ? 'Đang tải...' : 'Làm mới danh sách'}>
                                     <span>
-                                    <IconButton
+                                        <IconButton
                                             onClick={fetchOrders}
                                             disabled={loading}
-                                        sx={{
-                                            backgroundColor: 'rgba(255,255,255,0.15)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            color: 'white',
+                                            sx={{
+                                                backgroundColor: 'rgba(255,255,255,0.15)',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                color: 'white',
                                                 '&:hover': {backgroundColor: 'rgba(255,255,255,0.25)'},
                                                 opacity: loading ? 0.7 : 1
-                                        }}
-                                    >
-                                        <Refresh/>
-                                    </IconButton>
+                                            }}
+                                        >
+                                            <Refresh/>
+                                        </IconButton>
                                     </span>
                                 </Tooltip>
                              
@@ -564,39 +584,39 @@ export default function Order() {
                                                 {(order.orderItems && order.orderItems.length > 0) ? (
                                                     order.orderItems.map((item, index) => (
                                                         <Stack key={`${order.orderId}-${index}`} direction="row" spacing={2}
-                                                           alignItems="center"
-                                                           sx={{p: 2, borderRadius: 2, backgroundColor: 'rgba(13,59,46,0.02)'}}
-                                                    >
-                                                        <Badge
-                                                            badgeContent={`x${item.quantity}`}
-                                                            color="secondary"
-                                                            sx={{'& .MuiBadge-badge': {fontWeight: 600}}}
+                                                               alignItems="center"
+                                                               sx={{p: 2, borderRadius: 2, backgroundColor: 'rgba(13,59,46,0.02)'}}
                                                         >
-                                                            <Avatar
-                                                                variant="rounded"
-                                                                sx={{
-                                                                    width: 48,
-                                                                    height: 48,
-                                                                    backgroundColor: 'rgba(13,59,46,0.08)',
-                                                                    color: '#0D3B2E',
-                                                                    fontWeight: 700
-                                                                }}
+                                                            <Badge
+                                                                badgeContent={`x${item.quantity}`}
+                                                                color="secondary"
+                                                                sx={{'& .MuiBadge-badge': {fontWeight: 600}}}
                                                             >
-                                                                <ShoppingBag/>
-                                                            </Avatar>
-                                                        </Badge>
-                                                        <Box sx={{flexGrow: 1}}>
-                                                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+                                                                <Avatar
+                                                                    variant="rounded"
+                                                                    sx={{
+                                                                        width: 48,
+                                                                        height: 48,
+                                                                        backgroundColor: 'rgba(13,59,46,0.08)',
+                                                                        color: '#0D3B2E',
+                                                                        fontWeight: 700
+                                                                    }}
+                                                                >
+                                                                    <ShoppingBag/>
+                                                                </Avatar>
+                                                            </Badge>
+                                                            <Box sx={{flexGrow: 1}}>
+                                                                <Typography variant="subtitle1" sx={{fontWeight: 600}}>
                                                                     {item.productName}
-                                                            </Typography>
-                                                            <Typography variant="body2" color="text.secondary">
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary">
                                                                     Kích thước: {item.sizeName || '—'} • Số lượng: {item.quantity}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Typography variant="subtitle1" sx={{fontWeight: 700}}>
+                                                                {formatCurrency(item.price)}
                                                             </Typography>
-                                                        </Box>
-                                                        <Typography variant="subtitle1" sx={{fontWeight: 700}}>
-                                                            {formatCurrency(item.price)}
-                                                        </Typography>
-                                                    </Stack>
+                                                        </Stack>
                                                     ))
                                                 ) : (
                                                     <Typography variant="body2" color="text.secondary">
@@ -699,7 +719,46 @@ export default function Order() {
                                             </Stack>
                                         </Grid>
                                     </Grid>
+ <Stack direction="row" justifyContent="flex-end">
+                
+                  {(order.status === 'PACKAGING' || order.status === 'SHIPPING') && (
+        <Button
+            variant="outlined"
+            color="error"
+            onClick={() => handleCancelOrder(order)}
+            startIcon={<CancelOutlined />}
+            sx={{ fontWeight: 700, mr: "50px" }} 
+        >
+            Hủy đơn
+        </Button>
+    )}
 
+    {/* PACKAGING -> SHIPPING */}
+    {order.status === 'PACKAGING' && (
+        <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleUpdateOrder(order, 'SHIPPING')}
+            startIcon={<LocalShipping />}
+            sx={{ fontWeight: 700 }}
+        >
+            Chuyển sang vận chuyển
+        </Button>
+    )}
+
+    {/* SHIPPING -> DONE */}
+    {order.status === 'SHIPPING' && (
+        <Button
+            variant="contained"
+            color="success"
+            onClick={() => handleUpdateOrder(order, 'DONE')}
+            startIcon={<CheckCircle />}
+            sx={{ fontWeight: 700 }}
+        >
+            Đã giao thành công
+        </Button>
+    )}
+            </Stack>
                                   
                                 </Stack>
                             </Paper>
@@ -707,173 +766,7 @@ export default function Order() {
                     </Stack>
                 </Stack>
             </Container>
-            <Dialog
-                open={detailOpen}
-                onClose={handleCloseDetail}
-                fullWidth
-                maxWidth="md"
-                scroll="body"
-            >
-                <DialogTitle sx={{fontWeight: 700}}>
-                    {selectedOrder ? `Chi tiết đơn #${selectedOrder.orderId}` : 'Chi tiết đơn hàng'}
-                </DialogTitle>
-                <DialogContent dividers sx={{backgroundColor: 'rgba(13,59,46,0.02)'}}>
-                    {detailLoading && (
-                        <LinearProgress sx={{mb: 2}}/>
-                    )}
-
-                    {detailError && (
-                        <Alert severity="error" sx={{mb: 2}}>
-                            {detailError}
-                        </Alert>
-                    )}
-
-                    {selectedOrder && (
-                        <Stack spacing={3}>
-                            <Paper
-                                variant="outlined"
-                                sx={{p: 3, borderRadius: 3, borderColor: 'rgba(13,59,46,0.1)'}}
-                            >
-                                <Stack direction={{xs: 'column', md: 'row'}} spacing={3}
-                                       justifyContent="space-between">
-                                    <Stack spacing={1}>
-                                        <Typography variant="subtitle2" sx={{color: 'text.secondary'}}>
-                                            Trạng thái
-                                        </Typography>
-                                        {renderStatusChip(selectedOrder.status)}
-                                    </Stack>
-                                    <Stack spacing={0.5}>
-                                        <Typography variant="subtitle2" sx={{color: 'text.secondary'}}>
-                                            Thời gian
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            Đặt lúc: {formatDate(selectedOrder.orderDate)}
-                                        </Typography>
-                                     
-                                    </Stack>
-                                </Stack>
-                            </Paper>
-
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <Paper variant="outlined" sx={{p: 3, borderRadius: 3, height: '100%'}}>
-                                        <Stack spacing={1}>
-                                            <Typography variant="subtitle2" sx={{color: 'text.secondary'}}>
-                                                Thông tin người nhận
-                                            </Typography>
-                                            <Typography variant="h6" sx={{fontWeight: 700}}>
-                                                {selectedOrder.buyerName}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Email: {selectedOrder.email}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                SĐT: {selectedOrder.buyerPhone}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Địa chỉ: {selectedOrder.address}
-                                            </Typography>
-                                        </Stack>
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Paper variant="outlined" sx={{p: 3, borderRadius: 3, height: '100%'}}>
-                                        <Stack spacing={1}>
-                                            <Typography variant="subtitle2" sx={{color: 'text.secondary'}}>
-                                                Thanh toán
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Phương thức: {selectedOrder.paymentMethod}
-                                            </Typography>
-                                            <Stack direction="row" justifyContent="space-between">
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Tạm tính
-                                                </Typography>
-                                                <Typography variant="body2" sx={{fontWeight: 600}}>
-                                                    {formatCurrency(selectedOrder.totalAmount)}
-                                                </Typography>
-                                            </Stack>
-                                            <Stack direction="row" justifyContent="space-between">
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Phí vận chuyển
-                                                </Typography>
-                                                <Typography variant="body2" sx={{fontWeight: 600}}>
-                                                    {formatCurrency(selectedOrder.shippingFee)}
-                                                </Typography>
-                                            </Stack>
-                                            <Divider sx={{my: 1}}/>
-                                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                                <Typography variant="subtitle1" sx={{fontWeight: 700}}>
-                                                    Tổng thanh toán
-                                                </Typography>
-                                                <Typography variant="h6" sx={{fontWeight: 800, color: '#0D3B2E'}}>
-                                                    {formatCurrency(selectedOrder.finalAmount)}
-                                                </Typography>
-                                            </Stack>
-                                        </Stack>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-
-                            <Paper variant="outlined" sx={{p: 3, borderRadius: 3}}>
-                                <Stack spacing={2}>
-                                    <Typography variant="subtitle2" sx={{color: 'text.secondary'}}>
-                                        Sản phẩm trong đơn
-                                    </Typography>
-                                    <Stack spacing={2}>
-                                        {selectedOrder.orderItems.map((item, idx) => (
-                                            <Stack key={`${selectedOrder.orderId}-detail-${idx}`}
-                                                   direction="row"
-                                                   spacing={2}
-                                                   alignItems="center"
-                                                   sx={{
-                                                       p: 2,
-                                                       borderRadius: 2,
-                                                       backgroundColor: 'rgba(13,59,46,0.04)'
-                                                   }}
-                                            >
-                                                <Badge badgeContent={`x${item.quantity}`} color="secondary">
-                                                    <Avatar
-                                                        variant="rounded"
-                                                        sx={{
-                                                            width: 48,
-                                                            height: 48,
-                                                            backgroundColor: 'rgba(13,59,46,0.1)',
-                                                            color: '#0D3B2E',
-                                                            fontWeight: 700
-                                                        }}
-                                                    >
-                                                        <ShoppingBag/>
-                                                    </Avatar>
-                                                </Badge>
-                                                <Box sx={{flexGrow: 1}}>
-                                                    <Typography variant="subtitle1" sx={{fontWeight: 600}}>
-                                                        {item.productName}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Kích thước: {item.sizeName}
-                                                    </Typography>
-                                                </Box>
-                                                <Typography variant="subtitle1" sx={{fontWeight: 700}}>
-                                                    {formatCurrency(item.price)}
-                                                </Typography>
-                                            </Stack>
-                                        ))}
-                                    </Stack>
-                                </Stack>
-                            </Paper>
-                        </Stack>
-                    )}
-                </DialogContent>
-                <DialogActions sx={{p: 2}}>
-                    <Button onClick={handleCloseDetail} sx={{borderRadius: 2}}>
-                        Đóng
-                    </Button>
-                    <Button variant="contained" sx={{borderRadius: 2}} onClick={handleCloseDetail}>
-                        Liên hệ hỗ trợ
-                    </Button>
-                </DialogActions>
-            </Dialog>
+         
         </Box>
     )
 }
