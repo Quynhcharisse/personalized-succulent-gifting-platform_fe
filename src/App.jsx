@@ -21,6 +21,7 @@ const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetai
 const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest.jsx'))
 const ViewCustomRequest = lazy(() => import('./components/buyer/custom/ViewCustomRequest.jsx'))
 const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomRequestDetail.jsx'))
+const BuyerOrders = lazy(() => import('./components/buyer/Order.jsx'))
 
 
 // Lazy imports for layouts and frequently used components
@@ -511,7 +512,21 @@ const router = createBrowserRouter([
             {
                 path: 'succulent/:id/design',
                 element: <PotAccessoryDesigner/>
-            }
+
+            },
+            {
+                path: 'posts',
+                element: <BuyerPosts/>
+            },
+            {
+                path: 'orders',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <BuyerOrders/>
+                    </Suspense>
+                )
+            },
+
         ]
     },
     {

@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Box,
-    Card,
-    CardContent,
-    Typography,
-    CircularProgress,
-    Alert,
-    alpha
-} from '@mui/material';
-import { People as PeopleIcon } from '@mui/icons-material';
-import { getTotalBuyerCount } from '../../services/AccountService.jsx';
+import React, {useEffect, useState} from 'react';
+import {Alert, alpha, Box, Card, CardContent, CircularProgress, Typography} from '@mui/material';
+import {People as PeopleIcon} from '@mui/icons-material';
+import {getTotalBuyerCount} from '../../services/AccountService.jsx';
 
 const colors = {
     primary: '#0b3f31',
@@ -35,12 +27,12 @@ export default function BuyerStatsChart() {
     const fetchData = async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const response = await getTotalBuyerCount();
-          
+
             const count = response?.data?.data?.totalBuyerCount || 0;
-          
+
             setTotalBuyers(count);
             setLastUpdated(new Date());
         } catch (err) {
@@ -65,8 +57,8 @@ export default function BuyerStatsChart() {
                 boxShadow: `0 12px 40px ${alpha(colors.primary, 0.2)}`,
             }
         }}>
-            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <CardContent sx={{p: 3, height: '100%', display: 'flex', flexDirection: 'column'}}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
                     <Box sx={{
                         width: 56,
                         height: 56,
@@ -78,23 +70,23 @@ export default function BuyerStatsChart() {
                         boxShadow: `0 4px 12px ${alpha(colors.primary, 0.3)}`,
                         mr: 2
                     }}>
-                        <PeopleIcon sx={{ fontSize: 32, color: 'white' }} />
+                        <PeopleIcon sx={{fontSize: 32, color: 'white'}}/>
                     </Box>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" sx={{ 
-                            fontWeight: 700, 
+                    <Box sx={{flexGrow: 1}}>
+                        <Typography variant="h6" sx={{
+                            fontWeight: 700,
                             color: colors.primary,
                             mb: 0.5
                         }}>
                             Tổng số người mua
                         </Typography>
                         {loading ? (
-                            <CircularProgress size={24} sx={{ color: colors.primary }} />
+                            <CircularProgress size={24} sx={{color: colors.primary}}/>
                         ) : error ? (
-                            <Alert severity="error" sx={{ mt: 1, p: 1 }}>{error}</Alert>
+                            <Alert severity="error" sx={{mt: 1, p: 1}}>{error}</Alert>
                         ) : (
-                            <Typography variant="h3" sx={{ 
-                                fontWeight: 800, 
+                            <Typography variant="h3" sx={{
+                                fontWeight: 800,
                                 background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
                                 backgroundClip: 'text',
                                 WebkitBackgroundClip: 'text',
@@ -104,13 +96,14 @@ export default function BuyerStatsChart() {
                                 {totalBuyers.toLocaleString('vi-VN')}
                             </Typography>
                         )}
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
                             tài khoản đã đăng ký
                         </Typography>
                     </Box>
                 </Box>
                 {lastUpdated && (
-                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 'auto', textAlign: 'left' }}>
+                    <Typography variant="caption" color="text.disabled"
+                                sx={{display: 'block', mt: 'auto', textAlign: 'left'}}>
                         Cập nhật lần cuối: {lastUpdated.toLocaleString('vi-VN')}
                     </Typography>
                 )}

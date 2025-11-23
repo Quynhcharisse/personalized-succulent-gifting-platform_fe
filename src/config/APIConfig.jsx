@@ -73,20 +73,20 @@ axiosClient.interceptors.request.use(
 
         const skipTokenEndpoints = ['/auth/login', '/auth/refresh', '/account/access'];
         const shouldSkipToken = skipTokenEndpoints.some(endpoint => config.url?.includes(endpoint));
-        
+
         // Public endpoints (có thể truy cập không cần token)
-        const publicEndpoints = ['/product', '/product/list', '/succulent'];
+        const publicEndpoints = ['/product', '/product/list', '/account/access'];
         const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
-        
-        if (!shouldSkipToken) {
-            const token = await getAccessToken();
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-                // console.log('✅ Token attached to request:', config.url);
-            } else if (!isPublicEndpoint) {
-                // Chỉ warn nếu endpoint không phải public
-                console.warn('⚠️ No token available for protected endpoint:', config.url);
-            }
+
+        if (shouldSkipToken || isPublicEndpoint) {
+            return config;
+        }
+
+        const token = await getAccessToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            console.warn('⚠️ No token available for protected endpoint:', config.url);
         }
         
         return config;
@@ -96,7 +96,6 @@ axiosClient.interceptors.request.use(
     }
 );
 
-// Response interceptor: Xử lý 401/403
 axiosClient.interceptors.response.use(
     response => response,
     async error => {
@@ -105,18 +104,16 @@ axiosClient.interceptors.response.use(
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             if (originalRequest.url === "/auth/refresh") {
                 console.error("Refresh token request failed, redirecting to login.");
-                // Don't redirect if already on login page
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = "/login";
                 }
                 return Promise.reject(error);
             }
 
-            const publicEndpoints = ["/account/access", "/product", "/product/list"];
+            const publicEndpoints = ["/account/access", "/product/list"];
             const isPublicEndpoint = publicEndpoints.some(endpoint => originalRequest.url.startsWith(endpoint));
 
             if (isPublicEndpoint) {
-                // Just reject the error without redirecting for public endpoints
                 return Promise.reject(error);
             }
 

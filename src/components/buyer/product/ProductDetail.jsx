@@ -1,28 +1,28 @@
 import React, {useEffect, useState} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
-    Container,
-    Typography,
-    Button,
-    Box,
-    Chip,
-    Divider,
-    Paper,
-    CircularProgress,
     Alert,
+    Box,
+    Button,
     Card,
     CardMedia,
+    Chip,
+    CircularProgress,
+    Container,
     Dialog,
-    DialogTitle,
+    DialogActions,
     DialogContent,
-    DialogActions
+    DialogTitle,
+    Divider,
+    Paper,
+    Typography
 } from '@mui/material';
-import {ShoppingCart, FavoriteBorder, ArrowBack, LocalFlorist, SquareFoot, WaterDrop, Brush} from '@mui/icons-material';
+import {ArrowBack, Brush, LocalFlorist, ShoppingCart, SquareFoot, WaterDrop} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { viewProduct } from '../../../services/ProductService.jsx';
-import { addItem } from '../../../store/slices/cartSlice.js';
+import {useDispatch, useSelector} from 'react-redux';
+import {viewProduct} from '../../../services/ProductService.jsx';
+import {addItem} from '../../../store/slices/cartSlice.js';
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -36,7 +36,7 @@ export default function ProductDetail() {
     const [quantity, setQuantity] = useState(1);
     const [openLimitDialog, setOpenLimitDialog] = useState(false);
     const [limitMessage, setLimitMessage] = useState('');
-    
+
     const dispatch = useDispatch();
     const cartItems = useSelector(state => state?.cart?.items || []);
 
@@ -71,7 +71,6 @@ export default function ProductDetail() {
                 setError('Không thể tải thông tin sản phẩm');
             }
         } catch (error) {
-            console.error('Error fetching product detail:', error);
             setError('Không thể tải thông tin sản phẩm');
         } finally {
             setLoading(false);
@@ -132,8 +131,8 @@ export default function ProductDetail() {
 
     const addSelectionToCart = () => {
         if (!isLoggedIn()) {
-            enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', { variant: 'info' });
-            navigate('/login', { state: { from: `/product/${id}` } });
+            enqueueSnackbar('Vui lòng đăng nhập để thêm vào giỏ hàng', {variant: 'info'});
+            navigate('/login', {state: {from: `/product/${id}`}});
             return false;
         }
 
@@ -175,26 +174,25 @@ export default function ProductDetail() {
     const handleAddToCart = () => {
         const success = addSelectionToCart();
         if (success) {
-            enqueueSnackbar('Đã thêm sản phẩm vào giỏ hàng', { variant: 'success' });
+            enqueueSnackbar('Đã thêm sản phẩm vào giỏ hàng', {variant: 'success'});
         }
     };
-    
+
     const handleBuyNow = () => {
         const success = addSelectionToCart();
         if (success) {
-            enqueueSnackbar('Đang chuyển đến trang thanh toán...', { variant: 'info' });
+            enqueueSnackbar('Đang chuyển đến trang thanh toán...', {variant: 'info'});
             navigate('/buyer/checkout');
         }
     };
-    
+
     const handleAddToWishlist = () => {
         if (!isLoggedIn()) {
-                enqueueSnackbar('Vui lòng đăng nhập để thêm vào yêu thích', {variant: 'info'});
+            enqueueSnackbar('Vui lòng đăng nhập để thêm vào yêu thích', {variant: 'info'});
             navigate('/login', {state: {from: `/product/${id}`}});
             return;
         }
-        // TODO: Implement add to wishlist functionality
-        console.log('Add to wishlist:', product.id);
+
         enqueueSnackbar('Đã thêm vào yêu thích', {variant: 'success'});
     };
 
@@ -203,7 +201,7 @@ export default function ProductDetail() {
     if (loading) {
         return (
             <Container sx={{py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <CircularProgress />
+                <CircularProgress/>
             </Container>
         );
     }
@@ -235,13 +233,12 @@ export default function ProductDetail() {
     }
 
 
-
     return (
         <Container maxWidth="lg" sx={{py: 4}}>
             <Button startIcon={<ArrowBack/>} sx={{mb: 2}} onClick={() => navigate(-1)}>
                 Quay lại
             </Button>
-            
+
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 4}}>
                 {/* Product Images */}
                 <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 16px)'}}}>
@@ -282,32 +279,32 @@ export default function ProductDetail() {
                         )}
                     </Card>
                 </Box>
-                
+
                 {/* Product Info */}
                 <Box sx={{flex: {xs: '1 1 100%', md: '1 1 calc(50% - 16px)'}}}>
                     <Box>
                         {/* Status Chip */}
                         {product.status && (
-                            <Chip 
-                                label={product.status} 
+                            <Chip
+                                label={product.status}
                                 color={product.status.includes('còn hàng') ? 'success' : 'error'}
                                 sx={{mb: 2}}
                             />
                         )}
-                        
+
                         <Typography variant="h4" gutterBottom sx={{fontWeight: 700, color: '#0D3B2E', mb: 2}}>
                             {productName}
                         </Typography>
-                        
+
                         <Divider sx={{my: 2}}/>
-                        
+
                         {/* Price */}
                         <Box sx={{mb: 3}}>
                             <Typography variant="h3" color="primary" sx={{fontWeight: 'bold', color: '#0D3B2E'}}>
                                 {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
                             </Typography>
                         </Box>
-                        
+
                         {/* Size Selection */}
                         {product.sizes && product.sizes.length > 1 && (
                             <Box sx={{mb: 3}}>
@@ -336,7 +333,7 @@ export default function ProductDetail() {
                                 </Box>
                             </Box>
                         )}
-                        
+
                         {/* Quantity Selector */}
                         {selectedSize && (
                             <Box sx={{mb: 3}}>
@@ -344,9 +341,14 @@ export default function ProductDetail() {
                                     <Typography variant="subtitle1" sx={{fontWeight: 600, minWidth: '80px'}}>
                                         Số Lượng
                                     </Typography>
-                                    
+
                                     {/* Quantity Controls */}
-                                    <Box sx={{display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: 1}}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        border: '1px solid #ddd',
+                                        borderRadius: 1
+                                    }}>
                                         <Button
                                             variant="text"
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -362,10 +364,10 @@ export default function ProductDetail() {
                                         >
                                             -
                                         </Button>
-                                        
+
                                         <Typography sx={{
-                                            minWidth: '60px', 
-                                            textAlign: 'center', 
+                                            minWidth: '60px',
+                                            textAlign: 'center',
                                             px: 2,
                                             fontSize: '1.1rem',
                                             fontWeight: 600,
@@ -373,7 +375,7 @@ export default function ProductDetail() {
                                         }}>
                                             {quantity}
                                         </Typography>
-                                        
+
                                         <Button
                                             variant="text"
                                             onClick={() => setQuantity(Math.min(Number(selectedSize?.quantity || 0), quantity + 1))}
@@ -390,7 +392,7 @@ export default function ProductDetail() {
                                             +
                                         </Button>
                                     </Box>
-                                    
+
                                     {/* Stock Info */}
                                     <Typography variant="body2" color="text.secondary">
                                         {Number(selectedSize?.quantity || 0)} sản phẩm có sẵn
@@ -429,9 +431,9 @@ export default function ProductDetail() {
                                 )}
                             </Box>
                         )}
-                        
+
                         <Divider sx={{my: 3}}/>
-                        
+
 
                         {/* Action Buttons */}
                         <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4}}>
@@ -465,7 +467,7 @@ export default function ProductDetail() {
                                 {Number(selectedSize?.quantity || 0) === 0 ? 'Hết hàng' : 'Thêm Vào Giỏ Hàng'}
 
                             </Button>
-                            
+
                             <Button
                                 variant="contained"
                                 size="large"
@@ -491,9 +493,9 @@ export default function ProductDetail() {
                             </Button>
                         </Box>
                         {/* Custom request button removed from product detail */}
-                        
+
                         <Divider sx={{my: 4}}/>
-                        
+
                         {/* Description */}
                         <Box sx={{mb: 4}}>
                             <Typography variant="h6" gutterBottom sx={{fontWeight: 700, mb: 2}}>
@@ -526,13 +528,13 @@ export default function ProductDetail() {
                     <Typography variant="h5" gutterBottom sx={{fontWeight: 700, mb: 3, color: '#0D3B2E'}}>
                         Chi tiết sản phẩm - {selectedSize.name}
                     </Typography>
-                    
+
                     {/* Combined Product Components */}
                     <Paper elevation={2} sx={{p: 4, mb: 3}}>
                         <Typography variant="h6" sx={{fontWeight: 700, mb: 3, color: '#0D3B2E'}}>
                             Thành phần sản phẩm
                         </Typography>
-                        
+
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
                             {/* Succulents */}
                             {selectedSize.succulents && selectedSize.succulents.length > 0 && (
@@ -550,7 +552,8 @@ export default function ProductDetail() {
                                                     • {succulent.name}
                                                 </Typography>
                                                 {succulent.description && (
-                                                    <Typography variant="body2" color="text.secondary" sx={{ml: 2, mb: 1}}>
+                                                    <Typography variant="body2" color="text.secondary"
+                                                                sx={{ml: 2, mb: 1}}>
                                                         {succulent.description}
                                                     </Typography>
                                                 )}
@@ -591,11 +594,18 @@ export default function ProductDetail() {
                                             </Typography>
                                         )}
                                         <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', ml: 2}}>
-                                            <Chip label={`Chất liệu: ${selectedSize.pot.material}`} size="small" sx={{backgroundColor: '#fff3e0'}}/>
+                                            <Chip label={`Chất liệu: ${selectedSize.pot.material}`} size="small"
+                                                  sx={{backgroundColor: '#fff3e0'}}/>
                                             {selectedSize.pot.color && (
                                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                                     <Typography variant="caption">Màu:</Typography>
-                                                    <Box sx={{width: 20, height: 20, backgroundColor: selectedSize.pot.color, borderRadius: '50%', border: '1px solid #ddd'}}/>
+                                                    <Box sx={{
+                                                        width: 20,
+                                                        height: 20,
+                                                        backgroundColor: selectedSize.pot.color,
+                                                        borderRadius: '50%',
+                                                        border: '1px solid #ddd'
+                                                    }}/>
                                                 </Box>
                                             )}
                                         </Box>
@@ -617,7 +627,8 @@ export default function ProductDetail() {
                                             • {selectedSize.soil.name}
                                         </Typography>
                                         {selectedSize.soil.description && (
-                                            <Typography variant="body2" color="text.secondary" sx={{ml: 2, whiteSpace: 'pre-line'}}>
+                                            <Typography variant="body2" color="text.secondary"
+                                                        sx={{ml: 2, whiteSpace: 'pre-line'}}>
                                                 {selectedSize.soil.description}
                                             </Typography>
                                         )}
