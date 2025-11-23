@@ -26,9 +26,7 @@ export default function Home() {
         fetchProducts();
     }, []);
 
-    // Removed video control effect (no video in hero now)
-
-    // Compact header shadow on scroll
+    // Hiệu ứng bóng đổ header khi cuộn
     useEffect(() => {
         const header = document.getElementById('siteHeader')
         if (!header) return
@@ -41,9 +39,43 @@ export default function Home() {
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
-    // Highlight only sections on Home (exclude /cham-soc which is a separate page)
+    const calculateProductPrice = (size) => {
+        if (!size) return 0;
+        let totalPrice = 0;
+
+        // Tính giá sen đá
+        size.succulents?.forEach(succulent => {
+            if (succulent.size && Array.isArray(succulent.size)) {
+                succulent.size.forEach(sizeItem => {
+                    totalPrice += (sizeItem.price || 0) * (sizeItem.quantity || 1);
+                });
+            } else if (succulent.size?.price) {
+                totalPrice += (succulent.size.price || 0) * (succulent.quantity || 1);
+            }
+        });
+
+        // Tính giá chậu
+        if (size.pot?.size && size.pot.size.length > 0) {
+            totalPrice += size.pot.size[0].price || 0;
+        }
+
+        // Tính giá đất
+        if (size.soil?.basePricing) {
+            const soilPrice = (size.soil.basePricing.price / size.soil.basePricing.massValue) * size.soil.massAmount;
+            totalPrice += soilPrice;
+        }
+
+        // Tính giá phụ kiện
+        size.decorations?.forEach(decoration => {
+            totalPrice += decoration.totalPrice || 0;
+        });
+
+        return totalPrice;
+    };
+
+    // Highlight menu khi cuộn trang (Đã xóa 'danh-gia' khỏi danh sách theo dõi)
     useEffect(() => {
-        const sectionIds = ['san-pham', 'danh-gia', 'ly-do']
+        const sectionIds = ['san-pham', 'ly-do']
         const linkById = new Map(sectionIds.map(id => [id, document.querySelector(`.main-nav a[href="#${id}"]`)]))
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -62,6 +94,17 @@ export default function Home() {
         return () => observer.disconnect()
     }, [])
 
+    // Đóng dropdown liên hệ khi click ra ngoài
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showContactDropdown && !event.target.closest('.contact-widget')) {
+                setShowContactDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [showContactDropdown])
+
     return (
         <>
             <div className="home">
@@ -73,7 +116,7 @@ export default function Home() {
                     </p>
                 </header>
 
-                {/* About Section - Elementor-like layout */}
+                {/* About Section */}
                 <div
                     className="elementor-element elementor-element-60fcf008 e-flex e-con-boxed e-con e-parent e-lazyloaded"
                     id="about">
@@ -131,28 +174,29 @@ export default function Home() {
                             <h2 className="section-title">Sản phẩm bán chạy</h2>
                         </div>
                         <div className="bestsellers__grid">
-                            {/* Chỉ render khi có dữ liệu thật từ catalogProducts */}
-                            {catalogProducts.slice(0, 3).map((t) => {
-                                const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
-                                const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
-                                return (
-                                    <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
-                                        <div className="teaser__media">
-                                            <img loading="lazy" src={productImage} alt={productName}/>
-                                        </div>
-                                        <div className="teaser__body">
-                                            <h3>{productName}</h3>
-                                            <button
-                                                className="btn btn--sm"
-                                                onClick={() => navigate(`/product/${t.id}`)}
-                                            >
-                                                Xem chi tiết
-                                            </button>
-                                        </div>
-                                    </article>
-                                );
-                            })}
-                            {catalogProducts.length === 0 && (
+                            {/* Logic hiển thị sản phẩm thật */}
+                            {catalogProducts.length > 0 ? (
+                                catalogProducts.slice(0, 3).map((t) => {
+                                    const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
+                                    const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
+                                    return (
+                                        <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
+                                            <div className="teaser__media">
+                                                <img loading="lazy" src={productImage} alt={productName}/>
+                                            </div>
+                                            <div className="teaser__body">
+                                                <h3>{productName}</h3>
+                                                <button
+                                                    className="btn btn--sm"
+                                                    onClick={() => navigate(`/product/${t.id}`)}
+                                                >
+                                                    Xem chi tiết
+                                                </button>
+                                            </div>
+                                        </article>
+                                    );
+                                })
+                            ) : (
                                 <p style={{textAlign: 'center', width: '100%'}}>Đang cập nhật sản phẩm...</p>
                             )}
                         </div>
@@ -177,25 +221,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                <section id="danh-gia" className="testimonials">
-                    <div className="container">
-                        <h2 className="section-title">Đánh giá của khách hàng</h2>
-                        <div className="testimonials__grid">
-                            {testimonials.map((r) => (
-                                <article key={r.id} className="review">
-                                    <div className="review__header">
-                                        <div className="stars" aria-label={`${r.rating} sao`}>
-                                            {'★★★★★'.slice(0, r.rating)}
-                                        </div>
-                                        <span className="review__name">{r.name}</span>
-                                    </div>
-                                    <p className="review__text">{r.text}</p>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
+                {/* Đã xóa hoàn toàn section 'danh-gia' chứa biến testimonials bị lỗi */}
 
                 <section id="ly-do" className="reasons">
                     <div className="container">

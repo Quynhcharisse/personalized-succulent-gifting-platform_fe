@@ -563,11 +563,6 @@ p {
 .section-title {
     letter-spacing: .2px;
 }
-
-.testimonials .section-title, .catalog .section-title, .bestsellers .section-title, .reasons .section-title {
-    margin-bottom: 1.25rem;
-}
-
 /* Emphasized section title card */
 .section-title-card {
     background: linear-gradient(135deg, #f0fdf4, #e6f7f0);
@@ -821,29 +816,6 @@ p {
 
 .teaser__body .btn--sm:active {
     transform: translateY(-2px);
-}
-
-/* Testimonials */
-.testimonials {
-    padding: clamp(3rem, 6vw, 5rem) 0;
-    background-image: url('/hinhnen.jpg');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-.testimonials__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: clamp(1rem, 3vw, 1.5rem);
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-@media (min-width: 900px) {
-    .testimonials__grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
 }
 
 .review {
