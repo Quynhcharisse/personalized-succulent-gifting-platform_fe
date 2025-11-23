@@ -22,6 +22,7 @@ const CustomRequest = lazy(() => import('./components/buyer/custom/CustomRequest
 const ViewCustomRequest = lazy(() => import('./components/buyer/custom/ViewCustomRequest.jsx'))
 const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomRequestDetail.jsx'))
 const BuyerOrders = lazy(() => import('./components/buyer/Order.jsx'))
+const SellerOrder = lazy(() => import('./components/seller/Order.jsx'))
 
 
 // Lazy imports for layouts and frequently used components
@@ -436,7 +437,11 @@ const router = createBrowserRouter([
             },
             {
                 path: 'orders',
-                element: <h1>Quản lý đơn hàng</h1>
+                element: ( 
+                <Suspense fallback={<LoadingFallback/>}>
+                <SellerOrder/>
+                </Suspense>
+                )
             },
             {
                 path: 'analytics',
