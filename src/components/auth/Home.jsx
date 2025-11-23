@@ -204,7 +204,8 @@ export default function Home() {
                                     justifyContent: 'center',
                                     width: '100%',
                                     minHeight: '200px', // Tạo chiều cao để không bị xẹp
-                                    gap: '1rem'
+                                    gap: '1rem',
+                                    gridColumn: '1 / -1'
                                 }}>
                                     {/* Spinner màu trắng */}
                                     <CircularProgress sx={{color: '#ffffff'}}/>
@@ -212,6 +213,7 @@ export default function Home() {
                                     {/* Text màu trắng */}
                                     <p style={{
                                         textAlign: 'center',
+                                        alignItems: 'center',
                                         color: '#ffffff',
                                         fontSize: '1.1rem',
                                         fontWeight: 500

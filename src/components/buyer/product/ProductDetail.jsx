@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {
     Alert,
@@ -23,6 +23,10 @@ import {useSnackbar} from 'notistack';
 import {useDispatch, useSelector} from 'react-redux';
 import {viewProduct} from '../../../services/ProductService.jsx';
 import {addItem} from '../../../store/slices/cartSlice.js';
+
+// Cache key for sessionStorage (same as ProductList)
+const PRODUCTS_CACHE_KEY = 'products_cache';
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
 export default function ProductDetail() {
     const {id} = useParams();
@@ -55,9 +59,44 @@ export default function ProductDetail() {
         setQuantity(1);
     }, [selectedSizeIndex]);
 
+    // Try to get product from cache first
+    const getProductFromCache = useCallback(() => {
+        try {
+            const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                const now = Date.now();
+                
+                // Use cache if it's still valid (less than 5 minutes old)
+                if (now - timestamp < CACHE_EXPIRY_TIME) {
+                    const product = data.find(p => p.id === parseInt(id));
+                    if (product) {
+                        return product;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('Error reading product cache:', error);
+        }
+        return null;
+    }, [id]);
+
     const fetchProductDetail = async () => {
         try {
-            // Get all products and filter by id
+            setLoading(true);
+            setError(null);
+
+            // Step 1: Try to get from cache first (instant display - NO API CALL)
+            const cachedProduct = getProductFromCache();
+            if (cachedProduct) {
+                setProduct(cachedProduct);
+                setLoading(false);
+                // Still fetch fresh data in background (silent update)
+                fetchFreshProduct(true);
+                return;
+            }
+
+            // Step 2: Only call API if cache is not available
             const response = await viewProduct();
             if (response && response.data && response.data.data) {
                 const product = response.data.data.find(p => p.id === parseInt(id));
@@ -71,9 +110,27 @@ export default function ProductDetail() {
                 setError('Không thể tải thông tin sản phẩm');
             }
         } catch (error) {
+            console.error('Error fetching product detail:', error);
             setError('Không thể tải thông tin sản phẩm');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Fetch fresh product data in background (silent update)
+    const fetchFreshProduct = async (silent = false) => {
+        try {
+            const response = await viewProduct();
+            if (response && response.data && response.data.data) {
+                const product = response.data.data.find(p => p.id === parseInt(id));
+                if (product) {
+                    setProduct(product);
+                }
+            }
+        } catch (error) {
+            if (!silent) {
+                console.error('Error fetching fresh product:', error);
+            }
         }
     };
 
