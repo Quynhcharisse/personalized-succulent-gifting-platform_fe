@@ -233,7 +233,7 @@ export default function UserProfile() {
 
     async function handleSubmit(e) {
         e.preventDefault()
-        const error = UserProfileValidation(form);
+        const error = UserProfileValidation(form, originalForm);
         setErrors(error);
         if (Object.keys(error).length > 0) {
             enqueueSnackbar('Vui lòng kiểm tra lại thông tin', {variant: 'warning'})
