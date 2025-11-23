@@ -15,6 +15,8 @@ import {viewProduct} from '../../../services/ProductService.jsx';
 import { createPost, updatePost } from '../../../services/PostService.jsx';
 import { enqueueSnackbar } from 'notistack';
 import { DASHBOARD_STYLES } from '../../constants.js';
+import UploadImageField from '../succulent/UploadImageField.jsx';
+import uploadToCloudinary from '../../cloudinaryUpload.js';
 
 const STATUS_OPTIONS = [
     {value: 'DRAFT', label: 'Draft'},
@@ -34,6 +36,9 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     // now postImages: array of { id?, name, link }
     const [postImages, setPostImages] = useState([]);
+
+    // per-image uploading/progress state: { [index]: { isUploading: boolean, progress: number } }
+    const [uploadingMap, setUploadingMap] = useState({});
 
     useEffect(() => {
         if (open) {
@@ -71,9 +76,11 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                 setPostImages([]);
             }
             setIsSubmitting(false);
+            setUploadingMap({});
         } else {
-            // dialog closed: reset image entries
+            // dialog closed: reset image entries and uploading states
             setPostImages([]);
+            setUploadingMap({});
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, post]);
@@ -86,7 +93,33 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
 
     const addPostImage = () => setPostImages(prev => [...prev, { name: '', link: '' }]);
 
-    const removePostImage = (index) => setPostImages(prev => prev.filter((_, i) => i !== index));
+    const removePostImage = (index) => {
+        setPostImages(prev => prev.filter((_, i) => i !== index));
+        setUploadingMap(prev => {
+            const copy = {...prev};
+            delete copy[index];
+            return copy;
+        });
+    };
+
+    const handlePostImageFileSelected = async (index, event) => {
+        const file = event.target?.files?.[0];
+        if (!file) return;
+        setUploadingMap(prev => ({...prev, [index]: { isUploading: true, progress: 0 }}));
+        try {
+            const imageUrl = await uploadToCloudinary(file, {
+                onProgress: (p) => setUploadingMap(prev => ({...prev, [index]: { isUploading: true, progress: p }}))
+            });
+            setPostImages(prev => prev.map((pi, i) => i === index ? { ...pi, link: imageUrl, name: pi.name || file.name } : pi));
+            enqueueSnackbar('Upload ảnh thành công', { variant: 'success' });
+        } catch (error) {
+            console.error('Upload failed', error);
+            enqueueSnackbar('Tải ảnh thất bại', { variant: 'error' });
+        } finally {
+            setUploadingMap(prev => ({...prev, [index]: {...(prev[index] || {}), isUploading: false}}));
+            if (event.target) event.target.value = '';
+        }
+    };
 
     const handleSubmit = async () => {
         // split, trim, filter empty
@@ -237,9 +270,6 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                 <Typography variant="subtitle2">Hình ảnh</Typography>
                                 <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Thêm ảnh</Button>
-                                <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
-                                    Cung cấp tên và liên kết cho mỗi ảnh
-                                </Typography>
                             </Box>
 
                             <Stack spacing={1}>
@@ -252,13 +282,14 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                                             size="small"
                                             fullWidth
                                         />
-                                        <TextField
-                                            label="Liên kết"
-                                            value={pi.link}
-                                            onChange={e => updatePostImage(idx, 'link', e.target.value)}
-                                            size="small"
-                                            fullWidth
-                                        />
+                                        <Box sx={{ width: 320 }}>
+                                            <UploadImageField
+                                                imageUrl={pi.link}
+                                                isUploading={!!uploadingMap[idx]?.isUploading}
+                                                uploadProgress={uploadingMap[idx]?.progress || 0}
+                                                onFileSelected={(e) => handlePostImageFileSelected(idx, e)}
+                                            />
+                                        </Box>
                                         <IconButton size="small" onClick={() => removePostImage(idx)} aria-label={`remove-image-${idx}`}>
                                             <DeleteIcon fontSize="small" />
                                         </IconButton>
