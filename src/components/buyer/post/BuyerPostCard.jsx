@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Card,
     CardContent,
-    CardMedia,
     CardHeader,
     CardActions,
     Typography,
@@ -12,9 +11,15 @@ import {
     Button,
     TextField,
     IconButton,
-    CircularProgress
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const BuyerPostCard = ({ post, onSubmitComment }) => {
     const p = post || {};
@@ -35,6 +40,10 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const mainImage = images.length > 0 ? (images[selectedIndex]?.link || images[selectedIndex]?.url || null) : null;
+
+    // Lightbox state
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
 
     // comment input state
     const [commentText, setCommentText] = useState('');
@@ -61,6 +70,140 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
         }
     };
 
+    // Lightbox controls
+    const openLightboxAt = (idx) => {
+        setLightboxIndex(idx);
+        setLightboxOpen(true);
+    };
+    const closeLightbox = () => setLightboxOpen(false);
+    const prevLightbox = () => setLightboxIndex(i => (i - 1 + images.length) % images.length);
+    const nextLightbox = () => setLightboxIndex(i => (i + 1) % images.length);
+
+    useEffect(() => {
+        if (!lightboxOpen) return;
+        const onKey = (e) => {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') prevLightbox();
+            if (e.key === 'ArrowRight') nextLightbox();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [lightboxOpen, images.length]);
+
+    const renderImagesGrid = () => {
+        const cnt = images.length;
+        if (cnt === 0) return null;
+
+        const containerHeight = 320;
+
+        if (cnt === 1) {
+            return (
+                <Box sx={{ px: 2, pt: 1 }}>
+                    <Box
+                        component="img"
+                        src={images[0]?.link || images[0]?.url}
+                        alt={images[0]?.name || title}
+                        onClick={() => openLightboxAt(0)}
+                        sx={{
+                            width: '100%',
+                            height: containerHeight,
+                            objectFit: 'contain',
+                            backgroundColor: '#f5f5f5',
+                            display: 'block',
+                            p: 1,
+                            borderRadius: 1,
+                            cursor: 'pointer'
+                        }}
+                    />
+                </Box>
+            );
+        }
+
+        let gridTemplateColumns = '1fr 1fr';
+        let gridTemplateRows = '1fr';
+        if (cnt === 2) {
+            gridTemplateColumns = '1fr 1fr';
+            gridTemplateRows = '1fr';
+        } else if (cnt === 3) {
+            gridTemplateColumns = '2fr 1fr';
+            gridTemplateRows = '1fr 1fr';
+        } else {
+            gridTemplateColumns = '1fr 1fr';
+            gridTemplateRows = '1fr 1fr';
+        }
+
+        const itemsToRender = cnt > 4 ? images.slice(0, 4) : images.slice(0, Math.min(cnt, 4));
+
+        return (
+            <Box sx={{ px: 2, pt: 1 }}>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gap: 1,
+                        width: '100%',
+                        height: containerHeight,
+                        gridTemplateColumns,
+                        gridTemplateRows,
+                        gridTemplateAreas: cnt === 3 ? `"a b" "a c"` : undefined
+                    }}
+                >
+                    {itemsToRender.map((img, idx) => {
+                        const key = img.id ?? img.link ?? idx;
+                        const isExtraOverlay = idx === 3 && cnt > 4;
+                        const gridArea = cnt === 3 ? (idx === 0 ? 'a' : (idx === 1 ? 'b' : 'c')) : undefined;
+                        return (
+                            <Box
+                                key={key}
+                                onClick={() => { setSelectedIndex(idx); openLightboxAt(idx); }}
+                                sx={{
+                                    position: 'relative',
+                                    width: '100%',
+                                    height: '100%',
+                                    gridArea,
+                                    overflow: 'hidden',
+                                    borderRadius: 1,
+                                    cursor: 'pointer'
+                                }}
+                                component="div"
+                            >
+                                <Box
+                                    component="img"
+                                    src={img.link || img.url}
+                                    alt={img.name || `img-${idx}`}
+                                    sx={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        objectPosition: 'center',
+                                        display: 'block',
+                                        backgroundColor: '#f5f5f5'
+                                    }}
+                                />
+                                {isExtraOverlay && (
+                                    <Box
+                                        sx={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: 'rgba(0,0,0,0.45)',
+                                            color: '#fff',
+                                            fontSize: 20,
+                                            fontWeight: 600
+                                        }}
+                                    >
+                                        {`+${cnt - 4}`}
+                                    </Box>
+                                )}
+                            </Box>
+                        );
+                    })}
+                </Box>
+            </Box>
+        );
+    };
+
     return (
         <Card>
             <CardHeader
@@ -68,40 +211,7 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                 subheader={p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}
             />
 
-            {mainImage ? (
-                <CardMedia
-                    component="img"
-                    height="320"
-                    image={mainImage}
-                    alt={images[selectedIndex]?.name || title}
-                    sx={{ objectFit: 'cover' }}
-                />
-            ) : null}
-
-            {images.length > 1 && (
-                <Box sx={{ px: 2, pt: 1 }}>
-                    <Stack direction="row" spacing={1} sx={{ overflowX: 'auto' }}>
-                        {images.map((img, idx) => (
-                            <Box
-                                key={img.id ?? img.link ?? idx}
-                                component="img"
-                                src={img.link || img.url}
-                                alt={img.name || `thumb-${idx}`}
-                                onClick={() => setSelectedIndex(idx)}
-                                sx={{
-                                    width: 64,
-                                    height: 64,
-                                    objectFit: 'cover',
-                                    borderRadius: 1,
-                                    cursor: 'pointer',
-                                    border: idx === selectedIndex ? '2px solid' : '1px solid',
-                                    borderColor: idx === selectedIndex ? 'primary.main' : 'divider'
-                                }}
-                            />
-                        ))}
-                    </Stack>
-                </Box>
-            )}
+            {renderImagesGrid()}
 
             <CardContent>
                 <Typography variant="body1" paragraph>
@@ -177,6 +287,39 @@ const BuyerPostCard = ({ post, onSubmitComment }) => {
                     </Link>
                 )}
             </CardActions>
+
+            {/* Lightbox dialog */}
+            <Dialog open={lightboxOpen} onClose={closeLightbox} maxWidth="lg" fullWidth>
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
+                    <Box />
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <IconButton onClick={prevLightbox} aria-label="previous image" size="large">
+                            <ArrowBackIosNewIcon />
+                        </IconButton>
+                        <IconButton onClick={nextLightbox} aria-label="next image" size="large">
+                            <ArrowForwardIosIcon />
+                        </IconButton>
+                        <IconButton onClick={closeLightbox} aria-label="close" size="large">
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                    {images[lightboxIndex] ? (
+                        <Box
+                            component="img"
+                            src={images[lightboxIndex].link || images[lightboxIndex].url}
+                            alt={images[lightboxIndex].name || `image-${lightboxIndex}`}
+                            sx={{
+                                maxHeight: '80vh',
+                                maxWidth: '100%',
+                                objectFit: 'contain',
+                                display: 'block'
+                            }}
+                        />
+                    ) : null}
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 };

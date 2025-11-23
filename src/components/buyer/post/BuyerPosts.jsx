@@ -1,4 +1,3 @@
-// javascript
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Stack, CircularProgress } from '@mui/material';
 import { viewPosts, createPostComment } from '../../../services/PostService.jsx';
