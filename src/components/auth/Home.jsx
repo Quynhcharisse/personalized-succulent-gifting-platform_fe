@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {Button} from '@mui/material'
+import {Button, CircularProgress} from '@mui/material'
 import '../../styles/auth/Home.css'
 import ChatBot from './ChatBot.jsx'
 import {viewProduct} from '../../services/ProductService.jsx'
@@ -197,7 +197,28 @@ export default function Home() {
                                     );
                                 })
                             ) : (
-                                <p style={{textAlign: 'center', width: '100%'}}>Đang cập nhật sản phẩm...</p>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                    minHeight: '200px', // Tạo chiều cao để không bị xẹp
+                                    gap: '1rem'
+                                }}>
+                                    {/* Spinner màu trắng */}
+                                    <CircularProgress sx={{color: '#ffffff'}}/>
+
+                                    {/* Text màu trắng */}
+                                    <p style={{
+                                        textAlign: 'center',
+                                        color: '#ffffff',
+                                        fontSize: '1.1rem',
+                                        fontWeight: 500
+                                    }}>
+                                        Đang cập nhật sản phẩm...
+                                    </p>
+                                </div>
                             )}
                         </div>
                         <div style={{display: 'flex', justifyContent: 'center', marginTop: '2rem'}}>
