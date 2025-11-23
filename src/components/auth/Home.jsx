@@ -4,27 +4,84 @@ import {Button, CircularProgress} from '@mui/material'
 import '../../styles/auth/Home.css'
 import ChatBot from './ChatBot.jsx'
 import {viewProduct} from '../../services/ProductService.jsx'
+import {createProductSlug} from '@utils/slugUtil.js'
+
+// Cache key for sessionStorage (same as ProductList)
+const PRODUCTS_CACHE_KEY = 'products_cache';
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
 export default function Home() {
     const navigate = useNavigate()
     const [showContactDropdown, setShowContactDropdown] = useState(false)
     const [products, setProducts] = useState([]);
     const [catalogProducts, setCatalogProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    // Load cached data first for instant display
     useEffect(() => {
-        const fetchProducts = async () => {
+        const loadCachedData = () => {
             try {
-                const response = await viewProduct();
-                if (response && response.data) {
-                    setProducts(response.data.data || []);
-                    setCatalogProducts(response.data.data || []);
+                const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+                if (cached) {
+                    const {data, timestamp} = JSON.parse(cached);
+                    const now = Date.now();
+
+                    // Use cache if it's still valid (less than 5 minutes old)
+                    if (now - timestamp < CACHE_EXPIRY_TIME) {
+                        setProducts(data);
+                        setCatalogProducts(data);
+                        setLoading(false);
+                        return true; // Cache was used
+                    } else {
+                        // Cache expired, remove it
+                        sessionStorage.removeItem(PRODUCTS_CACHE_KEY);
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching products:', error);
+                console.error('Error loading cached products:', error);
             }
+            return false; // Cache was not used
         };
-        fetchProducts();
+
+        const cacheUsed = loadCachedData();
+        if (!cacheUsed) {
+            fetchProducts();
+        } else {
+            // Still fetch fresh data in background
+            fetchProducts(true);
+        }
     }, []);
+
+    const fetchProducts = async (silent = false) => {
+        try {
+            if (!silent) {
+                setLoading(true);
+            }
+
+            const response = await viewProduct();
+            if (response && response.data) {
+                const productsData = response.data.data || [];
+                setProducts(productsData);
+                setCatalogProducts(productsData);
+
+                // Cache the data in sessionStorage
+                try {
+                    sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({
+                        data: productsData,
+                        timestamp: Date.now()
+                    }));
+                } catch (error) {
+                    console.warn('Failed to cache products:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        } finally {
+            if (!silent) {
+                setLoading(false);
+            }
+        }
+    };
 
     // Hiệu ứng bóng đổ header khi cuộn
     useEffect(() => {
@@ -175,28 +232,7 @@ export default function Home() {
                         </div>
                         <div className="bestsellers__grid">
                             {/* Logic hiển thị sản phẩm thật */}
-                            {catalogProducts.length > 0 ? (
-                                catalogProducts.slice(0, 3).map((t) => {
-                                    const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
-                                    const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
-                                    return (
-                                        <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
-                                            <div className="teaser__media">
-                                                <img loading="lazy" src={productImage} alt={productName}/>
-                                            </div>
-                                            <div className="teaser__body">
-                                                <h3>{productName}</h3>
-                                                <button
-                                                    className="btn btn--sm"
-                                                    onClick={() => navigate(`/product/${t.id}`)}
-                                                >
-                                                    Xem chi tiết
-                                                </button>
-                                            </div>
-                                        </article>
-                                    );
-                                })
-                            ) : (
+                            {loading && catalogProducts.length === 0 ? (
                                 <div style={{
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -219,6 +255,51 @@ export default function Home() {
                                         fontWeight: 500
                                     }}>
                                         Đang cập nhật sản phẩm...
+                                    </p>
+                                </div>
+                            ) : catalogProducts.length > 0 ? (
+                                catalogProducts.slice(0, 3).map((t) => {
+                                    const productName = typeof t.name === 'object' ? JSON.stringify(t.name) : t.name;
+                                    const productImage = t.images?.[0]?.url || t.thumbnail || t.image;
+                                    return (
+                                        <article key={t.id} className="teaser" style={{cursor: 'pointer'}}>
+                                            <div className="teaser__media">
+                                                <img loading="lazy" src={productImage} alt={productName}/>
+                                            </div>
+                                            <div className="teaser__body">
+                                                <h3>{productName}</h3>
+                                                <button
+                                                    className="btn btn--sm"
+                                                    onClick={() => {
+                                                        const slug = createProductSlug(productName, t.id);
+                                                        navigate(`/product/${slug}`);
+                                                    }}
+                                                >
+                                                    Xem chi tiết
+                                                </button>
+                                            </div>
+                                        </article>
+                                    );
+                                })
+                            ) : (
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                    minHeight: '200px',
+                                    gap: '1rem',
+                                    gridColumn: '1 / -1'
+                                }}>
+                                    <p style={{
+                                        textAlign: 'center',
+                                        alignItems: 'center',
+                                        color: '#ffffff',
+                                        fontSize: '1.1rem',
+                                        fontWeight: 500
+                                    }}>
+                                        Chưa có sản phẩm nào
                                     </p>
                                 </div>
                             )}
