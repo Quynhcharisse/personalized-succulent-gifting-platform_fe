@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                         }}>
                             <Stack direction="row" spacing={1} alignItems="center">
                                 <RoomServiceRounded sx={{color: 'white', fontSize: 16}}/>
-                                <Typography variant="body2" fontWeight={700}>ĐỊA CHỈ NHẬN HÀNG</Typography>
+                                <Typography variant="body2" fontWeight={700} sx={{color: 'white'}}>ĐỊA CHỈ NHẬN HÀNG</Typography>
                             </Stack>
                         </Box>
                         <Divider sx={{my: 1}}/>
@@ -278,12 +278,12 @@ export default function CheckoutPage() {
                         }}>
                             <Stack direction="row" alignItems="center" spacing={1}>
                                 <ShoppingCartOutlined sx={{color: 'white', fontSize: 16}}/>
-                                <Typography variant="body2" fontWeight={700}>SẢN PHẨM</Typography>
+                                <Typography variant="body2" fontWeight={700} sx={{color: 'white'}}>SẢN PHẨM</Typography>
                             </Stack>
-                            <Typography variant="body2" fontWeight={700} textAlign="right">Số lượng</Typography>
-                            <Typography variant="body2" fontWeight={700} textAlign="right">Size</Typography>
-                            <Typography variant="body2" fontWeight={700} textAlign="right">Thành tiền</Typography>
-                            <Typography variant="body2" fontWeight={700} textAlign="right">Thao tác</Typography>
+                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Số lượng</Typography>
+                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Size</Typography>
+                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Thành tiền</Typography>
+                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Thao tác</Typography>
                         </Box>
 
                         <Divider sx={{my: 1}}/>
@@ -495,7 +495,7 @@ export default function CheckoutPage() {
                             }}>
                                 <Stack direction="row" alignItems="center" spacing={1}>
                                     <PaymentOutlined sx={{color: "white", fontSize: 16}}/>
-                                    <Typography variant="body2" fontWeight={700}>PHƯƠNG THỨC THANH TOÁN</Typography>
+                                    <Typography variant="body2" fontWeight={700}  sx={{color: 'white'}}>PHƯƠNG THỨC THANH TOÁN</Typography>
                                 </Stack>
                             </Box>
                             <Divider sx={{my: 1}}/>
