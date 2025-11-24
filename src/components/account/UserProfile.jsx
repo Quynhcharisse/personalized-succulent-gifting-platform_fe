@@ -241,19 +241,54 @@ export default function UserProfile() {
         }
         try {
             setLoading(true)
+
+            // Backend yêu cầu tất cả field, nên phải gửi đầy đủ
+            // Nhưng chỉ validate các field đã thay đổi ở frontend
             const payload = {
-                phone: form.phone,
-                gender: form.gender,
-                address: form.address,
-                avatarUrl: form.avatarUrl,
-                fengShui: form.fengShui,
-                zodiac: form.zodiac
+                name: (form.name || '').trim(),
+                phone: (form.phone || '').trim(),
+                gender: (form.gender || '').trim(),
+                address: (form.address || '').trim(),
+                avatarUrl: (form.avatarUrl || '').trim(),
+                fengShui: (form.fengShui || '').trim(),
+                zodiac: (form.zodiac || '').trim()
             }
-            // Only update name if user actually changed it
+
+            // Check if any field actually changed
             const trimmedCurrentName = (form.name || '').trim()
             const trimmedOriginalName = (originalForm?.name || '').trim()
-            if (trimmedCurrentName !== trimmedOriginalName) {
-                payload.name = trimmedCurrentName
+            const nameChanged = trimmedCurrentName !== trimmedOriginalName
+
+            const currentPhone = (form.phone || '').trim()
+            const originalPhone = (originalForm?.phone || '').trim()
+            const phoneChanged = currentPhone !== originalPhone
+
+            const currentGender = (form.gender || '').trim()
+            const originalGender = (originalForm?.gender || '').trim()
+            const genderChanged = currentGender !== originalGender
+
+            const currentAddress = (form.address || '').trim()
+            const originalAddress = (originalForm?.address || '').trim()
+            const addressChanged = currentAddress !== originalAddress
+
+            const currentAvatarUrl = (form.avatarUrl || '').trim()
+            const originalAvatarUrl = (originalForm?.avatarUrl || '').trim()
+            const avatarUrlChanged = currentAvatarUrl !== originalAvatarUrl
+
+            const currentFengShui = (form.fengShui || '').trim()
+            const originalFengShui = (originalForm?.fengShui || '').trim()
+            const fengShuiChanged = currentFengShui !== originalFengShui
+
+            const currentZodiac = (form.zodiac || '').trim()
+            const originalZodiac = (originalForm?.zodiac || '').trim()
+            const zodiacChanged = currentZodiac !== originalZodiac
+
+            // If no fields changed, show message and return
+            if (!nameChanged && !phoneChanged && !genderChanged && !addressChanged &&
+                !avatarUrlChanged && !fengShuiChanged && !zodiacChanged) {
+                enqueueSnackbar('Không có thay đổi nào để cập nhật', {variant: 'info'})
+                setLoading(false)
+                return
             }
 
             const res = await updateProfile(payload)
@@ -589,7 +624,7 @@ export default function UserProfile() {
                                                         value={form.name}
                                                         onChange={handleChange('name')}
                                                         error={!!errors.name}
-                                                        helperText={errors.name || 'Tên phải có ít nhất 3 ký tự'}
+                                                        helperText={errors.name}
                                                         placeholder="Nhập tên của bạn"
                                                         sx={{
                                                             '& .MuiOutlinedInput-root': {

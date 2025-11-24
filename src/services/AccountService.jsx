@@ -1,8 +1,7 @@
-import axiosClient, { clearTokenCache } from "../config/APIConfig.jsx";
+import axiosClient from "../config/APIConfig.jsx";
 
 export const signOut = async () => {
     const response = await axiosClient.post("/account/logout");
-    clearTokenCache(); // Clear token cache khi logout
     return response || null
 }
 
