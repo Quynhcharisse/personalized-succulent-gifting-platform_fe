@@ -5,16 +5,7 @@ import {GoogleOAuthProvider} from '@react-oauth/google'
 import {SnackbarProvider} from 'notistack'
 import {createTheme, CssBaseline, Slide, ThemeProvider} from '@mui/material'
 
-
-
-
-
-
-
 // Buyer components
-const SucculentList = lazy(() => import('./components/buyer/SucculentList.jsx'))
-const SucculentDetail = lazy(() => import('./components/buyer/SucculentDetail.jsx'))
-const PotAccessoryDesigner = lazy(() => import('./components/buyer/PotAccessoryDesigner.jsx'))
 const BuyerPosts = lazy(() => import('./components/buyer/post/BuyerPosts.jsx'))
 const ProductList = lazy(() => import('./components/buyer/product/ProductList.jsx'))
 const ProductDetail = lazy(() => import('./components/buyer/product/ProductDetail.jsx'))
@@ -437,10 +428,10 @@ const router = createBrowserRouter([
             },
             {
                 path: 'orders',
-                element: ( 
-                <Suspense fallback={<LoadingFallback/>}>
-                <SellerOrder/>
-                </Suspense>
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <SellerOrder/>
+                    </Suspense>
                 )
             },
             {
@@ -497,7 +488,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-
             {
                 path: 'profile',
                 element: (
@@ -505,19 +495,6 @@ const router = createBrowserRouter([
                         <UserProfile/>
                     </Suspense>
                 )
-            },
-            {
-                path: 'succulent',
-                element: <SucculentList/>
-            },
-            {
-                path: 'succulent/:id',
-                element: <SucculentDetail/>
-            },
-            {
-                path: 'succulent/:id/design',
-                element: <PotAccessoryDesigner/>
-
             },
             {
                 path: 'posts',
