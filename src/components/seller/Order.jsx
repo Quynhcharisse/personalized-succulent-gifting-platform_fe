@@ -52,164 +52,7 @@ const statusMeta = {
     FAILED_SHIPPING: {label: 'Vận chuyển thất bại', color: 'error', icon: CancelOutlined}
 }
 
-const fallbackOrders = [
-    {
-        orderId: 1,
-        status: 'PACKAGING',
-        orderDate: '2025-11-14T13:50:01.747107',
-        updatedAt: '2025-11-15T09:20:00',
-        totalAmount: 6400,
-        shippingFee: 20000,
-        finalAmount: 26400,
-        paymentMethod: 'Ví Momo',
-        buyerName: 'N/A',
-        buyerPhone: 'N/A',
-        email: 'huatri1235@gmail.com',
-        address: 'Phường Hiệp Phú, Thành Phố Thủ Đức, Hồ Chí Minh',
-        carrier: 'Giao Hàng Nhanh',
-        eta: '19/11/2025',
-        orderItems: [
-            {
-                productName: 'Sen nhện combo',
-                quantity: 1,
-                sizeName: 'medium',
-                price: 6400
-            }
-        ]
-    },
-    {
-        orderId: 2,
-        status: 'SHIPPING',
-        orderDate: '2025-11-10T08:10:00',
-        updatedAt: '2025-11-16T08:45:00',
-        totalAmount: 1210000,
-        shippingFee: 35000,
-        finalAmount: 1245000,
-        paymentMethod: 'Ví ZaloPay',
-        buyerName: 'Trần Gia Hào',
-        buyerPhone: '0908 456 789',
-        email: 'hao.tran@example.com',
-        address: '85 Lê Lợi, Quận 1, TP.HCM',
-        carrier: 'VNPost',
-        eta: '17/11/2025',
-        orderItems: [
-            {
-                productName: 'Combo Sen Đá “Garden Breeze”',
-                quantity: 1,
-                sizeName: 'large',
-                price: 690000
-            },
-            {
-                productName: 'Chậu Gốm Sứ Vẽ Tay - Cỡ M',
-                quantity: 1,
-                sizeName: 'medium',
-                price: 420000
-            },
-            {
-                productName: 'Bộ Sỏi Trang Trí Pastel',
-                quantity: 1,
-                sizeName: 'standard',
-                price: 100000
-            }
-        ]
-    },
-    {
-        orderId: 3,
-        status: 'DONE',
-        orderDate: '2025-10-28T14:25:00',
-        updatedAt: '2025-10-30T11:15:00',
-        totalAmount: 840000,
-        shippingFee: 25000,
-        finalAmount: 865000,
-        paymentMethod: 'Thẻ Visa',
-        buyerName: 'Phạm Mỹ Linh',
-        buyerPhone: '0977 321 456',
-        email: 'linh.pham@example.com',
-        address: '21 Nguyễn Thị Minh Khai, Quận 3, TP.HCM',
-        carrier: 'Giao Hàng Tiết Kiệm',
-        eta: '30/10/2025',
-        orderItems: [
-            {
-                productName: 'Terrarium “Forest Whisper”',
-                quantity: 1,
-                sizeName: 'premium',
-                price: 650000
-            },
-            {
-                productName: 'Đèn LED Mini dưỡng cây',
-                quantity: 1,
-                sizeName: 'standard',
-                price: 190000
-            }
-        ]
-    },
-    {
-        orderId: 4,
-        status: 'FAILED_SHIPPING',
-        orderDate: '2025-10-18T10:00:00',
-        updatedAt: '2025-10-20T12:40:00',
-        totalAmount: 320000,
-        shippingFee: 0,
-        finalAmount: 320000,
-        paymentMethod: 'Thẻ nội địa Napas',
-        buyerName: 'Hoàng Khánh Vy',
-        buyerPhone: '0912 111 999',
-        email: 'vy.hoang@example.com',
-        address: '9 Nguyễn Đình Chiểu, Đà Lạt',
-        carrier: 'Đang cập nhật',
-        eta: '—',
-        orderItems: [
-            {
-                productName: 'Sen Đá Bắp Cải',
-                quantity: 1,
-                sizeName: 'medium',
-                price: 190000
-            },
-            {
-                productName: 'Bộ Dụng Cụ Chăm Sóc',
-                quantity: 1,
-                sizeName: 'standard',
-                price: 130000
-            }
-        ]
-    },
-    {
-        orderId: 5,
-        status: 'PACKAGING',
-        orderDate: '2025-11-17T09:35:00',
-        updatedAt: '2025-11-17T10:10:00',
-        totalAmount: 1460000,
-        shippingFee: 40000,
-        finalAmount: 1500000,
-        paymentMethod: 'Thanh toán khi nhận hàng',
-        buyerName: 'Nguyễn Quốc Huy',
-        buyerPhone: '0903 654 210',
-        email: 'huy.nguyen@example.com',
-        address: '56 Hoàng Diệu, Đà Nẵng',
-        carrier: 'Giao Hàng Nhanh',
-        eta: '22/11/2025',
-        orderItems: [
-            {
-                productName: 'Combo Chậu Sen Đá “Sunset Glow”',
-                quantity: 1,
-                sizeName: 'deluxe',
-                price: 950000
-            },
-            {
-                productName: 'Đèn LED Mini dưỡng cây',
-                quantity: 1,
-                sizeName: 'standard',
-                price: 180000
-            },
-            {
-                productName: 'Dung dịch dinh dưỡng hữu cơ',
-                quantity: 1,
-                sizeName: '250ml',
-                price: 330000
-            }
-        ]
-    }
-]
+
 
 
 
@@ -232,7 +75,7 @@ const formatDate = (isoDate) => {
 export default function Order() {
     const [searchTerm, setSearchTerm] = useState('')
     const [activeStatus, setActiveStatus] = useState('ALL')
-    const [orders, setOrders] = useState(fallbackOrders)
+    const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [detailOpen, setDetailOpen] = useState(false)
@@ -261,7 +104,7 @@ export default function Order() {
         } catch (ordersError) {
             console.error('Failed to fetch orders list', ordersError)
             setError(ordersError?.response?.data?.message || 'Không thể tải danh sách đơn hàng')
-            setOrders(fallbackOrders)
+            setOrders([])
         } finally {
             setLoading(false)
         }
@@ -529,9 +372,7 @@ export default function Order() {
                                 <Typography variant="h6" sx={{fontWeight: 700, color: '#0D3B2E'}}>
                                     Không tìm thấy đơn hàng phù hợp
                                 </Typography>
-                                <Typography variant="body1" sx={{color: 'text.secondary'}}>
-                                    Thử thay đổi bộ lọc hoặc kiểm tra lại từ khóa tìm kiếm.
-                                </Typography>
+                         
                             </Paper>
                         )}
 
@@ -687,7 +528,7 @@ export default function Order() {
                                                             Thanh toán
                                                         </Typography>
                                                         <Typography variant="body1" sx={{fontWeight: 600}}>
-                                                            Phương thức: {order.paymentMethod || 'Đang cập nhật'}
+                                                            Phương thức: VNPAY
                                                         </Typography>
                                                         <Stack direction="row" justifyContent="space-between">
                                                             <Typography variant="body2" color="text.secondary">
