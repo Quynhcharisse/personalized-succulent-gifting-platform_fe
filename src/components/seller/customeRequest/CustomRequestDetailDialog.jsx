@@ -222,6 +222,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                         </Typography>
                     </Box>
                 </Box>
+                
                 <ActionButton
                     action="cancel"
                     onClick={onClose}
@@ -255,8 +256,33 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                         </Typography>
                     </Box>
                 ) : (
+                    
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
                         {/* Request Info */}
+                        <Box sx={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        mt: 1
+    }}>
+        <Button
+            variant="contained"
+            startIcon={<EditIcon/>}
+            onClick={() => setProcessDialogOpen(true)}
+            sx={{
+                backgroundColor: '#0D3B2E',
+                color: 'white',
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                '&:hover': {
+                    backgroundColor: '#0a2e22'
+                }
+            }}
+        >
+            Cập nhật thiết kế
+        </Button>
+    </Box>
                         <Card sx={{border: '1px solid #E6F1ED', backgroundColor: '#FAFFFD', borderRadius: 2}}>
                             <CardContent>
                                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2}}>
@@ -268,6 +294,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                                         color={getStatusColor(request.status)}
                                         sx={{fontWeight: 600}}
                                     />
+                                    
                                 </Box>
                                 <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary', mt: 2}}>
                                     <ScheduleIcon sx={{mr: 1}}/>
@@ -275,8 +302,10 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                                         Tạo lúc: {formatDate(request.createdAt)}
                                     </Typography>
                                 </Box>
+                                
                             </CardContent>
                         </Card>
+
 
                         {/* Buyer Info */}
                         {request.buyer && (

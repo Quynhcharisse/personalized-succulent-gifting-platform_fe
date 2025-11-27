@@ -34,8 +34,9 @@ import {
 } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
-import {createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
+import {confirmCustomRequest, createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
 import {FENGSHUI, GENDERS, ZODIACS} from '../../constants.js';
+import ShippingAddressDialog from '../checkout/ShippingAddressDialog.jsx';
 
 export default function CustomRequestDetail() {
     const {id: idParam} = useParams();
@@ -44,6 +45,8 @@ export default function CustomRequestDetail() {
     const id = stateId ?? idParam;
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
+    const [showDialog, setShowDialog] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
 
     const [loading, setLoading] = useState(true);
     const [request, setRequest] = useState(null);
@@ -179,6 +182,21 @@ export default function CustomRequestDetail() {
             return dateString;
         }
     };
+    const handleConfirmDelivery = async () => {
+        try {
+            const response = await confirmCustomRequest(request.id);
+    
+            enqueueSnackbar("Xác nhận yêu cầu thành công!", { variant: "success" });
+    
+            // refresh lại request để ẩn nút
+            await fetchCustomRequestDetail();
+            setShowDialog(false);
+    
+        } catch (error) {
+            enqueueSnackbar("Không thể xác nhận yêu cầu", { variant: "error" });
+        }
+    };
+    
 
     const getFengShuiLabel = (value) => {
         const item = FENGSHUI.find(f => f.value === value);
@@ -569,43 +587,47 @@ export default function CustomRequestDetail() {
                         </Typography>
                     )}
                 </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "end",
-                        gap: 3,
-                        mt: 2,
-                 
-                    }}
-                >
-                      {request.status === 'Đã chỉnh sửa' && (
-                        <Button
-                            variant="contained"
-                            color="warning"
-                            startIcon={<EditIcon/>}
-                            onClick={() => setRevisionDialogOpen(true)}
-                            sx={{color: 'white'}}
-                        >
-                            Yêu Cầu Chỉnh Sửa
-                        </Button>
-                    )}
-                   <Button
-                        variant="contained"
-                        startIcon={<ConfirmationNumberRounded/>}
-                        sx={{
-                            backgroundColor: '#0D3B2E',
-                            color: 'white',
-                            fontWeight: 600,
-                            px: 3,
-                            py: 1,
-                            '&:hover': {
-                                backgroundColor: '#0a2e22'
-                            }
-                        }}
-                    >
-                     Xác Nhận Giao Hàng
-                    </Button>
-                </Box>
+    <Box
+        sx={{
+            display: "flex",
+            justifyContent: "end",
+            gap: 3,
+            mt: 2,
+        }}
+    >
+        {( request.status !== 'Đang chỉnh sửa' && request.status !== 'thành công' ) && (
+
+        <Button
+            variant="contained"
+            color="warning"
+            startIcon={<EditIcon />}
+            onClick={() => setRevisionDialogOpen(true)}
+            sx={{ color: "white" }}
+        >
+            Yêu Cầu Chỉnh Sửa
+        </Button>
+                )}
+        {( request.status !== 'Đang chỉnh sửa' && request.status !== 'thành công' ) && (
+       <Button
+       variant="contained"
+       startIcon={<ConfirmationNumberRounded />}
+       onClick={handleConfirmDelivery}   // <-- đổi ở đây
+       sx={{
+           backgroundColor: "#0D3B2E",
+           color: "white",
+           fontWeight: 600,
+           px: 3,
+           py: 1,
+           "&:hover": {
+               backgroundColor: "#0a2e22",
+           },
+       }}
+   >
+       Xác Nhận Giao Hàng
+   </Button>   
+        )}
+</Box>
+
             </Box>
         </Paper>
     </>
@@ -1283,7 +1305,9 @@ export default function CustomRequestDetail() {
                     </Button>
                 </DialogActions>
             </Dialog>
+           
         </Box>
+        
     );
 }
 
