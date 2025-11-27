@@ -30,7 +30,7 @@ import {
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
-import {createOrUpdateProduct, getAccessories, getSucculents} from '../../../services/ProductService.jsx';
+import {createOrUpdateProduct, getAccessories, getSucculents} from '@/services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 

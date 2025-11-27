@@ -11,8 +11,8 @@ import {
     Typography
 } from '@mui/material';
 import { Article as ArticleIcon, Add as AddIcon, DeleteOutline as DeleteIcon } from '@mui/icons-material';
-import {viewProduct} from '../../../services/ProductService.jsx';
-import { createPost, updatePost } from '../../../services/PostService.jsx';
+import {viewProduct} from '@/services/ProductService.jsx';
+import { createPost, updatePost } from '@/services/PostService.jsx';
 import { enqueueSnackbar } from 'notistack';
 import { DASHBOARD_STYLES } from '../../constants.js';
 import UploadImageField from '../succulent/UploadImageField.jsx';

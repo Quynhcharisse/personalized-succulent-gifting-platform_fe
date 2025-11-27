@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Box, Container, Paper, Typography, FormControl, InputLabel, Select, MenuItem, Chip, Stack, Tooltip, IconButton} from '@mui/material';
 import {Add as AddIcon, Inventory as InventoryIcon, Visibility as VisibilityIcon, Edit as EditIcon} from '@mui/icons-material';
-import {getAccessories} from '../../../services/ProductService.jsx';
+import {getAccessories} from '@/services/ProductService.jsx';
 import DataTable from '../../common/DataTable.jsx';
 import AccessoryDetail from './AccessoryDetail.jsx';
 import CreateAccessoryDialog from './CreateAccessoryDialog.jsx';

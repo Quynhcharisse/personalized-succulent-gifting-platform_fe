@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Box, Container, Paper, Typography} from '@mui/material';
 import {Add as AddIcon, LocalFlorist as LocalFloristIcon} from '@mui/icons-material';
-import {createSucculent, getSucculents} from '../../../services/ProductService.jsx';
+import {createSucculent, getSucculents} from '@/services/ProductService.jsx';
 import SucculentTable from './SucculentTable.jsx';
 import SucculentDetailDialog from './SucculentDetailDialog.jsx';
 import CreateSucculentDialog from './CreateSucculentDialog.jsx';

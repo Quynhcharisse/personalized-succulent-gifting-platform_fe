@@ -16,7 +16,7 @@ import {
 import {Build, Event as EventIcon, Schedule, Visibility} from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
-import {viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
+import {viewCustomProductRequestByBuyer} from '@/services/CustomeRequestService.jsx';
 
 const CUSTOM_REQUESTS_CACHE_KEY = 'custom_requests_cache';
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes

@@ -34,9 +34,9 @@ import {
 } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
-import {confirmCustomRequest, createRevision, viewCustomProductRequestByBuyer} from '../../../services/CustomeRequestService.jsx';
+import {confirmCustomRequest, createRevision, viewCustomProductRequestByBuyer} from '@/services/CustomeRequestService.jsx';
 import {FENGSHUI, GENDERS, ZODIACS} from '../../constants.js';
-import ShippingAddressDialog from '../checkout/ShippingAddressDialog.jsx';
+
 
 export default function CustomRequestDetail() {
     const {id: idParam} = useParams();

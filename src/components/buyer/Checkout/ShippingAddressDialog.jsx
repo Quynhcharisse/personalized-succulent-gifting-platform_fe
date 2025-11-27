@@ -14,8 +14,8 @@ import {
 } from '@mui/material';
 import React, {useEffect, useState} from 'react';
 import {COLORS, DASHBOARD_STYLES} from '../../constants.js';
-import {createShippingAddress, getShippingAddresses} from '../../../services/ShippingAddressService.jsx';
-import {viewDistricts, viewProvinces, viewWards} from '../../../services/GhnService.jsx';
+import {createShippingAddress, getShippingAddresses} from '@/services/ShippingAddressService.jsx';
+import {viewDistricts, viewProvinces, viewWards} from '@/services/GhnService.jsx';
 
 const ShippingAddressDialog = ({ open, onClose, onSelect }) => {
     const [addresses, setAddresses] = useState([]);

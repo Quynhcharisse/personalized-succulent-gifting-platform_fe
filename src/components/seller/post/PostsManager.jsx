@@ -3,7 +3,7 @@ import {Box, Button, Container, Paper, Typography, Alert, Tooltip, IconButton} f
 import { Add as AddIcon, Article as ArticleIcon } from '@mui/icons-material';
 import PostTable from './PostTable.jsx';
 import PostDialog from './PostDialog.jsx';
-import { viewPostsBySeller } from '../../../services/PostService.jsx';
+import { viewPostsBySeller } from '@/services/PostService.jsx';
 import { DASHBOARD_STYLES } from '../../constants.js';
 
 const mapStatusToKey = (rawStatus) => {

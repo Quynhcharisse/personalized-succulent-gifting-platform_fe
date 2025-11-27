@@ -25,8 +25,7 @@ import {
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
-import {checkAvailabileQuantityInStorage, getAccessories, getSucculents} from '../../../services/ProductService.jsx';
-import {createCustomProductRequest} from '../../../services/CustomeRequestService.jsx';
+import {checkAvailabileQuantityInStorage, getAccessories, getSucculents} from '@/services/ProductService.jsx';
 import {useSnackbar} from 'notistack';
 import {FENGSHUI, ZODIACS} from '../../constants.js';
 import uploadToCloudinary from '../../cloudinaryUpload.js';

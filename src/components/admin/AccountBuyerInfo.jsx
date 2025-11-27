@@ -41,7 +41,6 @@ import {
 import {activateAccount, banAccount, viewAccountBuyerList} from '../../services/AccountService';
 import ActionButton from "../buttonCustom/ActionButton.jsx";
 
-// Helper function to map API response to normalized data
 function mapBuyerAccounts(apiResponse) {
     const message = apiResponse?.message || "";
     const list = Array.isArray(apiResponse?.data) ? apiResponse.data : [];
