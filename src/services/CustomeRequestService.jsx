@@ -33,4 +33,9 @@ export const createRevision = async (requireData) => {
     return response || null
 }
 
+export const confirmCustomRequest = async (id) => {
+    const response = await axiosClient.put(`/custom/custom-request/status/${id}`);
+    return response || null;
+};
+
 

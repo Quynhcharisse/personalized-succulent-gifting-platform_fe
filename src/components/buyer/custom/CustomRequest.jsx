@@ -25,7 +25,7 @@ import {
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
-import {getAccessories, getSucculents} from '../../../services/ProductService.jsx';
+import {checkAvailabileQuantityInStorage, getAccessories, getSucculents} from '../../../services/ProductService.jsx';
 import {createCustomProductRequest} from '../../../services/CustomeRequestService.jsx';
 import {useSnackbar} from 'notistack';
 import {FENGSHUI, ZODIACS} from '../../constants.js';
@@ -69,6 +69,94 @@ export default function CustomRequest() {
     // Filter State (single-select type, conditional values)
     const [filterType, setFilterType] = useState('none'); // 'none' | 'fengshui' | 'zodiac'
     const [filterValue, setFilterValue] = useState('all');
+
+    const calculateEstimate = () => {
+        let total = 0;
+        let breakdown = [];
+    
+        // 🌵 Succulents
+        formData.succulents.forEach(item => {
+            const succulent = allSucculents.find(s => s.id === item.id);
+            if (succulent && succulent.size[item.size]) {
+                const price = succulent.size[item.size].price;
+                const qty = item.quantity;
+                const subtotal = price * qty;
+    
+                breakdown.push({
+                    label: `${succulent.speciesName} (${item.size}) x ${qty}`,
+                    price,
+                    qty,
+                    subtotal
+                });
+    
+                total += subtotal;
+            }
+        });
+    
+        // 🪴 Pot
+        const pot = availablePots.find(p => p.name === formData.pot);
+        if (pot && formData.potSize) {
+            const sizeData = pot.size.find(s => s.name === formData.potSize);
+            if (sizeData) {
+                breakdown.push({
+                    label: `Chậu: ${pot.name} (${formData.potSize})`,
+                    price: sizeData.price,
+                    qty: 1,
+                    subtotal: sizeData.price
+                });
+                total += sizeData.price;
+            }
+        }
+    
+        // 🌱 Soil
+        const soil = availableSoils.find(s => s.name === formData.soil);
+        if (soil && soil.basePricing) {
+            const mass = formData.soilMass;
+            const unitMass = soil.basePricing.massValue;
+            const price = soil.basePricing.price;
+    
+            const qty = Math.ceil(mass / unitMass);
+            const subtotal = qty * price;
+    
+            breakdown.push({
+                label: `Đất: ${soil.name} (${mass}g)`,
+                price,
+                qty,
+                subtotal
+            });
+    
+            total += subtotal;
+        }
+    
+        // 🎀 Decorations
+        formData.decorations.forEach(d => {
+            const deco = availableDecorations.find(x => x.name === d.name);
+            if (deco && deco.basePricing) {
+                const price = deco.basePricing.price;
+                const qty = d.quantity;
+                const subtotal = price * qty;
+    
+                breakdown.push({
+                    label: `Trang trí: ${deco.name} x ${qty}`,
+                    price,
+                    qty,
+                    subtotal
+                });
+    
+                total += subtotal;
+            }
+        });
+    
+        // 💰 Service fee 10%
+        const serviceFee = Math.round(total * 0.1);
+    
+        // 💰 Final amount
+        const finalAmount = total + serviceFee;
+    
+        return { total, breakdown, serviceFee, finalAmount };
+    };
+    
+    
 
     // Cache helpers
     const getCachedData = (cacheKey) => {
@@ -390,55 +478,102 @@ export default function CustomRequest() {
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
-
+    
         try {
-            // Transform data to match API payload structure
-            const selectedPot = availablePots.find(p => p.name === formData.pot);
-            const selectedSoil = availableSoils.find(s => s.name === formData.soil);
-
+            // ➤ Lấy giá trị tiền cuối cùng
+            const { finalAmount } = calculateEstimate();
+    
+            // 1️⃣ Build payload để kiểm tra tồn kho
             const payload = {
-                images: formData.images,
-                occasion: formData.occasion || null,
-                size: {
-                    succulents: formData.succulents.map(s => {
-                        const succulentData = allSucculents.find(as => as.id === s.id);
-                        return {
-                            id: succulentData?.id,
-                            name: succulentData?.speciesName,
+                succulentDataList: formData.succulents.map(s => ({
+                    succulentId: s.id,
+                    size: s.size,
+                    quantity: s.quantity
+                })),
+                soilData: formData.soil
+                    ? { soilName: formData.soil, quantity: formData.soilMass }
+                    : null,
+                accessoryData: formData.decorations.length > 0
+                    ? {
+                        accessoryName: formData.decorations[0].name,
+                        quantity: formData.decorations[0].quantity
+                    }
+                    : null,
+                potData: formData.pot
+                    ? {
+                        potName: formData.pot,
+                        size: formData.potSize,
+                        quantity: 1
+                    }
+                    : null
+            };
+    
+            const res = await checkAvailabileQuantityInStorage(payload);
+    
+            if (!(res?.status >= 200 && res?.status < 300)) {
+                throw new Error(res?.data?.message || 'Kiểm tra tồn kho thất bại');
+            }
+    
+            enqueueSnackbar('Tồn kho hợp lệ! Đang chuyển đến trang thanh toán...', {
+                variant: 'success'
+            });
+    
+            // 3️⃣ Xóa session cũ + set flag để Payment tạo link PayOS mới
+            try {
+                localStorage.removeItem('payos-session');
+                localStorage.setItem('payos-force-new', '1');
+            } catch {}
+    
+            // 4️⃣ Điều hướng sang Payment → truyền finalAmount
+            navigate('/buyer/payment', {
+                state: {
+                    forceNew: true,
+                    size: {
+                        succulents: formData.succulents.map(s => ({
+                            id: s.id,
+                            name: allSucculents.find(a => a.id === s.id)?.speciesName,
                             sizes: [{
                                 size: s.size,
                                 quantity: s.quantity
                             }]
-                        }
-                    }),
-                    pot: selectedPot && formData.potSize ? {
-                        name: formData.pot,
-                        size: formData.potSize
-                    } : null,
-                    soil: selectedSoil ? {
-                        name: formData.soil,
-                        massAmount: formData.soilMass / 1000 // Convert from grams to kg
-                    } : null,
-                    decoration: formData.decorations.length > 0 ? {
-                        included: true,
-                        details: formData.decorations.map(dec => ({
-                            name: dec.name,
-                            quantity: dec.quantity
-                        }))
-                    } : null
+                        })),
+            
+                        pot: payload.potData ? {
+                            name: payload.potData.potName,
+                            size: payload.potData.size
+                        } : null,
+            
+                        soil: payload.soilData ? {
+                            name: payload.soilData.soilName,
+                            massAmount: payload.soilData.quantity // FE đang gửi gram → tuỳ bạn convert
+                        } : null,
+            
+                        decoration: payload.accessoryData ? {
+                            included: true,
+                            details: [{
+                                name: payload.accessoryData.accessoryName,
+                                quantity: payload.accessoryData.quantity
+                            }]
+                        } : null
+                    },
+                    images: formData.images,
+                    occasion: formData.occasion,
+                    amount: finalAmount,
+                    customRequest: true
                 }
-            };
-
-            await createCustomProductRequest(payload);
-            enqueueSnackbar('Gửi yêu cầu thành công!', {variant: 'success'});
-            navigate('/custom-request');
+            });
+    
         } catch (error) {
-            enqueueSnackbar('Gửi yêu cầu thất bại', {variant: 'error'});
+            enqueueSnackbar(
+                error?.response?.data?.message || error?.message || "Gửi yêu cầu thất bại",
+                { variant: "error" }
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
-
+    
+    
     if (loading) {
         return <Container sx={{py: 8, display: 'flex', justifyContent: 'center'}}><CircularProgress/></Container>;
     }
@@ -867,6 +1002,129 @@ export default function CustomRequest() {
                         </Box>
                         {isUploading && <CircularProgress size={20}/>}
                     </Box>
+<br/>
+{/* Estimate Card */}
+<Paper
+    sx={{
+        p: 3,
+        mb: 4,
+        borderRadius: 3,
+        border: "1px solid #DCF4E5",
+        backgroundColor: "#F7FFF9"
+    }}
+>
+    <Typography variant="h6" sx={{ fontWeight: 700, color: "#0D3B2E", mb: 2 }}>
+        TỔNG CHI PHÍ ƯỚC TÍNH
+    </Typography>
+
+    {(() => {
+const { total, breakdown, serviceFee, finalAmount } = calculateEstimate();
+return (
+            <Box>
+                {breakdown.map((item, i) => (
+                    <Box
+                        key={i}
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            py: 1
+                        }}
+                    >
+                        <Typography sx={{ color: "#2E4F38" }}>{item.label}</Typography>
+                        <Typography sx={{ fontWeight: 600 }}>
+                            {item.subtotal.toLocaleString("vi-VN")}₫
+                        </Typography>
+                    </Box>
+                ))}
+
+                <Divider sx={{ my: 2 }} />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
+    <Typography variant="body1" sx={{ fontWeight: 600, color: "#AD6800" }}>
+        Phí dịch vụ (10%):
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+        {serviceFee.toLocaleString("vi-VN")}₫
+    </Typography>
+</Box>
+
+<Divider sx={{ my: 2 }} />
+
+{/* Final Amount */}
+<Box sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, color: "#2E7D32" }}>
+        Tổng thanh toán dự kiến:
+    </Typography>
+    <Typography variant="h6" sx={{ fontWeight: 700, color: "#1B5E20" }}>
+        {finalAmount.toLocaleString("vi-VN")}₫
+    </Typography>
+</Box>
+            </Box>
+        );
+    })()}
+</Paper>
+<Paper
+    sx={{
+        p: 3,
+        mb: 4,
+        borderRadius: 3,
+        border: "1px solid #FFE7B3",
+        backgroundColor: "#FFF9E6",
+    }}
+>
+    <Typography
+        variant="h6"
+        sx={{
+            fontWeight: 700,
+            color: "#B45309",
+            display: "flex",
+            alignItems: "center",
+            mb: 1.5,
+        }}
+    >
+        ⚠️ Lưu ý quan trọng
+    </Typography>
+
+    <Typography variant="body1" sx={{ color: "#7C4A03", lineHeight: 1.6 }}>
+    Để đảm bảo trải nghiệm tốt nhất cho quý khách, chúng tôi luôn hỗ trợ quý khách
+    tự do tuỳ chỉnh yêu cầu đã tạo trên hệ thống. 
+    Tuy nhiên, nếu yêu cầu tuỳ chỉnh của quý khách không hợp lý hoặc vượt quá 
+    <strong> 5 lần yêu cầu tùy chỉnh sau khi tạo</strong>, chúng tôi có quyền 
+    <strong> hủy đơn hàng</strong>.
+    <br /><br />
+
+    Trong trường hợp cần hoàn tiền, quý khách vui lòng liên hệ qua email:
+    <strong> huatri2004@gmail.com</strong> để được hỗ trợ xử lý nhanh nhất.
+    <br /><br />
+
+    Sau khi nhấn nút gửi yêu cầu, quý khách sẽ được chuyển đến 
+    <strong> trang thanh toán</strong>.
+    <br /><br />
+
+    <strong>Lưu ý về chi phí:</strong> Chi phí được hiển thị trong phần 
+    <em> Tổng Chi Phí Ước Tính </em> chỉ bao gồm:
+    <ul style={{ marginTop: "8px", marginBottom: "8px" }}>
+        <li>Phí dịch vụ</li>
+        <li>Tiền sen đá theo kích thước & số lượng</li>
+        <li>Tiền chậu</li>
+        <li>Tiền đất</li>
+        <li>Phụ kiện trang trí (nếu có)</li>
+    </ul>
+    Các chi phí trên <strong>chưa bao gồm phí vận chuyển</strong>.
+    <br /><br />
+
+    Sau khi quý khách đồng ý với mẫu tuỳ chỉnh, sẽ có nhân viên của shop liên hệ 
+    để <strong>tư vấn hình thức vận chuyển phù hợp</strong> và báo phí vận chuyển cụ thể.
+    <br /><br />
+
+    <strong style={{ color: "#B45309" }}>Chân thành cảm ơn quý khách đã tin tưởng và lựa chọn Điện Cây!</strong>
+    <br />
+    Chúng tôi luôn trân trọng từng yêu cầu của quý khách và mong rằng sẽ mang đến cho quý khách
+    một sản phẩm ưng ý nhất.
+</Typography>
+
+
+</Paper>
 
                     <Box sx={{mt: 4, display: 'flex', justifyContent: 'flex-end'}}>
                         <Button variant="contained" color="success" size="large" onClick={handleSubmit}

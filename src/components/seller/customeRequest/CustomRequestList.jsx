@@ -46,11 +46,7 @@ export default function CustomRequestList() {
         setSelectedRequestId(null);
     };
 
-    const handleApprove = (row) => {
-        if (!row?.id) return;
-        setSelectedRequestId(row.id);
-        setProcessDialogOpen(true);
-    };
+
 
     useEffect(() => {
         loadData();
@@ -107,7 +103,6 @@ export default function CustomRequestList() {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     onViewDetail={handleViewDetail}
-                    onApprove={handleApprove}
                 />
             </Paper>
 

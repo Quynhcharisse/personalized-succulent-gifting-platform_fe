@@ -102,3 +102,7 @@ export const checkAvailabilityProductsBySize = async(payload) => {
     const response = await axiosClient.put(`/product/check/availability/products`, payload);
     return response || null
 }
+export const checkAvailabileQuantityInStorage = async(payload) => {
+    const response = await axiosClient.put(`/product/check/availability`, payload);
+    return response || null
+}
