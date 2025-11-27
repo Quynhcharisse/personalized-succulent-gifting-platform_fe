@@ -68,8 +68,8 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
     };
 
     const handleProcessSuccess = () => {
-        // Refresh the request detail after successful processing
-        fetchRequestDetail();
+        fetchRequestDetail();            // reload chi tiết
+        if (onSuccess) onSuccess();      // reload danh sách trong CustomRequestList
     };
 
     const handleRejectRequest = async () => {
@@ -628,6 +628,190 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                                 ))}
                             </>
                         )}
+{/* Latest Version */}
+{request.latestVersion && (
+    <>
+        <Divider sx={{ my: 2 }} />
+        <Typography
+            variant="h6"
+            sx={{
+                fontWeight: 700,
+                color: "#0D3B2E",
+                mb: 2
+            }}
+        >
+            Phiên bản mới nhất
+        </Typography>
+
+        <Paper
+            sx={{
+                border: "1px solid #E6F1ED",
+                backgroundColor: "#F0FFF8",
+                borderRadius: 2,
+                overflow: "hidden",
+                mb: 3
+            }}
+        >
+            <Box sx={{ p: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 2
+                    }}
+                >
+                    <Box>
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                fontWeight: 700,
+                                color: "#0D3B2E"
+                            }}
+                        >
+                        v_{request.latestVersion.parentVersion}
+                        </Typography>
+
+                        <Typography variant="body2" color="text.secondary">
+                            Loại: {request.latestVersion.type === 'design' ? 'Thiết kế' : request.latestVersion.type}
+                     </Typography>
+                    </Box>
+
+                    <Chip
+                        label={
+                            request.latestVersion.status === "pending"
+                                ? "Đang chờ"
+                                : request.latestVersion.status
+                        }
+                        color={
+                            request.latestVersion.status === "pending"
+                                ? "warning"
+                                : "success"
+                        }
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                    />
+                </Box>
+
+                {request.latestVersion.revisionContent && (
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Nội dung chỉnh sửa:
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 500, mt: 0.5 }}
+                        >
+                            {request.latestVersion.revisionContent}
+                        </Typography>
+                    </Box>
+                )}
+
+                {/* Images */}
+                {request.latestVersion.images &&
+                    request.latestVersion.images.length > 0 && (
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ mb: 1 }}
+                            >
+                                Ảnh thiết kế ({request.latestVersion.images.length})
+                            </Typography>
+
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2
+                                }}
+                            >
+                                {request.latestVersion.images.map(
+                                    (img, index) => (
+                                        <Avatar
+                                            key={index}
+                                            src={img}
+                                            variant="rounded"
+                                            sx={{
+                                                width: 130,
+                                                height: 130,
+                                                border: "2px solid #C6EADF",
+                                                cursor: "pointer",
+                                                "&:hover": {
+                                                    borderColor: "#0D3B2E",
+                                                    transform: "scale(1.05)",
+                                                    transition: "all 0.2s"
+                                                }
+                                            }}
+                                            onClick={() =>
+                                                window.open(img, "_blank")
+                                            }
+                                        />
+                                    )
+                                )}
+                            </Box>
+                        </Box>
+                    )}
+
+                {/* Dates */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 3,
+                        mt: 2,
+                        fontSize: "0.875rem",
+                        color: "text.secondary"
+                    }}
+                >
+                    {request.latestVersion.revisionDate && (
+                        <Typography variant="body2">
+                            Ngày chỉnh sửa:{" "}
+                            {formatDateArray(
+                                request.latestVersion.revisionDate
+                            )}
+                        </Typography>
+                    )}
+
+                    {request.latestVersion.createDate && (
+                        <Typography variant="body2">
+                            Ngày tạo:{" "}
+                            {formatDateArray(
+                                request.latestVersion.createDate
+                            )}
+                        </Typography>
+                    )}
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "end",
+                        gap: 3,
+                        mt: 2,
+                 
+                    }}
+                >
+                   <Button
+                        variant="contained"
+                        startIcon={<EditIcon/>}
+                        onClick={() => setProcessDialogOpen(true)}
+                        sx={{
+                            backgroundColor: '#0D3B2E',
+                            color: 'white',
+                            fontWeight: 600,
+                            px: 3,
+                            py: 1,
+                            '&:hover': {
+                                backgroundColor: '#0a2e22'
+                            }
+                        }}
+                    >
+                     Cập Nhật Thiết Kế
+                    </Button>
+                </Box>
+            </Box>
+        </Paper>
+    </>
+)}
 
                         {/* Versions */}
                         {request.versions && request.versions.length > 0 && (
@@ -712,40 +896,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                 )}
             </DialogContent>
 
-            {request && request.status === 'Đang chờ duyệt' && (
-                <DialogActions sx={{p: 3, pt: 2, justifyContent: 'flex-end', gap: 2}}>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => handleRejectRequest()}
-                        disabled={rejecting}
-                        sx={{
-                            fontWeight: 600,
-                            px: 3,
-                            py: 1,
-                        }}
-                    >
-                        {rejecting ? 'Đang xử lý...' : 'Từ Chối'}
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<EditIcon/>}
-                        onClick={() => setProcessDialogOpen(true)}
-                        sx={{
-                            backgroundColor: '#0D3B2E',
-                            color: 'white',
-                            fontWeight: 600,
-                            px: 3,
-                            py: 1,
-                            '&:hover': {
-                                backgroundColor: '#0a2e22'
-                            }
-                        }}
-                    >
-                        Xem Xét & Cập Nhật Thiết Kế
-                    </Button>
-                </DialogActions>
-            )}
+          
 
             <ProcessRequestDialog
                 open={processDialogOpen}

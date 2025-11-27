@@ -98,37 +98,38 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
         }
     };
 
-    const handleOpenReject = () => {
-        setRejectOpen(true);
-    };
+    // const handleOpenReject = () => {
+    //     setRejectOpen(true);
+    // };
 
-    const handleConfirmReject = async () => {
-        setSubmitting(true);
-        setError('');
+    // const handleConfirmReject = async () => {
+    //     setSubmitting(true);
+    //     setError('');
 
-        try {
-            const requestData = {
-                id: requestId,
-                images: [],
-                rejectReason: rejectReason && rejectReason.trim() !== '' ? rejectReason.trim() : undefined
-            };
-            const response = await processCustomRequest(requestData, "false");
-            if (response) {
-                enqueueSnackbar('Từ chối yêu cầu thành công', {variant: 'success'});
-                if (onSuccess) onSuccess();
-                handleClose();
-            }
-        } catch (error) {
-            console.error('Error submitting design:', error);
-            const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
-            setError(errorMsg);
-            enqueueSnackbar(errorMsg, {variant: 'error'});
-        } finally {
-            setSubmitting(false);
-        }
-    };
+    //     try {
+    //         const requestData = {
+    //             id: requestId,
+    //             images: [],
+    //             rejectReason: rejectReason && rejectReason.trim() !== '' ? rejectReason.trim() : undefined
+    //         };
+    //         const response = await processCustomRequest(requestData, "false");
+    //         if (response) {
+    //             enqueueSnackbar('Từ chối yêu cầu thành công', {variant: 'success'});
+    //             if (onSuccess) onSuccess();
+    //             handleClose();
+    //         }
+    //     } catch (error) {
+    //         console.error('Error submitting design:', error);
+    //         const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
+    //         setError(errorMsg);
+    //         enqueueSnackbar(errorMsg, {variant: 'error'});
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
 
     const handleClose = () => {
+        if (onSuccess) onSuccess();  // ADD HERE
         setImages([{url: ''}]);
         setError('');
         setRejectReason('');
@@ -154,7 +155,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
             <DialogTitle sx={DASHBOARD_STYLES.dialogTitle}>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <Typography variant="h5" sx={{fontWeight: 700}}>
-                        Xem Xét & Cập Nhật Thiết Kế
+                        Cập Nhật Thiết Kế
                     </Typography>
                     <ActionButton
                         action="cancel"
@@ -176,6 +177,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                 )}
 
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+                    <br/>
                     <Box>
                         <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2, color: '#0D3B2E'}}>
                             Upload Ảnh Thiết Kế
@@ -292,8 +294,8 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{p: 3, pt: 0, gap: 1}}>
-                <Button
+            <DialogActions sx={{p: 3, pt: 0, gap: 1,   backgroundColor: '#f7faf7'}}>
+                {/* <Button
                     variant={'contained'}
                     color="error"
                     onClick={handleOpenReject}
@@ -301,7 +303,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                     sx={{fontWeight: 600}}
                 >
                     Từ chối
-                </Button>
+                </Button> */}
                 <Button
                     variant="contained"
                     color="success"
@@ -314,7 +316,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
             </DialogActions>
 
             {/* Confirm Reject Dialog */}
-            <Dialog
+            {/* <Dialog
                 open={rejectOpen}
                 onClose={() => setRejectOpen(false)}
                 maxWidth="sm"
@@ -340,7 +342,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                         Xác nhận từ chối
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </Dialog> */}
         </Dialog>
     );
 }

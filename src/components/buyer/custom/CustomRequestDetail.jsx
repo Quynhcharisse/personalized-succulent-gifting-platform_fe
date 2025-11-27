@@ -29,7 +29,8 @@ import {
     LocalFlorist as PotIcon,
     Park as SoilIcon,
     Schedule,
-    Spa as SucculentIcon
+    Spa as SucculentIcon,
+    ConfirmationNumberRounded
 } from '@mui/icons-material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
@@ -334,17 +335,7 @@ export default function CustomRequestDetail() {
                             Chi Tiết Yêu Cầu #{request.id}
                         </Typography>
                     </Box>
-                    {request.status === 'Đã duyệt' && (
-                        <Button
-                            variant="contained"
-                            color="warning"
-                            startIcon={<EditIcon/>}
-                            onClick={() => setRevisionDialogOpen(true)}
-                            sx={{color: 'white'}}
-                        >
-                            Yêu Cầu Chỉnh Sửa
-                        </Button>
-                    )}
+                  
                 </Box>
 
                 <Paper elevation={0}
@@ -425,6 +416,201 @@ export default function CustomRequestDetail() {
                                 </CardContent>
                             </Card>
                         </Box>
+
+                        {request.latestVersion && (
+    <>
+        <Divider sx={{ my: 2 }} />
+        <Typography
+            variant="h6"
+            sx={{
+                fontWeight: 700,
+                color: "#0D3B2E",
+                mb: 2
+            }}
+        >
+            Phiên bản mới nhất
+        </Typography>
+
+        <Paper
+            sx={{
+                border: "1px solid #E6F1ED",
+                backgroundColor: "#F0FFF8",
+                borderRadius: 2,
+                overflow: "hidden",
+                mb: 3
+            }}
+        >
+            <Box sx={{ p: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 2
+                    }}
+                >
+                    <Box>
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                fontWeight: 700,
+                                color: "#0D3B2E"
+                            }}
+                        >
+                        v_{request.latestVersion.parentVersion}
+                        </Typography>
+
+                        <Typography variant="body2" color="text.secondary">
+                            Loại: {request.latestVersion.type === 'design' ? 'Thiết kế' : request.latestVersion.type}
+                     </Typography>
+                    </Box>
+
+                    <Chip
+                        label={
+                            request.latestVersion.status === "pending"
+                                ? "Đang chờ"
+                                : request.latestVersion.status
+                        }
+                        color={
+                            request.latestVersion.status === "pending"
+                                ? "warning"
+                                : "success"
+                        }
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                    />
+                </Box>
+
+                {request.latestVersion.revisionContent && (
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Nội dung chỉnh sửa:
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 500, mt: 0.5 }}
+                        >
+                            {request.latestVersion.revisionContent}
+                        </Typography>
+                    </Box>
+                )}
+
+                {/* Images */}
+                {request.latestVersion.images &&
+                    request.latestVersion.images.length > 0 && (
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ mb: 1 }}
+                            >
+                                Ảnh thiết kế ({request.latestVersion.images.length})
+                            </Typography>
+
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2
+                                }}
+                            >
+                                {request.latestVersion.images.map(
+                                    (img, index) => (
+                                        <Avatar
+                                            key={index}
+                                            src={img}
+                                            variant="rounded"
+                                            sx={{
+                                                width: 130,
+                                                height: 130,
+                                                border: "2px solid #C6EADF",
+                                                cursor: "pointer",
+                                                "&:hover": {
+                                                    borderColor: "#0D3B2E",
+                                                    transform: "scale(1.05)",
+                                                    transition: "all 0.2s"
+                                                }
+                                            }}
+                                            onClick={() =>
+                                                window.open(img, "_blank")
+                                            }
+                                        />
+                                    )
+                                )}
+                            </Box>
+                        </Box>
+                    )}
+
+                {/* Dates */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 3,
+                        mt: 2,
+                        fontSize: "0.875rem",
+                        color: "text.secondary"
+                    }}
+                >
+                    {request.latestVersion.revisionDate && (
+                        <Typography variant="body2">
+                            Ngày chỉnh sửa:{" "}
+                            {formatDateArray(
+                                request.latestVersion.revisionDate
+                            )}
+                        </Typography>
+                    )}
+
+                    {request.latestVersion.createDate && (
+                        <Typography variant="body2">
+                            Ngày tạo:{" "}
+                            {formatDateArray(
+                                request.latestVersion.createDate
+                            )}
+                        </Typography>
+                    )}
+                </Box>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "end",
+                        gap: 3,
+                        mt: 2,
+                 
+                    }}
+                >
+                      {request.status === 'Đã chỉnh sửa' && (
+                        <Button
+                            variant="contained"
+                            color="warning"
+                            startIcon={<EditIcon/>}
+                            onClick={() => setRevisionDialogOpen(true)}
+                            sx={{color: 'white'}}
+                        >
+                            Yêu Cầu Chỉnh Sửa
+                        </Button>
+                    )}
+                   <Button
+                        variant="contained"
+                        startIcon={<ConfirmationNumberRounded/>}
+                        sx={{
+                            backgroundColor: '#0D3B2E',
+                            color: 'white',
+                            fontWeight: 600,
+                            px: 3,
+                            py: 1,
+                            '&:hover': {
+                                backgroundColor: '#0a2e22'
+                            }
+                        }}
+                    >
+                     Xác Nhận Giao Hàng
+                    </Button>
+                </Box>
+            </Box>
+        </Paper>
+    </>
+)}
+
 
                         {/* Buyer Info */}
                         {request.buyer && (
@@ -871,128 +1057,179 @@ export default function CustomRequestDetail() {
                         )}
 
                         {/* Versions */}
-                        {request.versions && request.versions.length > 0 && (
-                            <>
-                                <Divider sx={{my: 2}}/>
-                                <Box>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            mb: 2,
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => handleToggleSection('versions')}
-                                    >
-                                        <Typography variant="h6" sx={{fontWeight: 600, color: '#0D3B2E'}}>
-                                            Lịch sử phiên bản thiết kế
-                                        </Typography>
-                                        <IconButton size="small">
-                                            <ExpandMoreIcon sx={{
-                                                transform: expandedSections.versions ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                transition: 'transform 0.3s'
-                                            }}/>
-                                        </IconButton>
-                                    </Box>
-                                    <Collapse in={expandedSections.versions}>
-                                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                            {request.versions.map((version, idx) => (
-                                                <Paper key={idx} sx={{
-                                                    border: '1px solid #E6F1ED',
-                                                    backgroundColor: '#FAFFFD',
-                                                    borderRadius: 2,
-                                                    overflow: 'hidden'
-                                                }}>
-                                                    <Box sx={{p: 2}}>
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'flex-start',
-                                                            mb: 2
-                                                        }}>
-                                                            <Box>
-                                                                <Typography variant="subtitle1"
-                                                                            sx={{fontWeight: 600, color: '#0D3B2E'}}>
-                                                                    {version.version}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    Loại: {version.type === 'design' ? 'Thiết kế' : version.type}
-                                                                </Typography>
-                                                            </Box>
-                                                            <Chip
-                                                                label={version.status === 'pending' ? 'Đang chờ' : version.status === 'approved' ? 'Đã duyệt' : version.status}
-                                                                color={version.status === 'pending' ? 'warning' : version.status === 'approved' ? 'success' : 'error'}
-                                                                size="small"
-                                                                sx={{fontWeight: 600}}
-                                                            />
-                                                        </Box>
-                                                        {version.revisionContent && (
-                                                            <Box sx={{mb: 2}}>
-                                                                <Typography variant="body2" color="text.secondary">Nội
-                                                                    dung chỉnh sửa:</Typography>
-                                                                <Typography variant="body1"
-                                                                            sx={{fontWeight: 500, mt: 0.5}}>
-                                                                    {version.revisionContent}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                        {version.images && version.images.length > 0 && (
-                                                            <Box>
-                                                                <Typography variant="body2" color="text.secondary"
-                                                                            sx={{mb: 1}}>
-                                                                    Ảnh thiết kế ({version.images.length}):
-                                                                </Typography>
-                                                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2}}>
-                                                                    {version.images.map((image, imgIdx) => (
-                                                                        <Avatar
-                                                                            key={imgIdx}
-                                                                            src={image}
-                                                                            variant="rounded"
-                                                                            sx={{
-                                                                                width: 120,
-                                                                                height: 120,
-                                                                                border: '2px solid #E6F1ED',
-                                                                                cursor: 'pointer',
-                                                                                '&:hover': {
-                                                                                    borderColor: '#0D3B2E',
-                                                                                    transform: 'scale(1.05)',
-                                                                                    transition: 'all 0.2s'
-                                                                                }
-                                                                            }}
-                                                                            onClick={() => window.open(image, '_blank')}
-                                                                        />
-                                                                    ))}
-                                                                </Box>
-                                                            </Box>
-                                                        )}
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            gap: 3,
-                                                            mt: 2,
-                                                            fontSize: '0.875rem',
-                                                            color: 'text.secondary'
-                                                        }}>
-                                                            {version.revisionDate && (
-                                                                <Typography variant="body2">
-                                                                    Ngày chỉnh
-                                                                    sửa: {formatDateArray(version.revisionDate)}
-                                                                </Typography>
-                                                            )}
-                                                            {version.createDate && (
-                                                                <Typography variant="body2">
-                                                                    Ngày tạo: {formatDateArray(version.createDate)}
-                                                                </Typography>
-                                                            )}
-                                                        </Box>
-                                                    </Box>
-                                                </Paper>
-                                            ))}
-                                        </Box>
-                                    </Collapse>
-                                </Box>
-                            </>
+                         {/* Versions in Collapse */}
+{request.versions && request.versions.length > 0 && (
+    <>
+        <Divider sx={{ my: 2 }} />
+
+        {/* Header */}
+        <Box
+            sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+                mb: 2
+            }}
+            onClick={() => handleToggleSection("versions")}
+        >
+            <Typography variant="h6" sx={{ fontWeight: 600, color: "#0D3B2E" }}>
+                Lịch sử phiên bản thiết kế
+            </Typography>
+
+            <IconButton size="small">
+                <ExpandMoreIcon
+                    sx={{
+                        transform: expandedSections.versions ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.3s"
+                    }}
+                />
+            </IconButton>
+        </Box>
+
+        {/* COLLAPSE BODY */}
+        <Collapse in={expandedSections.versions}>
+            {request.versions.map((version, idx) => (
+                <Paper
+                    key={idx}
+                    sx={{
+                        border: "1px solid #E6F1ED",
+                        backgroundColor: "#FAFFFD",
+                        borderRadius: 2,
+                        overflow: "hidden",
+                        mb: 2
+                    }}
+                >
+                    <Box sx={{ p: 2 }}>
+                        {/* Header Row */}
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                mb: 2
+                            }}
+                        >
+                            <Box>
+                                <Typography
+                                    variant="subtitle1"
+                                    sx={{ fontWeight: 600, color: "#0D3B2E" }}
+                                >
+                                    {version.version}
+                                </Typography>
+
+                                <Typography variant="body2" color="text.secondary">
+                                    Loại:{" "}
+                                    {version.type === "design"
+                                        ? "Thiết kế"
+                                        : "Chỉnh sửa"}
+                                </Typography>
+                            </Box>
+
+                            <Chip
+                                label={
+                                    version.status === "pending"
+                                        ? "Đang chờ"
+                                        : version.status === "fixed"
+                                        ? "Đã chỉnh sửa"
+                                        : version.status
+                                }
+                                color={
+                                    version.status === "pending"
+                                        ? "warning"
+                                        : version.status === "fixed"
+                                        ? "success"
+                                        : "default"
+                                }
+                                size="small"
+                                sx={{ fontWeight: 600 }}
+                            />
+                        </Box>
+
+                        {/* Revision Content */}
+                        {version.revisionContent && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Nội dung chỉnh sửa:
+                                </Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 500, mt: 0.5 }}>
+                                    {version.revisionContent}
+                                </Typography>
+                            </Box>
                         )}
+
+                        {/* Images */}
+                        {version.images && version.images.length > 0 && (
+                            <Box>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ mb: 1 }}
+                                >
+                                    Ảnh thiết kế ({version.images.length})
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 2
+                                    }}
+                                >
+                                    {version.images.map((image, imgIdx) => (
+                                        <Avatar
+                                            key={imgIdx}
+                                            src={image}
+                                            variant="rounded"
+                                            sx={{
+                                                width: 120,
+                                                height: 120,
+                                                border: "2px solid #E6F1ED",
+                                                cursor: "pointer",
+                                                "&:hover": {
+                                                    borderColor: "#0D3B2E",
+                                                    transform: "scale(1.05)",
+                                                    transition: "all 0.2s"
+                                                }
+                                            }}
+                                            onClick={() =>
+                                                window.open(image, "_blank")
+                                            }
+                                        />
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
+
+                        {/* Dates */}
+                        <Box
+                            sx={{
+                                display: "flex",
+                                gap: 3,
+                                mt: 2,
+                                fontSize: "0.875rem",
+                                color: "text.secondary"
+                            }}
+                        >
+                            {version.revisionDate && (
+                                <Typography variant="body2">
+                                    Ngày chỉnh sửa: {formatDateArray(version.revisionDate)}
+                                </Typography>
+                            )}
+
+                            {version.createDate && (
+                                <Typography variant="body2">
+                                    Ngày tạo: {formatDateArray(version.createDate)}
+                                </Typography>
+                            )}
+                        </Box>
+                    </Box>
+                </Paper>
+            ))}
+        </Collapse>
+    </>
+)}
+
                     </Box>
                 </Paper>
             </Container>

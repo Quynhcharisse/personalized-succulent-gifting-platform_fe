@@ -105,7 +105,7 @@ export default function CustomRequestTable({
                     >
                         <VisibilityIcon/>
                     </IconButton>
-                    <Button
+                    {/* <Button
                         variant="contained"
                         color="success"
                         size="small"
@@ -114,7 +114,7 @@ export default function CustomRequestTable({
                         sx={{fontWeight: 600}}
                     >
                         Approved
-                    </Button>
+                    </Button> */}
                 </Box>
             )
         }

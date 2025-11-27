@@ -112,7 +112,7 @@ export default function Payment() {
         embedded: true, // Nếu dùng giao diện nhúng
         onSuccess: async (event) => {   // <-- thêm async
             try {
-                await confirmPayment(buildConfirmPayload(true));
+                await confirmPayment(buildConfirmPayload(true, location.state));
             } catch (confirmErr) {
                 console.error('confirm payment failed', confirmErr);
             }
@@ -133,39 +133,68 @@ export default function Payment() {
     const handleGetPaymentLink = async () => {
         setIsCreatingLink(true);
         try {
-            const products = (cartItems || []).map((it) => ({
-                productId: it.id,
-                size: it.size,
-                price: Number(it.price) || 0,
-                quantity: Number(it.quantity || 1),
-            }));
-            const response = await createPaymentUrl({products, shippingFee});
+            const isCustom = Boolean(location?.state?.customRequest);
+            const finalAmount = Number(location?.state?.amount || 0);
+    
+            let payload;
+    
+            if (isCustom) {
+                // 🟢 CUSTOM REQUEST PAYLOAD
+                payload = {
+                    amount: finalAmount,
+                    customRequest: true
+                };
+            } else {
+                // 🟠 NORMAL CART PAYLOAD
+                const products = (cartItems || []).map((it) => ({
+                    productId: it.id,
+                    size: it.size,
+                    price: Number(it.price) || 0,
+                    quantity: Number(it.quantity || 1),
+                }));
+    
+                payload = {
+                    products,
+                    shippingFee
+                };
+            }
+    
+            const response = await createPaymentUrl(payload);
+    
             const result = response.data;
             setOrderCode(result.orderCode);
             orderCodeRef.current = result.orderCode;
+    
             setPayOSConfig((oldConfig) => ({
                 ...oldConfig,
                 CHECKOUT_URL: result.checkoutUrl,
             }));
+    
             setIsOpen(true);
-            // Lưu session để tránh reset khi refresh
+    
+            // Save session
             const now = Date.now();
             const newExpiresAt = now + 5 * 60 * 1000;
-            try {
-                STORAGE && STORAGE.setItem(
-                    STORAGE_KEY,
-                    JSON.stringify({
-                        orderCode: result.orderCode,
-                        checkoutUrl: result.checkoutUrl,
-                        expiresAt: newExpiresAt,
-                        shippingFee
-                    })
-                );
-            } catch {
-            }
+    
+            STORAGE?.setItem(
+                STORAGE_KEY,
+                JSON.stringify({
+                    orderCode: result.orderCode,
+                    checkoutUrl: result.checkoutUrl,
+                    expiresAt: newExpiresAt,
+                    shippingFee,
+                    customRequest: isCustom,
+                    size: payload.size,
+    images: payload.images,
+    occasion: payload.occasion,
+    amount: finalAmount   // <--- store custom request flag
+                })
+            );
+    
             setExpiresAt(newExpiresAt);
-            setTimeRemaining(5 * 60); // Reset về 5 phút khi tạo link mới
+            setTimeRemaining(5 * 60);
             setIsExpired(false);
+    
         } catch (error) {
             console.error("Error creating payment link:", error);
             setMessage("Có lỗi xảy ra khi tạo link thanh toán");
@@ -174,23 +203,45 @@ export default function Payment() {
             setIsCreatingLink(false);
         }
     };
+    
 
-    const buildConfirmPayload = (successFlag) => {
+    const buildConfirmPayload = (successFlag, locationState) => {
         const code = orderCodeRef.current || orderCode || 0;
-        return {
-            products: (cartItems || []).map((it) => ({
+    
+        const base = {
+            products: (cartItems || []).map(it => ({
                 productId: it.id,
                 size: it.size,
                 price: Number(it.price) || 0,
                 quantity: Number(it.quantity || 1),
             })),
-            orderCode: Number(code) || 0,
+            orderCode: Number(code),
             shippingFee: Number(shippingFee) || 0,
             shippingAddressId: initialShippingAddressId || null,
             success: Boolean(successFlag),
         };
+    
+        if (locationState?.customRequest) {
+            return {
+                products: [], // BẮT BUỘC PHẢI LÀ ARRAY RỖNG
+                orderCode: Number(code),
+                shippingFee: 0,
+                shippingAddressId: null,
+                success: Boolean(successFlag),
+        
+                // custom data
+                size: locationState.size,
+                images: locationState.images,
+                occasion: locationState.occasion,
+                amount: locationState.amount,
+                customRequest: true
+            };
+        }
+        
+    
+        return base;
     };
-
+    
     const handleCancelPayment = async () => {
         // Hủy và quay về trang checkout
         try {
@@ -203,7 +254,7 @@ export default function Payment() {
                 await cancelPaymentLink(orderCode);
             }
             try {
-                await confirmPayment(buildConfirmPayload(false));
+                await confirmPayment(buildConfirmPayload(false, location.state));
             } catch (confirmErr) {
                 console.error('confirm payment failed', confirmErr);
             }
@@ -215,7 +266,7 @@ export default function Payment() {
             } catch {
             }
             setIsCancelling(false);
-            navigate('/buyer/checkout');
+            navigate('/buyer');
         }
     };
 
@@ -260,7 +311,7 @@ export default function Payment() {
                 if (code) {
                     try {
                         await cancelPaymentLink(code);
-                        await confirmPayment(buildConfirmPayload(false));
+                        await confirmPayment(buildConfirmPayload(false, location.state));
                     } catch (confirmErr) {
                         console.error('confirm payment failed on route change', confirmErr);
                     }
@@ -332,13 +383,13 @@ export default function Payment() {
                 }
             }
             try {
-                const body = JSON.stringify(buildConfirmPayload(false));
+                const body = JSON.stringify(buildConfirmPayload(false, location.state));
                 navigator.sendBeacon(confirmUrl, new Blob([body], {type: 'application/json'}));
             } catch {
                 try {
                     fetch(confirmUrl, {
                         method: 'POST',
-                        body: JSON.stringify(buildConfirmPayload(false)),
+                        body: JSON.stringify(buildConfirmPayload(false, location.state)),
                         headers: {'Content-Type': 'application/json'},
                         keepalive: true
                     });
@@ -361,7 +412,7 @@ export default function Payment() {
                     } catch {
                     }
                     try {
-                        await confirmPayment(buildConfirmPayload(false));
+                        await confirmPayment(buildConfirmPayload(false, location.state));
                     } catch (confirmErr) {
                         console.error('confirm payment failed', confirmErr);
                     }
@@ -373,7 +424,7 @@ export default function Payment() {
                         STORAGE && STORAGE.removeItem(STORAGE_KEY);
                     } catch {
                     }
-                    navigate('/buyer/checkout');
+                    navigate('/buyer');
                 }
             })();
         }
