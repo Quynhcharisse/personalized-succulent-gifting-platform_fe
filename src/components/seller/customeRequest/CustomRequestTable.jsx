@@ -1,5 +1,5 @@
 import React from 'react';
-import {Chip, Avatar, Box, Typography, IconButton, Button} from '@mui/material';
+import {Chip, Avatar, Box, Typography, IconButton} from '@mui/material';
 import {Visibility as VisibilityIcon} from '@mui/icons-material';
 import DataTable from '../../common/DataTable.jsx';
 import {COLORS, FENGSHUI, ZODIACS} from '../../constants.js';
@@ -13,8 +13,7 @@ export default function CustomRequestTable({
     totalCount,
     onPageChange,
     onRowsPerPageChange,
-    onViewDetail,
-    onApprove
+    onViewDetail
 }) {
     const getFengShuiLabel = (value) => {
         const item = FENGSHUI.find(f => f.value === value);

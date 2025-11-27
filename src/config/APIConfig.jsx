@@ -1,7 +1,6 @@
 import {refreshToken} from "../services/AuthService.jsx";
 import axios from "axios";
 
-// Sử dụng environment variable hoặc fallback về localhost
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://personalized-succulent-gifting-platform.onrender.com/api/v1'
 
 axios.defaults.baseURL = baseURL;

@@ -3,8 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextField, InputAdornment, IconButton, Grid, Chip, Paper, Skeleton} from '@mui/material';
 import {Search, Clear, LocalFlorist, ShoppingCart, Visibility} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
-import {viewProduct} from '../../../services/ProductService.jsx';
-import {createProductSlug} from '../../../utils/slugUtil.js';
+import {viewProduct} from '@/services/ProductService.jsx';
+import {createProductSlug} from '@utils/slugUtil.js';
 
 // Cache key for sessionStorage
 const PRODUCTS_CACHE_KEY = 'products_cache';

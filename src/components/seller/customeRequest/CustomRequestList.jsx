@@ -4,7 +4,7 @@ import {Build as BuildIcon} from '@mui/icons-material';
 import CustomRequestTable from './CustomRequestTable.jsx';
 import CustomRequestDetailDialog from './CustomRequestDetailDialog.jsx';
 import ProcessRequestDialog from './ProcessRequestDialog.jsx';
-import {viewRequestBySeller} from '../../../services/CustomeRequestService.jsx';
+import {viewRequestBySeller} from '@/services/CustomeRequestService.jsx';
 import usePagination from '../../../hooks/usePagination.js';
 import {DASHBOARD_STYLES} from '../../constants.js';
 

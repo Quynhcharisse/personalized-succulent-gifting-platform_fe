@@ -19,7 +19,7 @@ import {
     Visibility as ViewIcon,
     Delete as DeleteIcon
 } from '@mui/icons-material';
-import {deactiveProduct, viewProduct} from '../../../services/ProductService.jsx';
+import {deactiveProduct, viewProduct} from '@/services/ProductService.jsx';
 import CreateOrUpdateProductDialog from './CreateOrUpdateProductDialog.jsx';
 import useNotify from '../../../hooks/useNotify.js';
 import DataTable from '../../common/DataTable.jsx';

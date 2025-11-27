@@ -2,11 +2,11 @@ import {usePayOS} from "@payos/payos-checkout";
 import React, {useEffect, useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useLocation, useNavigate} from "react-router-dom";
-import {cancelPaymentLink} from "../../../services/WalletService";
-import {confirmPayment} from "../../../services/PaymentService.jsx";
-import {clear} from "../../../store/slices/cartSlice.js";
+import {cancelPaymentLink} from "@/services/WalletService.jsx";
+import {confirmPayment} from "@/services/PaymentService.jsx";
+import {clear} from "@/store/slices/cartSlice.js";
 import "./Payment.css";
-import {createPaymentUrl} from "../../../services/PayOsService";
+import {createPaymentUrl} from "@/services/PayOsService.jsx";
 import axiosClient from "../../../config/APIConfig.jsx";
 
 export default function Payment() {

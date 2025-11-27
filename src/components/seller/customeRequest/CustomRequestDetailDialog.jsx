@@ -27,7 +27,7 @@ import {
     Schedule as ScheduleIcon,
     Edit as EditIcon
 } from '@mui/icons-material';
-import {viewRequestDetailBySeller, processCustomRequest} from '../../../services/CustomeRequestService.jsx';
+import {viewRequestDetailBySeller, processCustomRequest} from '@/services/CustomeRequestService.jsx';
 import {useSnackbar} from 'notistack';
 import {FENGSHUI, ZODIACS, GENDERS, DASHBOARD_STYLES} from '../../constants.js';
 import ActionButton from '../../buttonCustom/ActionButton.jsx';

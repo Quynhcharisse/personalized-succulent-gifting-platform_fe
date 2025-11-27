@@ -11,7 +11,7 @@ import {
     Typography
 } from '@mui/material';
 import {AutoAwesome as AutoAwesomeIcon} from '@mui/icons-material';
-import {getAiSuggestion} from '../../../services/AiSuggestionService.jsx';
+import {getAiSuggestion} from '@/services/AiSuggestionService.jsx';
 import {useSnackbar} from 'notistack';
 
 export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {

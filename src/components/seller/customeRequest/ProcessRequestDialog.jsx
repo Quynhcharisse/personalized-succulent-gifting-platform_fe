@@ -9,7 +9,6 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    TextField,
     Typography
 } from '@mui/material';
 import {
@@ -19,7 +18,7 @@ import {
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import {uploadToCloudinary} from '../../cloudinaryUpload.js';
-import {processCustomRequest} from '../../../services/CustomeRequestService.jsx';
+import {processCustomRequest} from '@/services/CustomeRequestService.jsx';
 import {useSnackbar} from 'notistack';
 import {DASHBOARD_STYLES} from '../../constants.js';
 import ActionButton from '../../buttonCustom/ActionButton.jsx';

@@ -14,11 +14,11 @@ import ShippingAddressDialog from "./ShippingAddressDialog.jsx";
 import {COLORS, DASHBOARD_STYLES} from "../../constants.js";
 import {useDispatch, useSelector} from "react-redux";
 import axiosClient from "../../../config/APIConfig.jsx";
-import {getDefaultShippingAddress} from "../../../services/ShippingAddressService.jsx";
-import {getWalletBalance} from "../../../services/WalletService.jsx";
-import {incrementQuantityBySize, removeItem} from "../../../store/slices/cartSlice.js";
+import {getDefaultShippingAddress} from "@/services/ShippingAddressService.jsx";
+import {getWalletBalance} from "@/services/WalletService.jsx";
+import {incrementQuantityBySize, removeItem} from "@/store/slices/cartSlice.js";
 import useNotify from "../../../hooks/useNotify.js";
-import {checkAvailabilityProductsBySize} from "../../../services/ProductService.jsx";
+import {checkAvailabilityProductsBySize} from "@/services/ProductService.jsx";
 
 export default function CheckoutPage() {
     const items = useSelector((state) => state?.cart?.items || []);

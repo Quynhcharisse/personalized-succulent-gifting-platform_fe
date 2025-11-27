@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Stack, Alert, Box, FormControl, InputLabel, Select, MenuItem, Chip, Card, Divider} from '@mui/material';
-import {updateSucculent} from '../../../services/ProductService.jsx';
+import {updateSucculent} from '@/services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import ActionButton from "../../buttonCustom/ActionButton.jsx";
 import {FENGSHUI, ZODIACS, DASHBOARD_STYLES} from '../../constants.js';
