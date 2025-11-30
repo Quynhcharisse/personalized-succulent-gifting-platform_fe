@@ -76,9 +76,10 @@ export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {
                 borderBottom: '1px solid #E0EBE7'
             }}>
                 <AutoAwesomeIcon sx={{color: '#2E7D32'}}/>
-                <Typography variant="h6" sx={{fontWeight: 600}}>
-                    AI Gợi Ý Thiết Kế
-                </Typography>
+                    {/* Avoid nested heading levels to prevent hydration errors */}
+                    <Typography variant="h6" component="span" sx={{fontWeight: 600}}>
+                        AI Gợi Ý Thiết Kế
+                    </Typography>
             </DialogTitle>
             
             <DialogContent sx={{mt: 2}}>

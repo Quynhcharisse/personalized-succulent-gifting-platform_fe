@@ -7,7 +7,7 @@ import {
     RoomServiceRounded,
     ShoppingCartOutlined
 } from "@mui/icons-material";
-import {Box, Button, Card, CardContent, Divider, IconButton, Stack, Typography} from "@mui/material";
+import {Box, Button, Card, CardContent, Divider, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import ShippingAddressDialog from "./ShippingAddressDialog.jsx";
@@ -18,6 +18,7 @@ import {getDefaultShippingAddress} from "@/services/ShippingAddressService.jsx";
 import {getWalletBalance} from "@/services/WalletService.jsx";
 import {incrementQuantityBySize, removeItem} from "@/store/slices/cartSlice.js";
 import useNotify from "../../../hooks/useNotify.js";
+import {useSnackbar} from 'notistack';
 import {checkAvailabilityProductsBySize} from "@/services/ProductService.jsx";
 
 export default function CheckoutPage() {
@@ -27,17 +28,35 @@ export default function CheckoutPage() {
     const dispatch = useDispatch();
     const [showDialog, setShowDialog] = useState(false);
     const {error} = useNotify();
+    const {enqueueSnackbar} = useSnackbar();
     const [placing, setPlacing] = useState(false);
 
     // Shipping address
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [loadingAddress, setLoadingAddress] = useState(true);
     const [shippingFee, setShippingFee] = useState(0);
+    const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+    const [profilePromptMessage, setProfilePromptMessage] = useState('');
+    const [openAddressCreate, setOpenAddressCreate] = useState(false);
+
+    const PLACEHOLDER_VALUES = ['N/A','NONE','TRỐNG','CHƯA CẬP NHẬT','NULL','KHÔNG','-',''];
+    const isPlaceholder = (val) => {
+        if (!val && val !== 0) return true;
+        const norm = String(val).trim().toUpperCase();
+        return PLACEHOLDER_VALUES.includes(norm);
+    };
+    const logMissingAddressEvent = (reason) => {
+        try {
+            // placeholder analytics hook (extend later)
+            window.dispatchEvent(new CustomEvent('missing-address', {detail:{reason, ts:Date.now()}}));
+        } catch {}
+    };
 
     useEffect(() => {
         const loadDefaultAddress = async () => {
             setLoadingAddress(true);
             try {
+                // Try to get default shipping address first
                 const res = await getDefaultShippingAddress();
                 const data = res?.data?.data;
                 if (data) {
@@ -59,9 +78,69 @@ export default function CheckoutPage() {
                         });
                         setShippingFee(Number(resFee?.data?.data || 0));
                     }
+
+                    // Validate address content (missing or placeholder)
+                    const addrText = (addr.shippingAddress || '').trim().toUpperCase();
+                    const detailText = (addr.address || '').trim().toUpperCase();
+                    if (isPlaceholder(addr.shippingAddress) || isPlaceholder(addr.address)) {
+                        setProfilePromptMessage('Địa chỉ giao hàng mặc định chưa đầy đủ. Vui lòng thêm địa chỉ mới hoặc cập nhật hồ sơ.');
+                        setShowProfilePrompt(true);
+                        logMissingAddressEvent('default-shipping-placeholder');
+                    } else if (!addr.districtId || !addr.wardCode) {
+                        setProfilePromptMessage('Địa chỉ chưa đủ Quận/Huyện hoặc Phường/Xã để tính phí vận chuyển. Vui lòng bổ sung.');
+                        setShowProfilePrompt(true);
+                        logMissingAddressEvent('default-shipping-missing-district-ward');
+                    }
+                } else {
+                    // If no shipping address, try to get address from user profile
+                    try {
+                        const userStr = sessionStorage.getItem('user');
+                        if (userStr) {
+                            const userData = JSON.parse(userStr);
+                            const profileAddress = userData?.user?.address || userData?.address;
+                            
+                            if (profileAddress) {
+                                setSelectedAddress({
+                                    id: null,
+                                    shippingAddress: "Địa chỉ từ hồ sơ",
+                                    address: profileAddress,
+                                    districtId: 0,
+                                    wardCode: "",
+                                });
+
+                                if (isPlaceholder(profileAddress)) {
+                                    setProfilePromptMessage('Địa chỉ trong hồ sơ của bạn chưa được cập nhật. Vui lòng thêm địa chỉ chi tiết.');
+                                    setShowProfilePrompt(true);
+                                    logMissingAddressEvent('profile-address-placeholder');
+                                } else {
+                                    setProfilePromptMessage('Bạn chưa có địa chỉ giao hàng mặc định. Hãy thêm một địa chỉ mới để đặt hàng.');
+                                    setShowProfilePrompt(true);
+                                    logMissingAddressEvent('no-default-shipping-fallback-profile');
+                                }
+                            }
+                            else {
+                                setProfilePromptMessage('Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ để tiếp tục.');
+                                setShowProfilePrompt(true);
+                                logMissingAddressEvent('no-shipping-no-profile');
+                            }
+                        }
+                        else {
+                            setProfilePromptMessage('Bạn chưa đăng nhập hoặc chưa có địa chỉ.');
+                            setShowProfilePrompt(true);
+                            logMissingAddressEvent('no-session-user');
+                        }
+                    } catch (profileErr) {
+                        // Error getting profile address
+                        setProfilePromptMessage('Không thể tải địa chỉ. Vui lòng thử lại hoặc cập nhật hồ sơ.');
+                        setShowProfilePrompt(true);
+                        logMissingAddressEvent('profile-load-error');
+                    }
                 }
             } catch (err) {
-                console.error("Load default address error", err);
+                // Load default address error
+                setProfilePromptMessage('Không thể tải địa chỉ giao hàng. Vui lòng thêm mới hoặc cập nhật hồ sơ.');
+                setShowProfilePrompt(true);
+                logMissingAddressEvent('default-load-error');
             } finally {
                 setLoadingAddress(false);
             }
@@ -163,6 +242,57 @@ export default function CheckoutPage() {
 
     return (
         <>
+            {hasItems && (
+                <Dialog open={showProfilePrompt} onClose={() => {}} disableEscapeKeyDown>
+                    <DialogTitle sx={{fontWeight:700,color:COLORS.primary}}>Thiếu địa chỉ giao hàng</DialogTitle>
+                    <DialogContent>
+                        <Typography variant="body2" sx={{lineHeight:1.6, mb:2}}>{profilePromptMessage}</Typography>
+                        <Typography variant="caption" sx={{color:COLORS.primaryLight}}>
+                            (Các giá trị như N/A, Trống, Chưa cập nhật được xem là không hợp lệ)
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions sx={{display:'flex',justifyContent:'space-between',px:3, pb:2}}>
+                        <Stack direction={{xs:'column', sm:'row'}} spacing={1}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={() => {
+                                    navigate('/');
+                                }}
+                                sx={{fontWeight:600}}
+                            >Quay lại mua sắm</Button>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                onClick={() => {
+                                    setOpenAddressCreate(true);
+                                    setShowProfilePrompt(false);
+                                    enqueueSnackbar('Thêm địa chỉ giao hàng mới', {variant:'info'});
+                                }}
+                                sx={{fontWeight:600}}
+                            >+ Thêm địa chỉ giao hàng</Button>
+                        </Stack>
+                        <Button
+                            variant="contained"
+                            color="warning"
+                            onClick={() => {
+                                enqueueSnackbar('Chuyển đến trang hồ sơ', {variant:'info'});
+                                navigate('/buyer/profile?from=checkout');
+                            }}
+                            sx={{fontWeight:600}}
+                        >Cập nhật hồ sơ</Button>
+                    </DialogActions>
+                </Dialog>
+            )}
+            <ShippingAddressDialog
+                open={openAddressCreate}
+                onClose={() => setOpenAddressCreate(false)}
+                onSelect={(addr) => {
+                    setSelectedAddress(addr);
+                    setOpenAddressCreate(false);
+                }}
+                startMode='create'
+            />
             <Box sx={{
                 bgcolor: 'white',
                 px: {xs: 1, sm: 2, md: 3},

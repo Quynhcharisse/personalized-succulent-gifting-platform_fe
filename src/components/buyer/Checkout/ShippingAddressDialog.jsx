@@ -17,7 +17,7 @@ import {COLORS, DASHBOARD_STYLES} from '../../constants.js';
 import {createShippingAddress, getShippingAddresses} from '@/services/ShippingAddressService.jsx';
 import {viewDistricts, viewProvinces, viewWards} from '@/services/GhnService.jsx';
 
-const ShippingAddressDialog = ({ open, onClose, onSelect }) => {
+const ShippingAddressDialog = ({ open, onClose, onSelect, startMode = 'list' }) => {
     const [addresses, setAddresses] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -84,7 +84,8 @@ const ShippingAddressDialog = ({ open, onClose, onSelect }) => {
     useEffect(() => {
         if (!open) return;
 
-        setMode("list");
+        // initialize mode from prop each time dialog opens
+        setMode(startMode === 'create' ? 'create' : 'list');
         const loadAddresses = async () => {
             setLoading(true);
             try {
@@ -104,7 +105,7 @@ const ShippingAddressDialog = ({ open, onClose, onSelect }) => {
         };
 
         loadAddresses();
-    }, [open]);
+    }, [open, startMode]);
 
     const handleApply = () => {
         const picked = addresses.find(a => a.id === selectedId);
