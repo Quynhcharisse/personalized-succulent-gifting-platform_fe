@@ -226,9 +226,11 @@ const BuyerPosts = () => {
         setRefreshKey(k => k + 1);
     };
 
-    const handleCreateComment = async (postId, content) => {
+    const handleCreateComment = async (postId, content, image) => {
         try {
-            await createPostComment(postId, {content});
+            const payload = { content };
+            if (image) payload.imageUrl = image.link;
+            await createPostComment(postId, payload);
             refresh();
         } catch (err) {
             console.error('Đăng bình luận thất bại', err);

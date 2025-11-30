@@ -21,6 +21,9 @@ import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import {enqueueSnackbar} from 'notistack';
+import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createProductSlug} from '@utils/slugUtil.js';
 
 const getAuthorName = (post) => {
@@ -34,7 +37,6 @@ const getAuthorName = (post) => {
         post?.seller?.name ||
         post?.buyer?.name ||
         post?.product?.sellerName ||
-        // fallback to id-based label
         (post?.sellerId ? `Người bán #${post.sellerId}` : (post?.buyerId ? `Người dùng #${post.buyerId}` : 'Ẩn danh'))
     );
 };
@@ -48,7 +50,6 @@ const initialsFrom = (name = '') => {
 
 const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
     const author = getAuthorName(post);
-    const excerpt = post.description || post.content || '';
     const p = post || {};
 
     const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Bài đăng #${p.id}` : 'Không tiêu đề');
@@ -63,8 +64,6 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
     const productObj = p.product || null;
     const productId = productObj?.id || p.productId;
     const productName = productObj?.name || (productId ? `Sản phẩm #${productId}` : null);
-    // Always use createProductSlug to avoid exposing ID in URL
-    // Even if productName is default, it will create slug from name (e.g., "san-pham-123" instead of "product-123")
     const productSlug = productId && productName
         ? createProductSlug(productName, productId)
         : null;
@@ -81,17 +80,80 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
     const [commentText, setCommentText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // comment image state (single image)
+    const [commentImageFile, setCommentImageFile] = useState(null);
+    const [commentImagePreview, setCommentImagePreview] = useState(null);
+    const [commentUploading, setCommentUploading] = useState(false);
+    const [commentUploadProgress, setCommentUploadProgress] = useState(0);
+
+    const [commentLightboxOpen, setCommentLightboxOpen] = useState(false);
+    const [commentLightboxSrc, setCommentLightboxSrc] = useState(null);
+
+    const openCommentLightbox = (src) => {
+        setCommentLightboxSrc(src);
+        setCommentLightboxOpen(true);
+    };
+    const closeCommentLightbox = () => {
+        setCommentLightboxOpen(false);
+        setCommentLightboxSrc(null);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+        };
+    }, [commentImagePreview]);
+
+    const handleCommentFileSelected = (e) => {
+        const file = e.target?.files?.[0];
+        if (!file) return;
+        if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+        setCommentImageFile(file);
+        setCommentImagePreview(URL.createObjectURL(file));
+    };
+
+    const removeCommentImage = () => {
+        if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+        setCommentImageFile(null);
+        setCommentImagePreview(null);
+        setCommentUploadProgress(0);
+    };
+
     const handleSubmitComment = async () => {
         const trimmed = commentText.trim();
-        if (!trimmed || isSubmitting) return;
+        if (!trimmed || isSubmitting || commentUploading) return;
         setIsSubmitting(true);
         try {
-            if (onSubmitComment) await onSubmitComment(p.id, trimmed);
+            let imagePayload = null;
+            if (commentImageFile) {
+                setCommentUploading(true);
+                try {
+                    const url = await uploadToCloudinary(commentImageFile, {
+                        onProgress: (p) => setCommentUploadProgress(p)
+                    });
+                    imagePayload = { name: commentImageFile.name || '', link: url };
+                } catch (err) {
+                    console.error('Upload comment image failed', err);
+                    enqueueSnackbar('Tải ảnh bình luận thất bại', { variant: 'error' });
+                    // allow submitting comment without image if upload fails? abort to let user retry
+                    setCommentUploading(false);
+                    setIsSubmitting(false);
+                    return;
+                } finally {
+                    setCommentUploading(false);
+                }
+            }
+
+            if (onSubmitComment) {
+                await onSubmitComment(p.id, trimmed, imagePayload);
+            }
             setCommentText('');
+            removeCommentImage();
         } catch (err) {
             console.error('submit comment failed', err);
         } finally {
             setIsSubmitting(false);
+            setCommentUploadProgress(0);
         }
     };
 
@@ -280,6 +342,24 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                                 <Typography variant="body2" color="text.secondary">
                                     {c.content}
                                 </Typography>
+                                {c.imageUrl && (
+                                    <Box mt={1}>
+                                        <Box
+                                            component="img"
+                                            src={c.imageUrl}
+                                            alt="comment-image"
+                                            onClick={() => openCommentLightbox(c.imageUrl)}
+                                            sx={{
+                                                width: 120,
+                                                height: 120,
+                                                objectFit: 'cover',
+                                                borderRadius: 1,
+                                                cursor: 'pointer',
+                                                boxShadow: 1
+                                            }}
+                                        />
+                                    </Box>
+                                )}
                             </Box>
                         );
                     })}
@@ -296,18 +376,44 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || commentUploading}
                         size="small"
                     />
+                    <Box>
+                        <input
+                            id={`comment-image-${p.id}`}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleCommentFileSelected}
+                        />
+                        <label htmlFor={`comment-image-${p.id}`}>
+                            <IconButton component="span" color="primary" size="large" aria-label="attach image">
+                                <PhotoCamera />
+                            </IconButton>
+                        </label>
+                    </Box>
                     <IconButton
                         color="primary"
                         onClick={handleSubmitComment}
-                        disabled={isSubmitting || !commentText.trim()}
+                        disabled={isSubmitting || commentUploading || !commentText.trim()}
                         aria-label="gửi bình luận"
+                        sx={{ alignSelf: 'flex-end' }}
                     >
-                        {isSubmitting ? <CircularProgress size={20}/> : <SendIcon/>}
+                        {isSubmitting || commentUploading ? <CircularProgress size={20}/> : <SendIcon/>}
                     </IconButton>
                 </Box>
+
+                {commentImagePreview && (
+                    <Box mt={1} display="flex" alignItems="center" gap={1}>
+                        <Box component="img" src={commentImagePreview} alt="preview" sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }} />
+                        <Box>
+                            <Typography variant="body2">{commentImageFile?.name}</Typography>
+                            {commentUploading && <Typography variant="caption">Uploading: {Math.round(commentUploadProgress)}%</Typography>}
+                            <Button size="small" onClick={removeCommentImage}>Remove</Button>
+                        </Box>
+                    </Box>
+                )}
             </CardContent>
 
             <CardActions>
@@ -348,6 +454,24 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                             }}
                         />
                     ) : null}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={commentLightboxOpen} onClose={closeCommentLightbox} maxWidth="lg" fullWidth>
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', pr: 1 }}>
+                    <IconButton onClick={closeCommentLightbox} size="large" aria-label="close">
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                    {commentLightboxSrc && (
+                        <Box
+                            component="img"
+                            src={commentLightboxSrc}
+                            alt="comment-large"
+                            sx={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+                        />
+                    )}
                 </DialogContent>
             </Dialog>
         </Card>
