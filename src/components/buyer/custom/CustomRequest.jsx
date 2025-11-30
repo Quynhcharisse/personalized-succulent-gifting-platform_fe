@@ -184,7 +184,7 @@ export default function CustomRequest() {
                 timestamp: Date.now()
             }));
         } catch (error) {
-            console.error(`Error caching ${cacheKey}:`, error);
+            // Error caching data
         }
     };
 
@@ -212,13 +212,13 @@ export default function CustomRequest() {
                 // If we have both cached, we can show UI immediately
                 if (cachedSucculents && cachedAccessories) {
                     setLoading(false);
-                    // Fetch fresh data in background
-                    fetchFreshData();
+                    // Fetch fresh data in background without showing loading spinner
+                    fetchFreshData(false);
                     return;
                 }
 
-                // Fetch from API
-                await fetchFreshData();
+                // Fetch from API with loading spinner
+                await fetchFreshData(true);
             } catch (error) {
                 enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
                 setLoading(false);
@@ -227,9 +227,11 @@ export default function CustomRequest() {
         loadData();
     }, []);
 
-    const fetchFreshData = async () => {
+    const fetchFreshData = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading) {
+                setLoading(true);
+            }
             const [succulentsRes, accessoriesRes] = await Promise.all([
                 getSucculents(),
                 getAccessories('all')
@@ -253,9 +255,13 @@ export default function CustomRequest() {
                 setCachedData(ACCESSORIES_CACHE_KEY, accessoriesData);
             }
         } catch (error) {
-            enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
+            if (showLoading) {
+                enqueueSnackbar("Không thể tải dữ liệu cho form", {variant: 'error'});
+            }
         } finally {
-            setLoading(false);
+            if (showLoading) {
+                setLoading(false);
+            }
         }
     };
 
@@ -470,7 +476,7 @@ export default function CustomRequest() {
                 );
             }
         } catch (error) {
-            console.error('Error applying AI suggestion:', error);
+            // Error applying AI suggestion
             enqueueSnackbar('Có lỗi khi áp dụng gợi ý từ AI', {variant: 'error'});
         }
     };
@@ -1100,16 +1106,7 @@ return (
     <strong> trang thanh toán</strong>.
     <br /><br />
 
-    <strong>Lưu ý về chi phí:</strong> Chi phí được hiển thị trong phần 
-    <em> Tổng Chi Phí Ước Tính </em> chỉ bao gồm:
-    <ul style={{ marginTop: "8px", marginBottom: "8px" }}>
-        <li>Phí dịch vụ</li>
-        <li>Tiền sen đá theo kích thước & số lượng</li>
-        <li>Tiền chậu</li>
-        <li>Tiền đất</li>
-        <li>Phụ kiện trang trí (nếu có)</li>
-    </ul>
-    Các chi phí trên <strong>chưa bao gồm phí vận chuyển</strong>.
+    <strong>Lưu ý về chi phí:</strong> Chi phí hiển thị trên <strong>chưa bao gồm phí vận chuyển</strong>.
     <br /><br />
 
     Sau khi quý khách đồng ý với mẫu tuỳ chỉnh, sẽ có nhân viên của shop liên hệ 

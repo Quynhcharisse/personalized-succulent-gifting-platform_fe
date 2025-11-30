@@ -71,7 +71,7 @@ export default function ViewCustomRequest() {
                 timestamp: Date.now()
             }));
         } catch (error) {
-            console.error('Error caching requests:', error);
+            // Error caching requests
         }
     }, []);
 

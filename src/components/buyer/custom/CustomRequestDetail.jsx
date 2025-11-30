@@ -143,7 +143,7 @@ export default function CustomRequestDetail() {
                     timestamp: Date.now()
                 }));
             } catch (error) {
-                console.error('Error caching requests:', error);
+                // Error caching requests
             }
 
             if (!foundRequest) {
