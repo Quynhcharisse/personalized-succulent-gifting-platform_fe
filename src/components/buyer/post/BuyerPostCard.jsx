@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Avatar,
     Box,
     Button,
     Card,
@@ -22,7 +23,32 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import {createProductSlug} from '@utils/slugUtil.js';
 
-const BuyerPostCard = ({post, onSubmitComment}) => {
+const getAuthorName = (post) => {
+    return (
+        post?.buyerName ||
+        post?.sellerName ||
+        post?.authorName ||
+        post?.userName ||
+        post?.accountName ||
+        post?.createdByName ||
+        post?.seller?.name ||
+        post?.buyer?.name ||
+        post?.product?.sellerName ||
+        // fallback to id-based label
+        (post?.sellerId ? `Người bán #${post.sellerId}` : (post?.buyerId ? `Người dùng #${post.buyerId}` : 'Ẩn danh'))
+    );
+};
+
+const initialsFrom = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
+    const author = getAuthorName(post);
+    const excerpt = post.description || post.content || '';
     const p = post || {};
 
     const title = p.title ?? p.data?.title ?? p.post?.title ?? (p.id ? `Bài đăng #${p.id}` : 'Không tiêu đề');
@@ -31,7 +57,7 @@ const BuyerPostCard = ({post, onSubmitComment}) => {
     if (Array.isArray(p.images)) images = p.images;
     else if (p.images && Array.isArray(p.images.postImages)) images = p.images.postImages;
 
-    const tagsArray = (p.tags && Array.isArray(p.tags.postTags)) ? p.tags.postTags : (Array.isArray(p.tags) ? p.tags : []);
+    const avatarSrc = p.userAvatar || p.user?.avatar || p.user?.avatarUrl || p.buyerAvatar || p.sellerAvatar || p.authorAvatar || p.accountAvatar || null;
     const commentsArray = (p.comments && Array.isArray(p.comments.comments)) ? p.comments.comments : (Array.isArray(p.comments) ? p.comments : []);
 
     const productObj = p.product || null;
@@ -216,8 +242,9 @@ const BuyerPostCard = ({post, onSubmitComment}) => {
     return (
         <Card>
             <CardHeader
-                title={title}
-                subheader={p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}
+                avatar={<Avatar src={avatarSrc}>{!avatarSrc && initialsFrom(author)}</Avatar>}
+                title={<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>}
+                subheader={<Typography variant="caption" color="text.secondary">Đăng bởi: {author} | {p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</Typography>}
             />
 
             {renderImagesGrid()}
@@ -236,13 +263,6 @@ const BuyerPostCard = ({post, onSubmitComment}) => {
                     ) : (
                         <Typography color="text.secondary">Không có sản phẩm liên kết</Typography>
                     )}
-                </Stack>
-
-                <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Thẻ:</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {tagsArray.length > 0 ? tagsArray.map(t => t.tagName ?? t).join(', ') : '-'}
-                    </Typography>
                 </Stack>
 
                 <Stack mt={2} spacing={1}>

@@ -3,6 +3,7 @@ import {Box, CircularProgress, Stack, Typography} from '@mui/material';
 import {createPostComment, viewPosts} from '@/services/PostService.jsx';
 import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
+import BuyerCreatePost from './BuyerCreatePost.jsx';
 import BuyerEmptyState from './BuyerEmptyState.jsx';
 
 const POSTS_CACHE_KEY = 'buyer_posts_cache';
@@ -253,6 +254,7 @@ const BuyerPosts = () => {
             py: 4
         }}>
             <Box sx={{maxWidth: 800, mx: 'auto'}}>
+                <BuyerCreatePost onCreated={refresh} />
                 {posts.length === 0 ? (
                     <BuyerEmptyState onRefresh={refresh}/>
                 ) : (
