@@ -15,7 +15,6 @@ const CustomRequestDetail = lazy(() => import('./components/buyer/custom/CustomR
 const BuyerOrders = lazy(() => import('./components/buyer/Order.jsx'))
 const SellerOrder = lazy(() => import('./components/seller/Order.jsx'))
 
-
 // Lazy imports for layouts and frequently used components
 const WebApplicationLayout = lazy(() => import('./layouts/WebApplicationLayout.jsx'))
 const ProtectedRoute = lazy(() => import('./config/ProtectedRoute.jsx'))
@@ -40,7 +39,6 @@ const CustomRequestList = lazy(() => import('./components/seller/customeRequest/
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
-
 const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
 const Payment = lazy(() => import('./components/buyer/payment/Payment.jsx'))
 

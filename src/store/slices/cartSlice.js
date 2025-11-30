@@ -4,7 +4,7 @@ const STORAGE_KEY_PREFIX = 'psgp_cart_v1';
 
 const getScopedStorageKey = () => {
     try {
-        const rawUser = localStorage.getItem('user');
+        const rawUser = sessionStorage.getItem('user');
         if (!rawUser) return `${STORAGE_KEY_PREFIX}_guest`;
         const parsed = JSON.parse(rawUser);
         const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest';

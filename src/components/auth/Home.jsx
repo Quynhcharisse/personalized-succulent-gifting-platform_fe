@@ -6,7 +6,6 @@ import ChatBot from './ChatBot.jsx'
 import {viewProduct} from '../../services/ProductService.jsx'
 import {createProductSlug} from '@utils/slugUtil.js'
 
-// Cache key for sessionStorage (same as ProductList)
 const PRODUCTS_CACHE_KEY = 'products_cache';
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
@@ -326,7 +325,6 @@ export default function Home() {
                 </section>
 
                 {/* Đã xóa hoàn toàn section 'danh-gia' chứa biến testimonials bị lỗi */}
-
                 <section id="ly-do" className="reasons">
                     <div className="container">
                         <div className="elementor-element elementor-element-6d252b79 e-flex e-con-boxed e-con e-parent">

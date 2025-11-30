@@ -23,16 +23,16 @@ async function Logout() {
         if (res && res.status === 200) {
             // Remove only current user's cart and user info
             try {
-                const rawUser = localStorage.getItem('user')
+                const rawUser = sessionStorage.getItem('user')
                 if (rawUser) {
                     const parsed = JSON.parse(rawUser)
                     const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest'
                     const cartKey = `psgp_cart_v1_${userIdentifier}`
-                    localStorage.removeItem(cartKey)
+                    sessionStorage.removeItem(cartKey)
                 }
             } catch {
             }
-            localStorage.removeItem('user')
+            sessionStorage.removeItem('user')
             if (sessionStorage.length > 0) {
                 sessionStorage.clear()
             }

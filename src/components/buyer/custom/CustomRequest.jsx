@@ -190,7 +190,7 @@ export default function CustomRequest() {
 
     // Data Fetching
     useEffect(() => {
-        if (localStorage.getItem("user") == null) {
+        if (sessionStorage.getItem("user") == null) {
             window.location.href = "/login"
         }
 

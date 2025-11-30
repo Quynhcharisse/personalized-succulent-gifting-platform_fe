@@ -35,8 +35,8 @@ export default function SignIn() {
                     return;
                 }
 
-                // Lưu user data kèm role vào localStorage để không cần gọi API mỗi lần
-                localStorage.setItem('user', JSON.stringify({
+                // Lưu user data kèm role vào sessionStorage - tự động xóa khi đóng trình duyệt
+                sessionStorage.setItem('user', JSON.stringify({
                     ...userDataToStore,
                     role: role ? role.toUpperCase() : null
                 }));

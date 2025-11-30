@@ -35,7 +35,7 @@ export default function SiteHeader() {
     const cartCount = useSelector(state => state?.cart?.items?.length || 0)
 
     useEffect(() => {
-        const raw = localStorage.getItem('user')
+        const raw = sessionStorage.getItem('user')
 
         if (!raw || raw === 'undefined') {
             setCurrentUser(null)
@@ -47,7 +47,7 @@ export default function SiteHeader() {
             setCurrentUser(parsed || null)
         } catch (error) {
             setCurrentUser(null)
-            localStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
+            sessionStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
         }
     }, [location.pathname])
 
@@ -115,16 +115,16 @@ export default function SiteHeader() {
             await signOut()
             // Remove only current user's cart and user info
             try {
-                const rawUser = localStorage.getItem('user')
+                const rawUser = sessionStorage.getItem('user')
                 if (rawUser) {
                     const parsed = JSON.parse(rawUser)
                     const userIdentifier = parsed?.id || parsed?.userId || parsed?.email || 'guest'
                     const cartKey = `psgp_cart_v1_${userIdentifier}`
-                    localStorage.removeItem(cartKey)
+                    sessionStorage.removeItem(cartKey)
                 }
             } catch {
             }
-            localStorage.removeItem('user')
+            sessionStorage.removeItem('user')
             enqueueSnackbar('Đã đăng xuất', {variant: 'success'})
             handleCloseMenu()
             navigate('/', {replace: true})

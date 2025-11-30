@@ -21,7 +21,7 @@ export default function ProductList() {
     
     // Check if user is logged in
     const isLoggedIn = useCallback(() => {
-        const user = localStorage.getItem('user');
+        const user = sessionStorage.getItem('user');
         return !!user;
     }, []);
 

@@ -47,7 +47,7 @@ export default function ProductDetail() {
 
     // Check if user is logged in
     const isLoggedIn = () => {
-        const user = localStorage.getItem('user');
+        const user = sessionStorage.getItem('user');
         return !!user;
     };
 

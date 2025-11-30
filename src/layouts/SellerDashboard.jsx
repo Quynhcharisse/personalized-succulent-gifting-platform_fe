@@ -457,9 +457,9 @@ export default function SellerDashboard() {
     useEffect(() => {
         document.title = 'Kênh người bán | Lá Nhỏ Bên Thềm';
 
-        // Lấy thông tin user từ localStorage
+        // Lấy thông tin user từ sessionStorage
         try {
-            const userData = localStorage.getItem('user');
+            const userData = sessionStorage.getItem('user');
 
             if (userData) {
                 const parsedUser = JSON.parse(userData);
@@ -475,7 +475,7 @@ export default function SellerDashboard() {
 
                 setSession(sessionData);
             } else {
-                console.warn('⚠️ No user data found in localStorage');
+                console.warn('⚠️ No user data found in sessionStorage');
             }
         } catch (error) {
             console.error('❌ Error parsing user data:', error);
@@ -496,8 +496,8 @@ export default function SellerDashboard() {
 
     const handleLogout = () => {
         handleMenuClose();
-        // Clear user data from localStorage
-        localStorage.removeItem('user');
+        // Clear user data from sessionStorage
+        sessionStorage.removeItem('user');
         // Clear cookies if any
         document.cookie.split(";").forEach(function (c) {
             document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");

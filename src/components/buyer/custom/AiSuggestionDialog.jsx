@@ -28,7 +28,7 @@ export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {
         setLoading(true);
         try {
             // Get user ID from localStorage
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
             const userId = user.id || 'guest';
 
             const response = await getAiSuggestion(query, userId);
