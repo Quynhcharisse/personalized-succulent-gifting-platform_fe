@@ -65,7 +65,7 @@ export default function CustomRequestDetail() {
     const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
     useEffect(() => {
-        if (localStorage.getItem("user") == null) {
+        if (sessionStorage.getItem("user") == null) {
             window.location.href = "/login";
             return;
         }

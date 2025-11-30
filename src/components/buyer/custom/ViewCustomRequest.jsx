@@ -30,7 +30,7 @@ export default function ViewCustomRequest() {
 
     // Memoize user check to avoid repeated localStorage access
     const isAuthenticated = useMemo(() => {
-        return localStorage.getItem("user") != null;
+        return sessionStorage.getItem("user") != null;
     }, []);
 
     useEffect(() => {

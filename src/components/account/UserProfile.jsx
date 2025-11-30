@@ -92,11 +92,9 @@ export default function UserProfile() {
                 let userData = {}
 
                 try {
-                    const userFromStorage = localStorage.getItem('user')
+                    const userFromStorage = sessionStorage.getItem('user')
                     if (userFromStorage) {
                         const parsedUser = JSON.parse(userFromStorage)
-
-                        // Lấy dữ liệu cơ bản từ localStorage và dùng email làm username nếu không có tên
                         formData = {
                             name: normalizeStringField(parsedUser.user?.name || parsedUser.name) || extractUsernameFromEmail(parsedUser.email) || '',
                             email: parsedUser.email || '',
@@ -111,16 +109,13 @@ export default function UserProfile() {
                             zodiac: normalizeStringField(parsedUser.user?.zodiac || parsedUser.zodiac)
                         }
 
-
                         setUserRole(parsedUser.role || '')
                         setForm(formData)
                         setOriginalForm(formData)
                     }
                 } catch (storageError) {
-                    console.error('Error parsing localStorage:', storageError)
                 }
 
-                // Sau đó gọi API để cập nhật thông tin chi tiết
                 try {
                     const res = await viewProfile()
 
@@ -129,7 +124,6 @@ export default function UserProfile() {
                         userData = accountData.user || {}
 
                         if (mounted) {
-                            // Cập nhật form với dữ liệu từ API, ưu tiên dữ liệu mới
                             const updatedFormData = {
                                 name: normalizeStringField(userData.name) || normalizeStringField(formData.name) || extractUsernameFromEmail(accountData.email) || '',
                                 email: accountData.email || formData.email || '',
@@ -150,15 +144,12 @@ export default function UserProfile() {
                         }
                     }
                 } catch (apiError) {
-                    console.error('API Error:', apiError)
-                    // Nếu API lỗi, vẫn giữ dữ liệu từ localStorage
                     if (mounted && Object.keys(formData).length > 0) {
                         enqueueSnackbar('Không thể cập nhật thông tin từ server, sử dụng dữ liệu local', {variant: 'warning'})
                     }
                 }
 
             } catch (e) {
-                console.error('Load error:', e)
                 enqueueSnackbar('Không tải được hồ sơ', {variant: 'error'})
             } finally {
                 if (mounted) {
@@ -207,9 +198,9 @@ export default function UserProfile() {
         return ZODIACS.find(z => z.value === value) || {label: value, icon: '⭐'}
     }
 
-    function updateLocalStorageUser(partial) {
+    function updateSessionStorageUser(partial) {
         try {
-            const userFromStorage = localStorage.getItem('user')
+            const userFromStorage = sessionStorage.getItem('user')
             if (!userFromStorage) return
             const parsedUser = JSON.parse(userFromStorage)
 
@@ -225,9 +216,8 @@ export default function UserProfile() {
                 }
             })
 
-            localStorage.setItem('user', JSON.stringify(updated))
+            sessionStorage.setItem('user', JSON.stringify(updated))
         } catch (e) {
-            // no-op
         }
     }
 
@@ -241,9 +231,6 @@ export default function UserProfile() {
         }
         try {
             setLoading(true)
-
-            // Backend yêu cầu tất cả field, nên phải gửi đầy đủ
-            // Nhưng chỉ validate các field đã thay đổi ở frontend
             const payload = {
                 name: (form.name || '').trim(),
                 phone: (form.phone || '').trim(),
@@ -297,7 +284,7 @@ export default function UserProfile() {
                 setOriginalForm(form)
                 setIsEditing(false)
                 setErrors({})
-                updateLocalStorageUser(payload)
+                updateSessionStorageUser(payload)
             } else {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật không thành công', {variant: 'warning'})
             }
@@ -547,7 +534,7 @@ export default function UserProfile() {
                                                                 setPreviewImage(null);
                                                             }
                                                         } catch (error) {
-                                                            console.error("File upload error:", error);
+                                                            // File upload error
                                                             setPreviewImage(null);
                                                             enqueueSnackbar("Lỗi khi xử lý file", {variant: "error"});
                                                         } finally {
