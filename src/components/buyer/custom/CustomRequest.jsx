@@ -1092,8 +1092,8 @@ return (
     <strong> hủy đơn hàng</strong>.
     <br /><br />
 
-    Trong trường hợp cần hoàn tiền, quý khách vui lòng liên hệ qua email:
-    <strong> huatri2004@gmail.com</strong> để được hỗ trợ xử lý nhanh nhất.
+    Trong trường hợp cần hoàn tiền, quý khách vui lòng liên hệ qua email của shop:
+    <strong>Lanhobenthem@gmail.com</strong> để được hỗ trợ xử lý nhanh nhất.
     <br /><br />
 
     Sau khi nhấn nút gửi yêu cầu, quý khách sẽ được chuyển đến 
