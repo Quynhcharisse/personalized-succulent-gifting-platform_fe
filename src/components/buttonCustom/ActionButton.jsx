@@ -14,7 +14,6 @@ export default function ActionButton({
                                          sx,
                                          ...rest
                                      }) {
-    // Xử lý mặc định cho các action
     const handleDefaultAction = () => {
         switch (action) {
             case 'close':

@@ -267,7 +267,7 @@ const SucculentForm = () => {
 
                     if (status === 403) {
                         // Kiểm tra xem có phải lỗi authentication không
-                        const user = localStorage.getItem('user');
+                        const user = sessionStorage.getItem('user');
                         if (!user || user === 'undefined') {
                             errorMessage = `🔐 Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.`;
                         } else {
