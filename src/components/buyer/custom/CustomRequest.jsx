@@ -190,6 +190,17 @@ export default function CustomRequest() {
 
     // Data Fetching
     useEffect(() => {
+        // Restore draft if present
+        try {
+            const draftRaw = sessionStorage.getItem('custom-request-draft');
+            if (draftRaw) {
+                const draft = JSON.parse(draftRaw);
+                if (draft && typeof draft === 'object') {
+                    setFormData(prev => ({...prev, ...(draft.formData || {})}));
+                }
+            }
+        } catch {}
+
         if (sessionStorage.getItem("user") == null) {
             window.location.href = "/login"
         }
@@ -482,6 +493,34 @@ export default function CustomRequest() {
     };
 
     const handleSubmit = async () => {
+        // Pre-check profile completeness to improve UX before calling BE
+        try {
+            const rawUser = sessionStorage.getItem('user');
+            const parsed = rawUser ? JSON.parse(rawUser) : null;
+            const u = parsed?.user || parsed || {};
+            const missing = [];
+            const isEmpty = (v) => !v || String(v).trim().length === 0 || String(v).trim().toUpperCase() === 'N/A';
+            if (isEmpty(u.name)) missing.push('Họ tên');
+            if (isEmpty(u.phone)) missing.push('Số điện thoại');
+            if (!u.fengShui) missing.push('Mệnh ngũ hành');
+            if (isEmpty(u.gender)) missing.push('Giới tính');
+            if (isEmpty(u.address)) missing.push('Địa chỉ');
+            if (!u.zodiac) missing.push('Cung hoàng đạo');
+            if (missing.length > 0) {
+                enqueueSnackbar(`Vui lòng cập nhật: ${missing.join(', ')} trước khi tạo yêu cầu`, {variant:'warning', autoHideDuration: 4000});
+                // Save current custom request as draft
+                try {
+                    sessionStorage.setItem('custom-request-draft', JSON.stringify({formData}));
+                } catch {}
+                // Redirect to profile, with return hint
+                setTimeout(() => {
+                    const returnTo = encodeURIComponent('/create-custom-request');
+                    navigate(`/buyer/profile?from=custom-request&returnTo=${returnTo}`);
+                }, 600);
+                return;
+            }
+        } catch {}
+
         setIsSubmitting(true);
     
         try {
@@ -569,10 +608,18 @@ export default function CustomRequest() {
             });
     
         } catch (error) {
-            enqueueSnackbar(
-                error?.response?.data?.message || error?.message || "Gửi yêu cầu thất bại",
-                { variant: "error" }
-            );
+            const msg = error?.response?.data?.message || error?.message || "Gửi yêu cầu thất bại";
+            // Handle BE validation about incomplete profile gracefully
+            if (String(msg).includes('vui lòng cập nhật đầy đủ profile')) {
+                enqueueSnackbar('Hồ sơ của bạn chưa đầy đủ. Vui lòng cập nhật trước khi tạo yêu cầu.', {variant:'warning'});
+                // Offer redirect to profile softly
+                setTimeout(() => {
+                    // Preserve current state by passing hint param
+                    navigate('/buyer/profile?from=custom-request');
+                }, 800);
+            } else {
+                enqueueSnackbar(msg, { variant: "error" });
+            }
         } finally {
             setIsSubmitting(false);
         }
