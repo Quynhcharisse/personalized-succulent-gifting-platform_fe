@@ -5,6 +5,8 @@ import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerCreatePost from './BuyerCreatePost.jsx';
 import BuyerEmptyState from './BuyerEmptyState.jsx';
+import {reloadFromStorage} from "@/store/slices/cartSlice.js";
+import {useDispatch} from "react-redux";
 
 const POSTS_CACHE_KEY = 'buyer_posts_cache';
 const PRODUCTS_CACHE_KEY = 'products_cache';
@@ -90,13 +92,30 @@ const BuyerPosts = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [currentUser, setCurrentUser] = useState(null);
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        const raw = sessionStorage.getItem('user')
+
+        if (!raw || raw === 'undefined') {
+            setCurrentUser(null)
+            return
+        }
+
+        try {
+            const parsed = JSON.parse(raw)
+            setCurrentUser(parsed || null)
+        } catch (error) {
+            setCurrentUser(null)
+            sessionStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
+        }
+    }, [location.pathname])
+
 
     const normalizePosts = (data) => {
         const raw = Array.isArray(data) ? data : (data && Array.isArray(data.posts) ? data.posts : []);
         return raw.map(p => {
-            const tags = Array.isArray(p?.tags?.postTags)
-                ? p.tags.postTags.map(t => t.tagName)
-                : (Array.isArray(p?.tags) ? p.tags : []);
 
             const comments = Array.isArray(p?.comments?.comments)
                 ? p.comments.comments.map(c => ({
@@ -112,7 +131,6 @@ const BuyerPosts = () => {
 
             return {
                 ...p,
-                tags,
                 comments,
                 product,
                 images,
@@ -151,6 +169,16 @@ const BuyerPosts = () => {
             console.error('Error caching posts:', error);
         }
     };
+
+    useEffect(() => {
+        dispatch(reloadFromStorage())
+    }, [currentUser, dispatch])
+
+    useEffect(() => {
+        const onRefreshEvent = () => refresh();
+        window.addEventListener('buyerPostsRefresh', onRefreshEvent);
+        return () => window.removeEventListener('buyerPostsRefresh', onRefreshEvent);
+    }, []);
 
     useEffect(() => {
         const fetch = async () => {
@@ -301,7 +329,7 @@ const BuyerPosts = () => {
             py: 4
         }}>
             <Box sx={{maxWidth: 800, mx: 'auto'}}>
-                <BuyerCreatePost onCreated={refresh} />
+                <BuyerCreatePost onCreated={refresh} currentUser={currentUser} />
                 {posts.length === 0 ? (
                     <BuyerEmptyState onRefresh={refresh}/>
                 ) : (
@@ -312,6 +340,7 @@ const BuyerPosts = () => {
                                 post={post}
                                 onSubmitComment={handleCreateComment}
                                 onEditComment={handleEditComment}
+                                currentUser={currentUser}
                             />
                         ))}
                     </Stack>

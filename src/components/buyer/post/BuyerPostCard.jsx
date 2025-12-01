@@ -22,10 +22,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {enqueueSnackbar} from 'notistack';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createProductSlug} from '@utils/slugUtil.js';
-import EditIcon from '@mui/icons-material/Edit';
+import {updatePostComment} from "@/services/PostService.jsx";
 
 const getAuthorName = (post) => {
     return (
@@ -49,7 +51,7 @@ const initialsFrom = (name = '') => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
+const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, currentUser = null }) => {
     const author = getAuthorName(post);
     const p = post || {};
 
@@ -95,6 +97,8 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
     const [editUploading, setEditUploading] = useState(false);
     const [editUploadProgress, setEditUploadProgress] = useState(0);
 
+    const [deletingCommentId, setDeletingCommentId] = useState(null);
+
     const [commentLightboxOpen, setCommentLightboxOpen] = useState(false);
     const [commentLightboxSrc, setCommentLightboxSrc] = useState(null);
 
@@ -115,6 +119,11 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
     }, [commentImagePreview, editImagePreview]);
 
     const handleCommentFileSelected = (e) => {
+        if (!isLoggedIn) {
+            // redirect to sign-in page
+            window.location.href = '/login';
+            return;
+        }
         const file = e.target?.files?.[0];
         if (!file) return;
         if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
@@ -130,6 +139,11 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
     };
 
     const handleSubmitComment = async () => {
+        if (!isLoggedIn) {
+            // redirect to sign-in page
+            window.location.href = '/login';
+            return;
+        }
         const trimmed = commentText.trim();
         if (!trimmed || isSubmitting || commentUploading) return;
         setIsSubmitting(true);
@@ -166,6 +180,10 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
 
     // --- Edit comment handlers ---
     const startEdit = (c) => {
+        if (!isCommentOwner(c)) {
+            enqueueSnackbar('Bạn chỉ có thể chỉnh sửa bình luận của chính mình', { variant: 'warning' });
+            return;
+        }
         setEditingCommentId(c.id);
         setEditText(c.content || c.text || '');
         setEditImageFile(null);
@@ -198,6 +216,13 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
     };
 
     const submitEdit = async (commentId) => {
+        // verify ownership before submitting
+        const orig = commentsArray.find(cc => String(cc.id) === String(commentId));
+        if (!isCommentOwner(orig)) {
+            enqueueSnackbar('Không có quyền chỉnh sửa bình luận này', { variant: 'warning' });
+            return;
+        }
+
         const trimmed = editText.trim();
         if (!trimmed || editUploading) return;
         setEditUploading(true);
@@ -216,7 +241,6 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                     return;
                 }
             } else if (editImagePreview) {
-                // keep existing preview url (likely already uploaded)
                 imagePayload = { name: '', link: editImagePreview };
             }
 
@@ -232,6 +256,56 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
         } finally {
             setEditUploading(false);
             setEditUploadProgress(0);
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        // ensure owner before delete
+        const orig = commentsArray.find(c => String(c.id) === String(commentId));
+        if (!isCommentOwner(orig)) {
+            enqueueSnackbar('Không có quyền xóa bình luận này', { variant: 'warning' });
+            return;
+        }
+
+        if (!commentId) return;
+        const ok = window.confirm('Bạn có chắc muốn xóa bình luận này?');
+        if (!ok) return;
+
+        setDeletingCommentId(commentId);
+        try {
+            // Build payload marking status as DELETED
+            const payload = { ...orig, status: 'DELETED' };
+
+            // remove local-only fields that might confuse the API
+            delete payload.id;
+            delete payload._temp;
+            delete payload.__typename;
+
+            if (typeof updatePostComment !== 'function') {
+                throw new Error('updatePostComment is not available');
+            }
+
+            const arity = updatePostComment.length;
+            if (arity >= 3) {
+                await updatePostComment(p.id, commentId, payload);
+            } else if (arity === 2) {
+                await updatePostComment(commentId, payload);
+            } else {
+                // fallback try both
+                try {
+                    await updatePostComment(p.id, commentId, payload);
+                } catch (e) {
+                    await updatePostComment(commentId, payload);
+                }
+            }
+
+            enqueueSnackbar('Xóa bình luận thành công', { variant: 'success' });
+            window.dispatchEvent(new Event('buyerPostsRefresh'));
+        } catch (err) {
+            console.error('Delete (mark DELETED) comment failed', err);
+            enqueueSnackbar('Xóa bình luận thất bại', { variant: 'error' });
+        } finally {
+            setDeletingCommentId(null);
         }
     };
 
@@ -346,6 +420,17 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
         );
     };
 
+    // ownership helper: determines if the given comment belongs to current user
+    const isCommentOwner = (c) => {
+        if (!c || currentUser == null) return false;
+        const owner = c.name || c.buyerName || c.userId || c.user?.id || c.buyer_id || c.account_id || c.user?.name;
+        if (owner == null) return false;
+        return String(owner) === String(currentUser.user?.name);
+    };
+
+    // comment input section: disable if not logged in
+    const isLoggedIn = currentUser != null;
+
     return (
         <Card>
             <CardHeader
@@ -394,6 +479,7 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                             null;
 
                         const isEditing = editingCommentId && String(editingCommentId) === String(c.id);
+                        const own = isCommentOwner(c);
 
                         return (
                             <Box key={c.id ?? `${p.id}-c-${Math.random()}`} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
@@ -407,8 +493,10 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                                         <Typography variant="caption" color="text.secondary">
                                             {c.createdAt ? ` • ${new Date(c.createdAt).toLocaleString()}` : ''}
                                         </Typography>
+
                                         <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-                                            {!isEditing && (
+                                            {/* edit only for own comments */}
+                                            {!isEditing && own && (
                                                 <IconButton
                                                     size="small"
                                                     onClick={() => startEdit(c)}
@@ -418,7 +506,9 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
                                             )}
-                                            {isEditing && (
+
+                                            {/* save/cancel when editing (only for owner) */}
+                                            {isEditing && own && (
                                                 <>
                                                     <Button size="small" onClick={() => submitEdit(c.id)} disabled={editUploading}>
                                                         {editUploading ? 'Đang lưu...' : 'Lưu'}
@@ -426,10 +516,23 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                                                     <Button size="small" onClick={cancelEdit}>Huỷ</Button>
                                                 </>
                                             )}
+
+                                            {/* delete only for own comments */}
+                                            {own && (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleDeleteComment(c.id)}
+                                                    aria-label="delete-comment"
+                                                    title="Xóa"
+                                                    disabled={deletingCommentId === c.id}
+                                                >
+                                                    {deletingCommentId === c.id ? <CircularProgress size={18} /> : <DeleteIcon fontSize="small" />}
+                                                </IconButton>
+                                            )}
                                         </Box>
                                     </Box>
 
-                                    {!isEditing && (
+                                    {!isEditing ? (
                                         <>
                                             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{c.content || c.text || c.message}</Typography>
 
@@ -452,9 +555,7 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                                                 </Box>
                                             )}
                                         </>
-                                    )}
-
-                                    {isEditing && (
+                                    ) : (
                                         <Box mt={1} display="flex" flexDirection="column" gap={1}>
                                             <TextField
                                                 value={editText}
@@ -496,43 +597,54 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
                 </Stack>
 
                 {/* comment input */}
-                <Box mt={2} display="flex" gap={1} alignItems="flex-end">
-                    <TextField
-                        label="Viết bình luận"
-                        placeholder="Nhập bình luận và nhấn Enter hoặc gửi"
-                        multiline
-                        maxRows={4}
-                        fullWidth
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        disabled={isSubmitting || commentUploading}
-                        size="small"
-                    />
-                    <Box>
-                        <input
-                            id={`comment-image-${p.id}`}
-                            type="file"
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={handleCommentFileSelected}
+                {isLoggedIn ? (
+                    <Box mt={2} display="flex" gap={1} alignItems="flex-end">
+                        <TextField
+                            label="Viết bình luận"
+                            placeholder="Nhập bình luận và nhấn Enter hoặc gửi"
+                            multiline
+                            maxRows={4}
+                            fullWidth
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            disabled={isSubmitting || commentUploading}
+                            size="small"
                         />
-                        <label htmlFor={`comment-image-${p.id}`}>
-                            <IconButton component="span" color="primary" size="large" aria-label="attach image">
-                                <PhotoCamera />
-                            </IconButton>
-                        </label>
+                        <Box>
+                            <input
+                                id={`comment-image-${p.id}`}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleCommentFileSelected}
+                            />
+                            <label htmlFor={`comment-image-${p.id}`}>
+                                <IconButton component="span" color="primary" size="large" aria-label="attach image">
+                                    <PhotoCamera />
+                                </IconButton>
+                            </label>
+                        </Box>
+                        <IconButton
+                            color="primary"
+                            onClick={handleSubmitComment}
+                            disabled={isSubmitting || commentUploading || !commentText.trim()}
+                            aria-label="gửi bình luận"
+                            sx={{ alignSelf: 'flex-end' }}
+                        >
+                            {isSubmitting || commentUploading ? <CircularProgress size={20}/> : <SendIcon/>}
+                        </IconButton>
                     </Box>
-                    <IconButton
-                        color="primary"
-                        onClick={handleSubmitComment}
-                        disabled={isSubmitting || commentUploading || !commentText.trim()}
-                        aria-label="gửi bình luận"
-                        sx={{ alignSelf: 'flex-end' }}
-                    >
-                        {isSubmitting || commentUploading ? <CircularProgress size={20}/> : <SendIcon/>}
-                    </IconButton>
-                </Box>
+                ) : (
+                    <Box mt={2} p={2} borderRadius={1} bgcolor="#f9f9f9" display="flex" flexDirection="column" gap={1}>
+                        <Typography variant="body2" color="text.secondary">
+                            Bạn cần đăng nhập để bình luận. Vui lòng nhấn vào nút dưới đây để đăng nhập.
+                        </Typography>
+                        <Button variant="contained" color="primary" size="small" onClick={() => { window.location.href = '/login'; }}>
+                            Đăng nhập
+                        </Button>
+                    </Box>
+                )}
 
                 {commentImagePreview && (
                     <Box mt={1} display="flex" alignItems="center" gap={1}>

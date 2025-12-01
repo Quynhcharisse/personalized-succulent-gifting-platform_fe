@@ -7,7 +7,7 @@ import { viewProduct } from '@/services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import { enqueueSnackbar } from 'notistack';
 
-const BuyerCreatePost = ({ onCreated }) => {
+const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [productId, setProductId] = useState('');
@@ -37,7 +37,14 @@ const BuyerCreatePost = ({ onCreated }) => {
         return () => { mounted = false; };
     }, []);
 
+    const isLoggedIn = currentUser != null;
+
     const handleFiles = (e) => {
+        if (!isLoggedIn) {
+            // redirect to sign-in page when user is not authenticated
+            window.location.href = '/signin';
+            return;
+        }
         const fileList = Array.from(e.target.files || []);
         setFiles(fileList);
         const urls = fileList.map(f => URL.createObjectURL(f));
@@ -62,6 +69,12 @@ const BuyerCreatePost = ({ onCreated }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setAttemptedSubmit(true);
+
+        if (!isLoggedIn) {
+            // redirect to sign-in page when user is not authenticated
+            window.location.href = '/login';
+            return;
+        }
 
         // require a purchased product to be attached
         if (!productId) {
@@ -113,12 +126,20 @@ const BuyerCreatePost = ({ onCreated }) => {
             <Stack spacing={1}>
                 <Typography variant="subtitle1">Tạo bài đăng mới</Typography>
 
+                {!isLoggedIn && (
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">Bạn cần đăng nhập để tạo bài đăng.</Typography>
+                        <Button href="/login" size="small" variant="outlined" sx={{ mt: 1 }}>Đăng nhập</Button>
+                    </Box>
+                )}
+
                 <TextField
                     label="Tiêu đề (tùy chọn)"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     size="small"
                     fullWidth
+                    disabled={!isLoggedIn}
                 />
 
                 <TextField
@@ -129,6 +150,7 @@ const BuyerCreatePost = ({ onCreated }) => {
                     minRows={3}
                     fullWidth
                     required
+                    disabled={!isLoggedIn}
                 />
 
                 <TextField
@@ -145,6 +167,7 @@ const BuyerCreatePost = ({ onCreated }) => {
                             ? 'Không có sản phẩm đã mua để chọn'
                             : ''
                     }
+                    disabled={!isLoggedIn}
                 >
                     {products.map(p => (
                         <MenuItem key={p.id ?? p.uuid ?? `${p.name}-${p.id}`} value={p.id}>
@@ -162,8 +185,9 @@ const BuyerCreatePost = ({ onCreated }) => {
                             multiple
                             style={{ display: 'none' }}
                             onChange={handleFiles}
+                            disabled={!isLoggedIn}
                         />
-                        <IconButton color="primary" component="span">
+                        <IconButton color="primary" component="span" disabled={!isLoggedIn}>
                             <PhotoCamera />
                         </IconButton>
                     </label>
@@ -185,7 +209,7 @@ const BuyerCreatePost = ({ onCreated }) => {
                         type="submit"
                         variant="contained"
                         size="small"
-                        disabled={isSubmitting || noPurchased}
+                        disabled={isSubmitting || noPurchased || !isLoggedIn}
                     >
                         {isSubmitting ? 'Đang gửi...' : 'Đăng bài'}
                     </Button>
@@ -202,6 +226,13 @@ const BuyerCreatePost = ({ onCreated }) => {
                         </Button>
                     )}
                 </Stack>
+
+                {/* show helper when not logged in */}
+                {!isLoggedIn && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                        Bạn cần đăng nhập để có thể đăng bài.
+                    </Typography>
+                )}
             </Stack>
         </Box>
     );
