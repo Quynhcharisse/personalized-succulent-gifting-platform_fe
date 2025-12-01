@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Box, CircularProgress, Stack, Typography} from '@mui/material';
-import {createPostComment, viewPosts, updatePostComment, updatePost, deletePost} from '@/services/PostService.jsx';
+import {createPostComment, updatePost, updatePostComment, viewPosts} from '@/services/PostService.jsx';
 import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerCreatePost from './BuyerCreatePost.jsx';
@@ -136,10 +136,9 @@ const BuyerPosts = () => {
     }, []);
 
 
-    const normalizePosts = (data) => {
+    const normalizePosts = (data, { sortBy = 'createdAt', order = 'desc' } = {}) => {
         const raw = Array.isArray(data) ? data : (data && Array.isArray(data.posts) ? data.posts : []);
-        return raw.map(p => {
-
+        const mapped = raw.map(p => {
             const comments = Array.isArray(p?.comments?.comments)
                 ? p.comments.comments.map(c => ({
                     content: c.content || c.text || '',
@@ -149,7 +148,7 @@ const BuyerPosts = () => {
                 }))
                 : (Array.isArray(p?.comments) ? p.comments : []);
 
-            const product = p.product || (p.productId ? {id: p.productId, name: p.productName || '-'} : null);
+            const product = p.product || (p.productId ? { id: p.productId, name: p.productName || '-' } : null);
             const images = Array.isArray(p?.images?.postImages) ? p.images.postImages : (Array.isArray(p?.images) ? p.images : []);
 
             return {
@@ -157,7 +156,22 @@ const BuyerPosts = () => {
                 comments,
                 product,
                 images,
+                createdAt: p.createdAt ?? null
             };
+        });
+
+        const toTime = (val) => {
+            if (val == null || val === '') return 0;
+            const t = typeof val === 'number' ? val : Date.parse(val);
+            return Number.isNaN(t) ? 0 : t;
+        };
+
+        const multiplier = order === 'asc' ? 1 : -1;
+
+        return mapped.sort((a, b) => {
+            const av = toTime(a[sortBy] ?? a.createdAt);
+            const bv = toTime(b[sortBy] ?? b.createdAt);
+            return (av - bv) * multiplier;
         });
     };
 
