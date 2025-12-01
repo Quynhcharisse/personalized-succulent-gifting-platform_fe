@@ -617,7 +617,7 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
                                                     </IconButton>
                                                 </label>
 
-                                                <Button size="small" onClick={() => removeEditImage()}>Remove image</Button>
+                                                <Button size="small" onClick={() => removeEditImage()}>Xoá hình ảnh</Button>
 
                                                 {editUploading && <CircularProgress size={18} />}
                                             </Stack>
