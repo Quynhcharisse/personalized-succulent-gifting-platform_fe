@@ -54,7 +54,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
             setImages(prev => prev.map((img, i) => i === index ? {url: imageUrl} : img));
             enqueueSnackbar('Tải ảnh thành công', {variant: 'success'});
         } catch (error) {
-            console.error('Error uploading image:', error);
+            // Error uploading image
             enqueueSnackbar('Tải ảnh thất bại', {variant: 'error'});
             setError('Tải ảnh thất bại. Vui lòng thử lại.');
         } finally {
@@ -88,7 +88,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
                 handleClose();
             }
         } catch (error) {
-            console.error('Error submitting design:', error);
+            // Error submitting design
             const errorMsg = error?.response?.data?.message || 'Cập nhật thiết kế thất bại';
             setError(errorMsg);
             enqueueSnackbar(errorMsg, {variant: 'error'});
@@ -118,7 +118,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
     //             handleClose();
     //         }
     //     } catch (error) {
-    //         console.error('Error submitting design:', error);
+    //         // Error submitting design
     //         const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
     //         setError(errorMsg);
     //         enqueueSnackbar(errorMsg, {variant: 'error'});

@@ -41,7 +41,7 @@ export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {
                 try {
                     suggestionData = JSON.parse(aiData.answer);
                 } catch (parseError) {
-                    console.error('Error parsing AI response:', parseError);
+                    // Error parsing AI response
                     enqueueSnackbar('Không thể xử lý kết quả từ AI', {variant: 'error'});
                     return;
                 }
@@ -54,7 +54,7 @@ export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {
                 enqueueSnackbar('Không nhận được phản hồi từ AI', {variant: 'error'});
             }
         } catch (error) {
-            console.error('Error getting AI suggestion:', error);
+            // Error getting AI suggestion
             enqueueSnackbar('Có lỗi xảy ra khi lấy gợi ý từ AI', {variant: 'error'});
         } finally {
             setLoading(false);
@@ -76,9 +76,10 @@ export default function AiSuggestionDialog({open, onClose, onApplySuggestion}) {
                 borderBottom: '1px solid #E0EBE7'
             }}>
                 <AutoAwesomeIcon sx={{color: '#2E7D32'}}/>
-                <Typography variant="h6" sx={{fontWeight: 600}}>
-                    AI Gợi Ý Thiết Kế
-                </Typography>
+                    {/* Avoid nested heading levels to prevent hydration errors */}
+                    <Typography variant="h6" component="span" sx={{fontWeight: 600}}>
+                        AI Gợi Ý Thiết Kế
+                    </Typography>
             </DialogTitle>
             
             <DialogContent sx={{mt: 2}}>

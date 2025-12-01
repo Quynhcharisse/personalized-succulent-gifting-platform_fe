@@ -60,7 +60,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
             const data = response?.data?.data || response?.data || response;
             setRequest(data);
         } catch (error) {
-            console.error("Error fetching custom request detail:", error);
+            // Error fetching custom request detail
             setRequest(null);
         } finally {
             setLoading(false);
@@ -89,7 +89,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
                 onClose();
             }
         } catch (error) {
-            console.error('Error rejecting request:', error);
+            // Error rejecting request
             const errorMsg = error?.response?.data?.message || 'Từ chối yêu cầu thất bại';
             enqueueSnackbar(errorMsg, {variant: 'error'});
         } finally {

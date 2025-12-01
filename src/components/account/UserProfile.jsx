@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
     Avatar,
     Box,
@@ -37,6 +38,8 @@ import ActionButton from "../buttonCustom/ActionButton.jsx";
 
 
 export default function UserProfile() {
+    const location = useLocation()
+    const navigate = useNavigate()
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -285,6 +288,16 @@ export default function UserProfile() {
                 setIsEditing(false)
                 setErrors({})
                 updateSessionStorageUser(payload)
+                // Navigate back to origin if provided
+                try {
+                    const params = new URLSearchParams(location.search)
+                    const returnTo = params.get('returnTo')
+                    if (returnTo) {
+                        setTimeout(() => {
+                            navigate(returnTo)
+                        }, 500)
+                    }
+                } catch {}
             } else {
                 enqueueSnackbar(res?.data?.message || 'Cập nhật không thành công', {variant: 'warning'})
             }
