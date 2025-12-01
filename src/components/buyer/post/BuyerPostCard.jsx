@@ -25,6 +25,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import {enqueueSnackbar} from 'notistack';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import {createProductSlug} from '@utils/slugUtil.js';
+import EditIcon from '@mui/icons-material/Edit';
 
 const getAuthorName = (post) => {
     return (
@@ -48,7 +49,7 @@ const initialsFrom = (name = '') => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
+const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment }) => {
     const author = getAuthorName(post);
     const p = post || {};
 
@@ -76,15 +77,23 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
 
-    // comment input state
+    // comment input state (new comment)
     const [commentText, setCommentText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // comment image state (single image)
+    // comment image state (single image for new comment)
     const [commentImageFile, setCommentImageFile] = useState(null);
     const [commentImagePreview, setCommentImagePreview] = useState(null);
     const [commentUploading, setCommentUploading] = useState(false);
     const [commentUploadProgress, setCommentUploadProgress] = useState(0);
+
+    // edit comment state
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editText, setEditText] = useState('');
+    const [editImageFile, setEditImageFile] = useState(null);
+    const [editImagePreview, setEditImagePreview] = useState(null);
+    const [editUploading, setEditUploading] = useState(false);
+    const [editUploadProgress, setEditUploadProgress] = useState(0);
 
     const [commentLightboxOpen, setCommentLightboxOpen] = useState(false);
     const [commentLightboxSrc, setCommentLightboxSrc] = useState(null);
@@ -101,8 +110,9 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
     useEffect(() => {
         return () => {
             if (commentImagePreview) URL.revokeObjectURL(commentImagePreview);
+            if (editImagePreview) URL.revokeObjectURL(editImagePreview);
         };
-    }, [commentImagePreview]);
+    }, [commentImagePreview, editImagePreview]);
 
     const handleCommentFileSelected = (e) => {
         const file = e.target?.files?.[0];
@@ -129,16 +139,12 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                 setCommentUploading(true);
                 try {
                     const url = await uploadToCloudinary(commentImageFile, {
-                        onProgress: (p) => setCommentUploadProgress(p)
+                        onProgress: p => setCommentUploadProgress(p)
                     });
                     imagePayload = { name: commentImageFile.name || '', link: url };
                 } catch (err) {
-                    console.error('Upload comment image failed', err);
-                    enqueueSnackbar('Tải ảnh bình luận thất bại', { variant: 'error' });
-                    // allow submitting comment without image if upload fails? abort to let user retry
-                    setCommentUploading(false);
-                    setIsSubmitting(false);
-                    return;
+                    enqueueSnackbar('Upload ảnh bình luận thất bại', { variant: 'error' });
+                    console.error(err);
                 } finally {
                     setCommentUploading(false);
                 }
@@ -151,9 +157,81 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
             removeCommentImage();
         } catch (err) {
             console.error('submit comment failed', err);
+            enqueueSnackbar('Gửi bình luận thất bại', { variant: 'error' });
         } finally {
             setIsSubmitting(false);
             setCommentUploadProgress(0);
+        }
+    };
+
+    // --- Edit comment handlers ---
+    const startEdit = (c) => {
+        setEditingCommentId(c.id);
+        setEditText(c.content || c.text || '');
+        setEditImageFile(null);
+        setEditImagePreview(c.imageUrl || c.image || null);
+    };
+
+    const cancelEdit = () => {
+        if (editImagePreview) URL.revokeObjectURL(editImagePreview);
+        setEditingCommentId(null);
+        setEditText('');
+        setEditImageFile(null);
+        setEditImagePreview(null);
+        setEditUploading(false);
+        setEditUploadProgress(0);
+    };
+
+    const handleEditFileSelected = (e) => {
+        const file = e.target?.files?.[0];
+        if (!file) return;
+        if (editImagePreview) URL.revokeObjectURL(editImagePreview);
+        setEditImageFile(file);
+        setEditImagePreview(URL.createObjectURL(file));
+    };
+
+    const removeEditImage = () => {
+        if (editImagePreview) URL.revokeObjectURL(editImagePreview);
+        setEditImageFile(null);
+        setEditImagePreview(null);
+        setEditUploadProgress(0);
+    };
+
+    const submitEdit = async (commentId) => {
+        const trimmed = editText.trim();
+        if (!trimmed || editUploading) return;
+        setEditUploading(true);
+        try {
+            let imagePayload = null;
+            if (editImageFile) {
+                try {
+                    const url = await uploadToCloudinary(editImageFile, {
+                        onProgress: p => setEditUploadProgress(p)
+                    });
+                    imagePayload = { name: editImageFile.name || '', link: url };
+                } catch (err) {
+                    enqueueSnackbar('Upload ảnh thất bại', { variant: 'error' });
+                    console.error(err);
+                    setEditUploading(false);
+                    return;
+                }
+            } else if (editImagePreview) {
+                // keep existing preview url (likely already uploaded)
+                imagePayload = { name: '', link: editImagePreview };
+            }
+
+            // call parent handler: (postId, commentId, content, image)
+            if (typeof onEditComment === 'function') {
+                await onEditComment(p.id, commentId, trimmed, imagePayload);
+                enqueueSnackbar('Cập nhật bình luận thành công', { variant: 'success' });
+            }
+            cancelEdit();
+        } catch (err) {
+            console.error('edit comment failed', err);
+            enqueueSnackbar('Cập nhật bình luận thất bại', { variant: 'error' });
+        } finally {
+            setEditUploading(false);
+            setEditUploadProgress(0);
         }
     };
 
@@ -248,52 +326,19 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                         return (
                             <Box
                                 key={key}
-                                onClick={() => {
-                                    setSelectedIndex(idx);
-                                    openLightboxAt(idx);
-                                }}
+                                component="img"
+                                src={img.link || img.url}
+                                alt={img.name || `img-${idx}`}
+                                onClick={() => openLightboxAt(idx)}
                                 sx={{
-                                    position: 'relative',
                                     width: '100%',
                                     height: '100%',
-                                    gridArea,
-                                    overflow: 'hidden',
+                                    objectFit: 'cover',
                                     borderRadius: 1,
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    gridArea
                                 }}
-                                component="div"
-                            >
-                                <Box
-                                    component="img"
-                                    src={img.link || img.url}
-                                    alt={img.name || `img-${idx}`}
-                                    sx={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover',
-                                        objectPosition: 'center',
-                                        display: 'block',
-                                        backgroundColor: '#f5f5f5'
-                                    }}
-                                />
-                                {isExtraOverlay && (
-                                    <Box
-                                        sx={{
-                                            position: 'absolute',
-                                            inset: 0,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            backgroundColor: 'rgba(0,0,0,0.45)',
-                                            color: '#fff',
-                                            fontSize: 20,
-                                            fontWeight: 600
-                                        }}
-                                    >
-                                        {`+${cnt - 4}`}
-                                    </Box>
-                                )}
-                            </Box>
+                            />
                         );
                     })}
                 </Box>
@@ -319,8 +364,8 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Typography variant="subtitle2">Sản phẩm:</Typography>
                     {productId ? (
-                        <Link href={productHref} underline="hover" target="_blank" rel="noopener">
-                            {productName}
+                        <Link href={productHref} target="_blank" rel="noopener" sx={{ ml: 1 }}>
+                            <Typography sx={{ fontWeight: 600 }}>{productName}</Typography>
                         </Link>
                     ) : (
                         <Typography color="text.secondary">Không có sản phẩm liên kết</Typography>
@@ -328,38 +373,123 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                 </Stack>
 
                 <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Bình luận
-                        ({p.comments?.count ?? commentsArray.length}):</Typography>
-                    {commentsArray.map(c => {
-                        const author = c.buyerName || c.buyer_name || c.userName || `Người dùng #${c.accountId ?? c.buyerId ?? '??'}`;
-                        const time = c.createdAt ? new Date(c.createdAt).toLocaleString() : '';
+                    <Typography variant="subtitle2">Bình luận ({p.comments?.count ?? commentsArray.length}):</Typography>
+
+                    {commentsArray.length === 0 && (
+                        <Typography variant="body2" color="text.secondary">Chưa có bình luận</Typography>
+                    )}
+
+                    {commentsArray.map((c) => {
+                        const commenterName = c.buyerName || c.buyer_name || c.userName || c.user?.name || c.name || 'Ẩn danh';
+                        // prefer comment-level avatar fields
+                        const commentAvatarSrc =
+                            c.userAvatar ||
+                            c.user?.avatar ||
+                            c.user?.avatarUrl ||
+                            c.buyerAvatar ||
+                            c.sellerAvatar ||
+                            c.authorAvatar ||
+                            c.accountAvatar ||
+                            c.avatarUrl ||
+                            null;
+
+                        const isEditing = editingCommentId && String(editingCommentId) === String(c.id);
+
                         return (
-                            <Box key={c.id ?? c.createdAt} sx={{mb: 1}}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="baseline">
-                                    <Typography variant="subtitle2">{author}</Typography>
-                                    {time && <Typography variant="caption" color="text.secondary">{time}</Typography>}
-                                </Stack>
-                                <Typography variant="body2" color="text.secondary">
-                                    {c.content}
-                                </Typography>
-                                {c.imageUrl && (
-                                    <Box mt={1}>
-                                        <Box
-                                            component="img"
-                                            src={c.imageUrl}
-                                            alt="comment-image"
-                                            onClick={() => openCommentLightbox(c.imageUrl)}
-                                            sx={{
-                                                width: 120,
-                                                height: 120,
-                                                objectFit: 'cover',
-                                                borderRadius: 1,
-                                                cursor: 'pointer',
-                                                boxShadow: 1
-                                            }}
-                                        />
+                            <Box key={c.id ?? `${p.id}-c-${Math.random()}`} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                                <Avatar src={commentAvatarSrc} sx={{ width: 40, height: 40 }}>
+                                    {!commentAvatarSrc && initialsFrom(commenterName)}
+                                </Avatar>
+
+                                <Box sx={{ flex: 1 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                        <Typography variant="subtitle2">{commenterName}</Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            {c.createdAt ? ` • ${new Date(c.createdAt).toLocaleString()}` : ''}
+                                        </Typography>
+                                        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+                                            {!isEditing && (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => startEdit(c)}
+                                                    aria-label="edit-comment"
+                                                    title="Sửa"
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            )}
+                                            {isEditing && (
+                                                <>
+                                                    <Button size="small" onClick={() => submitEdit(c.id)} disabled={editUploading}>
+                                                        {editUploading ? 'Đang lưu...' : 'Lưu'}
+                                                    </Button>
+                                                    <Button size="small" onClick={cancelEdit}>Huỷ</Button>
+                                                </>
+                                            )}
+                                        </Box>
                                     </Box>
-                                )}
+
+                                    {!isEditing && (
+                                        <>
+                                            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{c.content || c.text || c.message}</Typography>
+
+                                            { (c.imageUrl || c.image) && (
+                                                <Box mt={1}>
+                                                    <Box
+                                                        component="img"
+                                                        src={c.imageUrl || c.image}
+                                                        alt="comment-image"
+                                                        onClick={() => openCommentLightbox(c.imageUrl || c.image)}
+                                                        sx={{
+                                                            width: 120,
+                                                            height: 120,
+                                                            objectFit: 'cover',
+                                                            borderRadius: 1,
+                                                            cursor: 'pointer',
+                                                            boxShadow: 1
+                                                        }}
+                                                    />
+                                                </Box>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {isEditing && (
+                                        <Box mt={1} display="flex" flexDirection="column" gap={1}>
+                                            <TextField
+                                                value={editText}
+                                                onChange={e => setEditText(e.target.value)}
+                                                multiline
+                                                minRows={2}
+                                                fullWidth
+                                                size="small"
+                                            />
+
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <label htmlFor={`edit-comment-file-${c.id}`}>
+                                                    <input
+                                                        id={`edit-comment-file-${c.id}`}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        style={{ display: 'none' }}
+                                                        onChange={handleEditFileSelected}
+                                                    />
+                                                    <IconButton component="span" size="small">
+                                                        <PhotoCamera fontSize="small" />
+                                                    </IconButton>
+                                                </label>
+
+                                                <Button size="small" onClick={() => removeEditImage()}>Remove image</Button>
+
+                                                {editUploading && <CircularProgress size={18} />}
+                                            </Stack>
+
+                                            {editImagePreview && (
+                                                <Box component="img" src={editImagePreview} alt="edit-preview" sx={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 1 }} />
+                                            )}
+                                        </Box>
+                                    )}
+                                </Box>
                             </Box>
                         );
                     })}
@@ -409,8 +539,9 @@ const BuyerPostCard = ({ post = {}, onSubmitComment }) => {
                         <Box component="img" src={commentImagePreview} alt="preview" sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }} />
                         <Box>
                             <Typography variant="body2">{commentImageFile?.name}</Typography>
-                            {commentUploading && <Typography variant="caption">Uploading: {Math.round(commentUploadProgress)}%</Typography>}
-                            <Button size="small" onClick={removeCommentImage}>Remove</Button>
+                            <Box>
+                                <Button size="small" onClick={removeCommentImage}>Remove</Button>
+                            </Box>
                         </Box>
                     </Box>
                 )}

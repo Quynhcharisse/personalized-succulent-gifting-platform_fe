@@ -1,3 +1,4 @@
+// File: src/components/buyer/post/BuyerCreatePost.jsx
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Stack, Typography, IconButton, MenuItem } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
@@ -104,6 +105,9 @@ const BuyerCreatePost = ({ onCreated }) => {
 
     const noPurchased = products.length === 0;
 
+    // show cancel button only when there's content (title/content) or images selected
+    const hasContent = Boolean((title && title.trim()) || (content && content.trim()) || (files && files.length > 0));
+
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
             <Stack spacing={1}>
@@ -138,13 +142,13 @@ const BuyerCreatePost = ({ onCreated }) => {
                     error={attemptedSubmit && !productId}
                     helperText={
                         noPurchased
-                            ? 'Không có sản phẩm đã mua — không thể đăng'
-                            : (attemptedSubmit && !productId ? 'Bạn phải chọn một sản phẩm đã mua' : 'Chọn sản phẩm bạn đã mua để gắn vào bài đăng')
+                            ? 'Không có sản phẩm đã mua để chọn'
+                            : ''
                     }
                 >
                     {products.map(p => (
                         <MenuItem key={p.id ?? p.uuid ?? `${p.name}-${p.id}`} value={p.id}>
-                            {p.speciesName || p.name || p.title || `#${p.id}`}
+                            {p.name || p.title || `Sản phẩm #${p.id}`}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -152,9 +156,9 @@ const BuyerCreatePost = ({ onCreated }) => {
                 <Stack direction="row" spacing={1} alignItems="center">
                     <label htmlFor="buyer-post-images">
                         <input
-                            accept="image/*"
                             id="buyer-post-images"
                             type="file"
+                            accept="image/*"
                             multiple
                             style={{ display: 'none' }}
                             onChange={handleFiles}
@@ -164,14 +168,14 @@ const BuyerCreatePost = ({ onCreated }) => {
                         </IconButton>
                     </label>
                     <Typography variant="body2" color="text.secondary">
-                        {files.length} image(s) selected
+                        {files.length} ảnh đã chọn
                     </Typography>
                 </Stack>
 
                 {previews.length > 0 && (
                     <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1 }}>
                         {previews.map((src, i) => (
-                            <Box key={i} component="img" src={src} alt={`preview-${i}`} sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 1 }} />
+                            <Box key={src} component="img" src={src} alt={`preview-${i}`} sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }} />
                         ))}
                     </Stack>
                 )}
@@ -185,15 +189,18 @@ const BuyerCreatePost = ({ onCreated }) => {
                     >
                         {isSubmitting ? 'Đang gửi...' : 'Đăng bài'}
                     </Button>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                            setTitle(''); setContent(''); setProductId(''); setFiles([]); previews.forEach(url => URL.revokeObjectURL(url)); setPreviews([]); setAttemptedSubmit(false);
-                        }}
-                    >
-                        Hủy
-                    </Button>
+
+                    {hasContent && (
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                                setTitle(''); setContent(''); setProductId(''); setFiles([]); previews.forEach(url => URL.revokeObjectURL(url)); setPreviews([]); setAttemptedSubmit(false);
+                            }}
+                        >
+                            Hủy
+                        </Button>
+                    )}
                 </Stack>
             </Stack>
         </Box>

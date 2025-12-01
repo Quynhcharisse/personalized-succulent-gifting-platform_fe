@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Box, CircularProgress, Stack, Typography} from '@mui/material';
-import {createPostComment, viewPosts} from '@/services/PostService.jsx';
+import {createPostComment, viewPosts, updatePostComment} from '@/services/PostService.jsx';
 import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerCreatePost from './BuyerCreatePost.jsx';
@@ -237,6 +237,51 @@ const BuyerPosts = () => {
         }
     };
 
+    const handleEditComment = async (postId, commentId, content, image) => {
+        try {
+            // find original comment in current posts state so we can send a full payload
+            const post = posts.find(p => String(p.id) === String(postId));
+            const orig = post?.comments?.find(c => String(c.id) === String(commentId)) || {};
+
+            // Build a full payload by merging original fields and replacing content/image
+            const payload = { ...orig, content };
+
+            if (image && image.link) {
+                payload.imageUrl = image.link;
+            } else if (image === null) {
+                // explicit null signals "remove image"
+                payload.imageUrl = null;
+            } // if image is undefined, keep whatever orig had
+
+            // remove local-only fields that might confuse the API
+            delete payload.id;
+            // optionally remove nested objects or client-only props if present
+            delete payload._temp;
+            delete payload.__typename;
+
+            if (typeof updatePostComment !== 'function') {
+                throw new Error('updatePostComment is not available');
+            }
+
+            const arity = updatePostComment.length;
+            if (arity >= 3) {
+                await updatePostComment(postId, commentId, payload);
+            } else if (arity === 2) {
+                await updatePostComment(commentId, payload);
+            } else {
+                try {
+                    await updatePostComment(postId, commentId, payload);
+                } catch (e) {
+                    await updatePostComment(commentId, payload);
+                }
+            }
+
+            refresh();
+        } catch (err) {
+            console.error('Cập nhật bình luận thất bại', err);
+        }
+    };
+
     if (isLoading) {
         return (
             <Box sx={{maxWidth: 800, mx: 'auto', py: 6, textAlign: 'center'}}>
@@ -266,6 +311,7 @@ const BuyerPosts = () => {
                                 key={post.id}
                                 post={post}
                                 onSubmitComment={handleCreateComment}
+                                onEditComment={handleEditComment}
                             />
                         ))}
                     </Stack>
