@@ -51,7 +51,7 @@ const initialsFrom = (name = '') => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, currentUser = null }) => {
+const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, onDeletePost, currentUser = null }) => {
     const author = getAuthorName(post);
     const p = post || {};
 
@@ -431,12 +431,49 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, currentUser 
     // comment input section: disable if not logged in
     const isLoggedIn = currentUser != null;
 
+    // Check if current user is the post owner
+    const isPostOwner = () => {
+        if (!currentUser || !p) return false;
+        const postOwnerId = p.userName;
+        return String(currentUser.user.name) === String(postOwnerId);
+    };
+
+    const handleEditPost = () => {
+        if (!isPostOwner()) {
+            enqueueSnackbar('Bạn chỉ có thể chỉnh sửa bài viết của chính mình', { variant: 'warning' });
+            return;
+        }
+        if (onEditPost) onEditPost(p);
+    };
+
+    const handleDeletePost = async () => {
+        if (!isPostOwner()) {
+            enqueueSnackbar('Bạn chỉ có thể xóa bài viết của chính mình', { variant: 'warning' });
+            return;
+        }
+        const ok = window.confirm('Bạn có chắc muốn xóa bài viết này?');
+        if (!ok) return;
+        if (onDeletePost) await onDeletePost(p.id);
+    };
+
     return (
         <Card>
             <CardHeader
                 avatar={<Avatar src={avatarSrc}>{!avatarSrc && initialsFrom(author)}</Avatar>}
                 title={<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>}
                 subheader={<Typography variant="caption" color="text.secondary">Đăng bởi: {author} | {p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</Typography>}
+                action={
+                    isPostOwner() && (
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <IconButton size="small" onClick={handleEditPost} title="Sửa bài viết">
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" onClick={handleDeletePost} title="Xóa bài viết">
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </Box>
+                    )
+                }
             />
 
             {renderImagesGrid()}

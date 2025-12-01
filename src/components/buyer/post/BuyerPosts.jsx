@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Box, CircularProgress, Stack, Typography} from '@mui/material';
-import {createPostComment, viewPosts, updatePostComment} from '@/services/PostService.jsx';
+import {createPostComment, viewPosts, updatePostComment, updatePost, deletePost} from '@/services/PostService.jsx';
 import {viewProduct} from '@/services/ProductService.jsx';
 import BuyerPostCard from './BuyerPostCard.jsx';
 import BuyerCreatePost from './BuyerCreatePost.jsx';
 import BuyerEmptyState from './BuyerEmptyState.jsx';
+import EditPostDialog from './EditPostDialog.jsx';
+import {enqueueSnackbar} from 'notistack';
+import {useLocation} from 'react-router-dom';
 import {reloadFromStorage} from "@/store/slices/cartSlice.js";
 import {useDispatch} from "react-redux";
 
@@ -93,7 +96,11 @@ const BuyerPosts = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
     const [currentUser, setCurrentUser] = useState(null);
-    const dispatch = useDispatch()
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editingPost, setEditingPost] = useState(null);
+    const [products, setProducts] = useState([]);
+    const dispatch = useDispatch();
+    const location = useLocation();
 
     useEffect(() => {
         const raw = sessionStorage.getItem('user')
@@ -111,6 +118,22 @@ const BuyerPosts = () => {
             sessionStorage.removeItem('user') // Xóa dữ liệu không hợp lệ
         }
     }, [location.pathname])
+
+    // Fetch products for edit dialog
+    useEffect(() => {
+        let mounted = true;
+        viewProduct()
+            .then(res => {
+                if (!mounted) return;
+                const items = res?.data?.data || [];
+                setProducts(items);
+            })
+            .catch(err => {
+                console.error('Failed to load products', err);
+                setProducts([]);
+            });
+        return () => { mounted = false; };
+    }, []);
 
 
     const normalizePosts = (data) => {
@@ -310,6 +333,45 @@ const BuyerPosts = () => {
         }
     };
 
+    const handleEditPost = (post) => {
+        setEditingPost(post);
+        setEditDialogOpen(true);
+    };
+
+    const handleSavePost = async (postId, payload) => {
+        try {
+            await updatePost(postId, payload);
+            enqueueSnackbar('Cập nhật bài viết thành công', { variant: 'success' });
+            setEditDialogOpen(false);
+            setEditingPost(null);
+            refresh();
+        } catch (err) {
+            console.error('Update post failed', err);
+            enqueueSnackbar('Cập nhật bài viết thất bại', { variant: 'error' });
+            throw err;
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        try {
+            // Prefer marking as ARCHIVED
+            if (typeof updatePost === 'function') {
+                await updatePost(postId, { status: 'ARCHIVED' });
+            } else if (typeof deletePost === 'function') {
+                // fallback if updatePost not available
+                await deletePost(postId);
+            } else {
+                throw new Error('No update/delete API available');
+            }
+
+            enqueueSnackbar('Xóa bài viết thành công', { variant: 'success' });
+            refresh();
+        } catch (err) {
+            console.error('Delete post failed', err);
+            enqueueSnackbar('Xóa bài viết thất bại', { variant: 'error' });
+        }
+    };
+
     if (isLoading) {
         return (
             <Box sx={{maxWidth: 800, mx: 'auto', py: 6, textAlign: 'center'}}>
@@ -340,12 +402,25 @@ const BuyerPosts = () => {
                                 post={post}
                                 onSubmitComment={handleCreateComment}
                                 onEditComment={handleEditComment}
+                                onEditPost={handleEditPost}
+                                onDeletePost={handleDeletePost}
                                 currentUser={currentUser}
                             />
                         ))}
                     </Stack>
                 )}
             </Box>
+
+            <EditPostDialog
+                open={editDialogOpen}
+                onClose={() => {
+                    setEditDialogOpen(false);
+                    setEditingPost(null);
+                }}
+                post={editingPost}
+                onSave={handleSavePost}
+                products={products}
+            />
         </Box>
     );
 };
