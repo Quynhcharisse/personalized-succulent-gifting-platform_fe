@@ -412,7 +412,7 @@ export default function CheckoutPage() {
                             </Stack>
                             <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Số lượng</Typography>
                             <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Size</Typography>
-                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Thành tiền</Typography>
+                            <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Giá tiền 1 sản phẩm (VNĐ)</Typography>
                             <Typography variant="body2" fontWeight={700} textAlign="right"  sx={{color: 'white'}}>Thao tác</Typography>
                         </Box>
 

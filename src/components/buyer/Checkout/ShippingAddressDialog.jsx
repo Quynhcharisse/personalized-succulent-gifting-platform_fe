@@ -168,29 +168,40 @@ const ShippingAddressDialog = ({ open, onClose, onSelect, startMode = 'list' }) 
                         />
 
                         {/* District */}
-                        <Autocomplete sx={{ flex: 1 }}
-                          disablePortal disabled={!selectedProvince}
-                          options={districts}
-                          getOptionLabel={(o) => o?.DistrictName ?? ""}
-                          renderInput={(params) => <TextField {...params} label="Quận/Huyện" />}
-                          onChange={async (_, val) => {
-                            const id = val?.DistrictID || "";
-                            setSelectedDistrict(id);
-                            setSelectedWard("");
-                            if (id) {
-                              const res = await viewWards(id);
-                              setWards(res?.data?.data || []);
-                            } else setWards([]);
-                          }}
-                        />
+                        <Autocomplete
+  sx={{ flex: 1 }}
+  disablePortal
+  disabled={!selectedProvince}
+  options={districts}
+  value={districts.find(d => d.DistrictID === selectedDistrict) || null}
+  getOptionLabel={(o) => o?.DistrictName ?? ""}
+  renderInput={(params) => <TextField {...params} label="Quận/Huyện" />}
+  onChange={async (_, val) => {
+    const id = val?.DistrictID || "";
+    setSelectedDistrict(id);
+    setSelectedWard("");
+
+    if (id) {
+      const res = await viewWards(id);
+      setWards(res?.data?.data || []);
+    } else {
+      setWards([]);
+    }
+  }}
+/>
+
 
                         {/* Ward */}
-                        <Autocomplete disablePortal disabled={!selectedDistrict}
-                          options={wards}
-                          getOptionLabel={(o) => o?.WardName ?? ""}
-                          renderInput={(params) => <TextField {...params} label="Phường/Xã" />}
-                          onChange={(_, val) => setSelectedWard(val?.WardCode || "")}
-                        />
+                        <Autocomplete
+  disablePortal
+  disabled={!selectedDistrict}
+  options={wards}
+  value={wards.find(w => w.WardCode === selectedWard) || null}
+  getOptionLabel={(o) => o?.WardName ?? ""}
+  renderInput={(params) => <TextField {...params} label="Phường/Xã" />}
+  onChange={(_, val) => setSelectedWard(val?.WardCode || "")}
+/>
+
 
                         <TextField fullWidth label="Địa chỉ chi tiết"
                           sx={{ mt:2 }} value={shippingAddress}
