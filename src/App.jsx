@@ -265,14 +265,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
-            {
-                path: 'cart',
-                element: (
-                    <Suspense fallback={<LoadingFallback/>}>
-                        <Cart/>
-                    </Suspense>
-                )
-            },
+           
             {
                 path: 'payment',
                 element: (
@@ -329,6 +322,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
+        
             {
                 path: 'custom-request/detail',
                 element: (
@@ -354,12 +348,20 @@ const router = createBrowserRouter([
                 )
             },
             {
+                path: 'cart',
+                element:
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Cart />
+                    </Suspense>
+            },
+            {
                 path: 'posts',
                 element:
                     <Suspense fallback={<LoadingFallback/>}>
                         <BuyerPosts/>
                     </Suspense>
             },
+         
         ],
     },
     {
@@ -524,7 +526,7 @@ const router = createBrowserRouter([
                 path: 'cart',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
-                        <Cart/>
+                        <Cart />
                     </Suspense>
                 )
             },

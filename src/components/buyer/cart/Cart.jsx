@@ -8,7 +8,7 @@ import {
     ShoppingCartOutlined
 } from "@mui/icons-material";
 import {Box, Button, Card, CardContent, Divider, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 
 import {COLORS, DASHBOARD_STYLES} from "../../constants.js";
@@ -25,83 +25,26 @@ export default function Cart() {
     const hasItems = items.length > 0;
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [showDialog, setShowDialog] = useState(false);
-    const {error} = useNotify();
-    const {enqueueSnackbar} = useSnackbar();
-    const [placing, setPlacing] = useState(false);
-
  
 
-    const PLACEHOLDER_VALUES = ['N/A','NONE','TRỐNG','CHƯA CẬP NHẬT','NULL','KHÔNG','-',''];
-    const isPlaceholder = (val) => {
-        if (!val && val !== 0) return true;
-        const norm = String(val).trim().toUpperCase();
-        return PLACEHOLDER_VALUES.includes(norm);
-    };
-    const logMissingAddressEvent = (reason) => {
-        try {
-            // placeholder analytics hook (extend later)
-            window.dispatchEvent(new CustomEvent('missing-address', {detail:{reason, ts:Date.now()}}));
-        } catch {}
-    };
+    const isAuthenticated = useMemo(() => {
+        return sessionStorage.getItem("user") != null;
+    }, []);
 
-   
+    useEffect(() => {
+        if (!isAuthenticated) {
+            window.location.href = "/login";
+            return;
+        }
 
-   
-
-    // Wallet
-   
+    }, [isAuthenticated]);
 
     const subtotal = items.reduce((sum, i) => (sum + (Number(i?.price) || 0) * (i.quantity || 1)), 0);
   
 
     const formatCurrency = (v) => new Intl.NumberFormat("vi-VN", {style: "currency", currency: "VND"}).format(v);
 
-    const handlePlaceOrder = async () => {
-        if (!hasItems) return;
-        setPlacing(true);
-        try {
-            const payload = {
-                products: items.map((i) => ({
-                    productId: i.id,
-                    size: i.size,
-                    price: Number(i.price || 0),
-                    quantity: Number(i.quantity || 1),
-                })),
-            };
-
-            const res = await checkAvailabilityProductsBySize(payload);
-            const ok = (res?.status >= 200 && res?.status < 300);
-            if (!ok) {
-                throw new Error(res?.data?.message || 'Xác thực số lượng thất bại');
-            }
-
-            const orderCode = Math.random().toString(36).slice(2, 8).toUpperCase();
-            try {
-                localStorage.removeItem('payos-session');
-                localStorage.setItem('payos-force-new', '1');
-            } catch {
-            }
-
-            navigate('/buyer/payment', {
-                state: {
-                    forceNew: true,
-                    orderCode,
-                    total,
-                    items,
-                    shippingAddressId: selectedAddress?.id || null,
-                    subtotal,
-                    shippingFee,
-                    walletDeduction,
-                },
-            });
-        } catch (e) {
-            const msg = e?.response?.data?.message || e?.message || 'Không thể kiểm tra số lượng sản phẩm.';
-            error(msg);
-        } finally {
-            setPlacing(false);
-        }
-    };
+   
 
     return (
         <>
@@ -369,7 +312,7 @@ export default function Cart() {
                                     py: {xs: 1.5, sm: 2},
                                     '&.Mui-disabled': {background: '#e0e0e0', color: '#9e9e9e', boxShadow: 'none'}
                                 }}
-                                // disabled={!hasItems || loadingAddress || !selectedAddress || placing}
+                                disabled={!hasItems }
                                 onClick={() => navigate('/checkout')}
                                 >
                                 MUA NGAY

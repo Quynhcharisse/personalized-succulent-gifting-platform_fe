@@ -161,7 +161,7 @@ export default function SiteHeader() {
                     </div>
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
                   
-                        <Link className="header__icon" title="Giỏ hàng" to="/cart">
+                        <NavLink className="header__icon" title="Giỏ hàng" to="/cart">
                             <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
                                 <LocalGroceryStoreIcon
                                     sx={{
@@ -171,7 +171,7 @@ export default function SiteHeader() {
                                     }}
                                 />
                             </Badge>
-                        </Link>
+                        </NavLink>
                         <Link className="header__icon" title="Thông báo" to="#">
                             <NotificationDisplay/>
                         </Link>
