@@ -34,17 +34,7 @@ export default function OrderGuide() {
     document.title = 'Hướng dẫn mua hàng | Lá Nhỏ Bên Thềm'
 
     const steps = [
-        {
-            label: 'Tìm kiếm sản phẩm',
-            icon: <Search/>,
-            color: '#4caf50',
-            content: 'Quý khách có thể tìm sản phẩm theo 3 cách:',
-            items: [
-                'Gõ tên sản phẩm vào thanh tìm kiếm',
-                'Tìm theo danh mục',
-                'Duyệt các sản phẩm gợi ý trên trang'
-            ]
-        },
+       
         {
             label: 'Thêm sản phẩm vào giỏ hàng',
             icon: <ShoppingCart/>,
@@ -62,28 +52,16 @@ export default function OrderGuide() {
             color: '#2196f3',
             content: 'Để đặt nhiều sản phẩm khác nhau vào cùng 1 đơn hàng, vui lòng:',
             items: [
-                'Chọn "Tiếp tục mua sắm" hoặc bấm vào logo để về trang chủ',
+                'Bấm vào logo để về trang chủ',
                 'Tiếp tục thêm sản phẩm vào giỏ như Bước 2 (lặp lại đến khi đủ sản phẩm)'
             ],
             extraContent: 'Sau đó, trong trang giỏ hàng:',
             extraItems: [
                 'Điều chỉnh số lượng và cập nhật giỏ hàng',
-                'Nhập mã giảm giá (nếu có)',
+    
                 'Bấm "Thanh toán" để bắt đầu đặt hàng'
             ]
         },
-        {
-            label: 'Đăng nhập hoặc đăng ký tài khoản',
-            icon: <AccountCircle/>,
-            color: '#9c27b0',
-            content: 'Vui lòng đăng nhập bằng tài khoản đã có. Nếu chưa có tài khoản, chỉ cần điền các thông tin cần thiết theo mẫu để đăng ký nhanh.'
-        },
-        {
-            label: 'Chọn phương thức thanh toán và đặt mua',
-            icon: <Payment/>,
-            color: '#f44336',
-            content: 'Hỗ trợ giao hàng và thanh toán tận nơi cho đơn hàng từ 100.000đ đến 2.000.000đ tại một số quận nội thành TP.HCM. Vui lòng nhập mã giảm giá (nếu có) và bấm "Hoàn tất đơn hàng". Hệ thống sẽ tạo đơn dựa trên thông tin quý khách đã đăng ký.'
-        }
     ]
 
     return (
@@ -215,9 +193,9 @@ export default function OrderGuide() {
                                         1) Khu vực và thời gian giao hàng
                                     </Typography>
                                     <Typography variant="body2" paragraph>
-                                        Các quận trong TP.HCM. Giao qua đơn vị vận chuyển, thời gian dự kiến 2–3 ngày
-                                        sau
-                                        khi đặt hàng.
+                                        Giao qua đơn vị vận chuyển GHN, thời gian dự kiến 2–3 ngày
+                                        trong nội thành TP.HCM( 5 - 7 ngày ngoài nội thành TP.HCM.
+                                        khi đặt hàng. )
                                     </Typography>
 
                                     <Divider sx={{my: 2}}/>
@@ -234,7 +212,7 @@ export default function OrderGuide() {
 
                                 <Alert severity="info" sx={{mt: 2}}>
                                     <Typography variant="body2">
-                                        Liên hệ Zalo <strong>0968 374 473</strong> nếu có vấn đề liên quan đến đơn hàng
+                                        Liên hệ Zalo <strong>0886 122578</strong> nếu có vấn đề liên quan đến đơn hàng
                                     </Typography>
                                 </Alert>
                             </CardContent>

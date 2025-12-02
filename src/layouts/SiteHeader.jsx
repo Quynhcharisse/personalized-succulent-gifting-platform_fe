@@ -160,16 +160,8 @@ export default function SiteHeader() {
                         />
                     </div>
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
-                        <Link className="header__icon" title="Yêu thích" to="#">
-                            <FavoriteBorderIcon
-                                sx={{
-                                    width: 22,
-                                    height: 22,
-                                    color: '#0D3B2E'
-                                }}
-                            />
-                        </Link>
-                        <Link className="header__icon" title="Giỏ hàng" to="/checkout">
+                  
+                        <Link className="header__icon" title="Giỏ hàng" to="/cart">
                             <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
                                 <LocalGroceryStoreIcon
                                     sx={{

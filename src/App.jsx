@@ -41,6 +41,7 @@ const CustomRequestList = lazy(() => import('./components/seller/customeRequest/
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
 const CheckoutPage = lazy(() => import('./components/buyer/checkout/CheckoutPage.jsx'))
 const Payment = lazy(() => import('./components/buyer/payment/Payment.jsx'))
+const Cart = lazy(() => import('./components/buyer/cart/Cart.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
 const LoadingFallback = () => (
@@ -265,6 +266,14 @@ const router = createBrowserRouter([
                 )
             },
             {
+                path: 'cart',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Cart/>
+                    </Suspense>
+                )
+            },
+            {
                 path: 'payment',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
@@ -420,6 +429,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 )
             },
+            
             {
                 path: 'accessory',
                 element: (
@@ -507,6 +517,14 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
                         <Payment/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'cart',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Cart/>
                     </Suspense>
                 )
             },
