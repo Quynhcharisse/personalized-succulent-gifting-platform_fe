@@ -15,27 +15,45 @@ const POSTS_CACHE_KEY = 'buyer_posts_cache';
 const PRODUCTS_CACHE_KEY = 'products_cache';
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
+const isValidName = (v) => {
+    if (v == null) return false;
+    if (typeof v !== 'string') return false;
+    const s = v.trim();
+    if (s === '') return false;
+    const lower = s.toLowerCase();
+    return !(lower === 'null' || lower === 'undefined');
+};
+
+const getFirstName = (source = {}, keys = [], fallback = '') => {
+    for (const k of keys) {
+        const val = source?.[k];
+        if (isValidName(val)) return val;
+    }
+    return fallback;
+};
+
 const fetchProductsByIds = async (ids = []) => {
     const unique = Array.from(new Set(ids)).filter(Boolean);
     if (unique.length === 0) return {};
-    
+
     // Try to get from cache first
     try {
         const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
         if (cached) {
             const {data: cachedProducts, timestamp} = JSON.parse(cached);
             const now = Date.now();
-            
+
             if (now - timestamp < CACHE_EXPIRY_TIME && Array.isArray(cachedProducts)) {
                 // Find products from cache
                 const map = {};
                 unique.forEach(id => {
                     const found = cachedProducts.find(p => p.id?.toString() === id.toString());
                     if (found) {
-                        map[id] = {id: found.id, name: found.name || found.title || `Sản phẩm #${id}`};
+                        const name = getFirstName(found, ['name', 'title'], `Sản phẩm #${id}`);
+                        map[id] = {id: found.id, name};
                     }
                 });
-                
+
                 // If we found all products in cache, return early
                 if (Object.keys(map).length === unique.length) {
                     return map;
@@ -45,7 +63,7 @@ const fetchProductsByIds = async (ids = []) => {
     } catch (error) {
         console.error('Error reading products cache:', error);
     }
-    
+
     // Fetch from API
     const productsResponse = await viewProduct(unique);
     const res = Array.isArray(productsResponse)
@@ -55,9 +73,12 @@ const fetchProductsByIds = async (ids = []) => {
     unique.forEach((id, idx) => {
         const payload = res[idx];
         const data = payload?.data ?? payload;
-        if (data) map[id] = {id: data.id ?? id, name: data.name ?? data.title ?? `Sản phẩm #${id}`};
+        if (data) {
+            const name = getFirstName(data, ['name', 'title'], `Sản phẩm #${id}`);
+            map[id] = {id: data.id ?? id, name};
+        }
     });
-    
+
     // Update cache
     try {
         const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
@@ -68,7 +89,7 @@ const fetchProductsByIds = async (ids = []) => {
                 cachedProducts = parsed.data;
             }
         }
-        
+
         // Merge new products into cache
         const productsArray = Object.values(map);
         productsArray.forEach(newProduct => {
@@ -79,7 +100,7 @@ const fetchProductsByIds = async (ids = []) => {
                 cachedProducts.push(newProduct);
             }
         });
-        
+
         sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({
             data: cachedProducts,
             timestamp: Date.now()
@@ -87,7 +108,7 @@ const fetchProductsByIds = async (ids = []) => {
     } catch (error) {
         console.error('Error updating products cache:', error);
     }
-    
+
     return map;
 };
 
@@ -143,12 +164,15 @@ const BuyerPosts = () => {
                 ? p.comments.comments.map(c => ({
                     content: c.content || c.text || '',
                     buyerId: c.accountId || c.account_id || c.accountId,
-                    buyerName: c.buyerName || c.userName || 'Ẩn danh',
+                    buyerName: getFirstName(c, ['buyerName', 'userName', 'buyer_name'], 'Ẩn danh'),
                     ...c
                 }))
-                : (Array.isArray(p?.comments) ? p.comments : []);
+                : (Array.isArray(p?.comments) ? p.comments.map(c => ({
+                    ...c,
+                    buyerName: getFirstName(c, ['buyerName', 'userName', 'buyer_name'], 'Ẩn danh')
+                })) : []);
 
-            const product = p.product || (p.productId ? { id: p.productId, name: p.productName || '-' } : null);
+            const product = p.product || (p.productId ? { id: p.productId, name: getFirstName(p, ['productName', 'product_name'], `Sản phẩm #${p.productId}`) } : null);
             const images = Array.isArray(p?.images?.postImages) ? p.images.postImages : (Array.isArray(p?.images) ? p.images : []);
 
             return {
@@ -256,12 +280,18 @@ const BuyerPosts = () => {
                     ...(productFromApi || {})
                 };
 
-                const seller = {id: p.sellerId, name: p.sellerName || `Người bán #${p.sellerId}`};
+                const sellerName = getFirstName(p, ['sellerName', 'seller_name'], `Người bán #${p.sellerId}`);
+                const seller = {id: p.sellerId, name: sellerName};
 
                 const comments = (p.comments || []).map(c => ({
                     ...c,
-                    buyerName: c.buyerName || c.buyer_name || `Người dùng #${c.buyerId}`
+                    buyerName: getFirstName(c, ['buyerName', 'userName', 'buyer_name'], `Người dùng #${c.buyerId}`)
                 }));
+
+                // Ensure product.name always has a valid string
+                if (product && !isValidName(product.name)) {
+                    product.name = `Sản phẩm #${prodId ?? (p.productId ?? 'unknown')}`;
+                }
 
                 return {
                     ...p,
