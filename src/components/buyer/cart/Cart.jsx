@@ -13,12 +13,9 @@ import {useNavigate} from "react-router-dom";
 
 import {COLORS, DASHBOARD_STYLES} from "../../constants.js";
 import {useDispatch, useSelector} from "react-redux";
-import axiosClient from "../../../config/APIConfig.jsx";
-import {getWalletBalance} from "@/services/WalletService.jsx";
+
 import {incrementQuantityBySize, removeItem} from "@/store/slices/cartSlice.js";
-import useNotify from "../../../hooks/useNotify.js";
-import {useSnackbar} from 'notistack';
-import {checkAvailabilityProductsBySize} from "@/services/ProductService.jsx";
+
 
 export default function Cart() {
     const items = useSelector((state) => state?.cart?.items || []);

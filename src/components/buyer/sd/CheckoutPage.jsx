@@ -598,7 +598,7 @@ export default function CheckoutPage() {
                             <Stack spacing={1}>
                                 <Row label="Tạm tính" value={formatCurrency(subtotal)} bold/>
                                 <Row label="Phí vận chuyển" value={formatCurrency(shippingFee)} bold/>
-                                                             <Divider sx={{my: 1}}/>
+                                                      <Divider sx={{my: 1}}/>
                                 <Row label="Tổng thanh toán" value={formatCurrency(total)} xbold/>
                             </Stack>
                         </Box>
