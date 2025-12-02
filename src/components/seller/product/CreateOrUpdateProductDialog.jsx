@@ -1002,6 +1002,35 @@ const CreateOrUpdateProductDialog = ({
                                                                     }}
                                                                     label="Chọn sen đá"
                                                                     sx={DASHBOARD_STYLES.formField}
+                                                                        MenuProps={{
+                                                                            PaperProps: {
+                                                                                sx: {
+                                                                                    maxHeight: 360,
+                                                                                    '& .MuiList-root': {
+                                                                                        maxHeight: 360,
+                                                                                        overflowY: 'scroll',
+                                                                                        '&::-webkit-scrollbar': {
+                                                                                            width: '8px'
+                                                                                        },
+                                                                                        '&::-webkit-scrollbar-track': {
+                                                                                            background: '#f1f1f1',
+                                                                                            borderRadius: '10px'
+                                                                                        },
+                                                                                        '&::-webkit-scrollbar-thumb': {
+                                                                                            background: '#888',
+                                                                                            borderRadius: '10px',
+                                                                                            '&:hover': {
+                                                                                                background: '#555'
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    '& .MuiMenuItem-root': {
+                                                                                        minHeight: 52,
+                                                                                        py: 1.5
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }}
                                                                 >
                                                                     {Array.isArray(succulents) && succulents.map((s) => (
                                                                         <MenuItem key={s.id} value={toStringSafe(s.id)}>
@@ -1020,6 +1049,35 @@ const CreateOrUpdateProductDialog = ({
                                                                         label="Kích thước"
                                                                         disabled={!succulent.id}
                                                                         sx={DASHBOARD_STYLES.formField}
+                                                                        MenuProps={{
+                                                                            PaperProps: {
+                                                                                sx: {
+                                                                                    maxHeight: 360,
+                                                                                    '& .MuiList-root': {
+                                                                                        maxHeight: 360,
+                                                                                        overflowY: 'scroll',
+                                                                                        '&::-webkit-scrollbar': {
+                                                                                            width: '8px'
+                                                                                        },
+                                                                                        '&::-webkit-scrollbar-track': {
+                                                                                            background: '#f1f1f1',
+                                                                                            borderRadius: '10px'
+                                                                                        },
+                                                                                        '&::-webkit-scrollbar-thumb': {
+                                                                                            background: '#888',
+                                                                                            borderRadius: '10px',
+                                                                                            '&:hover': {
+                                                                                                background: '#555'
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    '& .MuiMenuItem-root': {
+                                                                                        minHeight: 52,
+                                                                                        py: 1.5
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         {(() => {
                                                                             const selectedSucculent = succulents.find(s => toStringSafe(s.id) === succulent.id);
