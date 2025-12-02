@@ -772,7 +772,7 @@ const CreateOrUpdateProductDialog = ({
                         }}>
                             {isEdit ? 'Cập Nhật Sản Phẩm' : 'Tạo Sản Phẩm Mới'}
                         </Typography>
-                        <Typography variant="body1" sx={{opacity: 0.9, fontWeight: 400}}>
+                        <Typography variant="body1" sx={{opacity: 0.9, fontWeight: 400, color: "white"}}>
                             {isEdit ? 'Chỉnh sửa thông tin sản phẩm' : 'Thiết lập thông tin sản phẩm hoàn chỉnh'}
                         </Typography>
                     </Box>
