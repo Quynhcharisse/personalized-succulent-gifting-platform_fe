@@ -136,6 +136,7 @@ export default function SiteHeader() {
           <span className="brand__logo" aria-hidden>
             <img src="/senda.png" alt="Lá Nhỏ Bên Thềm"/>
           </span>
+                    <span className="brand__name">Lá Nhỏ Bên Thềm</span>
                 </Link>
                 <nav className="main-nav" aria-label="Điều hướng chính">
                     <NavLink to="/" end> Trang chủ </NavLink>
@@ -147,23 +148,70 @@ export default function SiteHeader() {
                     )}
                 </nav>
                 <div className="header__actions">
-                    <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
-                        <Link className="header__icon" title="Yêu thích" to="#">
+                    <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 16}}>
+                        <Link 
+                            className="header__icon" 
+                            title="Yêu thích" 
+                            to="#"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
                             <FavoriteBorderIcon
                                 sx={{
-                                    width: 22,
-                                    height: 22,
-                                    color: '#0D3B2E'
+                                    width: 24,
+                                    height: 24,
+                                    color: '#0D3B2E',
+                                    transition: 'transform 0.2s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.1)'
+                                    }
                                 }}
                             />
                         </Link>
-                        <Link className="header__icon" title="Giỏ hàng" to="/buyer/checkout">
-                            <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
+                        <Link 
+                            className="header__icon" 
+                            title="Giỏ hàng" 
+                            to="/buyer/checkout"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <Badge 
+                                badgeContent={cartCount} 
+                                color="error" 
+                                overlap="circular" 
+                                invisible={!cartCount}
+                                sx={{
+                                    '& .MuiBadge-badge': {
+                                        fontSize: '0.7rem',
+                                        height: 18,
+                                        minWidth: 18,
+                                        fontWeight: 600
+                                    }
+                                }}
+                            >
                                 <LocalGroceryStoreIcon
                                     sx={{
-                                        width: 22,
-                                        height: 22,
-                                        color: '#0D3B2E'
+                                        width: 24,
+                                        height: 24,
+                                        color: '#0D3B2E',
+                                        transition: 'transform 0.2s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.1)'
+                                        }
                                     }}
                                 />
                             </Badge>
@@ -177,20 +225,22 @@ export default function SiteHeader() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    width: 44,
-                                    height: 44,
+                                    width: 40,
+                                    height: 40,
                                     borderRadius: '50%',
                                     transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                                    }
+                                    backgroundColor: 'transparent'
                                 }}
                             >
                                 <PersonIcon
                                     sx={{
-                                        width: 22,
-                                        height: 22,
-                                        color: '#0D3B2E'
+                                        width: 24,
+                                        height: 24,
+                                        color: '#0D3B2E',
+                                        transition: 'transform 0.2s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.1)'
+                                        }
                                     }}
                                 />
                             </Link>

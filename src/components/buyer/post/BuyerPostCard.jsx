@@ -457,49 +457,244 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
     };
 
     return (
-        <Card>
+        <Card 
+            sx={{ 
+                borderRadius: 3,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid rgba(0,0,0,0.06)',
+                overflow: 'hidden',
+                '&:hover': {
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-2px)'
+                }
+            }}
+        >
             <CardHeader
-                avatar={<Avatar src={avatarSrc}>{!avatarSrc && initialsFrom(author)}</Avatar>}
-                title={<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>}
-                subheader={<Typography variant="caption" color="text.secondary">Đăng bởi: {author} | {p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</Typography>}
+                avatar={
+                    <Avatar 
+                        src={avatarSrc}
+                        sx={{
+                            width: 48,
+                            height: 48,
+                            border: '2px solid',
+                            borderColor: 'primary.main',
+                            boxShadow: '0 2px 8px rgba(46, 125, 50, 0.2)'
+                        }}
+                    >
+                        {!avatarSrc && initialsFrom(author)}
+                    </Avatar>
+                }
+                title={
+                    <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                            fontWeight: 700,
+                            fontSize: '1.05rem',
+                            color: '#1a1a1a'
+                        }}
+                    >
+                        {title}
+                    </Typography>
+                }
+                subheader={
+                    <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.main'
+                            }}
+                        >
+                            {author}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">•</Typography>
+                        <Typography 
+                            variant="caption" 
+                            sx={{ 
+                                color: 'text.secondary',
+                                fontSize: '0.8rem'
+                            }}
+                        >
+                            {p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN', { 
+                                day: '2-digit', 
+                                month: '2-digit', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) : ''}
+                        </Typography>
+                    </Stack>
+                }
                 action={
                     isPostOwner() && (
                         <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            <IconButton size="small" onClick={handleEditPost} title="Sửa bài viết">
+                            <IconButton 
+                                size="small" 
+                                onClick={handleEditPost} 
+                                title="Sửa bài viết"
+                                sx={{
+                                    color: 'primary.main',
+                                    '&:hover': { 
+                                        backgroundColor: 'rgba(46, 125, 50, 0.08)',
+                                        transform: 'scale(1.1)'
+                                    },
+                                    transition: 'all 0.2s'
+                                }}
+                            >
                                 <EditIcon fontSize="small" />
                             </IconButton>
-                            <IconButton size="small" onClick={handleDeletePost} title="Xóa bài viết">
+                            <IconButton 
+                                size="small" 
+                                onClick={handleDeletePost} 
+                                title="Xóa bài viết"
+                                sx={{
+                                    color: 'error.main',
+                                    '&:hover': { 
+                                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                        transform: 'scale(1.1)'
+                                    },
+                                    transition: 'all 0.2s'
+                                }}
+                            >
                                 <DeleteIcon fontSize="small" />
                             </IconButton>
                         </Box>
                     )
                 }
+                sx={{
+                    pb: 1,
+                    '& .MuiCardHeader-action': {
+                        alignSelf: 'center'
+                    }
+                }}
             />
 
-            {renderImagesGrid()}
+            <Box sx={{ position: 'relative' }}>
+                {renderImagesGrid()}
+            </Box>
 
-            <CardContent>
-                <Typography variant="body1" paragraph>
+            <CardContent sx={{ pt: 2, pb: 1 }}>
+                <Typography 
+                    variant="body1" 
+                    paragraph
+                    sx={{
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
+                        color: '#333',
+                        mb: 2
+                    }}
+                >
                     {p.description || '-'}
                 </Typography>
 
-                <Stack direction="row" spacing={2} alignItems="center">
-                    <Typography variant="subtitle2">Sản phẩm:</Typography>
-                    {productId ? (
-                        <Link href={productHref} target="_blank" rel="noopener" sx={{ ml: 1 }}>
-                            <Typography sx={{ fontWeight: 600 }}>{productName}</Typography>
+                {productId && (
+                    <Box 
+                        sx={{ 
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            px: 2,
+                            py: 1,
+                            borderRadius: 2,
+                            background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.08) 0%, rgba(27, 94, 32, 0.08) 100%)',
+                            border: '1px solid rgba(46, 125, 50, 0.2)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.12) 0%, rgba(27, 94, 32, 0.12) 100%)',
+                                transform: 'translateX(4px)',
+                                boxShadow: '0 2px 8px rgba(46, 125, 50, 0.15)'
+                            }
+                        }}
+                    >
+                        <Typography 
+                            variant="caption" 
+                            sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.dark',
+                                textTransform: 'uppercase',
+                                letterSpacing: 0.5,
+                                fontSize: '0.7rem'
+                            }}
+                        >
+                            🌱 Sản phẩm
+                        </Typography>
+                        <Link 
+                            href={productHref} 
+                            target="_blank" 
+                            rel="noopener"
+                            underline="none"
+                            sx={{
+                                fontWeight: 700,
+                                color: 'primary.main',
+                                fontSize: '0.9rem',
+                                '&:hover': {
+                                    color: 'primary.dark'
+                                }
+                            }}
+                        >
+                            {productName}
                         </Link>
-                    ) : (
-                        <Typography color="text.secondary">Không có sản phẩm liên kết</Typography>
-                    )}
-                </Stack>
+                    </Box>
+                )}
 
-                <Stack mt={2} spacing={1}>
-                    <Typography variant="subtitle2">Bình luận ({p.comments?.count ?? commentsArray.length}):</Typography>
+                <Box 
+                    sx={{ 
+                        mt: 3,
+                        pt: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider'
+                    }}
+                >
+                    <Typography 
+                        variant="subtitle2" 
+                        sx={{ 
+                            fontWeight: 700,
+                            fontSize: '0.95rem',
+                            color: '#1a1a1a',
+                            mb: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                        }}
+                    >
+                        💬 Bình luận
+                        <Box 
+                            component="span" 
+                            sx={{ 
+                                px: 1,
+                                py: 0.25,
+                                borderRadius: 1,
+                                backgroundColor: 'primary.main',
+                                color: 'white',
+                                fontSize: '0.75rem',
+                                fontWeight: 600
+                            }}
+                        >
+                            {p.comments?.count ?? commentsArray.length}
+                        </Box>
+                    </Typography>
 
                     {commentsArray.length === 0 && (
-                        <Typography variant="body2" color="text.secondary">Chưa có bình luận</Typography>
+                        <Box 
+                            sx={{ 
+                                textAlign: 'center',
+                                py: 3,
+                                backgroundColor: 'rgba(0,0,0,0.02)',
+                                borderRadius: 2
+                            }}
+                        >
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ fontSize: '0.9rem' }}
+                            >
+                                Chưa có bình luận nào. Hãy là người đầu tiên! 🌟
+                            </Typography>
+                        </Box>
                     )}
+
+                    <Stack spacing={2}>
 
                     {commentsArray.map((c) => {
                         const commenterName = c.buyerName || c.buyer_name || c.userName || c.user?.name || c.name || 'Ẩn danh';
@@ -519,16 +714,55 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
                         const own = isCommentOwner(c);
 
                         return (
-                            <Box key={c.id ?? `${p.id}-c-${Math.random()}`} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                                <Avatar src={commentAvatarSrc} sx={{ width: 40, height: 40 }}>
+                            <Box 
+                                key={c.id ?? `${p.id}-c-${Math.random()}`} 
+                                sx={{ 
+                                    display: 'flex', 
+                                    gap: 1.5, 
+                                    alignItems: 'flex-start',
+                                    p: 2,
+                                    borderRadius: 2,
+                                    backgroundColor: 'rgba(0,0,0,0.02)',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(0,0,0,0.04)'
+                                    }
+                                }}
+                            >
+                                <Avatar 
+                                    src={commentAvatarSrc} 
+                                    sx={{ 
+                                        width: 36, 
+                                        height: 36,
+                                        border: '2px solid',
+                                        borderColor: 'rgba(46, 125, 50, 0.2)'
+                                    }}
+                                >
                                     {!commentAvatarSrc && initialsFrom(commenterName)}
                                 </Avatar>
 
                                 <Box sx={{ flex: 1 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                        <Typography variant="subtitle2">{commenterName}</Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {c.createdAt ? ` • ${new Date(c.createdAt).toLocaleString()}` : ''}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                                        <Typography 
+                                            variant="subtitle2"
+                                            sx={{ 
+                                                fontWeight: 600,
+                                                color: '#1a1a1a'
+                                            }}
+                                        >
+                                            {commenterName}
+                                        </Typography>
+                                        <Typography 
+                                            variant="caption" 
+                                            color="text.secondary"
+                                            sx={{ fontSize: '0.75rem' }}
+                                        >
+                                            {c.createdAt ? new Date(c.createdAt).toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) : ''}
                                         </Typography>
 
                                         <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
@@ -571,22 +805,36 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
 
                                     {!isEditing ? (
                                         <>
-                                            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{c.content || c.text || c.message}</Typography>
+                                            <Typography 
+                                                variant="body2" 
+                                                sx={{ 
+                                                    whiteSpace: 'pre-wrap',
+                                                    fontSize: '0.9rem',
+                                                    lineHeight: 1.5,
+                                                    color: '#333'
+                                                }}
+                                            >
+                                                {c.content || c.text || c.message}
+                                            </Typography>
 
                                             { (c.imageUrl || c.image) && (
-                                                <Box mt={1}>
+                                                <Box mt={1.5}>
                                                     <Box
                                                         component="img"
                                                         src={c.imageUrl || c.image}
                                                         alt="comment-image"
                                                         onClick={() => openCommentLightbox(c.imageUrl || c.image)}
                                                         sx={{
-                                                            width: 120,
-                                                            height: 120,
+                                                            width: 150,
+                                                            height: 150,
                                                             objectFit: 'cover',
-                                                            borderRadius: 1,
+                                                            borderRadius: 2,
                                                             cursor: 'pointer',
-                                                            boxShadow: 1
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                            transition: 'transform 0.2s ease',
+                                                            '&:hover': {
+                                                                transform: 'scale(1.05)'
+                                                            }
                                                         }}
                                                     />
                                                 </Box>
@@ -637,50 +885,113 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
 
                 {/* comment input */}
                 {isLoggedIn ? (
-                    <Box mt={2} display="flex" gap={1} alignItems="flex-end">
-                        <TextField
-                            label="Viết bình luận"
-                            placeholder="Nhập bình luận và nhấn Enter hoặc gửi"
-                            multiline
-                            maxRows={4}
-                            fullWidth
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={isSubmitting || commentUploading}
-                            size="small"
-                        />
-                        <Box>
-                            <input
-                                id={`comment-image-${p.id}`}
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleCommentFileSelected}
+                    <Box 
+                        mt={3} 
+                        sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(46, 125, 50, 0.03)',
+                            border: '1px solid rgba(46, 125, 50, 0.1)'
+                        }}
+                    >
+                        <Box display="flex" gap={1.5} alignItems="flex-end">
+                            <TextField
+                                label="Viết bình luận"
+                                placeholder="Chia sẻ suy nghĩ của bạn..."
+                                multiline
+                                maxRows={4}
+                                fullWidth
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                disabled={isSubmitting || commentUploading}
+                                size="small"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'white',
+                                        '&:hover': {
+                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: 'primary.main'
+                                            }
+                                        }
+                                    }
+                                }}
                             />
-                            <label htmlFor={`comment-image-${p.id}`}>
-                                <IconButton component="span" color="primary" size="large" aria-label="attach image">
-                                    <PhotoCamera />
+                            <Box display="flex" gap={0.5}>
+                                <input
+                                    id={`comment-image-${p.id}`}
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleCommentFileSelected}
+                                />
+                                <label htmlFor={`comment-image-${p.id}`}>
+                                    <IconButton 
+                                        component="span" 
+                                        color="primary" 
+                                        aria-label="attach image"
+                                        sx={{
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(46, 125, 50, 0.08)'
+                                            }
+                                        }}
+                                    >
+                                        <PhotoCamera />
+                                    </IconButton>
+                                </label>
+                                <IconButton
+                                    color="primary"
+                                    onClick={handleSubmitComment}
+                                    disabled={isSubmitting || commentUploading || !commentText.trim()}
+                                    aria-label="gửi bình luận"
+                                    sx={{
+                                        backgroundColor: 'primary.main',
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: 'primary.dark'
+                                        },
+                                        '&.Mui-disabled': {
+                                            backgroundColor: 'rgba(0,0,0,0.12)',
+                                            color: 'rgba(0,0,0,0.26)'
+                                        }
+                                    }}
+                                >
+                                    {isSubmitting || commentUploading ? <CircularProgress size={20} sx={{ color: 'white' }}/> : <SendIcon/>}
                                 </IconButton>
-                            </label>
+                            </Box>
                         </Box>
-                        <IconButton
-                            color="primary"
-                            onClick={handleSubmitComment}
-                            disabled={isSubmitting || commentUploading || !commentText.trim()}
-                            aria-label="gửi bình luận"
-                            sx={{ alignSelf: 'flex-end' }}
-                        >
-                            {isSubmitting || commentUploading ? <CircularProgress size={20}/> : <SendIcon/>}
-                        </IconButton>
                     </Box>
                 ) : (
-                    <Box mt={2} p={2} borderRadius={1} bgcolor="#f9f9f9" display="flex" flexDirection="column" gap={1}>
-                        <Typography variant="body2" color="text.secondary">
-                            Bạn cần đăng nhập để bình luận. Vui lòng nhấn vào nút dưới đây để đăng nhập.
+                    <Box 
+                        mt={3} 
+                        p={3} 
+                        borderRadius={2} 
+                        sx={{
+                            background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(27, 94, 32, 0.05) 100%)',
+                            border: '1px dashed rgba(46, 125, 50, 0.3)',
+                            textAlign: 'center'
+                        }}
+                    >
+                        <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ mb: 2, fontSize: '0.9rem' }}
+                        >
+                            💬 Đăng nhập để tham gia thảo luận và chia sẻ trải nghiệm của bạn
                         </Typography>
-                        <Button variant="contained" color="primary" size="small" onClick={() => { window.location.href = '/login'; }}>
-                            Đăng nhập
+                        <Button 
+                            variant="contained" 
+                            color="primary" 
+                            onClick={() => { window.location.href = '/login'; }}
+                            sx={{
+                                borderRadius: 2,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1
+                            }}
+                        >
+                            Đăng nhập ngay
                         </Button>
                     </Box>
                 )}
@@ -696,6 +1007,7 @@ const BuyerPostCard = ({ post = {}, onSubmitComment, onEditComment, onEditPost, 
                         </Box>
                     </Box>
                 )}
+                </Box>
             </CardContent>
 
             <CardActions>

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useMemo, useCallback, useRef, memo} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextField, InputAdornment, IconButton, Grid, Chip, Paper, Skeleton} from '@mui/material';
-import {Search, Clear, LocalFlorist, ShoppingCart, Visibility} from '@mui/icons-material';
+import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextField, InputAdornment, IconButton, Grid, Chip, Paper, Skeleton, ToggleButtonGroup, ToggleButton, Divider, Stack, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+import {Search, Clear, LocalFlorist, ShoppingCart, Visibility, FilterList, SortByAlpha, AttachMoney, GridView, ViewList} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '@/services/ProductService.jsx';
 import {createProductSlug} from '@utils/slugUtil.js';
@@ -15,6 +15,9 @@ export default function ProductList() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('name'); // name, price-asc, price-desc, newest
+    const [priceRange, setPriceRange] = useState('all'); // all, under50k, 50k-100k, 100k-200k, over200k
+    const [viewMode, setViewMode] = useState('grid'); // grid or list
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
     const debounceTimerRef = useRef(null);
@@ -76,23 +79,63 @@ export default function ProductList() {
         }
     }, []);
 
-    // Memoized filtered products - only recalculate when debouncedSearchTerm or products change
+    // Memoized filtered and sorted products
     const filteredProducts = useMemo(() => {
-        if (!debouncedSearchTerm.trim()) {
-            return products;
+        let filtered = [...products];
+        
+        // Apply search filter
+        if (debouncedSearchTerm.trim()) {
+            const searchLower = debouncedSearchTerm.toLowerCase();
+            filtered = filtered.filter(product => {
+                const productName = typeof product.name === 'object' 
+                    ? JSON.stringify(product.name) 
+                    : product.name || '';
+                const description = product.description || '';
+                
+                return productName.toLowerCase().includes(searchLower) ||
+                       description.toLowerCase().includes(searchLower);
+            });
         }
         
-        const searchLower = debouncedSearchTerm.toLowerCase();
-        return products.filter(product => {
-            const productName = typeof product.name === 'object' 
-                ? JSON.stringify(product.name) 
-                : product.name || '';
-            const description = product.description || '';
-            
-            return productName.toLowerCase().includes(searchLower) ||
-                   description.toLowerCase().includes(searchLower);
+        // Apply price range filter
+        if (priceRange !== 'all') {
+            filtered = filtered.filter(product => {
+                const { currentPrice } = getPriceInfo(product);
+                switch (priceRange) {
+                    case 'under50k':
+                        return currentPrice < 50000;
+                    case '50k-100k':
+                        return currentPrice >= 50000 && currentPrice < 100000;
+                    case '100k-200k':
+                        return currentPrice >= 100000 && currentPrice < 200000;
+                    case 'over200k':
+                        return currentPrice >= 200000;
+                    default:
+                        return true;
+                }
+            });
+        }
+        
+        // Apply sorting
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    const nameA = (typeof a.name === 'object' ? JSON.stringify(a.name) : a.name || '').toLowerCase();
+                    const nameB = (typeof b.name === 'object' ? JSON.stringify(b.name) : b.name || '').toLowerCase();
+                    return nameA.localeCompare(nameB);
+                case 'price-asc':
+                    return getPriceInfo(a).currentPrice - getPriceInfo(b).currentPrice;
+                case 'price-desc':
+                    return getPriceInfo(b).currentPrice - getPriceInfo(a).currentPrice;
+                case 'newest':
+                    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                default:
+                    return 0;
+            }
         });
-    }, [debouncedSearchTerm, products]);
+        
+        return filtered;
+    }, [debouncedSearchTerm, products, sortBy, priceRange, getPriceInfo]);
 
     const fetchProducts = async (silent = false) => {
         try {
@@ -547,12 +590,12 @@ export default function ProductList() {
                         background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
                         borderRadius: 4,
                         p: 4,
-                        mb: 5,
+                        mb: 4,
                         color: 'white',
                         boxShadow: '0 8px 32px rgba(13, 59, 46, 0.2)'
                     }}
                 >
-                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 3}}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 3, mb: 3}}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                             <Box
                                 sx={{
@@ -571,18 +614,18 @@ export default function ProductList() {
                             </Box>
                             <Box>
                                 <Typography variant="h4" sx={{fontWeight: 800, mb: 0.5, fontSize: {xs: '1.75rem', md: '2.125rem'}}}>
-                                    Sản Phẩm
+                                    🌿 Sản Phẩm
                                 </Typography>
                                 <Typography variant="body2" sx={{opacity: 0.95, fontSize: '0.95rem'}}>
-                                    Khám phá bộ sưu tập sen đá độc đáo của chúng tôi
-                </Typography>
+                                    Khám phá {products.length} sản phẩm sen đá độc đáo
+                                </Typography>
                             </Box>
                         </Box>
-                <TextField
-                    variant="outlined"
-                    placeholder="Tìm kiếm sản phẩm..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
+                        <TextField
+                            variant="outlined"
+                            placeholder="Tìm kiếm sản phẩm..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                             size="medium"
                             sx={{
                                 minWidth: {xs: '100%', sm: '380px'},
@@ -609,26 +652,128 @@ export default function ProductList() {
                             }}
                             slotProps={{
                                 input: {
-                        startAdornment: (
-                            <InputAdornment position="start">
+                                    startAdornment: (
+                                        <InputAdornment position="start">
                                             <Search sx={{color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.5rem'}}/>
-                            </InputAdornment>
-                        ),
-                        endAdornment: searchTerm && (
-                            <InputAdornment position="end">
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: searchTerm && (
+                                        <InputAdornment position="end">
                                             <IconButton 
                                                 size="small" 
                                                 onClick={handleClearSearch}
                                                 sx={{color: 'rgba(255, 255, 255, 0.9)'}}
                                             >
-                                    <Clear />
-                                </IconButton>
-                            </InputAdornment>
-                        )
+                                                <Clear />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
                                 }
+                            }}
+                        />
+                    </Box>
+                </Paper>
+
+                {/* Filter & Sort Bar */}
+                <Paper 
+                    elevation={0}
+                    sx={{
+                        p: 3,
+                        mb: 4,
+                        borderRadius: 3,
+                        background: 'white',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
+                        border: '1px solid rgba(13, 59, 46, 0.08)'
                     }}
-                />
-            </Box>
+                >
+                    <Stack 
+                        direction={{ xs: 'column', md: 'row' }} 
+                        spacing={3} 
+                        alignItems={{ xs: 'stretch', md: 'center' }}
+                        justifyContent="space-between"
+                    >
+                        {/* Left: Filters */}
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flex: 1 }}>
+                            <FormControl size="small" sx={{ minWidth: 200 }}>
+                                <InputLabel>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <SortByAlpha fontSize="small" />
+                                        Sắp xếp
+                                    </Box>
+                                </InputLabel>
+                                <Select
+                                    value={sortBy}
+                                    label="Sắp xếp"
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                >
+                                    <MenuItem value="name">Tên A-Z</MenuItem>
+                                    <MenuItem value="price-asc">Giá thấp đến cao</MenuItem>
+                                    <MenuItem value="price-desc">Giá cao đến thấp</MenuItem>
+                                    <MenuItem value="newest">Mới nhất</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            <FormControl size="small" sx={{ minWidth: 200 }}>
+                                <InputLabel>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <AttachMoney fontSize="small" />
+                                        Khoảng giá
+                                    </Box>
+                                </InputLabel>
+                                <Select
+                                    value={priceRange}
+                                    label="Khoảng giá"
+                                    onChange={(e) => setPriceRange(e.target.value)}
+                                >
+                                    <MenuItem value="all">Tất cả</MenuItem>
+                                    <MenuItem value="under50k">Dưới 50.000đ</MenuItem>
+                                    <MenuItem value="50k-100k">50.000đ - 100.000đ</MenuItem>
+                                    <MenuItem value="100k-200k">100.000đ - 200.000đ</MenuItem>
+                                    <MenuItem value="over200k">Trên 200.000đ</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Stack>
+
+                        {/* Right: View Mode & Result Count */}
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Chip 
+                                icon={<FilterList />}
+                                label={`${filteredProducts.length} sản phẩm`}
+                                sx={{
+                                    fontWeight: 600,
+                                    background: 'linear-gradient(135deg, #e8f5e9 0%, #f0f8f4 100%)',
+                                    color: '#0D3B2E',
+                                    border: '1px solid rgba(13, 59, 46, 0.2)'
+                                }}
+                            />
+                            <Divider orientation="vertical" flexItem />
+                            <ToggleButtonGroup
+                                value={viewMode}
+                                exclusive
+                                onChange={(e, newMode) => newMode && setViewMode(newMode)}
+                                size="small"
+                                sx={{
+                                    '& .MuiToggleButton-root': {
+                                        borderColor: 'rgba(13, 59, 46, 0.2)',
+                                        '&.Mui-selected': {
+                                            backgroundColor: '#0D3B2E',
+                                            color: 'white',
+                                            '&:hover': {
+                                                backgroundColor: '#1a5f4a'
+                                            }
+                                        }
+                                    }
+                                }}
+                            >
+                                <ToggleButton value="grid" aria-label="grid view">
+                                    <GridView fontSize="small" />
+                                </ToggleButton>
+                                <ToggleButton value="list" aria-label="list view">
+                                    <ViewList fontSize="small" />
+                                </ToggleButton>
+                            </ToggleButtonGroup>
+                        </Stack>
+                    </Stack>
                 </Paper>
 
                 {/* Empty State */}
