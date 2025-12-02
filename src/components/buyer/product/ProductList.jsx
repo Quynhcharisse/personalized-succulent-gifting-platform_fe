@@ -857,28 +857,7 @@ export default function ProductList() {
                                             <Visibility />
                                         </IconButton>
                                         
-                                        {/* Add to Cart Button */}
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) => handleAddToCart(e, product)}
-                                            sx={{
-                                                position: 'absolute',
-                                                top: 6,
-                                                right: 6,
-                                                zIndex: 2,
-                                                background: 'white',
-                                                color: '#0D3B2E',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                width: 32,
-                                                height: 32,
-                                                '&:hover': {
-                                                    background: '#0D3B2E',
-                                                    color: 'white'
-                                                }
-                                            }}
-                                        >
-                                            <ShoppingCart sx={{ fontSize: '1rem' }} />
-                                        </IconButton>
+                                   
                                     </Box>
 
                                     <CardContent sx={{ 
