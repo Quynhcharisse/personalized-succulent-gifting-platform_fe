@@ -146,32 +146,7 @@ export default function SiteHeader() {
                 </nav>
                 <div className="header__actions">
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 16}}>
-                        <Link 
-                            className="header__icon" 
-                            title="Yêu thích" 
-                            to="#"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: 40,
-                                height: 40,
-                                borderRadius: '50%',
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            <FavoriteBorderIcon
-                                sx={{
-                                    width: 24,
-                                    height: 24,
-                                    color: '#0D3B2E',
-                                    transition: 'transform 0.2s ease',
-                                    '&:hover': {
-                                        transform: 'scale(1.1)'
-                                    }
-                                }}
-                            />
-                        </Link>
+                    
                         <Link 
                             className="header__icon" 
                             title="Giỏ hàng" 
@@ -225,8 +200,7 @@ export default function SiteHeader() {
                                     width: 40,
                                     height: 40,
                                     borderRadius: '50%',
-                                    transition: 'all 0.2s ease',
-                                    backgroundColor: 'transparent'
+                                    transition: 'all 0.2s ease'
                                 }}
                             >
                                 <PersonIcon
