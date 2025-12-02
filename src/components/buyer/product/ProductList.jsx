@@ -467,6 +467,35 @@ export default function ProductList() {
                                     <Select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 360,
+                                                    '& .MuiList-root': {
+                                                        maxHeight: 360,
+                                                        overflowY: 'scroll',
+                                                        '&::-webkit-scrollbar': {
+                                                            width: '8px'
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: '#f1f1f1',
+                                                            borderRadius: '10px'
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#888',
+                                                            borderRadius: '10px',
+                                                            '&:hover': {
+                                                                background: '#555'
+                                                            }
+                                                        }
+                                                    },
+                                                    '& .MuiMenuItem-root': {
+                                                        minHeight: 52,
+                                                        py: 1.5
+                                                    }
+                                                }
+                                            }
+                                        }}
                                     >
                                         <MenuItem value="name">Tên A-Z</MenuItem>
                                         <MenuItem value="price-asc">Giá thấp đến cao</MenuItem>
@@ -508,6 +537,35 @@ export default function ProductList() {
                                     <Select
                                         value={fengShuiFilter}
                                         onChange={(e) => setFengShuiFilter(e.target.value)}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 360,
+                                                    '& .MuiList-root': {
+                                                        maxHeight: 360,
+                                                        overflowY: 'scroll',
+                                                        '&::-webkit-scrollbar': {
+                                                            width: '8px'
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: '#f1f1f1',
+                                                            borderRadius: '10px'
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#888',
+                                                            borderRadius: '10px',
+                                                            '&:hover': {
+                                                                background: '#555'
+                                                            }
+                                                        }
+                                                    },
+                                                    '& .MuiMenuItem-root': {
+                                                        minHeight: 52,
+                                                        py: 1.5
+                                                    }
+                                                }
+                                            }
+                                        }}
                                     >
                                         <MenuItem value="all">Tất cả</MenuItem>
                                         {FENGSHUI.map(item => (
@@ -540,6 +598,35 @@ export default function ProductList() {
                                     <Select
                                         value={zodiacFilter}
                                         onChange={(e) => setZodiacFilter(e.target.value)}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 360,
+                                                    '& .MuiList-root': {
+                                                        maxHeight: 360,
+                                                        overflowY: 'scroll',
+                                                        '&::-webkit-scrollbar': {
+                                                            width: '8px'
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: '#f1f1f1',
+                                                            borderRadius: '10px'
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#888',
+                                                            borderRadius: '10px',
+                                                            '&:hover': {
+                                                                background: '#555'
+                                                            }
+                                                        }
+                                                    },
+                                                    '& .MuiMenuItem-root': {
+                                                        minHeight: 52,
+                                                        py: 1.5
+                                                    }
+                                                }
+                                            }
+                                        }}
                                     >
                                         <MenuItem value="all">Tất cả</MenuItem>
                                         {ZODIACS.map(item => (

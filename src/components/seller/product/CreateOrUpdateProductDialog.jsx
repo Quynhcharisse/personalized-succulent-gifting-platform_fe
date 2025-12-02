@@ -1084,6 +1084,35 @@ const CreateOrUpdateProductDialog = ({
                                                         })}
                                                         label="Chọn chậu"
                                                         sx={DASHBOARD_STYLES.formField}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    maxHeight: 360,
+                                                                    '& .MuiList-root': {
+                                                                        maxHeight: 360,
+                                                                        overflowY: 'scroll',
+                                                                        '&::-webkit-scrollbar': {
+                                                                            width: '8px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-track': {
+                                                                            background: '#f1f1f1',
+                                                                            borderRadius: '10px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-thumb': {
+                                                                            background: '#888',
+                                                                            borderRadius: '10px',
+                                                                            '&:hover': {
+                                                                                background: '#555'
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    '& .MuiMenuItem-root': {
+                                                                        minHeight: 52,
+                                                                        py: 1.5
+                                                                    }
+                                                                }
+                                                            }
+                                                        }}
                                                     >
                                                         {availablePots.map((pot) => (
                                                             <MenuItem key={pot.id} value={pot.name}>
@@ -1103,6 +1132,35 @@ const CreateOrUpdateProductDialog = ({
                                                         label="Kích thước chậu"
                                                         disabled={!size.pot.name}
                                                         sx={DASHBOARD_STYLES.formField}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    maxHeight: 360,
+                                                                    '& .MuiList-root': {
+                                                                        maxHeight: 360,
+                                                                        overflowY: 'scroll',
+                                                                        '&::-webkit-scrollbar': {
+                                                                            width: '8px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-track': {
+                                                                            background: '#f1f1f1',
+                                                                            borderRadius: '10px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-thumb': {
+                                                                            background: '#888',
+                                                                            borderRadius: '10px',
+                                                                            '&:hover': {
+                                                                                background: '#555'
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    '& .MuiMenuItem-root': {
+                                                                        minHeight: 52,
+                                                                        py: 1.5
+                                                                    }
+                                                                }
+                                                            }
+                                                        }}
                                                     >
                                                         {(() => {
                                                             const selectedPot = availablePots.find(p => toStringSafe(p.name) === toStringSafe(size.pot.name));
@@ -1150,6 +1208,35 @@ const CreateOrUpdateProductDialog = ({
                                                         })}
                                                         label="Chọn đất trồng"
                                                         sx={DASHBOARD_STYLES.formField}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    maxHeight: 360,
+                                                                    '& .MuiList-root': {
+                                                                        maxHeight: 360,
+                                                                        overflowY: 'scroll',
+                                                                        '&::-webkit-scrollbar': {
+                                                                            width: '8px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-track': {
+                                                                            background: '#f1f1f1',
+                                                                            borderRadius: '10px'
+                                                                        },
+                                                                        '&::-webkit-scrollbar-thumb': {
+                                                                            background: '#888',
+                                                                            borderRadius: '10px',
+                                                                            '&:hover': {
+                                                                                background: '#555'
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    '& .MuiMenuItem-root': {
+                                                                        minHeight: 52,
+                                                                        py: 1.5
+                                                                    }
+                                                                }
+                                                            }
+                                                        }}
                                                     >
                                                         {availableSoils.map((soil) => (
                                                             <MenuItem key={soil.id} value={soil.name}>
@@ -1283,6 +1370,35 @@ const CreateOrUpdateProductDialog = ({
                                                                             onChange={(e) => updateDecorationDetail(sizeIndex, detailIndex, 'name', e.target.value)}
                                                                             label="Tên chi tiết trang trí"
                                                                             sx={DASHBOARD_STYLES.formField}
+                                                                            MenuProps={{
+                                                                                PaperProps: {
+                                                                                    sx: {
+                                                                                        maxHeight: 360,
+                                                                                        '& .MuiList-root': {
+                                                                                            maxHeight: 360,
+                                                                                            overflowY: 'scroll',
+                                                                                            '&::-webkit-scrollbar': {
+                                                                                                width: '8px'
+                                                                                            },
+                                                                                            '&::-webkit-scrollbar-track': {
+                                                                                                background: '#f1f1f1',
+                                                                                                borderRadius: '10px'
+                                                                                            },
+                                                                                            '&::-webkit-scrollbar-thumb': {
+                                                                                                background: '#888',
+                                                                                                borderRadius: '10px',
+                                                                                                '&:hover': {
+                                                                                                    background: '#555'
+                                                                                                }
+                                                                                            }
+                                                                                        },
+                                                                                        '& .MuiMenuItem-root': {
+                                                                                            minHeight: 52,
+                                                                                            py: 1.5
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }}
                                                                         >
                                                                             {availableDecorations.map((decoration) => (
                                                                                 <MenuItem key={decoration.id}
