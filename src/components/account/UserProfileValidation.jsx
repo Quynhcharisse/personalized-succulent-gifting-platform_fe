@@ -82,9 +82,7 @@ export function UserProfileValidation(form, originalForm = null) {
         // If it's a URL, we assume it's valid (Cloudinary URLs don't always have extensions)
         // If it's not a URL, it must have a valid image extension
         if (!isUrl && !hasValidExtension) {
-            errors.avatarUrl = 'Ảnh đại diện không hợp lệ. Vui lòng tải lên file ảnh có định dạng: JPG, JPEG, PNG, GIF hoặc WEBP';
-        } else if (!isUrl) {
-            errors.avatarUrl = 'URL ảnh phải bắt đầu bằng http:// hoặc https://';
+            errors.avatarUrl = 'URL ảnh đại diện phải là hình ảnh (jpg, jpeg, png, gif, webp)';
         }
     }
 

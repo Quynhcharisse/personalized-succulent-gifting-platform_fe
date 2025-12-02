@@ -1016,9 +1016,28 @@ export default function UserProfile() {
                                                                                 MenuProps: {
                                                                                     PaperProps: {
                                                                                         sx: {
-                                                                                            maxHeight: 400,
+                                                                                            maxHeight: 360,
+                                                                                            '& .MuiList-root': {
+                                                                                                maxHeight: 360,
+                                                                                                overflowY: 'scroll',
+                                                                                                '&::-webkit-scrollbar': {
+                                                                                                    width: '8px'
+                                                                                                },
+                                                                                                '&::-webkit-scrollbar-track': {
+                                                                                                    background: '#f1f1f1',
+                                                                                                    borderRadius: '4px'
+                                                                                                },
+                                                                                                '&::-webkit-scrollbar-thumb': {
+                                                                                                    background: '#888',
+                                                                                                    borderRadius: '4px',
+                                                                                                    '&:hover': {
+                                                                                                        background: '#555'
+                                                                                                    }
+                                                                                                }
+                                                                                            },
                                                                                             '& .MuiMenuItem-root': {
-                                                                                                py: 1.5
+                                                                                                py: 1.5,
+                                                                                                minHeight: 52
                                                                                             }
                                                                                         }
                                                                                     }

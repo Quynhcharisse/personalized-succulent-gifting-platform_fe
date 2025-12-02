@@ -234,7 +234,17 @@ export default function CheckoutPage() {
             });
         } catch (e) {
             const msg = e?.response?.data?.message || e?.message || 'Không thể kiểm tra số lượng sản phẩm.';
-            error(msg);
+            
+                // Handle incomplete profile gracefully
+                if (String(msg).toLowerCase().includes('vui lòng cập nhật đầy đủ profile') || 
+                    String(msg).toLowerCase().includes('profile')) {
+                    enqueueSnackbar('Hồ sơ của bạn chưa đầy đủ. Vui lòng cập nhật trước khi thanh toán.', {variant:'warning'});
+                    setTimeout(() => {
+                        navigate('/buyer/profile?from=checkout&returnTo=/buyer/checkout');
+                    }, 800);
+                } else {
+                    error(msg);
+                }
         } finally {
             setPlacing(false);
         }
@@ -242,45 +252,6 @@ export default function CheckoutPage() {
 
     return (
         <>
-            {hasItems && (
-                <Dialog open={showProfilePrompt} onClose={() => {}} disableEscapeKeyDown>
-                    <DialogTitle sx={{fontWeight:700,color:COLORS.primary}}>Thiếu địa chỉ giao hàng</DialogTitle>
-                    <DialogContent>
-                        <Typography variant="body2" sx={{lineHeight:1.6}}>{profilePromptMessage}</Typography>
-                    </DialogContent>
-                    <DialogActions sx={{display:'flex',justifyContent:'space-between',px:3, pb:2}}>
-                        <Stack direction={{xs:'column', sm:'row'}} spacing={1}>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                onClick={() => {
-                                    navigate('/');
-                                }}
-                                sx={{fontWeight:600}}
-                            >Quay lại mua sắm</Button>
-                            {/* <Button
-                                variant="contained"
-                                color="success"
-                                onClick={() => {
-                                    setOpenAddressCreate(true);
-                                    setShowProfilePrompt(false);
-                                    enqueueSnackbar('Thêm địa chỉ giao hàng mới', {variant:'info'});
-                                }}
-                                sx={{fontWeight:600}}
-                            >+ Thêm địa chỉ giao hàng</Button> */}
-                        </Stack>
-                        <Button
-                            variant="contained"
-                            color="warning"
-                            onClick={() => {
-                                enqueueSnackbar('Chuyển đến trang hồ sơ', {variant:'info'});
-                                navigate('/buyer/profile?from=checkout');
-                            }}
-                            sx={{fontWeight:600}}
-                        >Cập nhật hồ sơ</Button>
-                    </DialogActions>
-                </Dialog>
-            )}
             <ShippingAddressDialog
                 open={openAddressCreate}
                 onClose={() => setOpenAddressCreate(false)}
