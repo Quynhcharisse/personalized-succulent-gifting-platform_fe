@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
     Box, Button,
-    Chip,
     Dialog,
     DialogActions,
     DialogContent,
@@ -30,8 +29,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
         title: '',
         description: '',
         productId: '',
-        status: 'DRAFT',
-        tags: ''
+        status: 'DRAFT'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     // now postImages: array of { id?, name, link }
@@ -48,8 +46,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                     title: post.title ?? '',
                     description: post.description ?? post.content ?? '',
                     productId: post.productId ?? (post.product?.id ?? ''),
-                    status: post.status ?? 'DRAFT',
-                    tags: Array.isArray(post.tags) ? post.tags.join(', ') : (post.tags || '')
+                    status: post.status ?? 'DRAFT'
                 });
                 // Normalize existing images / postImages and preserve ids
                 const imgs = Array.isArray(post.postImages)
@@ -70,8 +67,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                     title: '',
                     description: '',
                     productId: '',
-                    status: 'DRAFT',
-                    tags: ''
+                    status: 'DRAFT'
                 });
                 setPostImages([]);
             }
@@ -122,22 +118,6 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
     };
 
     const handleSubmit = async () => {
-        // split, trim, filter empty
-        const rawTags = form.tags
-            ? form.tags.split(',').map(t => t.trim()).filter(Boolean)
-            : [];
-
-        // deduplicate case-insensitively while preserving first occurrence
-        const seen = new Set();
-        const tagNames = [];
-        for (const t of rawTags) {
-            const key = t.toLowerCase();
-            if (!seen.has(key)) {
-                seen.add(key);
-                tagNames.push(t);
-            }
-        }
-
         setIsSubmitting(true);
         try {
             const payload = {
@@ -145,7 +125,6 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                 description: form.description,
                 productId: Number(form.productId),
                 status: form.status,
-                tagNames: tagNames,
                 // include id when present so backend can reconcile images
                 postImages: postImages.map(pi => ({
                     ...(pi.id ? { id: pi.id } : {}),
@@ -300,22 +279,6 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                                 )}
                             </Stack>
                         </Box>
-
-                        <TextField
-                            label="Thẻ (phân cách bằng dấu phẩy)"
-                            name="tags"
-                            value={form.tags}
-                            onChange={handleChange}
-                            fullWidth
-                            sx={DASHBOARD_STYLES.formField}
-                        />
-                        {form.tags && (
-                            <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                                {form.tags.split(',').map((tag, idx) => (
-                                    tag.trim() && <Chip key={idx} label={tag.trim()} size="small" variant="outlined" />
-                                ))}
-                            </Stack>
-                        )}
                     </Box>
                 </Box>
             </DialogContent>

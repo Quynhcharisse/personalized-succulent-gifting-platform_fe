@@ -487,13 +487,11 @@ export default function CustomRequest() {
                 );
             }
         } catch (error) {
-            // Error applying AI suggestion
             enqueueSnackbar('Có lỗi khi áp dụng gợi ý từ AI', {variant: 'error'});
         }
     };
 
     const handleSubmit = async () => {
-        // Pre-check profile completeness to improve UX before calling BE
         try {
             const rawUser = sessionStorage.getItem('user');
             const parsed = rawUser ? JSON.parse(rawUser) : null;
@@ -508,11 +506,9 @@ export default function CustomRequest() {
             if (!u.zodiac) missing.push('Cung hoàng đạo');
             if (missing.length > 0) {
                 enqueueSnackbar(`Vui lòng cập nhật: ${missing.join(', ')} trước khi tạo yêu cầu`, {variant:'warning', autoHideDuration: 4000});
-                // Save current custom request as draft
                 try {
                     sessionStorage.setItem('custom-request-draft', JSON.stringify({formData}));
                 } catch {}
-                // Redirect to profile, with return hint
                 setTimeout(() => {
                     const returnTo = encodeURIComponent('/create-custom-request');
                     navigate(`/buyer/profile?from=custom-request&returnTo=${returnTo}`);
