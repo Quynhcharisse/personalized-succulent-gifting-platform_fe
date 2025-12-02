@@ -16,11 +16,8 @@ import {
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
 import {signOut} from '../services/AccountService.jsx'
-import {NotificationDisplay} from '../services/NotificationService.jsx';
-
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
-
 import {useDispatch, useSelector} from 'react-redux';
 import {reloadFromStorage} from '../store/slices/cartSlice';
 
