@@ -69,7 +69,6 @@ export default function OrderGuide() {
             extraItems: [
                 'Điều chỉnh số lượng và cập nhật giỏ hàng',
                 'Nhập mã giảm giá (nếu có)',
-                'Ghi chú đơn hàng (ví dụ: màu chậu, giao giờ hành chính,...)',
                 'Bấm "Thanh toán" để bắt đầu đặt hàng'
             ]
         },
@@ -263,16 +262,10 @@ export default function OrderGuide() {
 
                                 <Box sx={{flexGrow: 1}}>
                                     <Typography variant="body1" paragraph>
-                                        Hỗ trợ giao hàng và thu tiền tại nhà (COD) theo chính sách áp dụng.
+                                        Hỗ trợ giao hàng theo chính sách áp dụng.
                                     </Typography>
 
                                     <Box mt={3} mb={2}>
-                                        <Chip
-                                            label="COD - Thanh toán khi nhận hàng"
-                                            color="success"
-                                            variant="outlined"
-                                            sx={{mb: 1, mr: 1}}
-                                        />
                                         <Chip
                                             label="Chuyển khoản ngân hàng"
                                             color="primary"
@@ -281,14 +274,6 @@ export default function OrderGuide() {
                                         />
                                     </Box>
                                 </Box>
-
-                                <Alert severity="success" sx={{mt: 'auto'}}>
-                                    <Typography variant="body2">
-                                        Đơn hàng từ <strong>100.000đ - 2.000.000đ</strong> được hỗ trợ giao hàng tận nơi
-                                        tại
-                                        TP.HCM
-                                    </Typography>
-                                </Alert>
                             </CardContent>
                         </Card>
                     </Grid>
