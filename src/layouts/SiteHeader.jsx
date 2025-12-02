@@ -16,11 +16,8 @@ import {
 } from '@mui/icons-material'
 import {enqueueSnackbar} from 'notistack'
 import {signOut} from '../services/AccountService.jsx'
-import {NotificationDisplay} from '../services/NotificationService.jsx';
-
 import {getAccessToken} from '../utils/CookieUtil.jsx';
 import {jwtDecode} from 'jwt-decode';
-
 import {useDispatch, useSelector} from 'react-redux';
 import {reloadFromStorage} from '../store/slices/cartSlice';
 
@@ -65,10 +62,7 @@ export default function SiteHeader() {
             return
         }
 
-        // Lấy role từ localStorage (performance)
         const localRole = (currentUser?.role || null)
-
-        // Verify với JWT ngay lần đầu, sau đó cache trong 5 phút
         const lastVerified = sessionStorage.getItem('role_verified_at')
         const now = Date.now()
         const FIVE_MINUTES = 5 * 60 * 1000
@@ -81,7 +75,6 @@ export default function SiteHeader() {
                     const jwtRole = (decoded?.role || null)
 
                     if (localRole !== jwtRole) {
-                        // Role bị fake, dùng JWT role
                         setRole(jwtRole ? jwtRole.toUpperCase() : null)
                         sessionStorage.setItem('role_verified_at', now.toString())
                     } else {
@@ -96,7 +89,6 @@ export default function SiteHeader() {
             }
         }
 
-        // Verify lần đầu hoặc sau 5 phút
         if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
             verifyRole()
         } else {
@@ -141,9 +133,10 @@ export default function SiteHeader() {
           <span className="brand__logo" aria-hidden>
             <img src="/senda.png" alt="Lá Nhỏ Bên Thềm"/>
           </span>
+                    <span className="brand__name">Lá Nhỏ Bên Thềm</span>
                 </Link>
                 <nav className="main-nav" aria-label="Điều hướng chính">
-                    <NavLink to="/" end> Sản phẩm </NavLink>
+                    <NavLink to="/" end> Trang chủ </NavLink>
                     <NavLink to="/huong-dan-mua-hang"> Hướng dẫn mua hàng </NavLink>
                     <NavLink to="/cham-soc"> Chăm sóc </NavLink>
                     <NavLink to="/posts"> Bài đăng </NavLink>
@@ -152,30 +145,74 @@ export default function SiteHeader() {
                     )}
                 </nav>
                 <div className="header__actions">
-                    <div className="searchbar">
-                        <input
-                            className="searchbar__input"
-                            placeholder="Tìm sen đá, phụ kiện..."
-                            aria-label="Tìm kiếm sen đá, phụ kiện"
-                        />
-                    </div>
-                    <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
-                  
-                        <NavLink className="header__icon" title="Giỏ hàng" to="/cart">
-                            <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
+                    <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 16}}>
+                        <Link 
+                            className="header__icon" 
+                            title="Yêu thích" 
+                            to="#"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <FavoriteBorderIcon
+                                sx={{
+                                    width: 24,
+                                    height: 24,
+                                    color: '#0D3B2E',
+                                    transition: 'transform 0.2s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.1)'
+                                    }
+                                }}
+                            />
+                        </Link>
+                        <Link 
+                            className="header__icon" 
+                            title="Giỏ hàng" 
+                            to="/buyer/checkout"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <Badge 
+                                badgeContent={cartCount} 
+                                color="error" 
+                                overlap="circular" 
+                                invisible={!cartCount}
+                                sx={{
+                                    '& .MuiBadge-badge': {
+                                        fontSize: '0.7rem',
+                                        height: 18,
+                                        minWidth: 18,
+                                        fontWeight: 600
+                                    }
+                                }}
+                            >
                                 <LocalGroceryStoreIcon
                                     sx={{
-                                        width: 22,
-                                        height: 22,
-                                        color: '#0D3B2E'
+                                        width: 24,
+                                        height: 24,
+                                        color: '#0D3B2E',
+                                        transition: 'transform 0.2s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.1)'
+                                        }
                                     }}
                                 />
                             </Badge>
-                        </NavLink>
-                        <Link className="header__icon" title="Thông báo" to="#">
-                            <NotificationDisplay/>
                         </Link>
-
                         {!currentUser ? (
                             <Link
                                 to="/login"
@@ -185,20 +222,22 @@ export default function SiteHeader() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    width: 44,
-                                    height: 44,
+                                    width: 40,
+                                    height: 40,
                                     borderRadius: '50%',
                                     transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                                    }
+                                    backgroundColor: 'transparent'
                                 }}
                             >
                                 <PersonIcon
                                     sx={{
-                                        width: 22,
-                                        height: 22,
-                                        color: '#0D3B2E'
+                                        width: 24,
+                                        height: 24,
+                                        color: '#0D3B2E',
+                                        transition: 'transform 0.2s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.1)'
+                                        }
                                     }}
                                 />
                             </Link>

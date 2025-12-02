@@ -428,18 +428,48 @@ const BuyerPosts = () => {
     return (
         <Box sx={{
             minHeight: '100vh',
-            backgroundImage: "url('/header.jpg')",
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%)',
             py: 4
         }}>
-            <Box sx={{maxWidth: 800, mx: 'auto'}}>
+            <Box sx={{
+                maxWidth: 800, 
+                mx: 'auto',
+                px: { xs: 2, sm: 3, md: 4 }
+            }}>
+                {/* Header Section */}
+                <Box sx={{ 
+                    textAlign: 'center', 
+                    mb: 4,
+                    pb: 3,
+                    borderBottom: '2px solid',
+                    borderColor: 'primary.main'
+                }}>
+                    <Typography 
+                        variant="h4" 
+                        sx={{ 
+                            fontWeight: 800,
+                            color: 'primary.main',
+                            mb: 1,
+                            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        🌿 Cộng đồng Sen Đá
+                    </Typography>
+                    <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ fontSize: '0.95rem' }}
+                    >
+                        Chia sẻ trải nghiệm và khám phá bí quyết chăm sóc sen đá cùng cộng đồng
+                    </Typography>
+                </Box>
+
                 <BuyerCreatePost onCreated={refresh} currentUser={currentUser} />
+                
                 {posts.length === 0 ? (
                     <BuyerEmptyState onRefresh={refresh}/>
                 ) : (
-                    <Stack spacing={3}>
+                    <Stack spacing={3} sx={{ mt: 3 }}>
                         {posts.map(post => (
                             <BuyerPostCard
                                 key={post.id}

@@ -1,13 +1,19 @@
 // File: src/components/buyer/post/BuyerCreatePost.jsx
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Stack, Typography, IconButton, MenuItem } from '@mui/material';
+import { Box, TextField, Button, Stack, Typography, IconButton, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import { createPost } from '@/services/PostService.jsx';
 import { viewProduct } from '@/services/ProductService.jsx';
 import uploadToCloudinary from '../../cloudinaryUpload.js';
 import { enqueueSnackbar } from 'notistack';
 
+const PRODUCTS_CACHE_KEY = 'create_post_products_cache';
+const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes
+
 const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
+    const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [productId, setProductId] = useState('');
@@ -16,24 +22,77 @@ const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [products, setProducts] = useState([]);
     const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
     useEffect(() => {
         return () => previews.forEach(url => URL.revokeObjectURL(url));
     }, [previews]);
 
+    // Load products from cache or fetch from API
     useEffect(() => {
         let mounted = true;
-        viewProduct()
-            .then(res => {
-                if (!mounted) return;
+
+        const loadProducts = async () => {
+            // Try to get from cache first
+            try {
+                const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+                if (cached) {
+                    const { data, timestamp } = JSON.parse(cached);
+                    const now = Date.now();
+                    
+                    // If cache is still valid, use it immediately
+                    if (now - timestamp < CACHE_EXPIRY_TIME && Array.isArray(data)) {
+                        if (mounted) {
+                            setProducts(data);
+                        }
+                        
+                        // Fetch fresh data in background (optional)
+                        fetchAndCacheProducts(mounted, false);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error reading products cache:', error);
+            }
+
+            // No valid cache, fetch from API
+            await fetchAndCacheProducts(mounted, true);
+        };
+
+        const fetchAndCacheProducts = async (isMounted, showLoading) => {
+            if (showLoading && isMounted) {
+                setIsLoadingProducts(true);
+            }
+
+            try {
+                const res = await viewProduct();
                 const items = res?.data?.data || [];
-                const purchased = items;
-                setProducts(purchased);
-            })
-            .catch(err => {
+                
+                if (isMounted) {
+                    setProducts(items);
+                    setIsLoadingProducts(false);
+                }
+
+                // Cache the result
+                try {
+                    sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify({
+                        data: items,
+                        timestamp: Date.now()
+                    }));
+                } catch (cacheError) {
+                    console.error('Error caching products:', cacheError);
+                }
+            } catch (err) {
                 console.error('Failed to load products', err);
-                setProducts([]);
-            });
+                if (isMounted) {
+                    setProducts([]);
+                    setIsLoadingProducts(false);
+                }
+            }
+        };
+
+        loadProducts();
+
         return () => { mounted = false; };
     }, []);
 
@@ -66,17 +125,35 @@ const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
         return uploaded;
     };
 
+    const handleOpen = () => {
+        if (!isLoggedIn) {
+            window.location.href = '/login';
+            return;
+        }
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        // Reset form when closing
+        setTitle('');
+        setContent('');
+        setProductId('');
+        setFiles([]);
+        previews.forEach(url => URL.revokeObjectURL(url));
+        setPreviews([]);
+        setAttemptedSubmit(false);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setAttemptedSubmit(true);
 
         if (!isLoggedIn) {
-            // redirect to sign-in page when user is not authenticated
             window.location.href = '/login';
             return;
         }
 
-        // require a purchased product to be attached
         if (!productId) {
             enqueueSnackbar('Vui lòng chọn sản phẩm đã mua để đăng bài', { variant: 'warning' });
             return;
@@ -99,14 +176,7 @@ const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
             await createPost(payload);
             enqueueSnackbar('Đăng bài thành công', { variant: 'success' });
 
-            setTitle('');
-            setContent('');
-            setProductId('');
-            setFiles([]);
-            previews.forEach(url => URL.revokeObjectURL(url));
-            setPreviews([]);
-            setAttemptedSubmit(false);
-
+            handleClose();
             if (typeof onCreated === 'function') onCreated();
         } catch (err) {
             console.error('Create post failed', err);
@@ -118,123 +188,186 @@ const BuyerCreatePost = ({ onCreated, currentUser = null }) => {
 
     const noPurchased = products.length === 0;
 
-    // show cancel button only when there's content (title/content) or images selected
-    const hasContent = Boolean((title && title.trim()) || (content && content.trim()) || (files && files.length > 0));
-
     return (
-        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-            <Stack spacing={1}>
-                <Typography variant="subtitle1">Tạo bài đăng mới</Typography>
-
-                {!isLoggedIn && (
-                    <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">Bạn cần đăng nhập để tạo bài đăng.</Typography>
-                        <Button href="/login" size="small" variant="outlined" sx={{ mt: 1 }}>Đăng nhập</Button>
-                    </Box>
-                )}
-
-                <TextField
-                    label="Tiêu đề (tùy chọn)"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    size="small"
-                    fullWidth
-                    disabled={!isLoggedIn}
-                />
-
-                <TextField
-                    label="Nội dung"
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
-                    multiline
-                    minRows={3}
-                    fullWidth
-                    required
-                    disabled={!isLoggedIn}
-                />
-
-                <TextField
-                    select
-                    label="Sản phẩm đã mua (bắt buộc)"
-                    value={productId}
-                    onChange={e => setProductId(e.target.value)}
-                    size="small"
-                    fullWidth
-                    required
-                    error={attemptedSubmit && !productId}
-                    helperText={
-                        noPurchased
-                            ? 'Không có sản phẩm đã mua để chọn'
-                            : ''
-                    }
-                    disabled={!isLoggedIn}
+        <>
+            {/* Floating Action Button */}
+            <Box 
+                sx={{ 
+                    mb: 3,
+                    display: 'flex',
+                    justifyContent: 'center'
+                }}
+            >
+                <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpen}
+                    sx={{
+                        borderRadius: 3,
+                        px: 4,
+                        py: 1.5,
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
+                        boxShadow: '0 4px 16px rgba(46, 125, 50, 0.3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            background: 'linear-gradient(135deg, #1B5E20 0%, #0d3b1e 100%)',
+                            boxShadow: '0 6px 20px rgba(46, 125, 50, 0.4)',
+                            transform: 'translateY(-2px)'
+                        }
+                    }}
                 >
-                    {products.map(p => (
-                        <MenuItem key={p.id ?? p.uuid ?? `${p.name}-${p.id}`} value={p.id}>
-                            {p.name || p.title || `Sản phẩm #${p.id}`}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                    ✨ Tạo bài đăng mới
+                </Button>
+            </Box>
 
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <label htmlFor="buyer-post-images">
-                        <input
-                            id="buyer-post-images"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            style={{ display: 'none' }}
-                            onChange={handleFiles}
-                            disabled={!isLoggedIn}
+            {/* Dialog Form */}
+            <Dialog 
+                open={open} 
+                onClose={handleClose}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    pb: 1,
+                    borderBottom: '2px solid',
+                    borderColor: 'primary.main'
+                }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        Tạo bài đăng mới
+                    </Typography>
+                    <IconButton onClick={handleClose} size="small">
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+
+                <DialogContent sx={{ pt: 3 }}>
+                    <Stack spacing={2.5}>
+                        <TextField
+                            label="Tiêu đề (tùy chọn)"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            fullWidth
+                            placeholder="Nhập tiêu đề bài viết..."
                         />
-                        <IconButton color="primary" component="span" disabled={!isLoggedIn}>
-                            <PhotoCamera />
-                        </IconButton>
-                    </label>
-                    <Typography variant="body2" color="text.secondary">
-                        {files.length} ảnh đã chọn
-                    </Typography>
-                </Stack>
 
-                {previews.length > 0 && (
-                    <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1 }}>
-                        {previews.map((src, i) => (
-                            <Box key={src} component="img" src={src} alt={`preview-${i}`} sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }} />
-                        ))}
-                    </Stack>
-                )}
+                        <TextField
+                            label="Nội dung"
+                            value={content}
+                            onChange={e => setContent(e.target.value)}
+                            multiline
+                            minRows={4}
+                            fullWidth
+                            required
+                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                        />
 
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        size="small"
-                        disabled={isSubmitting || noPurchased || !isLoggedIn}
-                    >
-                        {isSubmitting ? 'Đang gửi...' : 'Đăng bài'}
-                    </Button>
-
-                    {hasContent && (
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => {
-                                setTitle(''); setContent(''); setProductId(''); setFiles([]); previews.forEach(url => URL.revokeObjectURL(url)); setPreviews([]); setAttemptedSubmit(false);
-                            }}
+                        <TextField
+                            select
+                            label="Sản phẩm đã mua (bắt buộc)"
+                            value={productId}
+                            onChange={e => setProductId(e.target.value)}
+                            fullWidth
+                            required
+                            error={attemptedSubmit && !productId}
+                            helperText={
+                                isLoadingProducts 
+                                    ? 'Đang tải danh sách sản phẩm...'
+                                    : (noPurchased
+                                        ? 'Không có sản phẩm đã mua để chọn'
+                                        : (attemptedSubmit && !productId ? 'Vui lòng chọn sản phẩm' : ''))
+                            }
+                            disabled={isLoadingProducts}
                         >
-                            Hủy
-                        </Button>
-                    )}
-                </Stack>
+                            {products.map(p => (
+                                <MenuItem key={p.id ?? p.uuid ?? `${p.name}-${p.id}`} value={p.id}>
+                                    {p.name || p.title || `Sản phẩm #${p.id}`}
+                                </MenuItem>
+                            ))}
+                        </TextField>
 
-                {/* show helper when not logged in */}
-                {!isLoggedIn && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                        Bạn cần đăng nhập để có thể đăng bài.
-                    </Typography>
-                )}
-            </Stack>
-        </Box>
+                        <Box>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                                <label htmlFor="buyer-post-images">
+                                    <input
+                                        id="buyer-post-images"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        style={{ display: 'none' }}
+                                        onChange={handleFiles}
+                                    />
+                                    <Button
+                                        component="span"
+                                        variant="outlined"
+                                        startIcon={<PhotoCamera />}
+                                        sx={{ textTransform: 'none' }}
+                                    >
+                                        Chọn ảnh
+                                    </Button>
+                                </label>
+                                <Typography variant="body2" color="text.secondary">
+                                    {files.length > 0 ? `${files.length} ảnh đã chọn` : 'Chưa có ảnh nào'}
+                                </Typography>
+                            </Stack>
+
+                            {previews.length > 0 && (
+                                <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1 }}>
+                                    {previews.map((src, i) => (
+                                        <Box 
+                                            key={src} 
+                                            component="img" 
+                                            src={src} 
+                                            alt={`preview-${i}`} 
+                                            sx={{ 
+                                                width: 100, 
+                                                height: 100, 
+                                                objectFit: 'cover', 
+                                                borderRadius: 2,
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                            }} 
+                                        />
+                                    ))}
+                                </Stack>
+                            )}
+                        </Box>
+                    </Stack>
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, pb: 3, pt: 2 }}>
+                    <Button 
+                        onClick={handleClose}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Hủy
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        disabled={isSubmitting || noPurchased || isLoadingProducts}
+                        sx={{
+                            textTransform: 'none',
+                            px: 3,
+                            fontWeight: 600
+                        }}
+                    >
+                        {isSubmitting ? 'Đang đăng...' : 'Đăng bài'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 
