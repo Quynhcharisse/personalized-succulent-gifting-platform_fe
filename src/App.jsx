@@ -257,6 +257,30 @@ const router = createBrowserRouter([
                 )
             },
             {
+                path: 'checkout',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <CheckoutPage/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'payment',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <Payment/>
+                    </Suspense>
+                )
+            },
+            {
+                path: 'orders',
+                element: (
+                    <Suspense fallback={<LoadingFallback/>}>
+                        <BuyerOrders/>
+                    </Suspense>
+                )
+            },
+            {
                 path: 'cham-soc',
                 element: (
                     <Suspense fallback={<LoadingFallback/>}>
