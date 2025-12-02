@@ -665,6 +665,7 @@ export default function CheckoutPage() {
                                 </Typography>
                             )}
                         </Box>
+                        
                     </CardContent>
                 </Card>
             </Box>
