@@ -246,10 +246,7 @@ export default function CheckoutPage() {
                 <Dialog open={showProfilePrompt} onClose={() => {}} disableEscapeKeyDown>
                     <DialogTitle sx={{fontWeight:700,color:COLORS.primary}}>Thiếu địa chỉ giao hàng</DialogTitle>
                     <DialogContent>
-                        <Typography variant="body2" sx={{lineHeight:1.6, mb:2}}>{profilePromptMessage}</Typography>
-                        <Typography variant="caption" sx={{color:COLORS.primaryLight}}>
-                            (Các giá trị như N/A, Trống, Chưa cập nhật được xem là không hợp lệ)
-                        </Typography>
+                        <Typography variant="body2" sx={{lineHeight:1.6}}>{profilePromptMessage}</Typography>
                     </DialogContent>
                     <DialogActions sx={{display:'flex',justifyContent:'space-between',px:3, pb:2}}>
                         <Stack direction={{xs:'column', sm:'row'}} spacing={1}>
@@ -261,7 +258,7 @@ export default function CheckoutPage() {
                                 }}
                                 sx={{fontWeight:600}}
                             >Quay lại mua sắm</Button>
-                            <Button
+                            {/* <Button
                                 variant="contained"
                                 color="success"
                                 onClick={() => {
@@ -270,7 +267,7 @@ export default function CheckoutPage() {
                                     enqueueSnackbar('Thêm địa chỉ giao hàng mới', {variant:'info'});
                                 }}
                                 sx={{fontWeight:600}}
-                            >+ Thêm địa chỉ giao hàng</Button>
+                            >+ Thêm địa chỉ giao hàng</Button> */}
                         </Stack>
                         <Button
                             variant="contained"
