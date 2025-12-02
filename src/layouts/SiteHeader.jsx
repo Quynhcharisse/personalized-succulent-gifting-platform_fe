@@ -175,7 +175,7 @@ export default function SiteHeader() {
                         <Link 
                             className="header__icon" 
                             title="Giỏ hàng" 
-                            to="/buyer/checkout"
+                            to="/cart"
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
