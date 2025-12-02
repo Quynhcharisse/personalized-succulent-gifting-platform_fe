@@ -39,7 +39,7 @@ const CustomRequestList = lazy(() => import('./components/seller/customeRequest/
 
 // Lazy imports for account components
 const UserProfile = lazy(() => import('./components/account/UserProfile.jsx'))
-const CheckoutPage = lazy(() => import('./components/buyer/Checkout/CheckoutPage.jsx'))
+const CheckoutPage = lazy(() => import('./components/buyer/checkout/CheckoutPage.jsx'))
 const Payment = lazy(() => import('./components/buyer/payment/Payment.jsx'))
 
 // Enhanced Loading component for Suspense fallback with responsive design
