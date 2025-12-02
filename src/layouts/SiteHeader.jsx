@@ -169,7 +169,7 @@ export default function SiteHeader() {
                                 }}
                             />
                         </Link>
-                        <Link className="header__icon" title="Giỏ hàng" to="/buyer/checkout">
+                        <Link className="header__icon" title="Giỏ hàng" to="/checkout">
                             <Badge badgeContent={cartCount} color="primary" overlap="circular" invisible={!cartCount}>
                                 <LocalGroceryStoreIcon
                                     sx={{
