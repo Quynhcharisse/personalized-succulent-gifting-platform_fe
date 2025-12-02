@@ -1011,6 +1011,20 @@ export default function UserProfile() {
                                                                         fullWidth
                                                                         value={form.zodiac}
                                                                         onChange={handleChange('zodiac')}
+                                                                        slotProps={{
+                                                                            select: {
+                                                                                MenuProps: {
+                                                                                    PaperProps: {
+                                                                                        sx: {
+                                                                                            maxHeight: 400,
+                                                                                            '& .MuiMenuItem-root': {
+                                                                                                py: 1.5
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }}
                                                                         sx={{
                                                                             '& .MuiOutlinedInput-root': {
                                                                                 borderRadius: 2,

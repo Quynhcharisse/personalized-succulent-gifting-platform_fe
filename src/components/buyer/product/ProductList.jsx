@@ -1,10 +1,11 @@
 import React, {useEffect, useState, useMemo, useCallback, useRef, memo} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextField, InputAdornment, IconButton, Grid, Chip, Paper, Skeleton} from '@mui/material';
-import {Search, Clear, LocalFlorist, ShoppingCart, Visibility} from '@mui/icons-material';
+import {Card, CardContent, CardMedia, Typography, Button, Box, Container, TextField, InputAdornment, IconButton, Grid, Chip, Paper, Skeleton, ToggleButtonGroup, ToggleButton, Divider, Stack, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+import {Search, Clear, LocalFlorist, ShoppingCart, Visibility, FilterList, SortByAlpha, AttachMoney, GridView, ViewList, Stars, Spa} from '@mui/icons-material';
 import {useSnackbar} from 'notistack';
 import {viewProduct} from '@/services/ProductService.jsx';
 import {createProductSlug} from '@utils/slugUtil.js';
+import {FENGSHUI, ZODIACS} from '../../constants.js';
 
 // Cache key for sessionStorage
 const PRODUCTS_CACHE_KEY = 'products_cache';
@@ -15,6 +16,11 @@ export default function ProductList() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('name'); // name, price-asc, price-desc, newest
+    const [priceRange, setPriceRange] = useState('all'); // all, under50k, 50k-100k, 100k-200k, over200k
+    const [fengShuiFilter, setFengShuiFilter] = useState('all'); // all, KIM, MOC, THUY, HOA, THO
+    const [zodiacFilter, setZodiacFilter] = useState('all'); // all, BACH_DUONG, etc.
+    const [viewMode, setViewMode] = useState('grid'); // grid or list
     const navigate = useNavigate();
     const {enqueueSnackbar} = useSnackbar();
     const debounceTimerRef = useRef(null);
@@ -75,24 +81,6 @@ export default function ProductList() {
             fetchProducts(true);
         }
     }, []);
-
-    // Memoized filtered products - only recalculate when debouncedSearchTerm or products change
-    const filteredProducts = useMemo(() => {
-        if (!debouncedSearchTerm.trim()) {
-            return products;
-        }
-        
-        const searchLower = debouncedSearchTerm.toLowerCase();
-        return products.filter(product => {
-            const productName = typeof product.name === 'object' 
-                ? JSON.stringify(product.name) 
-                : product.name || '';
-            const description = product.description || '';
-            
-            return productName.toLowerCase().includes(searchLower) ||
-                   description.toLowerCase().includes(searchLower);
-        });
-    }, [debouncedSearchTerm, products]);
 
     const fetchProducts = async (silent = false) => {
         try {
@@ -181,311 +169,110 @@ export default function ProductList() {
         return { currentPrice, originalPrice, discount };
     }, [calculateProductPrice]);
 
-    // Memoized Product Card Component to prevent unnecessary re-renders
-    const ProductCard = memo(({ product, onProductClick, onAddToCart, onViewDetail, getPriceInfo }) => {
-        const { currentPrice, originalPrice, discount } = getPriceInfo(product);
-        const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
-        const productImage = product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg';
+    // Memoized filtered and sorted products
+    const filteredProducts = useMemo(() => {
+        let filtered = [...products];
         
-        return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} sx={{maxWidth: {xs: '100%', sm: '320px', md: '300px', lg: '280px', xl: '270px'}}}>
-                <Card
-                    elevation={0}
-                    sx={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        cursor: 'pointer',
-                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                        position: 'relative',
-                        maxWidth: '100%',
-                        margin: '0 auto',
-                        borderRadius: 4,
-                        overflow: 'hidden',
-                        border: '2px solid rgba(255, 255, 255, 0.8)',
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(20px)',
-                        boxShadow: '0 8px 32px rgba(13, 59, 46, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
-                        '&:hover': {
-                            transform: 'translateY(-16px) scale(1.03)',
-                            boxShadow: '0 24px 48px rgba(13, 59, 46, 0.25), 0 8px 16px rgba(0, 0, 0, 0.12)',
-                            borderColor: 'rgba(13, 59, 46, 0.3)',
-                            background: 'rgba(255, 255, 255, 1)',
-                            '& .product-image': {
-                                transform: 'scale(1.15) rotate(2deg)'
-                            },
-                            '& .product-overlay': {
-                                opacity: 1
-                            },
-                            '& .action-icons': {
-                                opacity: 1,
-                                transform: 'translateY(0)'
-                            },
-                            '& .view-detail-btn': {
-                                opacity: 1,
-                                transform: 'translateY(0)'
-                            }
-                        }
-                    }}
-                >
-                    {/* Discount Badge - Enhanced */}
-                    {discount && discount > 0 && (
-                        <Chip
-                            label={`🔥 -${discount}%`}
-                            sx={{
-                                position: 'absolute',
-                                top: 16,
-                                left: 16,
-                                zIndex: 3,
-                                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)',
-                                color: 'white',
-                                fontWeight: 900,
-                                fontSize: '0.95rem',
-                                height: '42px',
-                                px: 2.5,
-                                boxShadow: '0 6px 20px rgba(255, 71, 87, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2)',
-                                border: '2px solid rgba(255, 255, 255, 0.3)',
-                                backdropFilter: 'blur(10px)',
-                                animation: 'pulse 2s ease-in-out infinite',
-                                '@keyframes pulse': {
-                                    '0%, 100%': {
-                                        transform: 'scale(1)'
-                                    },
-                                    '50%': {
-                                        transform: 'scale(1.05)'
-                                    }
-                                },
-                                '& .MuiChip-label': {
-                                    px: 1.5,
-                                    letterSpacing: '0.5px'
-                                }
-                            }}
-                        />
-                    )}
-
-                    {/* Action Icons - Enhanced Glass Morphism */}
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 16,
-                            right: 16,
-                            zIndex: 3,
-                            display: 'flex',
-                            gap: 1.5,
-                            opacity: 0,
-                            transform: 'translateY(-10px)',
-                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '& .MuiIconButton-root': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                backdropFilter: 'blur(20px)',
-                                boxShadow: '0 4px 16px rgba(13, 59, 46, 0.2)',
-                                border: '2px solid rgba(255, 255, 255, 0.6)',
-                                '&:hover': {
-                                    backgroundColor: '#0D3B2E',
-                                    color: 'white',
-                                    transform: 'scale(1.15) rotate(5deg)',
-                                    boxShadow: '0 6px 20px rgba(13, 59, 46, 0.4)',
-                                    borderColor: '#0D3B2E'
-                                },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }
-                        }}
-                        className="action-icons"
-                    >
-                        {/* View Detail Icon */}
-                        <IconButton
-                            size="small"
-                            onClick={(e) => onViewDetail(e, product)}
-                            sx={{
-                                width: 44,
-                                height: 44,
-                                color: '#0D3B2E'
-                            }}
-                            title="Xem chi tiết"
-                        >
-                            <Visibility sx={{fontSize: '1.3rem'}}/>
-                        </IconButton>
-                        
-                        {/* Shopping Cart Icon */}
-                        <IconButton
-                            size="small"
-                            onClick={(e) => onAddToCart(e, product)}
-                            sx={{
-                                width: 44,
-                                height: 44,
-                                color: '#0D3B2E'
-                            }}
-                            title="Thêm vào giỏ"
-                        >
-                            <ShoppingCart sx={{fontSize: '1.3rem'}}/>
-                        </IconButton>
-                    </Box>
+        // Apply search filter
+        if (debouncedSearchTerm.trim()) {
+            const searchLower = debouncedSearchTerm.toLowerCase();
+            filtered = filtered.filter(product => {
+                const productName = typeof product.name === 'object' 
+                    ? JSON.stringify(product.name) 
+                    : product.name || '';
+                const description = product.description || '';
+                
+                return productName.toLowerCase().includes(searchLower) ||
+                       description.toLowerCase().includes(searchLower);
+            });
+        }
+        
+        // Apply price range filter
+        if (priceRange !== 'all') {
+            filtered = filtered.filter(product => {
+                const { currentPrice } = getPriceInfo(product);
+                switch (priceRange) {
+                    case 'under50k':
+                        return currentPrice < 50000;
+                    case '50k-100k':
+                        return currentPrice >= 50000 && currentPrice < 100000;
+                    case '100k-200k':
+                        return currentPrice >= 100000 && currentPrice < 200000;
+                    case 'over200k':
+                        return currentPrice >= 200000;
+                    default:
+                        return true;
+                }
+            });
+        }
+        
+        // Apply Feng Shui filter - check if ANY succulent matches
+        if (fengShuiFilter !== 'all') {
+            filtered = filtered.filter(product => {
+                // Check if product has fengShui at product level
+                if (product.fengShui === fengShuiFilter || product.tags?.includes(fengShuiFilter)) {
+                    return true;
+                }
+                
+                // Check all sizes for any succulent with matching fengShui
+                return product.sizes?.some(size => {
+                    if (!size.succulents || size.succulents.length === 0) return false;
                     
-                    {/* Image Container with Overlay */}
-                    <Box 
-                        onClick={() => onProductClick(product.id)}
-                        sx={{ 
-                            flexGrow: 1,
-                            position: 'relative',
-                            overflow: 'hidden',
-                            backgroundColor: '#f8f9fa',
-                            height: '280px'
-                        }}
-                    >
-                        <Box
-                            className="product-overlay"
-                            sx={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                background: 'linear-gradient(135deg, rgba(13,59,46,0.1) 0%, rgba(29,89,74,0.3) 50%, rgba(13,59,46,0.4) 100%)',
-                                zIndex: 1,
-                                opacity: 0,
-                                transition: 'opacity 0.5s ease',
-                                backdropFilter: 'blur(2px)'
-                            }}
-                        />
-                        <CardMedia
-                            component="img"
-                            className="product-image"
-                            image={productImage}
-                            alt={productName}
-                            loading="lazy"
-                            sx={{
-                                objectFit: 'cover',
-                                width: '100%',
-                                height: '100%',
-                                transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                        />
-                    </Box>
+                    return size.succulents.some(succulent => {
+                        // API returns 'fengsui' (array) not 'fengShui' (string)
+                        const fengsui = succulent.fengsui || succulent.succulent?.fengsui;
+                        // Check if the array includes the filter value
+                        return Array.isArray(fengsui) && fengsui.includes(fengShuiFilter);
+                    });
+                });
+            });
+        }
+        
+        // Apply Zodiac filter - check if ANY succulent matches
+        if (zodiacFilter !== 'all') {
+            filtered = filtered.filter(product => {
+                // Check if product has zodiac at product level
+                if (product.zodiac === zodiacFilter || product.tags?.includes(zodiacFilter)) {
+                    return true;
+                }
+                
+                // Check all sizes for any succulent with matching zodiac
+                return product.sizes?.some(size => {
+                    if (!size.succulents || size.succulents.length === 0) return false;
+                    
+                    return size.succulents.some(succulent => {
+                        // API returns 'zodiacs' (array) not 'zodiac' (string)
+                        const zodiacs = succulent.zodiacs || succulent.succulent?.zodiacs;
+                        // Check if the array includes the filter value
+                        return Array.isArray(zodiacs) && zodiacs.includes(zodiacFilter);
+                    });
+                });
+            });
+        }
+        
+        // Apply sorting
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    const nameA = (typeof a.name === 'object' ? JSON.stringify(a.name) : a.name || '').toLowerCase();
+                    const nameB = (typeof b.name === 'object' ? JSON.stringify(b.name) : b.name || '').toLowerCase();
+                    return nameA.localeCompare(nameB);
+                case 'price-asc':
+                    return getPriceInfo(a).currentPrice - getPriceInfo(b).currentPrice;
+                case 'price-desc':
+                    return getPriceInfo(b).currentPrice - getPriceInfo(a).currentPrice;
+                case 'newest':
+                    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                default:
+                    return 0;
+            }
+        });
+        
+        return filtered;
+    }, [debouncedSearchTerm, products, sortBy, priceRange, fengShuiFilter, zodiacFilter, getPriceInfo]);
 
-                    <CardContent sx={{ 
-                        flexGrow: 1, 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        p: 3,
-                        '&:last-child': {
-                            pb: 3
-                        }
-                    }}>
-                        {/* Product Name */}
-                        <Typography 
-                            variant="h6" 
-                            gutterBottom 
-                            sx={{
-                                minHeight: '3.5rem',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                fontWeight: 700,
-                                color: '#0D3B2E',
-                                mb: 2.5,
-                                fontSize: '1.1rem',
-                                lineHeight: 1.5
-                            }}
-                        >
-                            {productName}
-                        </Typography>
-                        
-                        <Box sx={{ mt: 'auto' }}>
-                            {/* Price Section */}
-                            <Box sx={{ 
-                                mb: 2.5,
-                                p: 2,
-                                background: 'linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%)',
-                                borderRadius: 2.5,
-                                border: '1px solid rgba(13, 59, 46, 0.1)'
-                            }}>
-                                {originalPrice ? (
-                                    <Box>
-                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
-                                            <Typography 
-                                                variant="body2" 
-                                                sx={{ 
-                                                    textDecoration: 'line-through',
-                                                    color: '#757575',
-                                                    fontSize: '0.875rem'
-                                                }}
-                                            >
-                                                {new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫
-                                            </Typography>
-                                            <Chip 
-                                                label="Giảm giá" 
-                                                size="small"
-                                                sx={{
-                                                    height: '22px',
-                                                    fontSize: '0.7rem',
-                                                    background: '#ff6b6b',
-                                                    color: 'white',
-                                                    fontWeight: 700
-                                                }}
-                                            />
-                                        </Box>
-                                        <Typography 
-                                            variant="h5" 
-                                            sx={{ 
-                                                fontWeight: 800, 
-                                                color: '#0D3B2E',
-                                                fontSize: '1.6rem'
-                                            }}
-                                        >
-                                            {new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    <Typography 
-                                        variant="h5" 
-                                        sx={{ 
-                                            fontWeight: 800, 
-                                            color: '#0D3B2E',
-                                            fontSize: '1.6rem'
-                                        }}
-                                    >
-                                        {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
-                                    </Typography>
-                                )}
-                            </Box>
-                            
-                            {/* View Detail Button - Enhanced */}
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                startIcon={<Visibility />}
-                                onClick={(e) => onViewDetail(e, product)}
-                                className="view-detail-btn"
-                                sx={{
-                                    background: 'linear-gradient(135deg, #0D3B2E 0%, #1a5f4a 100%)',
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    fontSize: '0.95rem',
-                                    py: 1.5,
-                                    borderRadius: 2.5,
-                                    textTransform: 'none',
-                                    boxShadow: '0 4px 16px rgba(13, 59, 46, 0.3)',
-                                    opacity: 0.95,
-                                    transform: 'translateY(5px)',
-                                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #1a5f4a 0%, #2d8659 100%)',
-                                        boxShadow: '0 8px 24px rgba(13, 59, 46, 0.4)',
-                                        transform: 'translateY(0)',
-                                        opacity: 1
-                                    }
-                                }}
-                            >
-                                Xem Chi Tiết
-                            </Button>
-                        </Box>
-                    </CardContent>
-                </Card>
-            </Grid>
-        );
-    });
-    ProductCard.displayName = 'ProductCard';
+    // Memoized Product Card Component to prevent unnecessary re-renders
+    // Removed ProductCard component - now integrated directly in grid
 
     const handleProductClick = useCallback((product) => {
         const productName = typeof product.name === 'object' ? JSON.stringify(product.name) : product.name;
@@ -522,15 +309,31 @@ export default function ProductList() {
         setSearchTerm('');
     };
 
-    // Skeleton Loading Component
+    // Skeleton Loading Component - Enhanced
     const ProductSkeleton = memo(() => (
-        <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} sx={{maxWidth: {xs: '100%', sm: '320px', md: '300px', lg: '280px', xl: '270px'}}}>
-            <Card elevation={0} sx={{height: '100%', borderRadius: 4, overflow: 'hidden'}}>
-                <Skeleton variant="rectangular" height={280} animation="wave" />
-                <CardContent sx={{p: 3}}>
-                    <Skeleton variant="text" height={56} animation="wave" sx={{mb: 2}} />
-                    <Skeleton variant="rectangular" height={60} animation="wave" sx={{mb: 2, borderRadius: 2}} />
-                    <Skeleton variant="rectangular" height={48} animation="wave" sx={{borderRadius: 2}} />
+        <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Card 
+                elevation={0} 
+                sx={{
+                    height: '100%',
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    border: '1px solid rgba(13, 59, 46, 0.08)',
+                    background: 'white'
+                }}
+            >
+                <Skeleton 
+                    variant="rectangular" 
+                    sx={{
+                        paddingTop: '100%',
+                        position: 'relative'
+                    }}
+                    animation="wave" 
+                />
+                <CardContent sx={{p: 2.5}}>
+                    <Skeleton variant="text" height={48} animation="wave" sx={{mb: 2}} />
+                    <Skeleton variant="text" height={32} animation="wave" sx={{mb: 1}} />
+                    <Skeleton variant="rectangular" height={36} animation="wave" sx={{borderRadius: 2}} />
                 </CardContent>
             </Card>
         </Grid>
@@ -547,12 +350,12 @@ export default function ProductList() {
                         background: 'linear-gradient(135deg, #0D3B2E 0%, #1e5a4a 100%)',
                         borderRadius: 4,
                         p: 4,
-                        mb: 5,
+                        mb: 4,
                         color: 'white',
                         boxShadow: '0 8px 32px rgba(13, 59, 46, 0.2)'
                     }}
                 >
-                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 3}}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 3, mb: 3}}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                             <Box
                                 sx={{
@@ -571,18 +374,18 @@ export default function ProductList() {
                             </Box>
                             <Box>
                                 <Typography variant="h4" sx={{fontWeight: 800, mb: 0.5, fontSize: {xs: '1.75rem', md: '2.125rem'}}}>
-                                    Sản Phẩm
+                                    🌿 Sản Phẩm
                                 </Typography>
                                 <Typography variant="body2" sx={{opacity: 0.95, fontSize: '0.95rem'}}>
-                                    Khám phá bộ sưu tập sen đá độc đáo của chúng tôi
-                </Typography>
+                                    Khám phá {products.length} sản phẩm sen đá độc đáo
+                                </Typography>
                             </Box>
                         </Box>
-                <TextField
-                    variant="outlined"
-                    placeholder="Tìm kiếm sản phẩm..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
+                        <TextField
+                            variant="outlined"
+                            placeholder="Tìm kiếm sản phẩm..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                             size="medium"
                             sx={{
                                 minWidth: {xs: '100%', sm: '380px'},
@@ -609,71 +412,554 @@ export default function ProductList() {
                             }}
                             slotProps={{
                                 input: {
-                        startAdornment: (
-                            <InputAdornment position="start">
+                                    startAdornment: (
+                                        <InputAdornment position="start">
                                             <Search sx={{color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.5rem'}}/>
-                            </InputAdornment>
-                        ),
-                        endAdornment: searchTerm && (
-                            <InputAdornment position="end">
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: searchTerm && (
+                                        <InputAdornment position="end">
                                             <IconButton 
                                                 size="small" 
                                                 onClick={handleClearSearch}
                                                 sx={{color: 'rgba(255, 255, 255, 0.9)'}}
                                             >
-                                    <Clear />
-                                </IconButton>
-                            </InputAdornment>
-                        )
+                                                <Clear />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
                                 }
-                    }}
-                />
-            </Box>
+                            }}
+                        />
+                    </Box>
                 </Paper>
 
-                {/* Empty State */}
-            {filteredProducts.length === 0 && !loading && (
+                {/* Main Content Layout with Sidebar */}
+                <Box sx={{ display: 'flex', gap: 3, mb: 4 }}>
+                    {/* Left Sidebar - Filters */}
                     <Paper 
                         elevation={0}
                         sx={{
-                            p: 8,
-                            textAlign: 'center',
+                            width: 280,
+                            flexShrink: 0,
+                            p: 2.5,
+                            borderRadius: 2,
                             background: 'white',
-                            borderRadius: 4,
-                            mb: 4,
-                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                            border: '1px solid #e0e0e0',
+                            height: 'fit-content',
+                            position: 'sticky',
+                            top: 20,
+                            display: { xs: 'none', md: 'block' }
                         }}
                     >
-                        <LocalFlorist sx={{fontSize: '5rem', color: '#0D3B2E', opacity: 0.2, mb: 2}}/>
-                        <Typography variant="h5" sx={{color: '#0D3B2E', fontWeight: 700, mb: 1}}>
-                            {searchTerm ? `Không tìm thấy sản phẩm` : 'Chưa có sản phẩm nào'}
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#0D3B2E', mb: 2.5, fontSize: '1.1rem' }}>
+                            Bộ lọc
                         </Typography>
-                        <Typography variant="body1" sx={{color: 'text.secondary'}}>
-                            {searchTerm ? `Không có sản phẩm nào phù hợp với "${searchTerm}"` : 'Vui lòng quay lại sau'}
-                        </Typography>
-                    </Paper>
-                )}
+                        
+                        <Stack spacing={2.5}>
+                            {/* Sort */}
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#0D3B2E', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <SortByAlpha fontSize="small" /> Sắp xếp
+                                </Typography>
+                                <FormControl fullWidth size="small">
+                                    <Select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                    >
+                                        <MenuItem value="name">Tên A-Z</MenuItem>
+                                        <MenuItem value="price-asc">Giá thấp đến cao</MenuItem>
+                                        <MenuItem value="price-desc">Giá cao đến thấp</MenuItem>
+                                        <MenuItem value="newest">Mới nhất</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
 
-                {/* Products Grid */}
-                <Grid container spacing={4} sx={{justifyContent: {xs: 'flex-start', sm: 'center'}}}>
-                    {loading ? (
-                        // Show skeleton loaders while loading
-                        Array.from({ length: 8 }).map((_, index) => (
-                            <ProductSkeleton key={`skeleton-${index}`} />
-                        ))
-                    ) : (
-                        filteredProducts.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                onProductClick={handleProductClick}
-                                onAddToCart={handleAddToCart}
-                                onViewDetail={handleViewDetail}
-                                getPriceInfo={getPriceInfo}
+                            <Divider />
+
+                            {/* Price Range */}
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#0D3B2E', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <AttachMoney fontSize="small" /> Khoảng giá
+                                </Typography>
+                                <FormControl fullWidth size="small">
+                                    <Select
+                                        value={priceRange}
+                                        onChange={(e) => setPriceRange(e.target.value)}
+                                    >
+                                        <MenuItem value="all">Tất cả</MenuItem>
+                                        <MenuItem value="under50k">Dưới 50.000đ</MenuItem>
+                                        <MenuItem value="50k-100k">50.000đ - 100.000đ</MenuItem>
+                                        <MenuItem value="100k-200k">100.000đ - 200.000đ</MenuItem>
+                                        <MenuItem value="over200k">Trên 200.000đ</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
+
+                            <Divider />
+
+                            {/* Feng Shui */}
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#0D3B2E', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <Spa fontSize="small" /> Mệnh phong thủy
+                                </Typography>
+                                <FormControl fullWidth size="small">
+                                    <Select
+                                        value={fengShuiFilter}
+                                        onChange={(e) => setFengShuiFilter(e.target.value)}
+                                    >
+                                        <MenuItem value="all">Tất cả</MenuItem>
+                                        {FENGSHUI.map(item => (
+                                            <MenuItem key={item.value} value={item.value}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Box 
+                                                        sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            backgroundColor: item.color 
+                                                        }} 
+                                                    />
+                                                    {item.label}
+                                                </Box>
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+
+                            <Divider />
+
+                            {/* Zodiac */}
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#0D3B2E', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <Stars fontSize="small" /> Cung hoàng đạo
+                                </Typography>
+                                <FormControl fullWidth size="small">
+                                    <Select
+                                        value={zodiacFilter}
+                                        onChange={(e) => setZodiacFilter(e.target.value)}
+                                    >
+                                        <MenuItem value="all">Tất cả</MenuItem>
+                                        {ZODIACS.map(item => (
+                                            <MenuItem key={item.value} value={item.value}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Typography>{item.icon}</Typography>
+                                                    {item.label}
+                                                </Box>
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        </Stack>
+
+                        {/* Clear All Filters Button */}
+                        {(priceRange !== 'all' || fengShuiFilter !== 'all' || zodiacFilter !== 'all') && (
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                    setPriceRange('all');
+                                    setFengShuiFilter('all');
+                                    setZodiacFilter('all');
+                                }}
+                                sx={{
+                                    mt: 2,
+                                    borderColor: '#d32f2f',
+                                    color: '#d32f2f',
+                                    '&:hover': {
+                                        borderColor: '#d32f2f',
+                                        backgroundColor: '#ffebee'
+                                    }
+                                }}
+                            >
+                                Xóa tất cả bộ lọc
+                            </Button>
+                        )}
+                    </Paper>
+
+                    {/* Right Content - Products */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+
+                        {/* Top Bar */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            mb: 2,
+                            pb: 2,
+                            borderBottom: '1px solid #e0e0e0'
+                        }}>
+                            <Chip 
+                                icon={<FilterList />}
+                                label={`${filteredProducts.length} sản phẩm`}
+                                sx={{
+                                    fontWeight: 600,
+                                    background: '#0D3B2E',
+                                    color: 'white'
+                                }}
                             />
-                        ))
-                    )}
-                </Grid>
+                            <ToggleButtonGroup
+                                value={viewMode}
+                                exclusive
+                                onChange={(e, newMode) => newMode && setViewMode(newMode)}
+                                size="small"
+                                sx={{
+                                    '& .MuiToggleButton-root': {
+                                        borderColor: '#e0e0e0',
+                                        '&.Mui-selected': {
+                                            backgroundColor: '#0D3B2E',
+                                            color: 'white',
+                                            '&:hover': {
+                                                backgroundColor: '#1a5f4a'
+                                            }
+                                        }
+                                    }
+                                }}
+                            >
+                                <ToggleButton value="grid" aria-label="grid view">
+                                    <GridView fontSize="small" />
+                                </ToggleButton>
+                                <ToggleButton value="list" aria-label="list view">
+                                    <ViewList fontSize="small" />
+                                </ToggleButton>
+                            </ToggleButtonGroup>
+                        </Box>
+
+                        {/* Active Filters Display */}
+                        {(debouncedSearchTerm || priceRange !== 'all' || fengShuiFilter !== 'all' || zodiacFilter !== 'all') && (
+                            <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
+                                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#666', mr: 0.5 }}>
+                                        Đang lọc:
+                                    </Typography>
+                                    
+                                    {debouncedSearchTerm && (
+                                        <Chip
+                                            size="small"
+                                            label={`"${debouncedSearchTerm}"`}
+                                            onDelete={() => setSearchTerm('')}
+                                            sx={{
+                                                backgroundColor: '#e3f2fd',
+                                                color: '#1976d2',
+                                                height: 24
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {priceRange !== 'all' && (
+                                        <Chip
+                                            size="small"
+                                            label={
+                                                priceRange === 'under50k' ? 'Dưới 50k' :
+                                                priceRange === '50k-100k' ? '50k-100k' :
+                                                priceRange === '100k-200k' ? '100k-200k' :
+                                                'Trên 200k'
+                                            }
+                                            onDelete={() => setPriceRange('all')}
+                                            sx={{
+                                                backgroundColor: '#fff3e0',
+                                                color: '#f57c00',
+                                                height: 24
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {fengShuiFilter !== 'all' && (
+                                        <Chip
+                                            size="small"
+                                            label={FENGSHUI.find(f => f.value === fengShuiFilter)?.label || fengShuiFilter}
+                                            onDelete={() => setFengShuiFilter('all')}
+                                            sx={{
+                                                backgroundColor: FENGSHUI.find(f => f.value === fengShuiFilter)?.color + '20' || '#e8f5e9',
+                                                color: FENGSHUI.find(f => f.value === fengShuiFilter)?.color || '#2E7D32',
+                                                height: 24
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {zodiacFilter !== 'all' && (
+                                        <Chip
+                                            size="small"
+                                            label={`${ZODIACS.find(z => z.value === zodiacFilter)?.icon || ''} ${ZODIACS.find(z => z.value === zodiacFilter)?.label || zodiacFilter}`}
+                                            onDelete={() => setZodiacFilter('all')}
+                                            sx={{
+                                                backgroundColor: '#f3e5f5',
+                                                color: '#7b1fa2',
+                                                height: 24
+                                            }}
+                                        />
+                                    )}
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {/* Empty State */}
+                        {filteredProducts.length === 0 && !loading && (
+                            <Paper 
+                                elevation={0}
+                                sx={{
+                                    p: 8,
+                                    textAlign: 'center',
+                                    background: 'white',
+                                    borderRadius: 2,
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                                }}
+                            >
+                                <LocalFlorist sx={{fontSize: '4rem', color: '#0D3B2E', opacity: 0.2, mb: 2}}/>
+                                <Typography variant="h6" sx={{color: '#0D3B2E', fontWeight: 700, mb: 1}}>
+                                    {searchTerm ? `Không tìm thấy sản phẩm` : 'Chưa có sản phẩm nào'}
+                                </Typography>
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    {searchTerm ? `Không có sản phẩm nào phù hợp với "${searchTerm}"` : 'Vui lòng quay lại sau'}
+                                </Typography>
+                            </Paper>
+                        )}
+
+                        {/* Products Flexbox Layout */}
+                        <Box 
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: { xs: 1.5, sm: 2 },
+                                mb: 4
+                            }}
+                        >
+                            {loading ? (
+                                // Show skeleton loaders while loading
+                                Array.from({ length: 8 }).map((_, index) => (
+                                    <Box
+                                        key={`skeleton-${index}`}
+                                        sx={{
+                                            width: { xs: 'calc(50% - 6px)', sm: 'calc(33.333% - 11px)', md: 'calc(25% - 12px)', lg: 'calc(20% - 13px)' },
+                                            minWidth: 180
+                                        }}
+                                    >
+                                        <ProductSkeleton />
+                                    </Box>
+                                ))
+                            ) : (
+                                filteredProducts.map((product, index) => (
+                                    <Box
+                                        key={product.id}
+                                        sx={{
+                                            width: { xs: 'calc(50% - 6px)', sm: 'calc(33.333% - 11px)', md: 'calc(25% - 12px)', lg: 'calc(20% - 13px)' },
+                                            minWidth: 180,
+                                            display: 'flex'
+                                        }}
+                                    >
+                                <Card
+                                    elevation={0}
+                                    sx={{
+                                        width: '100%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        position: 'relative',
+                                        borderRadius: { xs: 1.5, sm: 2 },
+                                        overflow: 'hidden',
+                                        border: '1px solid #e0e0e0',
+                                        background: 'white',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                            borderColor: '#0D3B2E',
+                                            '& .product-image': {
+                                                transform: 'scale(1.05)'
+                                            },
+                                            '& .quick-view-btn': {
+                                                opacity: 1
+                                            }
+                                        }
+                                    }}
+                                    onClick={() => handleProductClick(product)}
+                                >
+                                    {/* Discount Badge */}
+                                    {(() => {
+                                        const { discount } = getPriceInfo(product);
+                                        return discount && discount > 0 ? (
+                                            <Chip
+                                                label={`-${discount}%`}
+                                                size="small"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 6,
+                                                    left: 6,
+                                                    zIndex: 3,
+                                                    background: '#ff4757',
+                                                    color: 'white',
+                                                    fontWeight: 700,
+                                                    fontSize: '0.7rem',
+                                                    height: '22px',
+                                                    '& .MuiChip-label': {
+                                                        px: 0.75
+                                                    }
+                                                }}
+                                            />
+                                        ) : null;
+                                    })()}
+
+                                    {/* Image Container */}
+                                    <Box 
+                                        sx={{ 
+                                            position: 'relative',
+                                            paddingTop: '100%',
+                                            overflow: 'hidden',
+                                            backgroundColor: '#f5f5f5',
+                                            borderBottom: '1px solid #e0e0e0'
+                                        }}
+                                    >
+                                        <CardMedia
+                                            component="img"
+                                            className="product-image"
+                                            image={product.images?.[0]?.url || product.thumbnail || '/placeholder.jpg'}
+                                            alt={typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
+                                            loading="lazy"
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                transition: 'transform 0.3s ease'
+                                            }}
+                                        />
+                                        
+                                        {/* Quick View Button */}
+                                        <IconButton
+                                            className="quick-view-btn"
+                                            size="small"
+                                            onClick={(e) => handleViewDetail(e, product)}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                left: '50%',
+                                                transform: 'translate(-50%, -50%)',
+                                                zIndex: 2,
+                                                opacity: 0,
+                                                transition: 'all 0.2s ease',
+                                                background: 'white',
+                                                color: '#0D3B2E',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                                '&:hover': {
+                                                    background: '#0D3B2E',
+                                                    color: 'white',
+                                                    transform: 'translate(-50%, -50%) scale(1.1)'
+                                                }
+                                            }}
+                                        >
+                                            <Visibility />
+                                        </IconButton>
+                                        
+                                        {/* Add to Cart Button */}
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleAddToCart(e, product)}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 6,
+                                                right: 6,
+                                                zIndex: 2,
+                                                background: 'white',
+                                                color: '#0D3B2E',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                width: 32,
+                                                height: 32,
+                                                '&:hover': {
+                                                    background: '#0D3B2E',
+                                                    color: 'white'
+                                                }
+                                            }}
+                                        >
+                                            <ShoppingCart sx={{ fontSize: '1rem' }} />
+                                        </IconButton>
+                                    </Box>
+
+                                    <CardContent sx={{ 
+                                        flexGrow: 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        p: { xs: 1, sm: 1.25 },
+                                        '&:last-child': { pb: { xs: 1, sm: 1.25 } }
+                                    }}>
+                                        {/* Product Name */}
+                                        <Typography 
+                                            variant="body2"
+                                            sx={{
+                                                minHeight: { xs: '2.2rem', sm: '2.4rem' },
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                fontWeight: 500,
+                                                color: '#333',
+                                                mb: 0.75,
+                                                fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                                                lineHeight: 1.3
+                                            }}
+                                        >
+                                            {typeof product.name === 'object' ? JSON.stringify(product.name) : product.name}
+                                        </Typography>
+                                        
+                                        {/* Price Section */}
+                                        <Box sx={{ mt: 'auto' }}>
+                                            {(() => {
+                                                const { currentPrice, originalPrice } = getPriceInfo(product);
+                                                return originalPrice ? (
+                                                    <Box>
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            sx={{ 
+                                                                textDecoration: 'line-through',
+                                                                color: '#999',
+                                                                fontSize: '0.7rem',
+                                                                display: 'block',
+                                                                mb: 0.25
+                                                            }}
+                                                        >
+                                                            {new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫
+                                                        </Typography>
+                                                        <Typography 
+                                                            variant="h6" 
+                                                            sx={{ 
+                                                                fontWeight: 700,
+                                                                color: '#d32f2f',
+                                                                fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                                                                lineHeight: 1
+                                                            }}
+                                                        >
+                                                            {new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫
+                                                        </Typography>
+                                                    </Box>
+                                                ) : (
+                                                    <Typography 
+                                                        variant="h6" 
+                                                        sx={{ 
+                                                            fontWeight: 700,
+                                                            color: '#0D3B2E',
+                                                            fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                                                            lineHeight: 1
+                                                        }}
+                                                    >
+                                                        {currentPrice > 0 ? new Intl.NumberFormat('vi-VN').format(currentPrice) + ' ₫' : 'N/A'}
+                                                    </Typography>
+                                                );
+                                            })()}
+                                        </Box>
+                                    </CardContent>
+                                    </Card>
+                                    </Box>
+                                ))
+                            )}
+                        </Box>
+                    </Box>
+                </Box>
         </Container>
         </Box>
     );
