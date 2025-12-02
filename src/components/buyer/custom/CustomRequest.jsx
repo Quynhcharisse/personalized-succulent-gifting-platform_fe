@@ -895,7 +895,36 @@ export default function CustomRequest() {
                                     <InputLabel>Sen đá</InputLabel>
                                     <Select value={succulent.id} label="Sen đá"
                                             onChange={(e) => handleSucculentChange(index, 'id', e.target.value)}
-                                            variant="outlined">
+                                            variant="outlined"
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: 360,
+                                                        '& .MuiList-root': {
+                                                            maxHeight: 360,
+                                                            overflowY: 'scroll',
+                                                            '&::-webkit-scrollbar': {
+                                                                width: '8px'
+                                                            },
+                                                            '&::-webkit-scrollbar-track': {
+                                                                background: '#f1f1f1',
+                                                                borderRadius: '10px'
+                                                            },
+                                                            '&::-webkit-scrollbar-thumb': {
+                                                                background: '#888',
+                                                                borderRadius: '10px',
+                                                                '&:hover': {
+                                                                    background: '#555'
+                                                                }
+                                                            }
+                                                        },
+                                                        '& .MuiMenuItem-root': {
+                                                            minHeight: 52,
+                                                            py: 1.5
+                                                        }
+                                                    }
+                                                }
+                                            }}>
                                         {filteredSucculents.map(s =>
                                             <MenuItem key={s.id} value={s.id}>
                                                 {s.speciesName}
@@ -906,7 +935,9 @@ export default function CustomRequest() {
                                     <InputLabel>Size</InputLabel>
                                     <Select value={succulent.size} label="Size"
                                             onChange={(e) => handleSucculentChange(index, 'size', e.target.value)}
-                                            variant="outlined">
+                                            variant="outlined"
+                                           
+                                            >
                                         {
                                             succulent.id ?
                                                 (Object.keys(allSucculents.find(s => s.id === succulent.id)?.size)
@@ -950,7 +981,36 @@ export default function CustomRequest() {
                             <FormControl fullWidth>
                                 <InputLabel>Loại chậu</InputLabel>
                                 <Select value={formData.pot} label="Loại chậu" onChange={handlePotChange}
-                                        variant="outlined">
+                                        variant="outlined"
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 360,
+                                                    '& .MuiList-root': {
+                                                        maxHeight: 360,
+                                                        overflowY: 'scroll',
+                                                        '&::-webkit-scrollbar': {
+                                                            width: '8px'
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: '#f1f1f1',
+                                                            borderRadius: '10px'
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#888',
+                                                            borderRadius: '10px',
+                                                            '&:hover': {
+                                                                background: '#555'
+                                                            }
+                                                        }
+                                                    },
+                                                    '& .MuiMenuItem-root': {
+                                                        minHeight: 52,
+                                                        py: 1.5
+                                                    }
+                                                }
+                                            }
+                                        }}>
                                     {availablePots.map(p => <MenuItem key={p.name} value={p.name}>{p.name}</MenuItem>)}
                                 </Select>
                             </FormControl>
@@ -973,7 +1033,36 @@ export default function CustomRequest() {
                             <FormControl fullWidth>
                                 <InputLabel>Loại đất</InputLabel>
                                 <Select value={formData.soil} label="Loại đất"
-                                        onChange={(e) => setFormData(prev => ({...prev, soil: e.target.value}))}>
+                                        onChange={(e) => setFormData(prev => ({...prev, soil: e.target.value}))}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 360,
+                                                    '& .MuiList-root': {
+                                                        maxHeight: 360,
+                                                        overflowY: 'scroll',
+                                                        '&::-webkit-scrollbar': {
+                                                            width: '8px'
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: '#f1f1f1',
+                                                            borderRadius: '10px'
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#888',
+                                                            borderRadius: '10px',
+                                                            '&:hover': {
+                                                                background: '#555'
+                                                            }
+                                                        }
+                                                    },
+                                                    '& .MuiMenuItem-root': {
+                                                        minHeight: 52,
+                                                        py: 1.5
+                                                    }
+                                                }
+                                            }
+                                        }}>
                                     {availableSoils.map(s => <MenuItem key={s.name} value={s.name}>{s.name}</MenuItem>)}
                                 </Select>
                             </FormControl>
@@ -1020,7 +1109,36 @@ export default function CustomRequest() {
                                     <InputLabel>Đồ trang trí</InputLabel>
                                     <Select value={decoration.name} label="Đồ trang trí"
                                             onChange={(e) => handleDecorationChange(index, 'name', e.target.value)}
-                                            variant="outlined">
+                                            variant="outlined"
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: 360,
+                                                        '& .MuiList-root': {
+                                                            maxHeight: 360,
+                                                            overflowY: 'scroll',
+                                                            '&::-webkit-scrollbar': {
+                                                                width: '8px'
+                                                            },
+                                                            '&::-webkit-scrollbar-track': {
+                                                                background: '#f1f1f1',
+                                                                borderRadius: '10px'
+                                                            },
+                                                            '&::-webkit-scrollbar-thumb': {
+                                                                background: '#888',
+                                                                borderRadius: '10px',
+                                                                '&:hover': {
+                                                                    background: '#555'
+                                                                }
+                                                            }
+                                                        },
+                                                        '& .MuiMenuItem-root': {
+                                                            minHeight: 52,
+                                                            py: 1.5
+                                                        }
+                                                    }
+                                                }
+                                            }}>
                                         {availableDecorations.map(d =>
                                             <MenuItem key={d.name} value={d.name}>
                                                 {d.name}
