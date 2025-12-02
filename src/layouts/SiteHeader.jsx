@@ -65,10 +65,7 @@ export default function SiteHeader() {
             return
         }
 
-        // Lấy role từ localStorage (performance)
         const localRole = (currentUser?.role || null)
-
-        // Verify với JWT ngay lần đầu, sau đó cache trong 5 phút
         const lastVerified = sessionStorage.getItem('role_verified_at')
         const now = Date.now()
         const FIVE_MINUTES = 5 * 60 * 1000
@@ -81,7 +78,6 @@ export default function SiteHeader() {
                     const jwtRole = (decoded?.role || null)
 
                     if (localRole !== jwtRole) {
-                        // Role bị fake, dùng JWT role
                         setRole(jwtRole ? jwtRole.toUpperCase() : null)
                         sessionStorage.setItem('role_verified_at', now.toString())
                     } else {
@@ -96,7 +92,6 @@ export default function SiteHeader() {
             }
         }
 
-        // Verify lần đầu hoặc sau 5 phút
         if (!lastVerified || (now - parseInt(lastVerified)) > FIVE_MINUTES) {
             verifyRole()
         } else {
@@ -143,7 +138,7 @@ export default function SiteHeader() {
           </span>
                 </Link>
                 <nav className="main-nav" aria-label="Điều hướng chính">
-                    <NavLink to="/" end> Sản phẩm </NavLink>
+                    <NavLink to="/" end> Trang chủ </NavLink>
                     <NavLink to="/huong-dan-mua-hang"> Hướng dẫn mua hàng </NavLink>
                     <NavLink to="/cham-soc"> Chăm sóc </NavLink>
                     <NavLink to="/posts"> Bài đăng </NavLink>
@@ -152,13 +147,6 @@ export default function SiteHeader() {
                     )}
                 </nav>
                 <div className="header__actions">
-                    <div className="searchbar">
-                        <input
-                            className="searchbar__input"
-                            placeholder="Tìm sen đá, phụ kiện..."
-                            aria-label="Tìm kiếm sen đá, phụ kiện"
-                        />
-                    </div>
                     <div className="header__icons" style={{display: 'flex', alignItems: 'center', gap: 12}}>
                         <Link className="header__icon" title="Yêu thích" to="#">
                             <FavoriteBorderIcon
@@ -180,10 +168,6 @@ export default function SiteHeader() {
                                 />
                             </Badge>
                         </Link>
-                        <Link className="header__icon" title="Thông báo" to="#">
-                            <NotificationDisplay/>
-                        </Link>
-
                         {!currentUser ? (
                             <Link
                                 to="/login"
