@@ -442,7 +442,9 @@ export default function CustomRequest() {
 
                 if (matchedSoil) {
                     newFormData.soil = matchedSoil.name;
-                    newFormData.soilMass = (aiData.size.soil.massAmount || 1) * 1000; // Convert kg to grams
+                    // AI might return grams directly (if > 10) or kg (if <= 10)
+                    const massAmount = aiData.size.soil.massAmount || 500;
+                    newFormData.soilMass = massAmount > 10 ? massAmount : massAmount * 1000;
                 } else {
                     matchWarnings.push(`Không tìm thấy loại đất "${aiData.size.soil.name}" trong hệ thống`);
                 }
