@@ -365,6 +365,40 @@ export default function CustomRequest() {
             const newFormData = {...formData};
             let matchWarnings = [];
 
+            // Apply filter (mệnh or cung hoàng đạo)
+            if (aiData.applied_filter) {
+                const { type, filter_value } = aiData.applied_filter;
+                
+                // Validate filter type
+                if (type && ['none', 'fengshui', 'zodiac'].includes(type)) {
+                    setFilterType(type);
+                    
+                    // Set filter value if not 'none'
+                    if (type !== 'none' && filter_value) {
+                        // Validate filter value based on type
+                        if (type === 'fengshui') {
+                            const validFengshuiValues = FENGSHUI.map(f => f.value);
+                            if (validFengshuiValues.includes(filter_value)) {
+                                setFilterValue(filter_value);
+                            } else {
+                                setFilterValue('all');
+                                matchWarnings.push(`Giá trị mệnh "${filter_value}" không hợp lệ`);
+                            }
+                        } else if (type === 'zodiac') {
+                            const validZodiacValues = ZODIACS.map(z => z.value);
+                            if (validZodiacValues.includes(filter_value)) {
+                                setFilterValue(filter_value);
+                            } else {
+                                setFilterValue('all');
+                                matchWarnings.push(`Giá trị cung hoàng đạo "${filter_value}" không hợp lệ`);
+                            }
+                        }
+                    } else {
+                        setFilterValue('all');
+                    }
+                }
+            }
+
             // Apply images
             if (aiData.images && Array.isArray(aiData.images)) {
                 newFormData.images = aiData.images;
@@ -380,11 +414,8 @@ export default function CustomRequest() {
                 const mappedSucculents = [];
                 
                 aiData.size.succulents.forEach(aiSucculent => {
-                    // Try to find matching succulent by name (case-insensitive)
-                    const matchedSucculent = allSucculents.find(s => 
-                        s.speciesName.toLowerCase().includes(aiSucculent.name.toLowerCase()) ||
-                        aiSucculent.name.toLowerCase().includes(s.speciesName.toLowerCase())
-                    );
+                    // Match by ID directly (more reliable than name matching)
+                    const matchedSucculent = allSucculents.find(s => s.id === aiSucculent.id);
 
                     if (matchedSucculent && aiSucculent.sizes && aiSucculent.sizes.length > 0) {
                         // Check if size exists for this succulent
@@ -398,11 +429,11 @@ export default function CustomRequest() {
                         });
 
                         if (!hasSize) {
-                            matchWarnings.push(`Sen đá "${aiSucculent.name}" không có size "${aiSize}", vui lòng chọn lại`);
+                            matchWarnings.push(`Sen đá "${matchedSucculent.speciesName}" không có size "${aiSize}", vui lòng chọn lại`);
                         }
                     } else {
-                        // Succulent not found, add empty entry
-                        matchWarnings.push(`Không tìm thấy sen đá "${aiSucculent.name}" trong hệ thống`);
+                        // Succulent not found by ID, add empty entry for user to select
+                        matchWarnings.push(`Không tìm thấy sen đá ID ${aiSucculent.id} (${aiSucculent.name}) trong hệ thống`);
                         mappedSucculents.push({id: '', size: '', quantity: aiSucculent.sizes?.[0]?.quantity || 1});
                     }
                 });
