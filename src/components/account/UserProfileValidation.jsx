@@ -9,11 +9,13 @@ export function UserProfileValidation(form, originalForm = null) {
     // Only validate name if it's being changed
     if (nameChanged) {
         if (!currentName || currentName.length === 0) {
-            errors.name = 'Tên là bắt buộc';
+            errors.name = 'Vui lòng nhập họ và tên của bạn';
         } else if (currentName.length < 3) {
-            errors.name = 'Tên phải có ít nhất 3 ký tự';
+            errors.name = `Tên quá ngắn (${currentName.length}/3 ký tự). Vui lòng nhập ít nhất 3 ký tự`;
         } else if (currentName.length > 100) {
-            errors.name = 'Tên không được vượt quá 100 ký tự';
+            errors.name = `Tên quá dài (${currentName.length}/100 ký tự). Vui lòng rút ngắn lại`;
+        } else if (!/^[\p{L}\s]+$/u.test(currentName)) {
+            errors.name = 'Tên chỉ được chứa chữ cái và khoảng trắng, không có ký tự đặc biệt hoặc số';
         }
     }
 
@@ -24,9 +26,11 @@ export function UserProfileValidation(form, originalForm = null) {
     
     if (phoneChanged) {
         if (!currentPhone || currentPhone.length === 0) {
-            errors.phone = 'Số điện thoại là bắt buộc';
+            errors.phone = 'Vui lòng nhập số điện thoại của bạn';
+        } else if (!/^[0-9+\s-]+$/.test(currentPhone)) {
+            errors.phone = 'Số điện thoại chỉ được chứa số, dấu + và dấu gạch ngang';
         } else if (!currentPhone.match(/^(0[1-9][0-9]{8,9}|\+84[1-9][0-9]{7,9})$/)) {
-            errors.phone = 'Định dạng số điện thoại không hợp lệ';
+            errors.phone = 'Số điện thoại không hợp lệ. Vui lòng nhập theo định dạng: 0xxxxxxxxx (10-11 số) hoặc +84xxxxxxxxx';
         }
     }
 
@@ -37,11 +41,11 @@ export function UserProfileValidation(form, originalForm = null) {
     
     if (genderChanged) {
         if (!currentGender || currentGender.length === 0) {
-            errors.gender = 'Giới tính là bắt buộc';
+            errors.gender = 'Vui lòng chọn giới tính (Nam hoặc Nữ)';
         } else {
             const gender = currentGender.toUpperCase();
             if (!(gender === "MALE" || gender === "FEMALE")) {
-                errors.gender = 'Giới tính không hợp lệ';
+                errors.gender = 'Giới tính không hợp lệ. Vui lòng chọn "Nam" hoặc "Nữ"';
             }
         }
     }
@@ -53,9 +57,11 @@ export function UserProfileValidation(form, originalForm = null) {
     
     if (addressChanged) {
         if (!currentAddress || currentAddress.length === 0) {
-            errors.address = 'Địa chỉ là bắt buộc';
+            errors.address = 'Vui lòng nhập địa chỉ của bạn (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)';
+        } else if (currentAddress.length < 10) {
+            errors.address = `Địa chỉ quá ngắn (${currentAddress.length}/10 ký tự). Vui lòng nhập địa chỉ đầy đủ hơn`;
         } else if (currentAddress.length > 255) {
-            errors.address = 'Địa chỉ không vượt quá 255 ký tự';
+            errors.address = `Địa chỉ quá dài (${currentAddress.length}/255 ký tự). Vui lòng rút ngắn lại`;
         }
     }
 
