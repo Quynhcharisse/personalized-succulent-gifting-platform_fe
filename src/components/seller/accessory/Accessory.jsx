@@ -12,7 +12,7 @@ import { DASHBOARD_STYLES } from '../../constants.js';
 export default function Accessory() {
     const [accessories, setAccessories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [activeType, setActiveType] = useState('all'); // all | pots | soils | decorations
+    const [activeType, setActiveType] = useState('all'); 
     const [showCreate, setShowCreate] = useState(false);
     const [submitMessage, setSubmitMessage] = useState({type: '', text: ''});
     const [showUpdate, setShowUpdate] = useState(false);
