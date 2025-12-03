@@ -69,7 +69,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
 
     const handleProcessSuccess = () => {
         fetchRequestDetail();            // reload chi tiết
-        if (onSuccess) onSuccess();      // reload danh sách trong CustomRequestList
+        if (onSuccess) onSuccess();      // reload danh sách + đóng dialog trong CustomRequestList
     };
 
     const handleRejectRequest = async () => {
@@ -85,8 +85,7 @@ export default function CustomRequestDetailDialog({open, onClose, requestId, onS
             const response = await processCustomRequest(requestData, "false");
             if (response) {
                 enqueueSnackbar('Từ chối yêu cầu thành công', {variant: 'success'});
-                if (onSuccess) onSuccess(); // Refresh list data
-                onClose();
+                if (onSuccess) onSuccess(); // Refresh list data + close dialog
             }
         } catch (error) {
             // Error rejecting request

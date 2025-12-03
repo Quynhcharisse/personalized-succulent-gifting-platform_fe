@@ -164,22 +164,22 @@ const PostsManager = ({ sellerId }) => {
                 />
             </Paper>
 
-            {/* Edit dialog: key ensures remount when selectedPost changes, onClose refreshes list */}
+            {/* Edit dialog: key ensures remount when selectedPost changes */}
             <PostDialog
                 key={`edit-${selectedPost?.id ?? 'none'}`}
                 open={showEditDialog}
-                onClose={() => { setShowEditDialog(false); loadPosts(); }}
+                onClose={() => { setShowEditDialog(false); }}
                 post={selectedPost}
-                onUpdated={loadPosts}
+                onUpdated={() => { setShowEditDialog(false); loadPosts(); }}
                 viewMode={true}
             />
 
-            {/* Create dialog: ensure list refresh on close as well */}
+            {/* Create dialog */}
             <PostDialog
                 key="create-dialog"
                 open={showCreateDialog}
-                onClose={() => { setShowCreateDialog(false); loadPosts(); }}
-                onCreated={loadPosts}
+                onClose={() => { setShowCreateDialog(false); }}
+                onCreated={() => { setShowCreateDialog(false); loadPosts(); }}
             />
         </Container>
     );

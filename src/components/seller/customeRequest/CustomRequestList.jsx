@@ -110,14 +110,20 @@ export default function CustomRequestList() {
                 open={detailDialogOpen}
                 onClose={handleCloseDetailDialog}
                 requestId={selectedRequestId}
-                onSuccess={loadData}
+                onSuccess={() => {
+                    handleCloseDetailDialog();
+                    loadData();
+                }}
             />
 
             <ProcessRequestDialog
                 open={processDialogOpen}
                 onClose={() => setProcessDialogOpen(false)}
                 requestId={selectedRequestId}
-                onSuccess={loadData}
+                onSuccess={() => {
+                    setProcessDialogOpen(false);
+                    loadData();
+                }}
             />
         </Container>
     );
