@@ -528,15 +528,26 @@ export default function CustomRequest() {
         try {
             const rawUser = sessionStorage.getItem('user');
             const parsed = rawUser ? JSON.parse(rawUser) : null;
+            // Check both parsed.user and top-level parsed for compatibility
             const u = parsed?.user || parsed || {};
             const missing = [];
             const isEmpty = (v) => !v || String(v).trim().length === 0 || String(v).trim().toUpperCase() === 'N/A';
-            if (isEmpty(u.name)) missing.push('Họ tên');
-            if (isEmpty(u.phone)) missing.push('Số điện thoại');
-            if (!u.fengShui) missing.push('Mệnh ngũ hành');
-            if (isEmpty(u.gender)) missing.push('Giới tính');
-            if (isEmpty(u.address)) missing.push('Địa chỉ');
-            if (!u.zodiac) missing.push('Cung hoàng đạo');
+            
+            // Check fields from both user object and top-level
+            const name = u.name || parsed?.name;
+            const phone = u.phone || parsed?.phone;
+            const fengShui = u.fengShui || parsed?.fengShui;
+            const gender = u.gender || parsed?.gender;
+            const address = u.address || parsed?.address;
+            const zodiac = u.zodiac || parsed?.zodiac;
+            
+            if (isEmpty(name)) missing.push('Họ tên');
+            if (isEmpty(phone)) missing.push('Số điện thoại');
+            if (isEmpty(fengShui)) missing.push('Mệnh ngũ hành');
+            if (isEmpty(gender)) missing.push('Giới tính');
+            if (isEmpty(address)) missing.push('Địa chỉ');
+            if (isEmpty(zodiac)) missing.push('Cung hoàng đạo');
+            
             if (missing.length > 0) {
                 enqueueSnackbar(`Vui lòng cập nhật: ${missing.join(', ')} trước khi tạo yêu cầu`, {variant:'warning', autoHideDuration: 4000});
                 try {
