@@ -528,10 +528,17 @@ export default function CustomRequest() {
         try {
             const rawUser = sessionStorage.getItem('user');
             const parsed = rawUser ? JSON.parse(rawUser) : null;
+            
             // Check both parsed.user and top-level parsed for compatibility
             const u = parsed?.user || parsed || {};
             const missing = [];
-            const isEmpty = (v) => !v || String(v).trim().length === 0 || String(v).trim().toUpperCase() === 'N/A';
+            const isEmpty = (v) => {
+                if (!v) return true;
+                const str = String(v).trim();
+                if (str.length === 0) return true;
+                if (str.toUpperCase() === 'N/A') return true;
+                return false;
+            };
             
             // Check fields from both user object and top-level
             const name = u.name || parsed?.name;
@@ -559,7 +566,9 @@ export default function CustomRequest() {
                 }, 600);
                 return;
             }
-        } catch {}
+        } catch (err) {
+            console.error('Profile validation error:', err);
+        }
 
         setIsSubmitting(true);
     
