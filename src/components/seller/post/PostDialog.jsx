@@ -23,7 +23,7 @@ const STATUS_OPTIONS = [
     {value: 'ARCHIVED', label: 'Archived'}
 ];
 
-const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
+const PostDialog = ({open, onClose, onCreated, post, onUpdated, viewMode = false}) => {
     const [products, setProducts] = useState([]);
     const [form, setForm] = useState({
         title: '',
@@ -173,7 +173,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                     <ArticleIcon sx={{fontSize: '2rem'}}/>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        {post ? 'Chỉnh Sửa Bài Viết' : 'Tạo Bài Viết Mới'}
+                        {viewMode ? 'Xem Bài Viết' : (post ? 'Chỉnh Sửa Bài Viết' : 'Tạo Bài Viết Mới')}
                     </Typography>
                 </Box>
             </DialogTitle>
@@ -190,6 +190,8 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             onChange={handleChange}
                             fullWidth
                             required
+                            disabled={viewMode}
+                            InputProps={{readOnly: viewMode}}
                             sx={DASHBOARD_STYLES.formField}
                         />
                         <TextField
@@ -201,6 +203,8 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             multiline
                             minRows={3}
                             required
+                            disabled={viewMode}
+                            InputProps={{readOnly: viewMode}}
                             sx={DASHBOARD_STYLES.formField}
                         />
                     </Box>
@@ -219,6 +223,8 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             onChange={handleChange}
                             fullWidth
                             required
+                            disabled={viewMode}
+                            InputProps={{readOnly: viewMode}}
                             sx={DASHBOARD_STYLES.formField}
                         >
                             {products.map(product => (
@@ -235,6 +241,8 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             onChange={handleChange}
                             fullWidth
                             required
+                            disabled={viewMode}
+                            InputProps={{readOnly: viewMode}}
                             sx={DASHBOARD_STYLES.formField}
                         >
                             {STATUS_OPTIONS.map(opt => (
@@ -248,7 +256,7 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                 <Typography variant="subtitle2">Hình ảnh</Typography>
-                                <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Thêm ảnh</Button>
+                                {!viewMode && <Button size="small" startIcon={<AddIcon />} onClick={addPostImage}>Thêm ảnh</Button>}
                             </Box>
 
                             <Stack spacing={1}>
@@ -260,18 +268,32 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                                             onChange={e => updatePostImage(idx, 'name', e.target.value)}
                                             size="small"
                                             fullWidth
+                                            disabled={viewMode}
+                                            InputProps={{readOnly: viewMode}}
                                         />
-                                        <Box sx={{ width: 320 }}>
-                                            <UploadImageField
-                                                imageUrl={pi.link}
-                                                isUploading={!!uploadingMap[idx]?.isUploading}
-                                                uploadProgress={uploadingMap[idx]?.progress || 0}
-                                                onFileSelected={(e) => handlePostImageFileSelected(idx, e)}
-                                            />
-                                        </Box>
-                                        <IconButton size="small" onClick={() => removePostImage(idx)} aria-label={`remove-image-${idx}`}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
+                                        {viewMode ? (
+                                            <Box sx={{ width: 320, height: 200, border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
+                                                {pi.link ? (
+                                                    <img src={pi.link} alt={pi.name || 'Post image'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <Typography variant="body2" color="text.secondary">Không có ảnh</Typography>
+                                                )}
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{ width: 320 }}>
+                                                <UploadImageField
+                                                    imageUrl={pi.link}
+                                                    isUploading={!!uploadingMap[idx]?.isUploading}
+                                                    uploadProgress={uploadingMap[idx]?.progress || 0}
+                                                    onFileSelected={(e) => handlePostImageFileSelected(idx, e)}
+                                                />
+                                            </Box>
+                                        )}
+                                        {!viewMode && (
+                                            <IconButton size="small" onClick={() => removePostImage(idx)} aria-label={`remove-image-${idx}`}>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
                                     </Box>
                                 ))}
                                 {postImages.length === 0 && (
@@ -285,8 +307,8 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
             <DialogActions sx={{ p: 3, backgroundColor: '#f7faf7' }}>
                 <Button
                     onClick={onClose}
-                    variant="outlined"
-                    sx={{
+                    variant={viewMode ? "contained" : "outlined"}
+                    sx={viewMode ? DASHBOARD_STYLES.primaryButton : {
                         borderRadius: 2,
                         fontWeight: 600,
                         px: 3,
@@ -298,16 +320,18 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated}) => {
                             backgroundColor: 'rgba(11, 63, 49, 0.05)'
                         }
                     }}
-                    disabled={isSubmitting}>Huỷ
+                    disabled={isSubmitting}>{viewMode ? 'Đóng' : 'Huỷ'}
                 </Button>
-                <Button
-                    onClick={handleSubmit}
-                    variant="contained"
-                    sx={DASHBOARD_STYLES.primaryButton}
-                    disabled={isSubmitting || !form.title || !form.description || !form.productId}
-                >
-                    {isSubmitting ? 'Đang lưu...' : (post ? 'Lưu' : 'Tạo bài viết')}
-                </Button>
+                {!viewMode && (
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        sx={DASHBOARD_STYLES.primaryButton}
+                        disabled={isSubmitting || !form.title || !form.description || !form.productId}
+                    >
+                        {isSubmitting ? 'Đang lưu...' : (post ? 'Lưu' : 'Tạo bài viết')}
+                    </Button>
+                )}
             </DialogActions>
         </Dialog>
     );

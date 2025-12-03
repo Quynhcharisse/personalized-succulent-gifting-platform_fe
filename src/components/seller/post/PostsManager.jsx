@@ -171,6 +171,7 @@ const PostsManager = ({ sellerId }) => {
                 onClose={() => { setShowEditDialog(false); loadPosts(); }}
                 post={selectedPost}
                 onUpdated={loadPosts}
+                viewMode={true}
             />
 
             {/* Create dialog: ensure list refresh on close as well */}
