@@ -25,6 +25,7 @@ const STATUS_OPTIONS = [
 
 const PostDialog = ({open, onClose, onCreated, post, onUpdated, viewMode = false}) => {
     const [products, setProducts] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(false);
     const [form, setForm] = useState({
         title: '',
         description: '',
@@ -40,7 +41,13 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated, viewMode = false
 
     useEffect(() => {
         if (open) {
-            viewProduct().then(res => setProducts(res?.data?.data || []));
+            // Only load products if not already loaded
+            if (products.length === 0 && !loadingProducts) {
+                setLoadingProducts(true);
+                viewProduct()
+                    .then(res => setProducts(res?.data?.data || []))
+                    .finally(() => setLoadingProducts(false));
+            }
             if (post) {
                 setForm({
                     title: post.title ?? '',
@@ -223,15 +230,52 @@ const PostDialog = ({open, onClose, onCreated, post, onUpdated, viewMode = false
                             onChange={handleChange}
                             fullWidth
                             required
-                            disabled={viewMode}
+                            disabled={viewMode || loadingProducts}
                             InputProps={{readOnly: viewMode}}
                             sx={DASHBOARD_STYLES.formField}
+                            SelectProps={{
+                                MenuProps: {
+                                    PaperProps: {
+                                        sx: {
+                                            maxHeight: 360,
+                                            '& .MuiList-root': {
+                                                maxHeight: 360,
+                                                overflowY: 'scroll',
+                                                '&::-webkit-scrollbar': {
+                                                    width: '8px'
+                                                },
+                                                '&::-webkit-scrollbar-track': {
+                                                    background: '#f1f1f1',
+                                                    borderRadius: '10px'
+                                                },
+                                                '&::-webkit-scrollbar-thumb': {
+                                                    background: '#888',
+                                                    borderRadius: '10px',
+                                                    '&:hover': {
+                                                        background: '#555'
+                                                    }
+                                                }
+                                            },
+                                            '& .MuiMenuItem-root': {
+                                                minHeight: 52,
+                                                py: 1.5
+                                            }
+                                        }
+                                    }
+                                }
+                            }}
                         >
-                            {products.map(product => (
-                                <MenuItem key={product.id} value={product.id}>
-                                    {product.speciesName || product.name}
-                                </MenuItem>
-                            ))}
+                            {loadingProducts ? (
+                                <MenuItem disabled>Đang tải sản phẩm...</MenuItem>
+                            ) : products.length === 0 ? (
+                                <MenuItem disabled>Không có sản phẩm</MenuItem>
+                            ) : (
+                                products.map(product => (
+                                    <MenuItem key={product.id} value={product.id}>
+                                        {product.speciesName || product.name}
+                                    </MenuItem>
+                                ))
+                            )}
                         </TextField>
                         <TextField
                             select

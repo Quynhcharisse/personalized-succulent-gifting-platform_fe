@@ -84,8 +84,7 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
             const response = await processCustomRequest(requestData, "true");
             if (response) {
                 enqueueSnackbar('Cập nhật thiết kế thành công', {variant: 'success'});
-                if (onSuccess) onSuccess();
-                handleClose();
+                if (onSuccess) onSuccess(); // Reload list + close in parent
             }
         } catch (error) {
             // Error submitting design
@@ -128,7 +127,6 @@ export default function ProcessRequestDialog({open, onClose, requestId, onSucces
     // };
 
     const handleClose = () => {
-        if (onSuccess) onSuccess();  // ADD HERE
         setImages([{url: ''}]);
         setError('');
         setRejectReason('');
